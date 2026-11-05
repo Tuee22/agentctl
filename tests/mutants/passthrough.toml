@@ -1,0 +1,80 @@
+[[mutant]]
+id = "M-pass-click-parses-tail"
+operator = "replace-literal"
+target = "src/agentctl/cli.py"
+search = "ctx.args = args\n        return args"
+replace = "return super().parse_args(ctx, args)"
+killers = ["tests/unit/test_passthrough.py::test_raw_tail_keeps_dashdash_and_help", "tests/e2e/test_passthrough_argv.py::test_through_stack_rows[claude]", "tests/e2e/test_passthrough_argv.py::test_through_stack_rows[codex]"]
+reason = "raw tail was parsed or changed"
+
+[[mutant]]
+id = "M-pass-split-drops-empty"
+operator = "delete"
+target = "src/agentctl/cli.py"
+search = "tuple(ctx.args)"
+replace = "tuple(argument for argument in ctx.args if argument)"
+killers = ["tests/unit/test_passthrough.py::test_raw_tail_keeps_dashdash_and_help"]
+reason = "raw tail was parsed or changed"
+
+[[mutant]]
+id = "M-pass-table-drops-command"
+operator = "delete"
+target = "src/agentctl/cli.py"
+search = "    \"codex\",\n"
+replace = ""
+killers = ["tests/unit/test_passthrough.py::test_passthrough_table_matches_oracle", "tests/unit/test_passthrough.py::test_every_command_but_check_passes_through", "tests/integration/test_passthrough.py::test_passthrough_table_equals_binary_commands"]
+reason = "passthrough command table differs"
+
+[[mutant]]
+id = "M-pass-binary-runs-without-protocol"
+operator = "widen"
+target = "src/agentctl/haskell/app/Core.hs"
+search = "not (validHandoff supplied)"
+replace = "not (validHandoff supplied) && validHandoff supplied"
+killers = ["tests/integration/test_passthrough.py::test_binary_refuses_direct_run"]
+reason = "binary ran without its handoff protocol"
+
+[[mutant]]
+id = "M-pass-progname-core"
+operator = "replace-literal"
+target = "src/agentctl/haskell/app/Core.hs"
+search = "withProgName \"agentctl\""
+replace = "withProgName \"agentctl-core\""
+killers = ["tests/integration/test_passthrough.py::test_usage_text_names_agentctl"]
+reason = "native usage did not name agentctl"
+
+[[mutant]]
+id = "M-pass-rebuild-on-hit"
+operator = "negate"
+target = "src/agentctl/bootstrap/binary.py"
+search = "return layout.binary.is_file()"
+replace = "return layout.binary.is_file() and False"
+killers = ["tests/integration/test_passthrough.py::test_warm_passthrough_spawns_only_the_binary"]
+reason = "warm handoff did not execute only its cached binary"
+
+[[mutant]]
+id = "M-pass-windows-execve"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/handoff.py"
+search = "Mode.CHILD if family == \"Windows\" else Mode.EXECVE"
+replace = "Mode.EXECVE if family == \"Windows\" else Mode.EXECVE"
+killers = ["tests/unit/test_handoff.py::test_handoff_mode_by_os_family"]
+reason = "handoff mode differs from host contract"
+
+[[mutant]]
+id = "M-pass-child-exit-zero"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/handoff.py"
+search = "if isinstance(result, Err) else result"
+replace = "if isinstance(result, Err) else Ok(0)"
+killers = ["tests/integration/test_handoff.py::test_child_mode_propagates_exit_status"]
+reason = "child handoff changed exit status"
+
+[[mutant]]
+id = "M-launch-argv-on-mux-line"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"
+search = "Process.runCommand (multiplexer runtime) command (commandContext runtime)"
+replace = "case command of Command.Create {} -> let invocation = Process.commandInvocation (Mux.muxKind (multiplexer runtime)) (Mux.muxExecutable (multiplexer runtime)) command (commandContext runtime) in Process.run (invocation {Process.arguments = Process.arguments invocation ++ requestArguments (request runtime)}); _ -> Process.runCommand (multiplexer runtime) command (commandContext runtime)"
+killers = ["tests/e2e/test_passthrough_argv.py::test_through_stack_rows[claude]", "tests/e2e/test_passthrough_argv.py::test_through_stack_rows[codex]"]
+reason = "agent argv reached multiplexer command line"

@@ -1,0 +1,1258 @@
+[[case]]
+id = "mux.version.tmux.old"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Linux", raw = "tmux 3.1c" }
+expected = false
+
+[[case]]
+id = "mux.version.tmux.floor"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Linux", raw = "tmux 3.2" }
+expected = true
+
+[[case]]
+id = "mux.version.tmux.letter"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Linux", raw = "tmux 3.2a" }
+expected = true
+
+[[case]]
+id = "mux.version.tmux.current"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Darwin", raw = "tmux 3.4\n" }
+expected = true
+
+[[case]]
+id = "mux.version.tmux.future"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Linux", raw = "tmux 4.0" }
+expected = true
+
+[[case]]
+id = "mux.version.tmux.unknown"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Linux", raw = "unknown" }
+expected = false
+
+[[case]]
+id = "mux.version.tmux.extra"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Linux", raw = "tmux 3.4 garbage" }
+expected = false
+
+[[case]]
+id = "mux.version.tmux.bad-number"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Linux", raw = "tmux x.2" }
+expected = false
+
+[[case]]
+id = "mux.version.tmux.bad-suffix"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Linux", raw = "tmux 3.2abc" }
+expected = false
+
+[[case]]
+id = "mux.version.psmux.old"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Windows", raw = "psmux 3.3.8 (abc 2026-08-18)" }
+expected = false
+
+[[case]]
+id = "mux.version.psmux.floor"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Windows", raw = "psmux 3.4.0 (abc 2026-10-13)" }
+expected = true
+
+[[case]]
+id = "mux.version.psmux.no-metadata"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Windows", raw = "psmux 3.4.1" }
+expected = true
+
+[[case]]
+id = "mux.version.psmux.alias"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Windows", raw = "tmux 3.4.0" }
+expected = false
+
+[[case]]
+id = "mux.version.psmux.bad-parts"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Windows", raw = "psmux 3.4" }
+expected = false
+
+[[case]]
+id = "mux.version.psmux.bad-meta"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Windows", raw = "psmux 3.4.0 unexpected" }
+expected = false
+
+[[case]]
+id = "mux.version.psmux.letter"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-version", family = "Windows", raw = "psmux 3.4.0a" }
+expected = false
+
+[[case]]
+id = "mux.candidates.linux"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-candidates", family = "Linux" }
+expected = ["tmux"]
+
+[[case]]
+id = "mux.candidates.darwin"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-candidates", family = "Darwin" }
+expected = ["tmux"]
+
+[[case]]
+id = "mux.candidates.windows"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-candidates", family = "Windows" }
+expected = ["psmux.exe"]
+
+[[case]]
+id = "mux.remedy.ubuntu"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-remedy", family = "Linux", distribution = "ubuntu" }
+expected = "sudo apt install tmux"
+
+[[case]]
+id = "mux.remedy.debian"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-remedy", family = "Linux", distribution = "debian" }
+expected = "sudo apt install tmux"
+
+[[case]]
+id = "mux.remedy.fedora"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-remedy", family = "Linux", distribution = "fedora" }
+expected = "sudo dnf install tmux"
+
+[[case]]
+id = "mux.remedy.rocky"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-remedy", family = "Linux", distribution = "rocky" }
+expected = "sudo dnf install tmux"
+
+[[case]]
+id = "mux.remedy.arch"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-remedy", family = "Linux", distribution = "arch" }
+expected = "sudo pacman -S tmux"
+
+[[case]]
+id = "mux.remedy.other"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-remedy", family = "Linux", distribution = "unknown" }
+expected = "Install tmux 3.2 or later with your OS package manager"
+
+[[case]]
+id = "mux.remedy.darwin"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-remedy", family = "Darwin", distribution = "" }
+expected = "brew install tmux"
+
+[[case]]
+id = "mux.remedy.windows"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-57"
+input = { subject = "mux-remedy", family = "Windows", distribution = "" }
+expected = "winget install psmux"
+
+[[case]]
+id = "mux.version.tmux.current.tool"
+amends = "mux.version.tmux.current"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "tool:3.4:tmux -V"
+input = { subject = "mux-version", family = "Darwin", raw = "tmux 3.4\n" }
+expected = true
+
+[[case]]
+id = "mux.version.psmux.floor.tool"
+amends = "mux.version.psmux.floor"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "tool:3.3.8:psmux -V"
+input = { subject = "mux-version", family = "Windows", raw = "psmux 3.4.0 (abc 2026-10-13)" }
+expected = true
+
+[[case]]
+id = "mux.candidates.windows.tool"
+amends = "mux.candidates.windows"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "tool:3.3.8:psmux ships"
+input = { subject = "mux-candidates", family = "Windows" }
+expected = ["psmux.exe"]
+
+[[case]]
+id = "mux.remedy.windows.tool"
+amends = "mux.remedy.windows"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "tool:3.4.0:winget install psmux"
+input = { subject = "mux-remedy", family = "Windows", distribution = "" }
+expected = "winget install psmux"
+
+
+
+[[case]]
+id = "mux.render.linux.create"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "create", session = "api-claude", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/a.json" }
+expected = { executable = "tmux", argv = ["new-session", "-d", "-s", "api-claude", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/a.json"] }
+
+[[case]]
+id = "mux.render.windows.create"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "create", session = "api-claude", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/a.json" }
+expected = { executable = "psmux.exe", argv = ["new-session", "-d", "-s", "api-claude", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/a.json"] }
+
+[[case]]
+id = "mux.render.linux.has-session"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "has-session", session = "ab" }
+expected = { executable = "tmux", argv = ["has-session", "-t", "=ab"] }
+
+[[case]]
+id = "mux.render.windows.has-session"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "has-session", session = "ab" }
+expected = { executable = "psmux.exe", argv = ["has-session", "-t", "=ab"] }
+
+[[case]]
+id = "mux.render.linux.list-sessions"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "list-sessions", format = "#{session_name}\t#{@agentctl_owner}" }
+expected = { executable = "tmux", argv = ["list-sessions", "-F", "#{session_name}\t#{@agentctl_owner}"] }
+
+[[case]]
+id = "mux.render.windows.list-sessions"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "list-sessions", format = "#{session_name}\t#{@agentctl_owner}" }
+expected = { executable = "psmux.exe", argv = ["list-sessions", "-F", "#{session_name}\t#{@agentctl_owner}"] }
+
+[[case]]
+id = "mux.render.linux.show-options"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "show-options", session = "ab" }
+expected = { executable = "tmux", argv = ["show-options", "-t", "=ab"] }
+
+[[case]]
+id = "mux.render.windows.show-options"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "show-options", session = "ab" }
+expected = { executable = "psmux.exe", argv = ["show-options", "-t", "=ab"] }
+
+[[case]]
+id = "mux.render.linux.list-panes"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "list-panes", session = "ab", format = "#{pane_id}" }
+expected = { executable = "tmux", argv = ["list-panes", "-s", "-t", "=ab", "-F", "#{pane_id}"] }
+
+[[case]]
+id = "mux.render.windows.list-panes"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "list-panes", session = "ab", format = "#{pane_id}" }
+expected = { executable = "psmux.exe", argv = ["list-panes", "-s", "-t", "=ab", "-F", "#{pane_id}"] }
+
+[[case]]
+id = "mux.render.linux.pane-state"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "pane-state", pane = "%12" }
+expected = { executable = "tmux", argv = ["display-message", "-p", "-t", "%12", "#{pane_pid} #{pane_dead} #{pane_dead_status} #{pane_dead_signal}"] }
+
+[[case]]
+id = "mux.render.windows.pane-state"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "pane-state", pane = "%12" }
+expected = { executable = "psmux.exe", argv = ["display-message", "-p", "-t", "%12", "#{pane_pid} #{pane_dead} #{pane_dead_status} #{pane_dead_signal}"] }
+
+[[case]]
+id = "mux.render.linux.owner"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "ab", key = "owner", value = "agentctl" }
+expected = { executable = "tmux", argv = ["set-option", "-t", "=ab", "@agentctl_owner", "agentctl"] }
+
+[[case]]
+id = "mux.render.windows.owner"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "set-identity", session = "ab", key = "owner", value = "agentctl" }
+expected = { executable = "psmux.exe", argv = ["set-option", "-t", "=ab", "@agentctl_owner", "agentctl"] }
+
+[[case]]
+id = "mux.render.linux.agent"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "ab", key = "agent", value = "codex" }
+expected = { executable = "tmux", argv = ["set-option", "-t", "=ab", "@agentctl_agent", "codex"] }
+
+[[case]]
+id = "mux.render.windows.agent"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "set-identity", session = "ab", key = "agent", value = "codex" }
+expected = { executable = "psmux.exe", argv = ["set-option", "-t", "=ab", "@agentctl_agent", "codex"] }
+
+[[case]]
+id = "mux.render.linux.folder"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "ab", key = "folder", value = "L2hvbWUvbWUvcHJvamVjdA" }
+expected = { executable = "tmux", argv = ["set-option", "-t", "=ab", "@agentctl_folder", "L2hvbWUvbWUvcHJvamVjdA"] }
+
+[[case]]
+id = "mux.render.windows.folder"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "set-identity", session = "ab", key = "folder", value = "L2hvbWUvbWUvcHJvamVjdA" }
+expected = { executable = "psmux.exe", argv = ["set-option", "-t", "=ab", "@agentctl_folder", "L2hvbWUvbWUvcHJvamVjdA"] }
+
+[[case]]
+id = "mux.render.linux.pane"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "ab", key = "pane", value = "%12" }
+expected = { executable = "tmux", argv = ["set-option", "-t", "=ab", "@agentctl_pane", "%12"] }
+
+[[case]]
+id = "mux.render.windows.pane"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "set-identity", session = "ab", key = "pane", value = "%12" }
+expected = { executable = "psmux.exe", argv = ["set-option", "-t", "=ab", "@agentctl_pane", "%12"] }
+
+[[case]]
+id = "mux.render.linux.remain-on"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "remain-on-exit", pane = "%12", enabled = true }
+expected = { executable = "tmux", argv = ["set-option", "-p", "-t", "%12", "remain-on-exit", "on"] }
+
+[[case]]
+id = "mux.render.windows.remain-on"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "remain-on-exit", pane = "%12", enabled = true }
+expected = { executable = "psmux.exe", argv = ["set-option", "-p", "-t", "%12", "remain-on-exit", "on"] }
+
+[[case]]
+id = "mux.render.linux.remain-unset"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "remain-on-exit", pane = "%12", enabled = false }
+expected = { executable = "tmux", argv = ["set-option", "-p", "-u", "-t", "%12", "remain-on-exit"] }
+
+[[case]]
+id = "mux.render.windows.remain-unset"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "remain-on-exit", pane = "%12", enabled = false }
+expected = { executable = "psmux.exe", argv = ["set-option", "-p", "-u", "-t", "%12", "remain-on-exit"] }
+
+[[case]]
+id = "mux.render.linux.capture"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "capture", pane = "%12", lines = 100 }
+expected = { executable = "tmux", argv = ["capture-pane", "-p", "-J", "-t", "%12", "-S", "-100"] }
+
+[[case]]
+id = "mux.render.windows.capture"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "capture", pane = "%12", lines = 100 }
+expected = { executable = "psmux.exe", argv = ["capture-pane", "-p", "-J", "-t", "%12", "-S", "-100"] }
+
+[[case]]
+id = "mux.render.linux.send-literal"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "send-literal", pane = "%12", text = "Continue the interrupted task from the last saved checkpoint." }
+expected = { executable = "tmux", argv = ["send-keys", "-l", "-t", "%12", "--", "Continue the interrupted task from the last saved checkpoint."] }
+
+[[case]]
+id = "mux.render.windows.send-literal"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "send-literal", pane = "%12", text = "Continue the interrupted task from the last saved checkpoint." }
+expected = { executable = "psmux.exe", argv = ["send-keys", "-l", "-t", "%12", "--", "Continue the interrupted task from the last saved checkpoint."] }
+
+[[case]]
+id = "mux.render.linux.send-enter"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "send-enter", pane = "%12" }
+expected = { executable = "tmux", argv = ["send-keys", "-t", "%12", "Enter"] }
+
+[[case]]
+id = "mux.render.windows.send-enter"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "send-enter", pane = "%12" }
+expected = { executable = "psmux.exe", argv = ["send-keys", "-t", "%12", "Enter"] }
+
+[[case]]
+id = "mux.render.linux.attach"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "attach", session = "ab" }
+expected = { executable = "tmux", argv = ["attach-session", "-t", "=ab"] }
+
+[[case]]
+id = "mux.render.windows.attach"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "attach", session = "ab" }
+expected = { executable = "psmux.exe", argv = ["attach-session", "-t", "=ab"] }
+
+[[case]]
+id = "mux.render.linux.switch"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "switch", session = "ab" }
+expected = { executable = "tmux", argv = ["switch-client", "-t", "=ab"] }
+
+[[case]]
+id = "mux.render.windows.switch"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "switch", session = "ab" }
+expected = { executable = "psmux.exe", argv = ["switch-client", "-t", "=ab"] }
+
+[[case]]
+id = "mux.render.linux.kill"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "kill", session = "ab" }
+expected = { executable = "tmux", argv = ["kill-session", "-t", "=ab"] }
+
+[[case]]
+id = "mux.render.windows.kill"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Windows", action = "kill", session = "ab" }
+expected = { executable = "psmux.exe", argv = ["kill-session", "-t", "=ab"] }
+
+[[case]]
+id = "mux.render.reject.forbidden-kill-server"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "kill-server" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.render.reject.forbidden-respawn"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "respawn-pane", pane = "%12" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.render.reject.forbidden-shell"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "run-shell", text = "echo hello" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.render.reject.invalid-session"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "kill", session = "a.b" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.render.reject.invalid-pane"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "send-enter", pane = "12" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.render.reject.non-ascii-pane"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "send-enter", pane = "%١" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.render.reject.invalid-key"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "ab", key = "status", value = "on" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.render.reject.unsafe-option"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "ab", key = "owner", value = "x;" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.render.reject.empty-option"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "ab", key = "owner", value = "" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.render.reject.zero-capture"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "capture", pane = "%12", lines = 0 }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.render.reject.negative-capture"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "capture", pane = "%12", lines = -1 }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.dead-status.tmux.exit"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Linux", status = 3 }
+expected = { status = 3 }
+
+[[case]]
+id = "mux.dead-status.tmux.success"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Darwin", status = 0 }
+expected = { status = 0 }
+
+[[case]]
+id = "mux.dead-status.tmux.signal"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Linux", signal = 9 }
+expected = { status = 137 }
+
+[[case]]
+id = "mux.dead-status.tmux.signal-over-status"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Linux", status = 0, signal = 15 }
+expected = { status = 143 }
+
+[[case]]
+id = "mux.dead-status.tmux.ignores-file"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Linux", status = 3, fileStatus = 0 }
+expected = { status = 3 }
+
+[[case]]
+id = "mux.dead-status.tmux.missing"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Linux" }
+expected = { error = "unavailable-status" }
+
+[[case]]
+id = "mux.dead-status.tmux.negative"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Linux", status = -1 }
+expected = { error = "unavailable-status" }
+
+[[case]]
+id = "mux.dead-status.psmux.file"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Windows", status = 0, fileStatus = 3 }
+expected = { status = 3 }
+
+[[case]]
+id = "mux.dead-status.psmux.success"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Windows", status = 9, signal = 15, fileStatus = 0 }
+expected = { status = 0 }
+
+[[case]]
+id = "mux.dead-status.psmux.missing"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Windows", status = 0 }
+expected = { error = "unavailable-status" }
+
+[[case]]
+id = "mux.dead-status.psmux.negative"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Windows", status = 0, fileStatus = -1 }
+expected = { error = "unavailable-status" }
+
+[[case]]
+id = "mux.render.windows.native-paths"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-14"
+input = { subject = "mux-render", family = "Windows", action = "create", session = "api-codex", binary = 'C:\Users\A B\agentctl\bin\agentctl-core.exe', spec = 'C:\Users\A B\agentctl\state\launch\a.json' }
+expected = { executable = "psmux.exe", argv = ["new-session", "-d", "-s", "api-codex", "-P", "-F", "#{pane_id}", "--", 'C:\Users\A B\agentctl\bin\agentctl-core.exe', "pane-exec", 'C:\Users\A B\agentctl\state\launch\a.json'] }
+
+[[case]]
+id = "mux.render.reject.empty-pane"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "send-enter", pane = "%" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.render.reject.unicode-option"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "ab", key = "owner", value = "λ" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "mux.dead-status.tmux.zero-signal"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Linux", status = 3, signal = 0 }
+expected = { status = 3 }
+
+[[case]]
+id = "mux.dead-status.tmux.file-cannot-substitute"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-58"
+input = { subject = "mux-dead-status", family = "Linux", fileStatus = 3 }
+expected = { error = "unavailable-status" }
+
+[[case]]
+id = "mux.spec.private"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = 384, directoryKind = true, directoryOwned = true, directoryMode = 448 }
+expected = true
+
+[[case]]
+id = "mux.spec.readonly"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = 256, directoryKind = true, directoryOwned = true, directoryMode = 320 }
+expected = true
+
+[[case]]
+id = "mux.spec.file-world-readable"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = 420, directoryKind = true, directoryOwned = true, directoryMode = 448 }
+expected = false
+
+[[case]]
+id = "mux.spec.file-group-readable"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = 416, directoryKind = true, directoryOwned = true, directoryMode = 448 }
+expected = false
+
+[[case]]
+id = "mux.spec.file-executable"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = 448, directoryKind = true, directoryOwned = true, directoryMode = 448 }
+expected = false
+
+[[case]]
+id = "mux.spec.file-special-bits"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = 2432, directoryKind = true, directoryOwned = true, directoryMode = 448 }
+expected = false
+
+[[case]]
+id = "mux.spec.directory-world-readable"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = 384, directoryKind = true, directoryOwned = true, directoryMode = 493 }
+expected = false
+
+[[case]]
+id = "mux.spec.directory-group-access"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = 384, directoryKind = true, directoryOwned = true, directoryMode = 488 }
+expected = false
+
+[[case]]
+id = "mux.spec.directory-special-bits"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = 384, directoryKind = true, directoryOwned = true, directoryMode = 1472 }
+expected = false
+
+[[case]]
+id = "mux.spec.foreign-file"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = false, fileMode = 384, directoryKind = true, directoryOwned = true, directoryMode = 448 }
+expected = false
+
+[[case]]
+id = "mux.spec.foreign-directory"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = 384, directoryKind = true, directoryOwned = false, directoryMode = 448 }
+expected = false
+
+[[case]]
+id = "mux.spec.file-not-regular"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = false, fileOwned = true, fileMode = 384, directoryKind = true, directoryOwned = true, directoryMode = 448 }
+expected = false
+
+[[case]]
+id = "mux.spec.parent-not-directory"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = 384, directoryKind = false, directoryOwned = true, directoryMode = 448 }
+expected = false
+
+[[case]]
+id = "mux.spec.negative-file-mode"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = -1, directoryKind = true, directoryOwned = true, directoryMode = 448 }
+expected = false
+
+[[case]]
+id = "mux.spec.negative-directory-mode"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-14"
+input = { subject = "mux-spec-acceptance", fileKind = true, fileOwned = true, fileMode = 384, directoryKind = true, directoryOwned = true, directoryMode = -1 }
+expected = false
+
+[[case]]
+id = "mux.render.linux.show-options.session-component"
+amends = "mux.render.linux.show-options"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "tool:3.4:pane-target grammar"
+input = { subject = "mux-render", family = "Linux", action = "show-options", session = "ab" }
+expected = { executable = "tmux", argv = ["show-options", "-t", "=ab:"] }
+
+[[case]]
+id = "mux.render.linux.owner.session-component"
+amends = "mux.render.linux.owner"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "tool:3.4:pane-target grammar"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "ab", key = "owner", value = "agentctl" }
+expected = { executable = "tmux", argv = ["set-option", "-t", "=ab:", "@agentctl_owner", "agentctl"] }
+
+[[case]]
+id = "mux.render.linux.agent.session-component"
+amends = "mux.render.linux.agent"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "tool:3.4:pane-target grammar"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "ab", key = "agent", value = "codex" }
+expected = { executable = "tmux", argv = ["set-option", "-t", "=ab:", "@agentctl_agent", "codex"] }
+
+[[case]]
+id = "mux.render.linux.folder.session-component"
+amends = "mux.render.linux.folder"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "tool:3.4:pane-target grammar"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "ab", key = "folder", value = "L2hvbWUvbWUvcHJvamVjdA" }
+expected = { executable = "tmux", argv = ["set-option", "-t", "=ab:", "@agentctl_folder", "L2hvbWUvbWUvcHJvamVjdA"] }
+
+[[case]]
+id = "mux.render.linux.pane.session-component"
+amends = "mux.render.linux.pane"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "tool:3.4:pane-target grammar"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "ab", key = "pane", value = "%12" }
+expected = { executable = "tmux", argv = ["set-option", "-t", "=ab:", "@agentctl_pane", "%12"] }
+
+[[case]]
+id = "mux.reap.linux.0.missing"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Linux", dead = false }
+expected = false
+
+[[case]]
+id = "mux.reap.linux.0.0"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Linux", dead = false, status = 0 }
+expected = false
+
+[[case]]
+id = "mux.reap.linux.0.3"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Linux", dead = false, status = 3 }
+expected = false
+
+[[case]]
+id = "mux.reap.linux.1.missing"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Linux", dead = true }
+expected = true
+
+[[case]]
+id = "mux.reap.linux.1.0"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Linux", dead = true, status = 0 }
+expected = false
+
+[[case]]
+id = "mux.reap.linux.1.3"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Linux", dead = true, status = 3 }
+expected = false
+
+[[case]]
+id = "mux.reap.darwin.0.missing"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Darwin", dead = false }
+expected = false
+
+[[case]]
+id = "mux.reap.darwin.0.0"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Darwin", dead = false, status = 0 }
+expected = false
+
+[[case]]
+id = "mux.reap.darwin.0.3"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Darwin", dead = false, status = 3 }
+expected = false
+
+[[case]]
+id = "mux.reap.darwin.1.missing"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Darwin", dead = true }
+expected = true
+
+[[case]]
+id = "mux.reap.darwin.1.0"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Darwin", dead = true, status = 0 }
+expected = false
+
+[[case]]
+id = "mux.reap.darwin.1.3"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Darwin", dead = true, status = 3 }
+expected = false
+
+[[case]]
+id = "mux.reap.windows.0.missing"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Windows", dead = false }
+expected = false
+
+[[case]]
+id = "mux.reap.windows.0.0"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Windows", dead = false, status = 0 }
+expected = false
+
+[[case]]
+id = "mux.reap.windows.0.3"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Windows", dead = false, status = 3 }
+expected = false
+
+[[case]]
+id = "mux.reap.windows.1.missing"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Windows", dead = true }
+expected = false
+
+[[case]]
+id = "mux.reap.windows.1.0"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Windows", dead = true, status = 0 }
+expected = false
+
+[[case]]
+id = "mux.reap.windows.1.3"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-61"
+input = { subject = "mux-reap-policy", family = "Windows", dead = true, status = 3 }
+expected = false
+
+[[case]]
+id = "mux.invocation.linux.0.claude"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Linux", action = "create", session = "api-claude", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/spec.json", directory = "/work/api", tool = "/tools/tmux" }
+expected = { executable = "/tools/tmux", argv = ["new-session", "-d", "-s", "api-claude", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/spec.json"], cwd = "/work/api" }
+
+[[case]]
+id = "mux.invocation.linux.0.codex"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Linux", action = "create", session = "api-codex", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/spec.json", directory = "/work/api", tool = "/tools/tmux" }
+expected = { executable = "/tools/tmux", argv = ["new-session", "-d", "-s", "api-codex", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/spec.json"], cwd = "/work/api" }
+
+[[case]]
+id = "mux.invocation.linux.1.claude"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Linux", action = "create", session = "api-claude", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/spec.json", directory = "/work/#(touch sentinel)", tool = "/tools/tmux" }
+expected = { executable = "/tools/tmux", argv = ["new-session", "-d", "-s", "api-claude", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/spec.json"], cwd = "/work/#(touch sentinel)" }
+
+[[case]]
+id = "mux.invocation.linux.1.codex"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Linux", action = "create", session = "api-codex", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/spec.json", directory = "/work/#(touch sentinel)", tool = "/tools/tmux" }
+expected = { executable = "/tools/tmux", argv = ["new-session", "-d", "-s", "api-codex", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/spec.json"], cwd = "/work/#(touch sentinel)" }
+
+[[case]]
+id = "mux.invocation.linux.2.claude"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Linux", action = "create", session = "api-claude", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/spec.json", directory = "/work/caf\u00e9 \u65e5", tool = "/tools/tmux" }
+expected = { executable = "/tools/tmux", argv = ["new-session", "-d", "-s", "api-claude", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/spec.json"], cwd = "/work/caf\u00e9 \u65e5" }
+
+[[case]]
+id = "mux.invocation.linux.2.codex"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Linux", action = "create", session = "api-codex", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/spec.json", directory = "/work/caf\u00e9 \u65e5", tool = "/tools/tmux" }
+expected = { executable = "/tools/tmux", argv = ["new-session", "-d", "-s", "api-codex", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/spec.json"], cwd = "/work/caf\u00e9 \u65e5" }
+
+[[case]]
+id = "mux.invocation.darwin.0.claude"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Darwin", action = "create", session = "api-claude", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/spec.json", directory = "/work/api", tool = "/tools/tmux" }
+expected = { executable = "/tools/tmux", argv = ["new-session", "-d", "-s", "api-claude", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/spec.json"], cwd = "/work/api" }
+
+[[case]]
+id = "mux.invocation.darwin.0.codex"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Darwin", action = "create", session = "api-codex", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/spec.json", directory = "/work/api", tool = "/tools/tmux" }
+expected = { executable = "/tools/tmux", argv = ["new-session", "-d", "-s", "api-codex", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/spec.json"], cwd = "/work/api" }
+
+[[case]]
+id = "mux.invocation.darwin.1.claude"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Darwin", action = "create", session = "api-claude", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/spec.json", directory = "/work/#(touch sentinel)", tool = "/tools/tmux" }
+expected = { executable = "/tools/tmux", argv = ["new-session", "-d", "-s", "api-claude", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/spec.json"], cwd = "/work/#(touch sentinel)" }
+
+[[case]]
+id = "mux.invocation.darwin.1.codex"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Darwin", action = "create", session = "api-codex", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/spec.json", directory = "/work/#(touch sentinel)", tool = "/tools/tmux" }
+expected = { executable = "/tools/tmux", argv = ["new-session", "-d", "-s", "api-codex", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/spec.json"], cwd = "/work/#(touch sentinel)" }
+
+[[case]]
+id = "mux.invocation.darwin.2.claude"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Darwin", action = "create", session = "api-claude", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/spec.json", directory = "/work/caf\u00e9 \u65e5", tool = "/tools/tmux" }
+expected = { executable = "/tools/tmux", argv = ["new-session", "-d", "-s", "api-claude", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/spec.json"], cwd = "/work/caf\u00e9 \u65e5" }
+
+[[case]]
+id = "mux.invocation.darwin.2.codex"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Darwin", action = "create", session = "api-codex", binary = "/owned folder/bin/agentctl-core", spec = "/owned folder/launch/spec.json", directory = "/work/caf\u00e9 \u65e5", tool = "/tools/tmux" }
+expected = { executable = "/tools/tmux", argv = ["new-session", "-d", "-s", "api-codex", "-P", "-F", "#{pane_id}", "--", "/owned folder/bin/agentctl-core", "pane-exec", "/owned folder/launch/spec.json"], cwd = "/work/caf\u00e9 \u65e5" }
+
+[[case]]
+id = "mux.invocation.windows.0.claude"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Windows", action = "create", session = "api-claude", binary = "C:\\owned folder\\bin\\agentctl-core.exe", spec = "C:\\owned folder\\launch\\spec.json", directory = "C:\\work\\api", tool = "C:\\tools\\psmux.exe" }
+expected = { executable = "C:\\tools\\psmux.exe", argv = ["new-session", "-d", "-s", "api-claude", "-P", "-F", "#{pane_id}", "--", "C:\\owned folder\\bin\\agentctl-core.exe", "pane-exec", "C:\\owned folder\\launch\\spec.json"], cwd = "C:\\work\\api" }
+
+[[case]]
+id = "mux.invocation.windows.0.codex"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Windows", action = "create", session = "api-codex", binary = "C:\\owned folder\\bin\\agentctl-core.exe", spec = "C:\\owned folder\\launch\\spec.json", directory = "C:\\work\\api", tool = "C:\\tools\\psmux.exe" }
+expected = { executable = "C:\\tools\\psmux.exe", argv = ["new-session", "-d", "-s", "api-codex", "-P", "-F", "#{pane_id}", "--", "C:\\owned folder\\bin\\agentctl-core.exe", "pane-exec", "C:\\owned folder\\launch\\spec.json"], cwd = "C:\\work\\api" }
+
+[[case]]
+id = "mux.invocation.windows.1.claude"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Windows", action = "create", session = "api-claude", binary = "C:\\owned folder\\bin\\agentctl-core.exe", spec = "C:\\owned folder\\launch\\spec.json", directory = "C:\\work\\#(touch sentinel)", tool = "C:\\tools\\psmux.exe" }
+expected = { executable = "C:\\tools\\psmux.exe", argv = ["new-session", "-d", "-s", "api-claude", "-P", "-F", "#{pane_id}", "--", "C:\\owned folder\\bin\\agentctl-core.exe", "pane-exec", "C:\\owned folder\\launch\\spec.json"], cwd = "C:\\work\\#(touch sentinel)" }
+
+[[case]]
+id = "mux.invocation.windows.1.codex"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Windows", action = "create", session = "api-codex", binary = "C:\\owned folder\\bin\\agentctl-core.exe", spec = "C:\\owned folder\\launch\\spec.json", directory = "C:\\work\\#(touch sentinel)", tool = "C:\\tools\\psmux.exe" }
+expected = { executable = "C:\\tools\\psmux.exe", argv = ["new-session", "-d", "-s", "api-codex", "-P", "-F", "#{pane_id}", "--", "C:\\owned folder\\bin\\agentctl-core.exe", "pane-exec", "C:\\owned folder\\launch\\spec.json"], cwd = "C:\\work\\#(touch sentinel)" }
+
+[[case]]
+id = "mux.invocation.windows.2.claude"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Windows", action = "create", session = "api-claude", binary = "C:\\owned folder\\bin\\agentctl-core.exe", spec = "C:\\owned folder\\launch\\spec.json", directory = "C:\\work\\caf\u00e9 \u65e5", tool = "C:\\tools\\psmux.exe" }
+expected = { executable = "C:\\tools\\psmux.exe", argv = ["new-session", "-d", "-s", "api-claude", "-P", "-F", "#{pane_id}", "--", "C:\\owned folder\\bin\\agentctl-core.exe", "pane-exec", "C:\\owned folder\\launch\\spec.json"], cwd = "C:\\work\\caf\u00e9 \u65e5" }
+
+[[case]]
+id = "mux.invocation.windows.2.codex"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-14"
+input = { subject = "mux-invocation", family = "Windows", action = "create", session = "api-codex", binary = "C:\\owned folder\\bin\\agentctl-core.exe", spec = "C:\\owned folder\\launch\\spec.json", directory = "C:\\work\\caf\u00e9 \u65e5", tool = "C:\\tools\\psmux.exe" }
+expected = { executable = "C:\\tools\\psmux.exe", argv = ["new-session", "-d", "-s", "api-codex", "-P", "-F", "#{pane_id}", "--", "C:\\owned folder\\bin\\agentctl-core.exe", "pane-exec", "C:\\owned folder\\launch\\spec.json"], cwd = "C:\\work\\caf\u00e9 \u65e5" }
+
+[[case]]
+id = "mux.status-file.linux"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-63"
+input = { subject = "mux-render", family = "Linux", action = "set-identity", session = "api-claude", key = "status-file", value = "L3N0YXRlL3N0YXR1cy5qc29u" }
+expected = { executable = "tmux", argv = ["set-option", "-t", "=api-claude:", "@agentctl_status", "L3N0YXRlL3N0YXR1cy5qc29u"] }
+
+[[case]]
+id = "mux.status-file.windows"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-63"
+input = { subject = "mux-render", family = "Windows", action = "set-identity", session = "api-claude", key = "status-file", value = "Qzovc3RhdGUvc3RhdHVzLmpzb24" }
+expected = { executable = "psmux.exe", argv = ["set-option", "-t", "=api-claude", "@agentctl_status", "Qzovc3RhdGUvc3RhdHVzLmpzb24"] }
+
+[[case]]
+id = "mux.inspect-pane.linux"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-64"
+input = { subject = "mux-render", family = "Linux", action = "inspect-pane", pane = "%3", format = "#{socket_path} #{session_id}" }
+expected = { executable = "tmux", argv = ["display-message", "-p", "-t", "%3", "#{socket_path} #{session_id}"] }
+
+[[case]]
+id = "mux.inspect-pane.windows"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-64"
+input = { subject = "mux-render", family = "Windows", action = "inspect-pane", pane = "%3", format = "#{socket_path} #{session_id}" }
+expected = { executable = "psmux.exe", argv = ["display-message", "-p", "-t", "%3", "#{socket_path} #{session_id}"] }
+
+[[case]]
+id = "mux.capture-visual.linux"
+requirement = "R18.1"
+quote = "Distinguish transient overload from usage limits, authentication errors, context exhaustion, and crashes"
+provenance = "decision:D-66"
+input = { subject = "mux-render", family = "Linux", action = "capture-visual", pane = "%3" }
+expected = { executable = "tmux", argv = ["capture-pane", "-p", "-e", "-t", "%3", "-S", "0"] }
+
+[[case]]
+id = "mux.capture-visual.windows"
+requirement = "R18.1"
+quote = "Distinguish transient overload from usage limits, authentication errors, context exhaustion, and crashes"
+provenance = "decision:D-66"
+input = { subject = "mux-render", family = "Windows", action = "capture-visual", pane = "%3" }
+expected = { executable = "psmux.exe", argv = ["capture-pane", "-p", "-e", "-t", "%3", "-S", "0"] }

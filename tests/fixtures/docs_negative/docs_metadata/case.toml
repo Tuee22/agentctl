@@ -1,0 +1,4 @@
+rule = "docs.metadata"
+path = "documents/operations/installation.md"
+search = "**Status**: Authoritative source"
+replace = "**Status**: Draft"

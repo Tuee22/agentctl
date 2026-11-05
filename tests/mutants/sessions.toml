@@ -1,0 +1,62 @@
+[[mutant]]
+id = "M-sessions-list-includes-foreign"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Sessions.hs"
+search = 'reportOwner report == Just "agentctl"'
+replace = 'reportOwner report /= Just "foreign"'
+killers = ["tests/unit/test_sessions_values.py::test_list_rows_match_oracle", "tests/e2e/test_sessions.py::test_list_shows_only_managed"]
+reason = "session rows differ from ownership oracle"
+
+[[mutant]]
+id = "M-sessions-dead-as-alive"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Sessions.hs"
+search = "(paneDead pane)"
+replace = "(paneDead pane && panePid pane == 0)"
+killers = ["tests/unit/test_sessions_values.py::test_list_rows_match_oracle", "tests/e2e/test_sessions.py::test_status_reports_dead_pane"]
+reason = "session rows differ from ownership oracle"
+
+[[mutant]]
+id = "M-sessions-status-wrong-folder"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Sessions.hs"
+search = "identity windows (rowFolder row) == identity windows folder"
+replace = 'identity windows (rowFolder row) /= identity windows (folder <> "-foreign")'
+killers = ["tests/unit/test_sessions_values.py::test_list_rows_match_oracle", "tests/e2e/test_sessions.py::test_status_defaults_to_current_folder"]
+reason = "session rows differ from ownership oracle"
+
+[[mutant]]
+id = "M-sessions-stop-prefix-target"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Mux/Tmux.hs"
+search = 'Kill name -> ["kill-session", "-t", exact (sessionNameText name)]'
+replace = 'Kill name -> ["kill-session", "-t", text (sessionNameText name)]'
+killers = ["tests/unit/test_sessions_values.py::test_stop_plan_matches_oracle", "tests/e2e/test_sessions.py::test_stop_never_prefix_matches"]
+reason = "session stop plan differs from ownership oracle"
+
+[[mutant]]
+id = "M-sessions-stop-kills-foreign"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Sessions.hs"
+search = "stopCommand (Foreign _) = Nothing"
+replace = "stopCommand (Foreign name) = Just (Command.Kill name)"
+killers = ["tests/unit/test_sessions_values.py::test_stop_plan_matches_oracle", "tests/e2e/test_sessions.py::test_stop_refuses_foreign_session"]
+reason = "session stop plan differs from ownership oracle"
+
+[[mutant]]
+id = "M-sessions-stop-kill-server"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Mux/Tmux.hs"
+search = 'Kill name -> ["kill-session", "-t", exact (sessionNameText name)]'
+replace = 'Kill _ -> ["kill-server"]'
+killers = ["tests/unit/test_sessions_values.py::test_stop_plan_matches_oracle", "tests/e2e/test_sessions.py::test_stop_kills_only_the_named_managed_session"]
+reason = "session stop plan differs from ownership oracle"
+
+[[mutant]]
+id = "M-sessions-attach-wrong-target"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Sessions.hs"
+search = "selected = rowName row"
+replace = 'selected = Name.plainName (Name.deriveNames False (Name.sessionNameText (rowName row) <> "-other") (rowAgent row))'
+killers = ["tests/unit/test_sessions_values.py::test_attach_plan_matches_oracle", "tests/e2e/test_sessions.py::test_attach_and_switch_under_pty", "tests/e2e/test_sessions.py::test_attach_without_tty_prints_command"]
+reason = "session attach selected another target"

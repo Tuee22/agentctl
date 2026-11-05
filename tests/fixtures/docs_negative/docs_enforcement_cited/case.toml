@@ -1,0 +1,4 @@
+rule = "docs.enforcement_cited"
+path = "documents/operations/installation.md"
+search = ""
+replace = "\nagentctl check fails on a skipped test.\n"

@@ -1,0 +1,3 @@
+Transport control: this independently written line is deliberately longer than a narrow terminal viewport so native capture must join wrapped rows while preserving the exact UTF-8 text λ日 and punctuation # $ ; without interpreting it.
+  Leading indentation survives.
+End of transport control: λ日

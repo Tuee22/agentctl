@@ -1,6 +1,6 @@
 # Phase 10 — Recovery supervisor
 
-**Status**: Planned
+**Status**: Done
 **Depends on**: [Phase 9 — Recovery state machine and backoff](phase-9-recovery-state-machine.md)
 **Host lane**: agent-host
 **Gate**: `agentctl check`
@@ -41,10 +41,10 @@ session management keeps working with no supervisor running.
 
 | Requirement | Oracle | Observer | Mutants | Tests |
 |---|---|---|---|---|
-| R18.6 — watch, unwatch, pause and resume-watch give manual pause and opt-out | `tests/oracles/command_surface.toml`, `tests/oracles/forbidden_actions.toml` | value: agentctl-core-eval watch-transition and poll-step cases; real: the watch columns of list and status and the watch-set file on a private tmux server | `M-super-pause-recorded-as-watched`, `M-super-watch-accepts-foreign`, `M-super-paused-target-stepped` | `tests/unit/test_watch_values.py::test_watch_transitions_oracle`, `tests/unit/test_supervisor_values.py::test_poll_step_oracle`, `tests/e2e/test_watch_commands.py::test_list_and_status_show_watch_state`, `tests/e2e/test_supervisor_scenarios.py::test_paused_target_never_sent` |
-| R17 — stopping the supervisor or unwatching never kills a managed or adopted session | `tests/oracles/forbidden_actions.toml`, `tests/oracles/command_surface.toml` | value: agentctl-core-eval command-plan cases for every recovery action, unwatch and shutdown; real: has-session and pane pids on a private tmux server after unwatch, SIGTERM and SIGINT; observer: the fake agents' pids and launch records with the nonce | `M-super-unwatch-kills`, `M-super-stop-kills-watched` | `tests/unit/test_watch_values.py::test_watch_transitions_oracle`, `tests/unit/test_supervisor_values.py::test_command_plan_oracle`, `tests/e2e/test_watch_commands.py::test_unwatch_never_touches_session`, `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions` |
-| R18 — the supervisor watches sessions through the recovery state machine and sends only what it decides | `tests/oracles/recovery_transitions.toml`, `tests/oracles/backoff.toml`, `tests/oracles/forbidden_actions.toml` | value: agentctl-core-eval poll-step, send-guard and command-plan cases; real: capture-pane and send-keys -l against a private tmux server; observer: the scripted fake agent's received-bytes record with the nonce; owed: live-agent-acceptance; owed: windows-psmux-acceptance | `M-super-deadline-ignored`, `M-super-guard-ignores-change`, `M-super-enter-in-literal` | `tests/unit/test_supervisor_values.py::test_poll_step_oracle`, `tests/unit/test_supervisor_values.py::test_send_guard_oracle`, `tests/unit/test_supervisor_values.py::test_command_plan_oracle`, `tests/e2e/test_supervisor_scenarios.py::test_overload_backoff_recovery_verify`, `tests/e2e/test_supervisor_scenarios.py::test_screen_change_aborts_send`, `tests/live/test_live_supervision.py::test_live_watch_sends_nothing` |
-| R18.5 — every observation, decision, attempt and result is logged, and logs shows them | `tests/oracles/log_records.toml` | value: agentctl-core-eval record-function and log-selection cases; real: the JSONL log a scripted run writes under an isolated state dir; observer: the fake agent's record of its session and nonce, matched to the target every record names | `M-super-log-skips-repeat`, `M-super-log-drops-result`, `M-super-logs-prefix-match`, `M-super-notify-stderr-only` | `tests/unit/test_supervisor_values.py::test_poll_records_oracle`, `tests/unit/test_supervisor_values.py::test_logs_selection_oracle`, `tests/unit/test_supervisor_values.py::test_poll_step_oracle`, `tests/e2e/test_supervisor_log.py::test_records_match_schema`, `tests/e2e/test_supervisor_log.py::test_every_poll_logged` |
+| R18.6 — watch, unwatch, pause and resume-watch give manual pause and opt-out | `tests/oracles/command_surface.toml`, `tests/oracles/forbidden_actions.toml` | value: agentctl-core-eval watch-transition and poll-step cases; real: the watch columns of list and status and the watch-set file on a private tmux server; observer: the paused target's unchanged input record beside a control target receiving recovery text | `M-super-pause-recorded-as-watched`, `M-super-watch-accepts-foreign`, `M-super-paused-target-stepped` | `tests/unit/test_watch_values.py::test_watch_transitions_oracle`, `tests/unit/test_supervisor_values.py::test_poll_step_oracle`, `tests/e2e/test_watch_commands.py::test_list_and_status_show_watch_state`, `tests/e2e/test_supervisor_scenarios.py::test_paused_target_never_sent` |
+| R17 — stopping the supervisor or unwatching never kills a managed or adopted session | `tests/oracles/forbidden_actions.toml`, `tests/oracles/command_surface.toml` | value: agentctl-core-eval command-plan cases for every recovery action, unwatch and shutdown; real: has-session and pane pids on a private tmux server after unwatch, SIGTERM and SIGINT; observer: the fake agents' pids and launch records with the nonce; owed: macos-acceptance; owed: windows-psmux-acceptance | `M-super-unwatch-kills`, `M-super-stop-kills-watched` | `tests/unit/test_watch_values.py::test_watch_transitions_oracle`, `tests/unit/test_supervisor_values.py::test_command_plan_oracle`, `tests/e2e/test_watch_commands.py::test_unwatch_never_touches_session`, `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions` |
+| R18 — the supervisor watches sessions through the recovery state machine and sends only what it decides | `tests/oracles/recovery_transitions.toml`, `tests/oracles/backoff.toml`, `tests/oracles/forbidden_actions.toml` | value: agentctl-core-eval poll-step, send-guard and command-plan cases; real: capture-pane and send-keys -l against a private tmux server; observer: the scripted fake agent's received-bytes record with the nonce; owed: live-agent-acceptance; owed: windows-psmux-acceptance | `M-super-deadline-ignored`, `M-super-guard-ignores-change`, `M-super-enter-in-literal`, `M-super-commit-aborted-send`, `M-super-failure-keeps-send-pending` | `tests/unit/test_supervisor_values.py::test_delivery_commit_oracle`, `tests/unit/test_supervisor_values.py::test_poll_step_oracle`, `tests/unit/test_supervisor_values.py::test_send_guard_oracle`, `tests/unit/test_supervisor_values.py::test_command_plan_oracle`, `tests/e2e/test_supervisor_scenarios.py::test_overload_backoff_recovery_verify`, `tests/e2e/test_supervisor_scenarios.py::test_screen_change_aborts_send`, `tests/live/test_live_supervision.py::test_live_watch_sends_nothing` |
+| R18.5 — every observation, decision, attempt and result is logged, and logs shows them | `tests/oracles/log_records.toml` | value: agentctl-core-eval record-function and log-selection cases; real: the JSONL log a scripted run writes under an isolated state dir; observer: the fake agent's record of its session and nonce, matched to the target every record names | `M-super-log-skips-repeat`, `M-super-log-drops-result`, `M-super-logs-prefix-match`, `M-super-notify-stderr-only`, `M-super-log-ignores-truncated-tail`, `M-super-log-accepts-extra-fields` | `tests/unit/test_supervisor_values.py::test_log_decoding_oracle`, `tests/unit/test_supervisor_values.py::test_poll_records_oracle`, `tests/unit/test_supervisor_values.py::test_logs_selection_oracle`, `tests/unit/test_supervisor_values.py::test_poll_step_oracle`, `tests/e2e/test_supervisor_log.py::test_records_match_schema`, `tests/e2e/test_supervisor_scenarios.py::test_failed_send_closes_unresolved`, `tests/e2e/test_supervisor_log.py::test_every_poll_logged`, `tests/e2e/test_supervisor_log.py::test_logs_selects_exact_target` |
 | R19 — the supervisor never switches models, never restarts crashed processes and never sends login input | `tests/oracles/forbidden_actions.toml` | value: agentctl-core-eval command-plan cases and the agent table's recovery-text rows; observer: the scripted fake agents' received-bytes and launch records with the nonce, each absence paired with a control pane that receives the recovery text | `M-super-respawn-on-exit`, `M-super-escalation-sends-model` | `tests/unit/test_supervisor_values.py::test_command_plan_oracle`, `tests/e2e/test_supervisor_scenarios.py::test_terminal_classes_escalate_without_send`, `tests/e2e/test_supervisor_scenarios.py::test_forbidden_actions_never_taken` |
 
 ## Not Proven By This Gate
@@ -54,16 +54,18 @@ session management keeps working with no supervisor running.
 - Supervision of logged-in claude and codex sessions, observed when `tests/live/test_live_supervision.py::test_live_watch_sends_nothing` takes its logged-in branch. — owed to [Phase 11 — Live agent acceptance](phase-11-live-agent-acceptance.md).
 - Live supervision of an `IdlePrompt` screen when the user has not already trusted the live folder, since the live run then sees only `TrustDialog` or `BypassWarning`. — not proven by any phase.
 - Capture, `send-keys -l` and the separate Enter through a real psmux, and the supervisor lock on Windows. — owed to [Phase 14 — Windows and psmux acceptance](phase-14-windows-psmux-acceptance.md).
+- Native SIGINT and SIGTERM shutdown on Darwin, including unchanged managed and adopted pane identities and released supervisor locks. — owed to [Phase 13 — macOS acceptance](phase-13-macos-acceptance.md).
+- Native Ctrl+C and Ctrl+Break shutdown in a private Windows console, including unchanged managed and adopted pane identities and released supervisor locks. — owed to [Phase 14 — Windows and psmux acceptance](phase-14-windows-psmux-acceptance.md).
 - A keystroke the user types in the instant between the send-time re-capture and `send-keys -l`; the guard narrows that window to one capture but cannot close it. — not proven by any phase.
-- Tamper resistance is bounded by [§ P](development_plan_standards.md#p-the-ratchet-and-the-users-commit-points): it holds against a HEAD the user has committed. — not proven by any phase.
+- Tamper resistance extends only to data already present in the available HEAD baseline ([§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure)); uncommitted inputs have no historical protection. — not proven by any phase.
 
 ## Sprints
 
-### Sprint 10.1: Watch state and commands [Planned]
+### Sprint 10.1: Watch state and commands [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Supervisor/Watch.hs`, `src/agentctl/haskell/src/AgentCtl/Sessions.hs`, `src/agentctl/haskell/src/AgentCtl/Protocol.hs`, `src/agentctl/haskell/app/`, `src/agentctl/haskell/agentctl-core.cabal`, `src/agentctl/cli.py`, `tests/oracles/command_surface.toml`, `tests/mutants/supervisor.toml`
-**Validation tests**: `tests/unit/test_watch_values.py::test_watch_transitions_oracle`, `tests/e2e/test_watch_commands.py::test_list_and_status_show_watch_state`, `tests/e2e/test_watch_commands.py::test_unwatch_never_touches_session`, `tests/e2e/test_watch_commands.py::test_watch_refuses_foreign_target`
+**Status**: Done
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Supervisor/Watch.hs`, `src/agentctl/haskell/src/AgentCtl/Sessions.hs`, `src/agentctl/haskell/src/AgentCtl/Protocol.hs`, `src/agentctl/haskell/app/`, `src/agentctl/haskell/agentctl-core.cabal`, `src/agentctl/cli.py`, `tests/oracles/command_surface.toml`, `tests/mutants/supervisor.toml`, `tests/unit/test_watch_values.py`, `tests/e2e/test_watch_commands.py`, `tests/harness/sessions.py`
+**Validation tests**: `tests/unit/test_watch_values.py::test_watch_transitions_oracle`, `tests/e2e/test_watch_commands.py::test_list_and_status_show_watch_state`, `tests/e2e/test_watch_commands.py::test_unwatch_never_touches_session`, `tests/e2e/test_watch_commands.py::test_watch_refuses_foreign_target`, `tests/e2e/test_watch_commands.py::test_concurrent_watch_updates_preserve_entries`
 **Mutants**: `M-super-pause-recorded-as-watched`, `M-super-watch-accepts-foreign`, `M-super-unwatch-kills`
 **Closes**: R18.6
 **Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/architecture/sessions_and_ownership.md`, `documents/reference/cli_reference.md`, `documents/reference/files_and_state.md`
@@ -80,12 +82,14 @@ Record watch intent for each target durably, through commands that never touch a
   `%ID`.
 - A pure transition function, an `agentctl-core-eval` subject, applies a command to the set and the resolved target:
   the new set and the multiplexer commands to issue (resolution queries only), a notice for a repeat, or a refusal
-  with exit 1 for a foreign or missing target.
+  with exit 1 when watch or resume targets a foreign or missing target. Pause and unwatch can disable an existing
+  stale entry, and revisions preserve a pause/resume event between polls.
 - `watch NAME|%ID`, `unwatch NAME|%ID`, `pause NAME|%ID` and `resume-watch NAME|%ID` enter the handshake command list
   and the passthrough table, which the Sprint 6.3 equality test holds together; `resume-watch` resumes supervision,
   not the agent's goal.
 - `list` and `status` gain the watched and paused columns.
-- `tests/oracles/command_surface.toml` gains the four commands' transition rows, with provenance `request:R18.6`.
+- `tests/oracles/command_surface.toml` gains the four commands' transition rows anchored to R18.6, with
+  `decision:D-70` provenance for revision and repeat semantics.
 
 #### Validation
 
@@ -104,24 +108,34 @@ Record watch intent for each target durably, through commands that never touch a
    against the control that watching the managed session succeeds —
    `tests/e2e/test_watch_commands.py::test_watch_refuses_foreign_target`; fails when a foreign session becomes
    watchable; no mutant: the kernel's mutants die in item 1.
+5. Concurrent watch, pause and resume commands for distinct managed and adopted targets retain every entry and
+   assign each effective update a distinct revision —
+   `tests/e2e/test_watch_commands.py::test_concurrent_watch_updates_preserve_entries`; fails when a write overwrites
+   another command's intent; no mutant: the native lock and complete read-modify-write scope are operating-system
+   effects, with each successful command and each target's distinct revision as controls.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 10.2: supervisor run [Planned]
+### Sprint 10.2: supervisor run [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Supervisor.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Lock.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Log.hs`, `src/agentctl/haskell/src/AgentCtl/Protocol.hs`, `src/agentctl/haskell/app/`, `src/agentctl/haskell/agentctl-core.cabal`, `src/agentctl/cli.py`, `tests/oracles/forbidden_actions.toml`, `tests/oracles/command_surface.toml`, `tests/mutants/supervisor.toml`
-**Validation tests**: `tests/unit/test_supervisor_values.py::test_command_plan_oracle`, `tests/unit/test_supervisor_values.py::test_send_guard_oracle`, `tests/unit/test_supervisor_values.py::test_poll_step_oracle`, `tests/unit/test_supervisor_values.py::test_run_flag_defaults_oracle`, `tests/e2e/test_supervisor_run.py::test_second_instance_refused`, `tests/e2e/test_supervisor_run.py::test_sends_once_after_initial_delay`, `tests/e2e/test_supervisor_run.py::test_escalation_notifies`
-**Mutants**: `M-super-enter-in-literal`, `M-super-respawn-on-exit`, `M-super-escalation-sends-model`, `M-super-stop-kills-watched`, `M-super-guard-ignores-change`, `M-super-paused-target-stepped`, `M-super-deadline-ignored`, `M-super-notify-stderr-only`
+**Status**: Done
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Supervisor.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Runtime.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Lock.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Commands.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Guard.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Poll.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Settings.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Delivery.hs`, `src/agentctl/haskell/src/AgentCtl/Sessions.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Log.hs`, `src/agentctl/haskell/src/AgentCtl/Native.hs`, `src/agentctl/haskell/src/AgentCtl/native_fs.c`, `src/agentctl/haskell/src/AgentCtl/native_stop.c`, `src/agentctl/haskell/src/AgentCtl/Protocol.hs`, `src/agentctl/haskell/app/`, `src/agentctl/haskell/test/SupervisorTests.hs`, `tests/harness/supervisor.py`, `tests/e2e/test_scripted_fake.py`, `src/agentctl/haskell/agentctl-core.cabal`, `src/agentctl/cli.py`, `tests/oracles/forbidden_actions.toml`, `tests/oracles/command_surface.toml`, `tests/mutants/supervisor.toml`
+**Validation tests**: `tests/unit/test_supervisor_values.py::test_command_plan_oracle`, `tests/unit/test_supervisor_values.py::test_send_guard_oracle`, `tests/unit/test_supervisor_values.py::test_poll_step_oracle`, `tests/unit/test_supervisor_values.py::test_run_flag_defaults_oracle`, `tests/e2e/test_supervisor_run.py::test_second_instance_refused`, `tests/e2e/test_supervisor_run.py::test_sends_once_after_initial_delay`, `tests/e2e/test_supervisor_run.py::test_escalation_notifies`, `haskell:agentctl-core-test/SupervisorReal/lock-contention-and-release`, `haskell:agentctl-core-test/SupervisorReal/lock-exception-releases`, `haskell:agentctl-core-test/SupervisorReal/lock-refuses-directory`, `haskell:agentctl-core-test/SupervisorReal/stop-handler-scope-reusable`, `tests/e2e/test_scripted_fake.py::test_scripted_agent_records_every_byte`, `tests/unit/test_supervisor_values.py::test_delivery_commit_oracle`
+**Mutants**: `M-super-enter-in-literal`, `M-super-respawn-on-exit`, `M-super-escalation-sends-model`, `M-super-stop-kills-watched`, `M-super-guard-ignores-change`, `M-super-paused-target-stepped`, `M-super-deadline-ignored`, `M-super-notify-stderr-only`, `M-super-commit-aborted-send`, `M-super-failure-keeps-send-pending`
 **Closes**: none
-**Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/engineering/testing.md`, `documents/reference/cli_reference.md`, `documents/reference/files_and_state.md`
+**Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/engineering/testing.md`, `documents/reference/cli_reference.md`, `documents/reference/files_and_state.md`, `documents/engineering/code_standards.md`, `documents/reference/external_tool_facts.md`
 
 #### Objective
 
 Run the recovery loop in the foreground over the watch set, sending only the agent's recovery text, only when the
 machine decides to, and only into a screen unchanged since that decision.
+
+The native lock and stop scopes, pure poll and send kernels, and foreground interpreter are small infrastructure
+modules implementing this one run contract. Their boundary is process lifetime and interpretation of a recovery
+decision; the scripted fake agent is its controlled observer. They share this sprint so no alternate loop or lock
+path substitutes for the production interpreter.
 
 #### Deliverables
 
@@ -179,24 +193,51 @@ machine decides to, and only into a screen unchanged since that decision.
 7. A watched usage-limit screen yields a stderr line naming the target and a `notify` record, and its pane receives
    nothing while a control pane receives the recovery text — `tests/e2e/test_supervisor_run.py::test_escalation_notifies`;
    fails when the notification reaches one sink only; no mutant: the kernels' mutants die in items 1 to 3.
+8. Independent native handles contend on the supervisor lock, report its holder, retain exclusion while the watch
+   lock is held, release after normal or exceptional exit, and refuse a directory without removing it —
+   `haskell:agentctl-core-test/SupervisorReal/lock-contention-and-release`,
+   `haskell:agentctl-core-test/SupervisorReal/lock-exception-releases`,
+   `haskell:agentctl-core-test/SupervisorReal/lock-refuses-directory`; fails when two handles own the same lock, an
+   exception leaves it locked or an unsafe entry is accepted; no mutant: these are native operating-system effects
+   with successful acquisition before and after each negative control.
+9. Stop-handler scopes refuse nesting without altering the outer scope and can be installed again after exit —
+   `haskell:agentctl-core-test/SupervisorReal/stop-handler-scope-reusable`; fails when a nested scope overwrites
+   handlers or cleanup prevents reuse; no mutant: the handlers are operating-system effects; actual stop signals
+   remain covered by Sprint 10.4's session-preservation scenario.
+10. For each fake agent, private file, input-byte and timed frame advances retain nonce-bound target identities and
+    native monotonic timestamps; a partial literal is recorded before Enter, the final byte is the separate carriage
+    return, and controlled stop exits cleanly —
+    `tests/e2e/test_scripted_fake.py::test_scripted_agent_records_every_byte`; fails when canonical buffering hides
+    an unsubmitted literal, a byte is missing, a frame advances early or a receipt names another target; no mutant:
+    this is the independent receiving observer, with successful byte and frame controls for both agents.
+11. Delivery commits a proposed recovery-sent state only after sent; an aborted guard steps the fresh capture and
+    defers another send proposal until the next poll, while command failure clears the incident, handles its
+    fingerprint and escalates with an unresolved result —
+    `tests/unit/test_supervisor_values.py::test_delivery_commit_oracle`; fails when an abort marks unsent input
+    handled or a failed command leaves a pending send; mutants `M-super-commit-aborted-send`,
+    `M-super-failure-keeps-send-pending`.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 10.3: Decision log and logs [Planned]
+### Sprint 10.3: Decision log and logs [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Supervisor/Log.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor.hs`, `src/agentctl/haskell/src/AgentCtl/Protocol.hs`, `src/agentctl/haskell/app/`, `src/agentctl/cli.py`, `tests/oracles/log_records.toml`, `tests/mutants/supervisor.toml`
-**Validation tests**: `tests/unit/test_supervisor_values.py::test_poll_records_oracle`, `tests/unit/test_supervisor_values.py::test_logs_selection_oracle`, `tests/e2e/test_supervisor_log.py::test_records_match_schema`, `tests/e2e/test_supervisor_log.py::test_every_poll_logged`, `tests/e2e/test_supervisor_log.py::test_logs_selects_exact_target`
-**Mutants**: `M-super-log-skips-repeat`, `M-super-log-drops-result`, `M-super-logs-prefix-match`
+**Status**: Done
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Supervisor/Log.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Log/File.hs`, `src/agentctl/haskell/src/AgentCtl/Native.hs`, `src/agentctl/haskell/src/AgentCtl/native_fs.c`, `src/agentctl/haskell/test/SupervisorTests.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor.hs`, `src/agentctl/haskell/src/AgentCtl/Protocol.hs`, `src/agentctl/haskell/app/`, `src/agentctl/cli.py`, `tests/oracles/log_records.toml`, `tests/mutants/supervisor.toml`
+**Validation tests**: `tests/unit/test_supervisor_values.py::test_poll_records_oracle`, `tests/unit/test_supervisor_values.py::test_logs_selection_oracle`, `tests/e2e/test_supervisor_log.py::test_records_match_schema`, `tests/e2e/test_supervisor_scenarios.py::test_failed_send_closes_unresolved`, `tests/e2e/test_supervisor_log.py::test_every_poll_logged`, `tests/e2e/test_supervisor_log.py::test_logs_selects_exact_target`, `tests/unit/test_supervisor_values.py::test_log_decoding_oracle`, `haskell:agentctl-core-test/SupervisorReal/log-owned-append-and-read`, `haskell:agentctl-core-test/SupervisorReal/log-refuses-directory`, `haskell:agentctl-core-test/SupervisorReal/log-refuses-public-parent`, `haskell:agentctl-core-test/SupervisorReal/log-writer-and-reader-share-history`, `haskell:agentctl-core-test/SupervisorReal/log-tail-requires-active-writer`
+**Mutants**: `M-super-log-skips-repeat`, `M-super-log-drops-result`, `M-super-logs-prefix-match`, `M-super-log-ignores-truncated-tail`, `M-super-log-accepts-extra-fields`
 **Closes**: R18.5
-**Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/reference/cli_reference.md`, `documents/reference/files_and_state.md`
+**Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/reference/cli_reference.md`, `documents/reference/files_and_state.md`, `documents/reference/external_tool_facts.md`
 
 #### Objective
 
 Make every observation, decision, attempt and result a durable JSONL record, and let `logs` show one target's
 records.
+
+The pure record and decoding module, owned file adapter and native append/snapshot ABI implement this one storage
+contract together. Their infrastructure boundary is validated record publication and concurrent reading; the
+foreground recovery interpreter consumes it without another log path.
 
 #### Deliverables
 
@@ -232,15 +273,33 @@ records.
 5. `agentctl logs NAME` prints NAME's records in order and exits non-zero for a target with none —
    `tests/e2e/test_supervisor_log.py::test_logs_selects_exact_target`; fails when another target's records appear; no
    mutant: the selection's mutant dies in item 2.
+6. The decoder accepts valid multi-kind records and an active writer's complete prefix, and refuses malformed
+   complete records, extra fields and an unterminated suffix after the writer exits —
+   `tests/unit/test_supervisor_values.py::test_log_decoding_oracle`; fails when corruption is silently dropped or
+   field validation accepts a changed record; mutants `M-super-log-ignores-truncated-tail`,
+   `M-super-log-accepts-extra-fields`.
+7. Native append preserves earlier bytes, creates a private file, makes each write visible to an independent snapshot, and reads history beyond the
+   launch-spec size limit; a directory or public parent refuses without appending, against successful private
+   writes and the independently observed unsafe parent —
+   `haskell:agentctl-core-test/SupervisorReal/log-owned-append-and-read`,
+   `haskell:agentctl-core-test/SupervisorReal/log-refuses-directory`,
+   `haskell:agentctl-core-test/SupervisorReal/log-refuses-public-parent`; fails on truncation, unsafe writes or a lost
+   launch-spec size bound; no mutant: these are operating-system effects with their native positive controls.
+8. The owned reader returns every appended record while the writer holds its native lock and after release; a
+   deliberate partial suffix is tolerated only during that writer's scope, then refused by both reading and a new
+   writer's startup — `haskell:agentctl-core-test/SupervisorReal/log-writer-and-reader-share-history`,
+   `haskell:agentctl-core-test/SupervisorReal/log-tail-requires-active-writer`; fails on lost history, a reader that
+   cannot coexist with the writer, or corrupt history accepted after exit; no mutant: the native lock and file
+   observers bind the pure decoding controls of item 6 to actual ownership.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 10.4: Scenario matrix [Planned]
+### Sprint 10.4: Scenario matrix [Done]
 
-**Status**: Planned
-**Implementation**: `tests/oracles/forbidden_actions.toml`
+**Status**: Done
+**Implementation**: `tests/oracles/forbidden_actions.toml`, `tests/harness/supervisor_cases.py`, `tests/harness/supervisor_barrier.py`, `src/agentctl/haskell/app/SupervisorFixture.hs`, `tests/live/test_live_supervision.py`, `tests/harness/supervisor_signals.py`, `tests/e2e/test_supervisor_scenarios.py`, `src/agentctl/haskell/test/ConsoleFixture.hs`, `src/agentctl/haskell/test/console_fixture.c`
 **Validation tests**: `tests/e2e/test_supervisor_scenarios.py::test_overload_backoff_recovery_verify`, `tests/e2e/test_supervisor_scenarios.py::test_terminal_classes_escalate_without_send`, `tests/e2e/test_supervisor_scenarios.py::test_unsafe_screens_never_sent`, `tests/e2e/test_supervisor_scenarios.py::test_paused_target_never_sent`, `tests/e2e/test_supervisor_scenarios.py::test_screen_change_aborts_send`, `tests/e2e/test_supervisor_scenarios.py::test_forbidden_actions_never_taken`, `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`, `tests/live/test_live_supervision.py::test_live_watch_sends_nothing`
 **Mutants**: none — the matrix is real and observer evidence, and the supervisor kernels' mutants die in the value cases of Sprints 10.1 to 10.3
 **Closes**: R17, R18, R19
@@ -293,7 +352,8 @@ then watch live sessions and send nothing.
    keeps its pid and its agent's one recorded launch), no model switch (no input holds `/model` while the control
    input is the recovery text), no login bytes (the authentication-error and login-screen panes receive nothing) —
    `tests/e2e/test_supervisor_scenarios.py::test_forbidden_actions_never_taken`; fails on any forbidden effect.
-7. SIGTERM, and in a second run SIGINT, end a supervisor watching a managed session and an adopted pane: it exits 0
+7. Native termination and interrupt requests (SIGTERM/SIGINT on POSIX, Ctrl+Break/Ctrl+C in a private Windows console)
+   end a supervisor watching managed sessions and adopted panes: it exits 0
    and releases the lock, and both stay alive with unchanged pane pids, against the control that its pid was alive and
    its log held an observation of each first, matched to their nonce-bearing fake-agent records —
    `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`; fails when stopping ends a target.
@@ -304,11 +364,11 @@ then watch live sessions and send nothing.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
 ## Remaining Work
 
-The whole phase: Sprints 10.1–10.4.
+None.
 
 ## Documentation Requirements
 

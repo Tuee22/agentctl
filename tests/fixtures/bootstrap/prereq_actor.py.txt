@@ -1,0 +1,108 @@
+# Copyright (c) 2026 agentctl contributors.
+"""Run the real consent/applier boundary under an independent vetoing observer."""
+
+import json
+import os
+import platform
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+
+import click
+from click.testing import CliRunner
+
+from agentctl.bootstrap.prereqs import (
+    GrantedPrerequisites,
+    PackageInstall,
+    apply,
+    authorize,
+    commands_of,
+    ensure,
+    invoke,
+    probe,
+    proposal,
+)
+from agentctl.check.audit import install
+from agentctl.cli import cli
+from agentctl.hostfacts import Distribution, HostContext, HostFacts, Prerequisite
+from agentctl.result import Err, Ok
+from agentctl.process import Output, SpawnError
+from agentctl.result import Result
+
+
+@dataclass(frozen=True, slots=True)
+class Outcome:
+    """Only non-secret, finite execution results cross the actor boundary."""
+
+    reasons: tuple[str, ...]
+
+
+def main() -> None:
+    """Keep all executable discovery and every possible install in an owned PATH."""
+    mode, directory_text, log_text, nonce = sys.argv[1:]
+    directory, log = Path(directory_text), Path(log_text)
+    binary = directory / "bin"
+    binary.mkdir()
+    compiler = binary / ("cc.exe" if platform.system() == "Windows" else "cc")
+    compiler.write_text("discovery-only compiler candidate", encoding="utf-8")
+    compiler.chmod(0o755)
+    env = {**os.environ, "PATH": str(binary), "PYTHONDONTWRITEBYTECODE": "1"}
+    context = HostContext("Linux", "x86_64", directory / "home", directory / "cache", directory, tuple(env.items()), is_root=False, interactive=False, assume_yes=False)
+    installed = install(log, nonce)
+    assert isinstance(installed, Ok)
+    def unusable(arguments: tuple[str, ...], value: HostContext) -> Result[Output, SpawnError]:
+        assert arguments[2:4] == ("-lgmp", "-o")
+        return invoke((sys.executable, *arguments[1:]), value)
+
+    measurements = probe(context, unusable, certificates=(None, None))
+    assert isinstance(measurements, Ok)
+    if mode in {"global-yes", "global-no"}:
+        os.chdir(directory)
+        arguments = ["--assume-yes", "check"] if mode == "global-yes" else ["check"]
+        isolated = {
+            "PATH": str(binary),
+            "XDG_CACHE_HOME": str(directory / "xdg-cache"),
+            "XDG_DATA_HOME": str(directory / "xdg-data"),
+            "XDG_STATE_HOME": str(directory / "xdg-state"),
+        }
+        result = CliRunner().invoke(cli, arguments, env=isolated)
+        assert result.exit_code == 1, result.output
+        print(json.dumps({"reasons": ["preconditions"], "console": result.output}))
+        return
+    flags = mode in {"assume-yes", "root", "xcode"}
+    interactive = mode in {"accepted", "batch", "declined", "declined-other", "declined-empty"}
+    observations = (Prerequisite("xcode-clt", ready=False),) if mode == "xcode" else measurements.value
+    facts = HostFacts("Darwin" if mode == "xcode" else "Linux", "x86_64", directory / "ghcup", None, None, None, distribution=Distribution("ubuntu", 24), is_root=mode == "root", interactive=interactive, assume_yes=flags, prerequisites=observations)
+    planned = proposal(facts)
+    assert isinstance(planned, Ok)
+    assert len(planned.value) == 1
+    action = planned.value[0]
+
+    @click.command()
+    def command() -> Outcome:
+        if mode in {"batch", "declined", "declined-other", "declined-empty", "non-tty"}:
+            result = ensure(action, facts, context)
+            return Outcome((result.error.reason,) if isinstance(result, Err) else ("ready",))
+        granted = authorize(action, facts)
+        if isinstance(granted, Err):
+            return Outcome((granted.error.reason,))
+        reasons: tuple[str, ...] = ()
+        if isinstance(action, PackageInstall):
+            for argv in commands_of(action):
+                single = GrantedPrerequisites(PackageInstall(action.packages, (argv,)))
+                result = apply(single, context)
+                reasons += (result.error.reason if isinstance(result, Err) else "ready",)
+        else:
+            result = apply(granted.value, context)
+            reasons = (result.error.reason if isinstance(result, Err) else "ready",)
+        return Outcome(reasons)
+
+    answer = "yes\n" if mode in {"accepted", "batch"} else "unexpected\n" if mode == "declined-other" else "\n" if mode == "declined-empty" else "n\n"
+    result = CliRunner().invoke(command, input=answer, standalone_mode=False)
+    assert result.exit_code == 0, result.output
+    outcome: object = result.return_value
+    assert isinstance(outcome, Outcome)
+    print(json.dumps({"reasons": outcome.reasons, "console": result.output}))
+
+
+main()

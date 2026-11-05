@@ -1,0 +1,71 @@
+[[mutant]]
+id = "M-ratchet-allow-edit"
+operator = "widen"
+target = "src/agentctl/check/ratchet.py"
+search = "current.get(row.identifier) != row.contents"
+replace = "row.identifier not in current"
+killers = ["tests/governance/test_ratchet.py::test_edited_row_rejected"]
+reason = "edited row was accepted"
+
+[[mutant]]
+id = "M-ratchet-allow-delete"
+operator = "widen"
+target = "src/agentctl/check/ratchet.py"
+search = "current.get(row.identifier) != row.contents"
+replace = "row.identifier in current and current.get(row.identifier) != row.contents"
+killers = ["tests/governance/test_ratchet.py::test_deleted_row_rejected"]
+reason = "deleted row was accepted"
+
+[[mutant]]
+id = "M-ratchet-config-widened"
+operator = "widen"
+target = "src/agentctl/check/ratchet.py"
+search = "return set(after) <= set(before)"
+replace = "return True"
+killers = ["tests/governance/test_ratchet.py::test_config_weakening_rejected"]
+reason = "configuration weakening was accepted"
+
+[[mutant]]
+id = "M-guard-parallel-runner-allowed"
+operator = "short-circuit"
+target = "src/agentctl/check/validator/source.py"
+search = "def forbidden_surfaces(root: Path) -> tuple[str, ...]:\n    \"\"\"Keep check as the only workflow entry surface outside data fixtures.\"\"\"\n    names: tuple[str, ...] = ()\n    for current, directories, files in os.walk(root):\n        directory = Path(current)\n        directories[:] = [\n            name\n            for name in directories\n            if directory / name not in {root / \".git\", root / \"tests/fixtures\"}\n        ]\n        for name in files:\n            path = directory / name\n            relative = path.relative_to(root)\n            script = path.suffix in {\".sh\", \".ps1\", \".bat\", \".cmd\"} or (\n                path.suffix == \".py\" and relative.parts[0] not in {\"src\", \"tests\"}\n            )\n            if name in FORBIDDEN_NAMES or script:\n                names += (relative.as_posix(),)\n    directories = tuple(\n        path\n        for path in (\".github/workflows\", \".githooks\", \"hooks\", \"scripts\")\n        if (root / path).exists()\n    )\n    return tuple(\n        sorted(f\"tree.forbidden-surfaces: {name}\" for name in (*names, *directories))\n    ) + _script_entries(root)"
+replace = "def forbidden_surfaces(root: Path) -> tuple[str, ...]:\n    \"\"\"Deliberately ignore workflow surfaces.\"\"\"\n    return ()"
+killers = ["tests/governance/test_forbidden_surfaces.py::test_fixture_and_live_tree"]
+reason = "parallel runner was accepted"
+
+[[mutant]]
+id = "M-guard-skip-ignored"
+operator = "widen"
+target = "src/agentctl/check/writeguard.py"
+search = "if directory != root or name != \".git\""
+replace = "if directory != root or name not in {\".git\", \".ignored\"}"
+killers = ["tests/integration/test_guard.py::test_ignored_write_detected"]
+reason = "ignored write was not detected"
+
+[[mutant]]
+id = "M-guard-ref-unchecked"
+operator = "widen"
+target = "src/agentctl/check/writeguard.py"
+search = "if first != second"
+replace = "if name != \"refs\" and first != second"
+killers = ["tests/integration/test_guard.py::test_ref_change_detected"]
+reason = "ref change was not detected"
+
+[[mutant]]
+id = "M-guard-venv-unchecked"
+operator = "widen"
+target = "src/agentctl/check/writeguard.py"
+search = "if first != second"
+replace = "if name != \"environment\" and first != second"
+killers = ["tests/integration/test_guard.py::test_venv_change_detected"]
+reason = "venv change was not detected"
+
+[[mutant]]
+id = "M-guard-containment-blind"
+operator = "widen"
+target = "src/agentctl/check/writeguard.py"
+search = "if state.value"
+replace = "if False"
+killers = ["tests/integration/test_guard.py::test_containment_detects_owned_leak"]
+reason = "owned process leak was accepted"

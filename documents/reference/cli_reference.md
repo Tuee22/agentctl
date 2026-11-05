@@ -17,7 +17,7 @@ Global options go before the command; after the command, every token belongs to 
 
 | Option | Meaning | Owning phase |
 |---|---|---|
-| `--assume-yes` | Consents in advance to installing missing OS prerequisites. A run without a terminal installs directly as root or through `sudo -n` with passwordless sudo; it never prompts. Example: `agentctl --assume-yes list`. | [Toolchain bootstrap](../../DEVELOPMENT_PLAN/phase-2-toolchain-bootstrap.md) |
+| `--assume-yes` | Consents in advance to installing missing OS prerequisites. Linux uses root or `sudo -n` without a terminal prompt. The option also applies to check; check refuses missing macOS Command Line Tools without opening their dialog (`tests/unit/test_preconditions.py::test_prerequisite_inspection_platforms_and_errors`). Example: `agentctl --assume-yes list`. | [Toolchain bootstrap](../../DEVELOPMENT_PLAN/phase-2-toolchain-bootstrap.md) |
 | `--help` | `agentctl --help` lists the commands, and `agentctl <command> --help` describes one. After `claude` or `codex`, `--help` is one of the ARGS and goes to the agent. | [Governance, documentation standards and the check skeleton](../../DEVELOPMENT_PLAN/phase-0-governance-and-check-skeleton.md) |
 
 ## Names
@@ -46,6 +46,14 @@ the one `$TMUX` names when it is set, otherwise your default server.
 | `agentctl logs NAME` | `NAME` | Prints, in log order, the supervisor's records for exactly that target: every observation, decision, attempt and result, and every notification. | [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) |
 | `agentctl supervisor run [OPTIONS]` | the timing options below | Runs the recovery supervisor in the foreground over the watch set until SIGINT (Ctrl-C) or SIGTERM. Nothing starts it for you, one runs at a time, and stopping it leaves every session running. It never switches models, restarts a crashed agent or sends login input, and its notifications go to its stderr and to the log. | [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) |
 | `agentctl check` | none | Runs the quality gate over the checkout agentctl is installed from: every step and leg, the entire test suite included. It needs an editable install of that checkout with the `dev` extra, and it never prompts. | [Governance, documentation standards and the check skeleton](../../DEVELOPMENT_PLAN/phase-0-governance-and-check-skeleton.md) |
+
+`list` and `status` use the [session table format](../architecture/sessions_and_ownership.md#what-each-command-may-touch),
+with a JSON-string folder field so a path cannot split the tab-separated rows.
+`status` appends `SCREEN`, containing the current [screen class](../architecture/supervisor_contract.md#screen-classes-and-fixture-provenance).
+An unvalidated stale entry reports `Unknown`.
+Both tables append `WATCHED` and `PAUSED`, each `yes` or `no`; a paused target remains watched.
+Repeated `watch` preserves a pause. Enabling or resuming watch intent requires a current managed or adopted target;
+pause and unwatch can disable an existing stale entry.
 
 `agentctl supervisor run` takes these timing options and reads no configuration file:
 

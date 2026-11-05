@@ -1,0 +1,4 @@
+rule = "docs.structure"
+path = "documents/architecture/launch_contract.md"
+search = "## TL;DR"
+replace = "## Overview"

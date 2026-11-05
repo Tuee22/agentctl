@@ -1,0 +1,255 @@
+[[case]]
+id = "sessions.list.mixed"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-list", reports = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = "/work/api", pane = "%1", attached = 1, panes = [{ pane = "%1", pid = 42, dead = false }] }, { name = "foreign", attached = 0, panes = [{ pane = "%2", pid = 43, dead = false }] }, { name = "dead-codex", owner = "agentctl", agent = "codex", folder = "/work/dead", pane = "%3", attached = 0, panes = [{ pane = "%3", pid = 44, dead = true, exit = 3 }] }] }
+expected = [{ name = "api-claude", agent = "claude", folder = "/work/api", pane = "%1", pid = 42, state = "alive", attached = 1, kind = "managed" }, { name = "dead-codex", agent = "codex", folder = "/work/dead", pane = "%3", pid = 44, state = "dead", exit = 3, attached = 0, kind = "managed" }]
+
+[[case]]
+id = "sessions.list.owner-required"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-list", reports = [{ name = "impostor", agent = "claude", folder = "/work/api", pane = "%1", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }, { name = "wrong-owner", owner = "another-tool", agent = "codex", folder = "/work/api", pane = "%2", attached = 0, panes = [{ pane = "%2", pid = 43, dead = false }] }] }
+expected = []
+
+[[case]]
+id = "sessions.list.complete-identity"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-list", reports = [{ name = "missing-agent", owner = "agentctl", folder = "/work/api", pane = "%1", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }, { name = "missing-folder", owner = "agentctl", agent = "claude", pane = "%2", attached = 0, panes = [{ pane = "%2", pid = 43, dead = false }] }, { name = "missing-pane", owner = "agentctl", agent = "codex", folder = "/work/api", pane = "%99", attached = 0, panes = [{ pane = "%3", pid = 44, dead = false }] }] }
+expected = []
+
+[[case]]
+id = "sessions.status.folder"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-status", windows = false, folder = "/work/api", reports = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = "/work/api", pane = "%1", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }, { name = "api-codex", owner = "agentctl", agent = "codex", folder = "/work/api", pane = "%2", attached = 0, panes = [{ pane = "%2", pid = 43, dead = false }] }, { name = "other-claude", owner = "agentctl", agent = "claude", folder = "/another/api", pane = "%3", attached = 0, panes = [{ pane = "%3", pid = 44, dead = false }] }] }
+expected = [{ name = "api-claude", agent = "claude", folder = "/work/api", pane = "%1", pid = 42, state = "alive", attached = 0, kind = "managed" }, { name = "api-codex", agent = "codex", folder = "/work/api", pane = "%2", pid = 43, state = "alive", attached = 0, kind = "managed" }]
+
+[[case]]
+id = "sessions.status.windows-case"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-status", windows = true, folder = 'C:\Work\API', reports = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = 'c:\work\api', pane = "%1", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }, { name = "another-codex", owner = "agentctl", agent = "codex", folder = 'C:\Another\api', pane = "%2", attached = 0, panes = [{ pane = "%2", pid = 43, dead = false }] }] }
+expected = [{ name = "api-claude", agent = "claude", folder = 'c:\work\api', pane = "%1", pid = 42, state = "alive", attached = 0, kind = "managed" }]
+
+[[case]]
+id = "sessions.status.posix-case"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-status", windows = false, folder = "/work/API", reports = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = "/work/api", pane = "%1", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }] }
+expected = []
+
+[[case]]
+id = "sessions.stop.managed"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-stop", windows = false, name = "api-claude", reports = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = "/work/api", pane = "%1", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }] }
+expected = { exit = 0, argv = ["kill-session", "-t", "=api-claude"] }
+
+[[case]]
+id = "sessions.stop.foreign"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-stop", windows = false, name = "foreign", reports = [{ name = "foreign", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }] }
+expected = { exit = 1, argv = [] }
+
+[[case]]
+id = "sessions.stop.missing"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-stop", windows = false, name = "missing", reports = [] }
+expected = { exit = 1, argv = [] }
+
+[[case]]
+id = "sessions.stop.prefix"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-stop", windows = false, name = "api", reports = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = "/work/api", pane = "%1", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }] }
+expected = { exit = 1, argv = [] }
+
+[[case]]
+id = "sessions.stop.windows-case"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-stop", windows = true, name = "API-CLAUDE", reports = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = "C:\\work\\api", pane = "%1", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }] }
+expected = { exit = 0, argv = ["kill-session", "-t", "=api-claude"] }
+
+[[case]]
+id = "sessions.attach.no-terminal"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-attach", windows = false, name = "api-claude", terminal = false, inside = false, reports = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = "/work/api", pane = "%1", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }] }
+expected = { exit = 0, action = "print", argv = ["attach-session", "-t", "=api-claude"] }
+
+[[case]]
+id = "sessions.attach.terminal"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-attach", windows = false, name = "api-claude", terminal = true, inside = false, reports = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = "/work/api", pane = "%1", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }] }
+expected = { exit = 0, action = "attach", argv = ["attach-session", "-t", "=api-claude"] }
+
+[[case]]
+id = "sessions.attach.inside"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-attach", windows = false, name = "api-claude", terminal = true, inside = true, reports = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = "/work/api", pane = "%1", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }] }
+expected = { exit = 0, action = "switch", argv = ["switch-client", "-t", "=api-claude"] }
+
+[[case]]
+id = "sessions.attach.foreign"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-09"
+input = { subject = "sessions-attach", windows = false, name = "foreign", terminal = true, inside = false, reports = [{ name = "foreign", attached = 0, panes = [{ pane = "%1", pid = 42, dead = false }] }] }
+expected = { exit = 1, action = "refused", argv = [] }
+
+[[case]]
+id = "adopt.decision.claude"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-decision", agent = "claude", existing = false, observation = { socket = "/tmp/owned/default", pane = "%3", pid = 41, session = "foreign", command = "claude", dead = false, owned = false, attached = 0 } }
+expected = { decision = "register", entry = { socket = "/tmp/owned/default", pane = "%3", pid = 41, agent = "claude" } }
+
+[[case]]
+id = "adopt.decision.codex"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-decision", agent = "codex", existing = false, observation = { socket = "/tmp/owned/default", pane = "%3", pid = 41, session = "foreign", command = "pwsh", dead = false, owned = false, attached = 0 } }
+expected = { decision = "register", entry = { socket = "/tmp/owned/default", pane = "%3", pid = 41, agent = "codex" } }
+
+[[case]]
+id = "adopt.decision.missing"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-decision", agent = "claude", existing = false }
+expected = { decision = "refuse-missing" }
+
+[[case]]
+id = "adopt.decision.managed"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-decision", agent = "claude", existing = false, observation = { socket = "/tmp/owned/default", pane = "%3", pid = 41, session = "foreign", command = "claude", dead = false, owned = true, attached = 0 } }
+expected = { decision = "refuse-managed" }
+
+[[case]]
+id = "adopt.decision.dead"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-decision", agent = "claude", existing = false, observation = { socket = "/tmp/owned/default", pane = "%3", pid = 41, session = "foreign", command = "claude", dead = true, owned = false, attached = 0 } }
+expected = { decision = "refuse-dead" }
+
+[[case]]
+id = "adopt.decision.existing"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-decision", agent = "claude", existing = true, observation = { socket = "/tmp/owned/default", pane = "%3", pid = 41, session = "foreign", command = "claude", dead = false, owned = false, attached = 0 } }
+expected = { decision = "refuse-existing" }
+
+[[case]]
+id = "adopt.revalidate.matching"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-revalidate", entry = { socket = "/tmp/owned/default", pane = "%3", pid = 41, agent = "claude" }, observation = { socket = "/tmp/owned/default", pane = "%3", pid = 41, session = "foreign", command = "claude", dead = false, owned = false, attached = 0 } }
+expected = true
+
+[[case]]
+id = "adopt.revalidate.missing"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-revalidate", entry = { socket = "/tmp/owned/default", pane = "%3", pid = 41, agent = "claude" } }
+expected = false
+
+[[case]]
+id = "adopt.revalidate.socket"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-revalidate", entry = { socket = "/tmp/owned/default", pane = "%3", pid = 41, agent = "claude" }, observation = { socket = "/tmp/another/default", pane = "%3", pid = 41, session = "foreign", command = "claude", dead = false, owned = false, attached = 0 } }
+expected = false
+
+[[case]]
+id = "adopt.revalidate.pane"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-revalidate", entry = { socket = "/tmp/owned/default", pane = "%3", pid = 41, agent = "claude" }, observation = { socket = "/tmp/owned/default", pane = "%4", pid = 41, session = "foreign", command = "claude", dead = false, owned = false, attached = 0 } }
+expected = false
+
+[[case]]
+id = "adopt.revalidate.pid"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-revalidate", entry = { socket = "/tmp/owned/default", pane = "%3", pid = 41, agent = "claude" }, observation = { socket = "/tmp/owned/default", pane = "%3", pid = 42, session = "foreign", command = "claude", dead = false, owned = false, attached = 0 } }
+expected = false
+
+[[case]]
+id = "adopt.revalidate.dead-same-identity"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-revalidate", entry = { socket = "/tmp/owned/default", pane = "%3", pid = 41, agent = "claude" }, observation = { socket = "/tmp/owned/default", pane = "%3", pid = 41, session = "foreign", command = "claude", dead = true, owned = false, attached = 0 } }
+expected = true
+
+[[case]]
+id = "adopt.stop.live"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-stop", entry = { socket = "/tmp/owned/default", pane = "%3", pid = 41, agent = "claude" }, observation = { socket = "/tmp/owned/default", pane = "%3", pid = 41, session = "foreign", command = "claude", dead = false, owned = false, attached = 0 } }
+expected = { exit = 0, action = "forget", argv = [] }
+
+[[case]]
+id = "adopt.stop.stale"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-stop", entry = { socket = "/tmp/owned/default", pane = "%3", pid = 41, agent = "claude" } }
+expected = { exit = 0, action = "forget", argv = [] }
+
+[[case]]
+id = "adopt.endpoint.tmux"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-endpoint", family = "Linux", namespace = "/tmp/owned/default", session = "$0" }
+expected = "/tmp/owned/default"
+
+[[case]]
+id = "adopt.endpoint.psmux"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-endpoint", family = "Windows", namespace = "C:/owned/registry/default", session = "$7" }
+expected = "[\"psmux\",\"C:/owned/registry/default\",\"$7\"]"
+
+[[case]]
+id = "adopt.endpoint.psmux-other-session"
+requirement = "R17.1"
+quote = "adopt pre-existing panes without taking ownership"
+provenance = "decision:D-41"
+input = { subject = "adopt-endpoint", family = "Windows", namespace = "C:/owned/registry/default", session = "$8" }
+expected = "[\"psmux\",\"C:/owned/registry/default\",\"$8\"]"

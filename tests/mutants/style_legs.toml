@@ -1,0 +1,53 @@
+[[mutant]]
+id = "M-style-drop-hlint"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = "        style.StyleStep(\"hlint\", context, root / \"src/agentctl/haskell\", pins),\n"
+replace = ""
+killers = ["tests/unit/test_check_legs.py::test_full_leg_set_matches_oracle"]
+reason = "full leg set differs from oracle"
+
+[[mutant]]
+id = "M-style-fourmolu-inplace"
+operator = "replace-literal"
+target = "src/agentctl/check/legs.py"
+search = "\"--mode\", \"check\", *files"
+replace = "\"--mode\", \"inplace\", *files"
+killers = ["tests/integration/test_haskell_style_legs.py::test_fourmolu_fires"]
+reason = "fourmolu accepted misformatted source"
+
+[[mutant]]
+id = "M-style-hlint-exit-ignored"
+operator = "short-circuit"
+target = "src/agentctl/check/style.py"
+search = "    return result.value.code\n"
+replace = "    return 0\n"
+killers = ["tests/integration/test_haskell_style_legs.py::test_hlint_fires"]
+reason = "hlint accepted hinted source"
+
+[[mutant]]
+id = "M-style-tools-from-path"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/style.py"
+search = "directory / (\"fourmolu\" + suffix)"
+replace = "Path(\"fourmolu\" + suffix)"
+killers = ["tests/integration/test_haskell_style_legs.py::test_style_tools_report_pins"]
+reason = "pinned style tools were not resolved"
+
+[[mutant]]
+id = "M-style-reinstall-always"
+operator = "short-circuit"
+target = "src/agentctl/bootstrap/build.py"
+search = "    if destination.exists():\n        return verify_style_tools(context, pins, destination)\n"
+replace = "    if False:\n        return verify_style_tools(context, pins, destination)\n"
+killers = ["tests/integration/test_haskell_style_legs.py::test_tools_idempotent"]
+reason = "warm style ensure attempted installation"
+
+[[mutant]]
+id = "M-style-hlint-ignore-allowed"
+operator = "short-circuit"
+target = "src/agentctl/check/style.py"
+search = "if (project / \".hlint.yaml\").read_text(encoding=\"utf-8\").strip() != \"[]\":"
+replace = "if False:"
+killers = ["tests/governance/test_style_config.py::test_style_configs_have_no_ignores"]
+reason = "HLint ignore configuration was accepted"

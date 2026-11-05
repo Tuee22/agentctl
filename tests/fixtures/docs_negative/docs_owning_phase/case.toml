@@ -1,0 +1,4 @@
+rule = "docs.owning_phase"
+path = "documents/README.md"
+search = "**Owning phase**: [Governance, documentation standards and the check skeleton]"
+replace = "**Owning phase**: [Wrong title]"

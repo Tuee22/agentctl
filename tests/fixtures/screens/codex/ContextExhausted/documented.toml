@@ -1,0 +1,4 @@
+provenance = "documented"
+source = "https://learn.chatgpt.com/docs/app-server"
+evidence = "contextWindowExceeded"
+note = "Illustrative fixture assembled from documented behavior and UI vocabulary; not a captured session or a claim about an exact live screen."

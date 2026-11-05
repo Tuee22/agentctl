@@ -1,0 +1,5 @@
+Claude Code
+
+Select login method:
+1. Account
+2. API key

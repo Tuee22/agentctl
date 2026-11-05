@@ -1,0 +1,2 @@
+Output from an unrecognized terminal application
+λ日

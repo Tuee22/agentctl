@@ -28,19 +28,19 @@ This table is the sole cross-phase status source, and every phase header's `**St
 
 | # | Phase | Status |
 |---|---|---|
-| 0 | [Governance, documentation standards and the check skeleton](phase-0-governance-and-check-skeleton.md) | Active |
-| 1 | [Gate-integrity apparatus](phase-1-gate-integrity-apparatus.md) | Planned |
-| 2 | [Toolchain bootstrap](phase-2-toolchain-bootstrap.md) | Planned |
-| 3 | [Haskell package, quality legs and digest-keyed build](phase-3-haskell-package-and-build.md) | Planned |
-| 4 | [Multiplexer adapter](phase-4-multiplexer-adapter.md) | Planned |
-| 5 | [Agent adapters and preflight](phase-5-agent-adapters-and-preflight.md) | Planned |
-| 6 | [Launch command and passthrough](phase-6-launch-and-passthrough.md) | Planned |
-| 7 | [Session management and adoption](phase-7-session-management-and-adoption.md) | Planned |
-| 8 | [Pane observation and classification](phase-8-pane-observation-and-classification.md) | Planned |
-| 9 | [Recovery state machine and backoff](phase-9-recovery-state-machine.md) | Planned |
-| 10 | [Recovery supervisor](phase-10-supervisor.md) | Planned |
-| 11 | [Live agent acceptance](phase-11-live-agent-acceptance.md) | Planned |
-| 12 | [Clean-host bootstrap acceptance](phase-12-clean-container-acceptance.md) | Planned |
+| 0 | [Governance, documentation standards and the check skeleton](phase-0-governance-and-check-skeleton.md) | Done |
+| 1 | [Gate-integrity apparatus](phase-1-gate-integrity-apparatus.md) | Done |
+| 2 | [Toolchain bootstrap](phase-2-toolchain-bootstrap.md) | Done |
+| 3 | [Haskell package, quality legs and digest-keyed build](phase-3-haskell-package-and-build.md) | Done |
+| 4 | [Multiplexer adapter](phase-4-multiplexer-adapter.md) | Done |
+| 5 | [Agent adapters and preflight](phase-5-agent-adapters-and-preflight.md) | Done |
+| 6 | [Launch command and passthrough](phase-6-launch-and-passthrough.md) | Done |
+| 7 | [Session management and adoption](phase-7-session-management-and-adoption.md) | Done |
+| 8 | [Pane observation and classification](phase-8-pane-observation-and-classification.md) | Done |
+| 9 | [Recovery state machine and backoff](phase-9-recovery-state-machine.md) | Done |
+| 10 | [Recovery supervisor](phase-10-supervisor.md) | Done |
+| 11 | [Live agent acceptance](phase-11-live-agent-acceptance.md) | Done |
+| 12 | [Clean-host bootstrap acceptance](phase-12-clean-container-acceptance.md) | Done |
 | 13 | [macOS acceptance](phase-13-macos-acceptance.md) | Planned |
 | 14 | [Windows and psmux acceptance](phase-14-windows-psmux-acceptance.md) | Planned |
 
@@ -66,18 +66,21 @@ side of them.
 6. A change under a covered path (`src/`, `tests/` or `pyproject.toml`) reopens every Done host-acceptance phase in the
    same change: its Status and its row here return to `Active`, and its Gate evidence to `none recorded`.
 7. A design error is fixed by rewriting the phase that introduced it, and validation resumes from that phase.
-8. Agents never run `git add`, `git commit` or `git push`. The user's commit points
-   ([§ P](development_plan_standards.md#p-the-ratchet-and-the-users-commit-points)) are: after the governed suite;
-   after [Phase 1 — Gate-integrity apparatus](phase-1-gate-integrity-apparatus.md), when the request-derived oracles
-   are frozen before any product code; and at each phase close.
+8. Agents never run `git add`, `git commit` or `git push`, or move HEAD. Commits and human review are optional and
+   never block closure or phase advancement ([§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure)).
+   After a qualifying gate pass, update the plan and continue to the next eligible sprint or phase.
 
 ## Validation Policy
 
 A phase is `Done` when its own gate passes on a host meeting its Host lane, the governed documents it names are
 aligned with what it built, and no work remains in its scope.
 
-- `agentctl check` is the only gate, and it takes no arguments. Inner-loop runs, such as one pytest node or a bare
-  `cabal build`, help while working and never close a sprint or a phase.
+- Every validation criterion is executable by an agent without human intervention. No commit, clean worktree,
+  review, approval, manual attestation, answered dialog or requested screen capture is a closure condition. Agents
+  record machine-observed host evidence; unavailable capabilities remain unmet, and activities listed as not proven
+  are outside the gate rather than manual work owed before closure.
+- `agentctl check` is the only gate, and it takes no arguments. Focused tests and application-owned build calls help
+  while working and never close a sprint or a phase. Agents never invoke cabal or the core binary directly.
 - A **self-verifying** phase is re-proved by every check run: the tests its sprints cite are collected and pass, and
   its applicable mutants are killed, in that run, so the phase stores nothing. The Phase 0 activation boundary above
   requires no mutation claim before the runner exists and permits no later exemption.
@@ -87,8 +90,8 @@ aligned with what it built, and no work remains in its scope.
 - What counts as evidence is in [§ L](development_plan_standards.md#l-evidence-classes-and-what-cannot-count); the
   gate, its kinds and the lanes are in [§ N](development_plan_standards.md#n-the-single-gate-gate-kinds-and-host-lanes);
   the no-skip suite is in [§ O](development_plan_standards.md#o-the-no-skip-suite-and-host-state-adaptivity); the
-  ratchet and the user's commit points are in
-  [§ P](development_plan_standards.md#p-the-ratchet-and-the-users-commit-points).
+  ratchet and automatic closure are in
+  [§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure).
 
 ## Definition of Done
 

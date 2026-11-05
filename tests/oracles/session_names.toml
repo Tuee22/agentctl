@@ -1,0 +1,472 @@
+[[case]]
+id = "names.0.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/home/ana/src/api", "windows" = false, "agent" = "claude" }
+expected = { "base" = "api", "plain" = "api-claude", "hashed" = "api-d5caeb4f-claude" }
+
+[[case]]
+id = "names.0.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/home/ana/src/api", "windows" = false, "agent" = "codex" }
+expected = { "base" = "api", "plain" = "api-codex", "hashed" = "api-d5caeb4f-codex" }
+
+[[case]]
+id = "names.1.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/home/ana/work/api", "windows" = false, "agent" = "claude" }
+expected = { "base" = "api", "plain" = "api-claude", "hashed" = "api-fe49ec32-claude" }
+
+[[case]]
+id = "names.1.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/home/ana/work/api", "windows" = false, "agent" = "codex" }
+expected = { "base" = "api", "plain" = "api-codex", "hashed" = "api-fe49ec32-codex" }
+
+[[case]]
+id = "names.2.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/", "windows" = false, "agent" = "claude" }
+expected = { "base" = "folder", "plain" = "folder-claude", "hashed" = "folder-8a5edab2-claude" }
+
+[[case]]
+id = "names.2.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/", "windows" = false, "agent" = "codex" }
+expected = { "base" = "folder", "plain" = "folder-codex", "hashed" = "folder-8a5edab2-codex" }
+
+[[case]]
+id = "names.3.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/tmp/a.b:c#(id)", "windows" = false, "agent" = "claude" }
+expected = { "base" = "a-b-c-id-", "plain" = "a-b-c-id--claude", "hashed" = "a-b-c-id--bea11a71-claude" }
+
+[[case]]
+id = "names.3.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/tmp/a.b:c#(id)", "windows" = false, "agent" = "codex" }
+expected = { "base" = "a-b-c-id-", "plain" = "a-b-c-id--codex", "hashed" = "a-b-c-id--bea11a71-codex" }
+
+[[case]]
+id = "names.4.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/tmp/---", "windows" = false, "agent" = "claude" }
+expected = { "base" = "folder", "plain" = "folder-claude", "hashed" = "folder-47b84e03-claude" }
+
+[[case]]
+id = "names.4.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/tmp/---", "windows" = false, "agent" = "codex" }
+expected = { "base" = "folder", "plain" = "folder-codex", "hashed" = "folder-47b84e03-codex" }
+
+[[case]]
+id = "names.5.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/tmp/a__b___c", "windows" = false, "agent" = "claude" }
+expected = { "base" = "a_b_c", "plain" = "a_b_c-claude", "hashed" = "a_b_c-ad9ee866-claude" }
+
+[[case]]
+id = "names.5.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/tmp/a__b___c", "windows" = false, "agent" = "codex" }
+expected = { "base" = "a_b_c", "plain" = "a_b_c-codex", "hashed" = "a_b_c-ad9ee866-codex" }
+
+[[case]]
+id = "names.6.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/tmp/-hello---there", "windows" = false, "agent" = "claude" }
+expected = { "base" = "hello-there", "plain" = "hello-there-claude", "hashed" = "hello-there-bc976902-claude" }
+
+[[case]]
+id = "names.6.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/tmp/-hello---there", "windows" = false, "agent" = "codex" }
+expected = { "base" = "hello-there", "plain" = "hello-there-codex", "hashed" = "hello-there-bc976902-codex" }
+
+[[case]]
+id = "names.7.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/tmp/caf\u00e9 \u65e5", "windows" = false, "agent" = "claude" }
+expected = { "base" = "caf-", "plain" = "caf--claude", "hashed" = "caf--0587f06e-claude" }
+
+[[case]]
+id = "names.7.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "/tmp/caf\u00e9 \u65e5", "windows" = false, "agent" = "codex" }
+expected = { "base" = "caf-", "plain" = "caf--codex", "hashed" = "caf--0587f06e-codex" }
+
+[[case]]
+id = "names.8.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "C:\\Work\\API", "windows" = true, "agent" = "claude" }
+expected = { "base" = "API", "plain" = "API-claude", "hashed" = "API-bc0efb45-claude" }
+
+[[case]]
+id = "names.8.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "C:\\Work\\API", "windows" = true, "agent" = "codex" }
+expected = { "base" = "API", "plain" = "API-codex", "hashed" = "API-bc0efb45-codex" }
+
+[[case]]
+id = "names.9.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "c:\\work\\api", "windows" = true, "agent" = "claude" }
+expected = { "base" = "api", "plain" = "api-claude", "hashed" = "api-bc0efb45-claude" }
+
+[[case]]
+id = "names.9.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { "subject" = "session-names", "canonical" = "c:\\work\\api", "windows" = true, "agent" = "codex" }
+expected = { "base" = "api", "plain" = "api-codex", "hashed" = "api-bc0efb45-codex" }
+
+[[case]]
+id = "names.decision.0"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { "subject" = "session-decision", "plain" = "owned", "hashed" = "absent" }
+expected = "attach-plain"
+
+[[case]]
+id = "names.decision.1"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { "subject" = "session-decision", "plain" = "foreign", "hashed" = "owned" }
+expected = "attach-hashed"
+
+[[case]]
+id = "names.decision.2"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { "subject" = "session-decision", "plain" = "absent", "hashed" = "owned" }
+expected = "attach-hashed"
+
+[[case]]
+id = "names.decision.3"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { "subject" = "session-decision", "plain" = "absent", "hashed" = "absent" }
+expected = "create-plain"
+
+[[case]]
+id = "names.decision.4"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { "subject" = "session-decision", "plain" = "foreign", "hashed" = "absent" }
+expected = "create-hashed"
+
+[[case]]
+id = "names.decision.5"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { "subject" = "session-decision", "plain" = "foreign", "hashed" = "foreign" }
+expected = "refuse"
+
+[[case]]
+id = "names.decision.6"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { "subject" = "session-decision", "plain" = "foreign", "hashed" = "owned" }
+expected = "attach-hashed"
+
+[[case]]
+id = "names.valid.0"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { subject = "session-name-valid", name = "api-claude" }
+expected = true
+
+[[case]]
+id = "names.valid.1"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { subject = "session-name-valid", name = "A_0-b" }
+expected = true
+
+[[case]]
+id = "names.valid.2"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { subject = "session-name-valid", name = "_safe" }
+expected = true
+
+[[case]]
+id = "names.valid.3"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { subject = "session-name-valid", name = "a__b" }
+expected = false
+
+[[case]]
+id = "names.valid.4"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { subject = "session-name-valid", name = "-a" }
+expected = false
+
+[[case]]
+id = "names.valid.5"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { subject = "session-name-valid", name = "a.b" }
+expected = false
+
+[[case]]
+id = "names.valid.6"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { subject = "session-name-valid", name = "a b" }
+expected = false
+
+[[case]]
+id = "names.valid.7"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { subject = "session-name-valid", name = "" }
+expected = false
+
+[[case]]
+id = "names.valid.8"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { subject = "session-name-valid", name = "a:b" }
+expected = false
+
+[[case]]
+id = "names.valid.9"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { subject = "session-name-valid", name = "é" }
+expected = false
+
+[[case]]
+id = "names.valid.10"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { subject = "session-name-valid", name = "a\nb" }
+expected = false
+
+[[case]]
+id = "names.valid.11"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-07"
+input = { subject = "session-name-valid", name = "#(id)" }
+expected = false
+
+
+[[case]]
+id = "names.casefold.0.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-names", canonical = "/tmp/API", windows = false, agent = "claude" }
+expected = { base = "API", plain = "API-claude", hashed = "API-a96ff1ea-claude" }
+
+[[case]]
+id = "names.casefold.0.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-names", canonical = "/tmp/API", windows = false, agent = "codex" }
+expected = { base = "API", plain = "API-codex", hashed = "API-a96ff1ea-codex" }
+
+[[case]]
+id = "names.casefold.1.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-names", canonical = "/tmp/api", windows = false, agent = "claude" }
+expected = { base = "api", plain = "api-claude", hashed = "api-ff60c327-claude" }
+
+[[case]]
+id = "names.casefold.1.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-names", canonical = "/tmp/api", windows = false, agent = "codex" }
+expected = { base = "api", plain = "api-codex", hashed = "api-ff60c327-codex" }
+
+[[case]]
+id = "names.casefold.2.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-names", canonical = "C:\\Stra\u00dfe\\Repo", windows = true, agent = "claude" }
+expected = { base = "Repo", plain = "Repo-claude", hashed = "Repo-0788115a-claude" }
+
+[[case]]
+id = "names.casefold.2.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-names", canonical = "C:\\Stra\u00dfe\\Repo", windows = true, agent = "codex" }
+expected = { base = "Repo", plain = "Repo-codex", hashed = "Repo-0788115a-codex" }
+
+[[case]]
+id = "names.casefold.3.claude"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-names", canonical = "c:\\STRASSE\\REPO", windows = true, agent = "claude" }
+expected = { base = "REPO", plain = "REPO-claude", hashed = "REPO-0788115a-claude" }
+
+[[case]]
+id = "names.casefold.3.codex"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-names", canonical = "c:\\STRASSE\\REPO", windows = true, agent = "codex" }
+expected = { base = "REPO", plain = "REPO-codex", hashed = "REPO-0788115a-codex" }
+
+[[case]]
+id = "names.selection.own"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-selection", canonical = "/work/api", windows = false, agent = "claude", sessions = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = "/work/api" }] }
+expected = { decision = "attach-plain", session = "api-claude" }
+
+[[case]]
+id = "names.selection.foreign-owner"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-selection", canonical = "/work/api", windows = false, agent = "claude", sessions = [{ name = "api-claude", owner = "other", agent = "claude", folder = "/work/api" }] }
+expected = { decision = "create-hashed", session = "api-c24c3b62-claude" }
+
+[[case]]
+id = "names.selection.missing-options"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-selection", canonical = "/work/api", windows = false, agent = "claude", sessions = [{ name = "api-claude" }] }
+expected = { decision = "create-hashed", session = "api-c24c3b62-claude" }
+
+[[case]]
+id = "names.selection.foreign-agent"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-selection", canonical = "/work/api", windows = false, agent = "claude", sessions = [{ name = "api-claude", owner = "agentctl", agent = "codex", folder = "/work/api" }] }
+expected = { decision = "create-hashed", session = "api-c24c3b62-claude" }
+
+[[case]]
+id = "names.selection.foreign-folder"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-selection", canonical = "/work/api", windows = false, agent = "claude", sessions = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = "/other/api" }] }
+expected = { decision = "create-hashed", session = "api-c24c3b62-claude" }
+
+[[case]]
+id = "names.selection.windows-own-case"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-selection", canonical = "c:\\work\\api", windows = true, agent = "codex", sessions = [{ name = "API-codex", owner = "agentctl", agent = "codex", folder = "C:\\Work\\API" }] }
+expected = { decision = "attach-plain", session = "API-codex" }
+
+[[case]]
+id = "names.selection.posix-case-foreign"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-selection", canonical = "/Work/api", windows = false, agent = "claude", sessions = [{ name = "api-claude", owner = "agentctl", agent = "claude", folder = "/work/api" }] }
+expected = { decision = "create-hashed", session = "api-7f1b2635-claude" }
+
+[[case]]
+id = "names.decision.both-owned"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-decision", plain = "owned", hashed = "owned" }
+expected = "attach-plain"
+
+[[case]]
+id = "names.decision.absent-foreign"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-decision", plain = "absent", hashed = "foreign" }
+expected = "create-plain"
+
+[[case]]
+id = "names.selection.hash-owned"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-selection", canonical = "/work/api", windows = false, agent = "claude", sessions = [{ name = "api-claude", owner = "other", agent = "claude", folder = "/work/api" }, { name = "api-c24c3b62-claude", owner = "agentctl", agent = "claude", folder = "/work/api" }] }
+expected = { decision = "attach-hashed", session = "api-c24c3b62-claude" }
+
+[[case]]
+id = "names.selection.hash-owned-plain-free"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-selection", canonical = "/work/api", windows = false, agent = "claude", sessions = [{ name = "api-c24c3b62-claude", owner = "agentctl", agent = "claude", folder = "/work/api" }] }
+expected = { decision = "attach-hashed", session = "api-c24c3b62-claude" }
+
+[[case]]
+id = "names.selection.both-foreign"
+requirement = "R8"
+quote = "a mandatory name for the tmux session which should be based on the folder the command calls it from"
+provenance = "decision:D-08"
+input = { subject = "session-selection", canonical = "/work/api", windows = false, agent = "claude", sessions = [{ name = "api-claude", owner = "other", agent = "claude", folder = "/work/api" }, { name = "api-c24c3b62-claude", owner = "other", agent = "claude", folder = "/work/api" }] }
+expected = { decision = "refuse", session = "api-c24c3b62-claude" }

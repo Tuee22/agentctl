@@ -8,18 +8,28 @@
 
 `agentctl check` is the only gate ([§ N](../../DEVELOPMENT_PLAN/development_plan_standards.md#n-the-single-gate-gate-kinds-and-host-lanes)). It takes no
 arguments, runs from a scrubbed environment, and fails when any step or leg fails or does not run
-(`tests/unit/test_check_legs.py::test_failing_leg_fails_check`). A warm run takes about 15 minutes; a host's first run also installs GHC and builds fourmolu and
-hlint. Inner-loop runs, such as one pytest node or a bare `cabal build`, help while working and are never evidence. This page is the prose home of R2, R14 and
+(`tests/unit/test_check_legs.py::test_failing_leg_fails_check`). The Python tool dispatcher allows two hours per complete leg; native queries and process controls retain their
+individual deadlines. A host's first run also installs GHC and builds fourmolu and
+hlint. Focused tests and application-owned build calls help development and never close work. This page is the prose home of R2, R14 and
 R14.1 in the [requirements table](../../DEVELOPMENT_PLAN/00-overview.md#requirements): their data homes are `tests/oracles/command_surface.toml`, which the
 click group's command table must equal, and `tests/oracles/check_legs.toml`, which holds the eight legs; `tests/oracles/check_steps.toml` holds the eighteen
 steps. What a pass of each step is evidence of is in [testing](testing.md#gate-legs-and-what-each-proves).
 
 ## Check Steps
 
-**The run.** check creates a fresh run directory, `agentctl-check-` plus a random suffix, under the system temporary directory, removes it when the run ends,
+**The run.** The packaged `00_agentctl_no_bytecode.pth` disables import bytecode in agentctl's private application
+environment before the console entry imports its editable source. A real child without Python environment
+controls observes the policy, beside a `-S` control that writes bytecode
+(`tests/integration/test_python_startup.py::test_startup_precedes_editable_imports`). Check creates a fresh run directory, `agentctl-check-` plus a random suffix, under the system temporary directory, removes it when the run ends,
 and re-executes itself through `src/agentctl/process.py` with `PYTHONPYCACHEPREFIX` pointing into it, so neither check nor any child reads or writes bytecode in
 the tree, and the write-guard needs to exclude only `.git`. The run directory holds the children's `TMPDIR`, the ty configuration home, the coverage data, the
 gate plugin's manifest, the tasty reports and every private tmux server, and check draws one nonce for the run.
+
+Each Python tool-leg command has a two-hour deadline, including the whole pytest suite and its mutant cases. The
+enclosing gate reserves eight complete leg budgets, covering bootstrap and the complete pipeline without cutting
+off a leg that is still inside its own deadline. Individual native queries and process controls retain their
+shorter deadlines. These are execution resource bounds; test collection, assertions, coverage requirements and
+mutation-kill criteria are mandatory throughout the run.
 
 **The environment.** Inherited host inputs use a closed allowlist kept in `src/agentctl/check/steps.py`: `PATH`, `HOME`, `USER`, a `C.UTF-8` locale, agentctl's
 XDG directory variables, `GHCUP_INSTALL_BASE_PREFIX` and `GHCUP_USE_XDG_DIRS`, the agents' configuration and credential variables that the live lane observes,
@@ -45,7 +55,7 @@ configuration home and private `CABAL_DIR`. The leg-plan oracle records these ad
 | 12 | `cabal-test` | leg, with suite routing |
 | 13 | `pytest` | leg: the entire suite, mutant cases included, under branch coverage with `fail_under = 100` |
 | 14 | `post-run-verifier` | requires the plugin's manifest to carry the run's nonce and list the same ids as collected, executed and passed, every Validation test a Done sprint cites to have run and passed in this run (`plan.cited-ids`, Haskell ids included), and every mutant record to have a passing case |
-| 15 | `ratchet` | runs `ratchet.append-only` against HEAD with read-only git and reports the commit it compared against, or `no baseline` before the user's first commit |
+| 15 | `ratchet` | runs `ratchet.append-only` against HEAD with read-only git and reports the commit it compared against, or `no baseline` in an unborn repository; neither case requires a new commit |
 | 16 | `containment` | requires that no private tmux server under the run directory and no observer pid recorded in this run is alive, and that no session carrying the run's nonce exists on the user's server, which it reads with `list-sessions` only |
 | 17 | `write-guard-compare` | re-walks the checkout and requires no added, removed or changed file and no moved ref |
 | 18 | `lane-summary` | evaluates the lanes, requires the lane of every Done self-verifying phase to be met (`plan.lanes`, `tests/unit/test_lane.py::test_refusal_when_done_lane_unmet`), and prints the [EVIDENCE line](#lane-summary-and-evidence-line) |
@@ -66,6 +76,13 @@ Planned steps are specification rows, never registered no-op legs; check runs ev
 (`tests/unit/test_check_legs.py::test_leg_table_matches_oracle`). The mutant runner activates retrospective governance mutants when [Gate-integrity
 apparatus](../../DEVELOPMENT_PLAN/phase-1-gate-integrity-apparatus.md) introduces it; the earlier gate uses direct negative-control tests
 (`tests/governance/test_mutants.py::test_corpus`).
+
+`cabal-build` and `binary-identity` use the same digest-keyed build directory and its native `build.lock`. Identity
+asks Cabal for the executable path, publishes through the application path when absent, and hashes both actual files.
+It refuses a foreign published file, an incomplete entry or a core executable on PATH; a build, spawn, lock or hash
+failure is a failed step (`tests/integration/test_build_cache.py::test_identity_step_rejects_foreign_binary`,
+`tests/integration/test_binary_boundaries.py::test_identity_refuses_missing_output_incomplete_publish_and_path`,
+`tests/integration/test_binary_boundaries.py::test_native_lock_spawn_hash_and_publication_race_controls`).
 
 ## The Eight Legs
 
@@ -103,8 +120,8 @@ suite reporting no case, or a pytest run collecting nothing is a failure of that
 | `ruff-check` | every Python file in the package and the tests is clean under `select = ["ALL"]` with only the pinned ignores, so a banned `typing.Any`, `typing.cast` or `unittest.mock` fails the leg (`tests/integration/test_static_legs.py::test_ruff_fires_on_fixture`) | correctness; rules newer than ruff 0.17.3 |
 | `ruff-format` | the files are in ruff's canonical format | anything about behaviour |
 | `ty` | the package and the tests type-check with every rule an error, ignore comments disrespected, and no user-level ty configuration merged | soundness gaps of a beta checker (ty 0.0.95); facts typing cannot express |
-| `fourmolu` | every Haskell source matches the committed `fourmolu.yaml` | behaviour |
-| `hlint` | no hint fires under the committed `.hlint.yaml`, which ignores nothing | behaviour; hints the pinned hlint lacks |
+| `fourmolu` | every Haskell source matches the repository `fourmolu.yaml` | behaviour |
+| `hlint` | no hint fires under the repository `.hlint.yaml`, which ignores nothing | behaviour; hints the pinned hlint lacks |
 | `cabal-build` | the library, the three executables and the test suite compile warning-free under `-Werror` with the pinned GHC | behaviour; other GHC versions |
 | `cabal-test` | every routed suite ran in this run, reported at least one case, and passed | properties its cases do not state; any effect on a real tool |
 | `pytest` | every collected test ran and passed, with no skip, selection, deselection or warning, and every branch of the package ran | anything owed to an acceptance phase or listed as not proven; that the assertions are adequate, which mutants bound |
@@ -122,6 +139,11 @@ suite reporting no case, or a pytest run collecting nothing is a failure of that
 - **The style tools are the pinned ones.** Each answers `--version` with its pin in `pins.toml`, and a second
   ensure builds nothing (`tests/integration/test_haskell_style_legs.py::test_style_tools_report_pins`,
   `tests/integration/test_haskell_style_legs.py::test_tools_idempotent`).
+  The Fourmolu leg prepares both tools together through the private Cabal directory with the project's index pin,
+  explicit GHC and parser constraint; the HLint leg consumes the verified cache. Neither leg reads inherited
+  formatter or linter controls. A formatting defect and a redundant bracket fail their actual native commands,
+  preserving source bytes (`tests/integration/test_haskell_style_legs.py::test_fourmolu_fires`,
+  `tests/integration/test_haskell_style_legs.py::test_hlint_fires`).
 - **Suite routing.** The `test-suite` stanzas of `agentctl-core.cabal` are exactly `agentctl-core-test`, none
   conditional, and each writes a tasty XML report into the run directory with at least one case and no failure;
   `agentctl-core-eval` and `agentctl-fake-agent` are executables, outside routing
@@ -133,18 +155,57 @@ suite reporting no case, or a pytest run collecting nothing is a failure of that
 
 ## Preconditions
 
+The Cabal legs use the shared application build path and the ensured absolute toolchain. Component declarations
+are unconditional and the sole suite route is `agentctl-core-test`. Before `test all`, check lists its cases;
+it then removes the previous owned XML report, supplies `TASTY_XML` itself and requires each listed case to appear
+and pass. The separate native manifest carries this run's nonce and joins the Python manifest before closure
+(`tests/integration/test_haskell_legs.py::test_every_suite_routed`,
+`tests/integration/test_haskell_legs.py::test_native_leg_execution_and_failures`,
+`tests/unit/test_haskell_gate.py::test_xml_requires_actual_nonempty_cases`,
+`tests/unit/test_haskell_gate.py::test_native_evidence_must_be_fresh_and_complete`).
+
+The initial dependency and checkout diagnostics in `check/preconditions.py` use only the standard library, so an
+interpreter without site packages reports missing dependencies instead of failing to import
+(`tests/integration/test_runtime_boundaries.py::test_preconditions_real_interpreters`). P9 observation lives in
+`check/prerequisites.py` and runs after those diagnostics pass.
+
 | # | Holds when | Remedy |
 |---|---|---|
 | P1 | editable identity: see below | from the checkout root, `pipx install --force --editable '.[dev]'`, or `uv tool install --editable '.[dev]'` |
-| P2 | `importlib.metadata` reports exactly click 8.5.0, ruff 0.17.3, ty 0.0.95, pytest 9.2.0 and the pinned coverage | the P1 reinstall |
+| P2 | `importlib.metadata` reports exactly click 8.5.0, ruff 0.17.3, ty 0.0.95, pytest 9.2.0, coverage 7.17.0 and hatchling 1.33.0 | the P1 reinstall |
 | P3 | the running interpreter is at least 3.12, the floor `requires-python` declares | `pipx install --python python3.12 --force --editable '.[dev]'` |
 | P4 | the checkout is a git work tree and `git` is on PATH | install git, or work from a clone |
 | P5 | no other check holds the single-run lock, `locks/check.lock` in agentctl's `state` directory | wait for the run that holds it, which the message names |
 | P6 | the longest private tmux socket path under the run directory is at most 100 bytes | point `TMPDIR` at a shorter directory, such as `/tmp` |
 | P7 | ghcup's directory and agentctl's `cache` have room for every pin not yet installed | free space |
 | P8 | every pin is installed, or `downloads.haskell.org` and `hackage.haskell.org` are reachable | connect to a network; only a first run or a pin change needs it |
-| P9 | GHC's OS prerequisites are present, or installable without a prompt: consent from `--assume-yes`, privilege as root or through `sudo -n` | the printed package-manager command, or `agentctl --assume-yes check` with passwordless sudo; on macOS, `xcode-select --install` |
+| P9 | GHC's OS prerequisites are present, or on Linux a verified set is installable without a prompt: consent from `--assume-yes`, privilege as root or through `sudo -n true`; macOS needs existing Command Line Tools | the printed package-manager command, or `agentctl --assume-yes check` with passwordless sudo; macOS GUI setup stays outside check |
 | P10 | the platform is Linux x86_64 or aarch64, macOS x86_64 or arm64, or Windows x86_64 | none: no GHC bindist exists for any other |
+
+P6 predicts `<run>/mux/<eight hex characters>/tmux-<uid>/default` from the canonical run directory and its native owner.
+It counts UTF-8 bytes, including multibyte names, before any private server can start. Linux and macOS use this
+common 100-byte bound; Windows has no Unix socket endpoint. An unreadable run directory fails with its filesystem
+diagnostic (`tests/unit/test_preconditions.py::test_socket_path_length`,
+`tests/integration/test_mux_resolution.py::test_socket_directory_inspection`).
+
+The pure toolchain readiness policy compares observed free capacity with the budget for missing pins, accepts
+offline operation when both pins are ready, and selects only the package's declared bindist platforms. Its
+boundary cases and exact remedies live in `tests/oracles/toolchain_preconditions.toml`
+(`tests/unit/test_preconditions.py::test_toolchain_preconditions`).
+
+P7's conservative policy budgets are 10 GiB for a missing GHC, 1 GiB for a missing cabal and 4 GiB of cold cache.
+On a shared filesystem their simultaneous needs are added; answering pins reserve nothing. The native observer
+queries each directory's existing ancestor and opens bounded TCP connections to port 443 of both P8 endpoints only
+for a cold toolchain. Warm readiness sends no network input
+(`tests/unit/test_toolchain_gate.py::test_storage_budget_values`,
+`tests/unit/test_toolchain_gate.py::test_native_readiness_and_warm_network_absence`,
+`tests/unit/test_toolchain_gate.py::test_reachability_opens_and_closes_owned_endpoints`).
+
+P9 uses a private compiler workspace under the run directory and prints concrete remediation commands for failed
+probes. It observes non-interactive privilege only for a verified Linux package proposal after `--assume-yes`;
+it never invokes an installer or an Xcode dialog itself
+(`tests/unit/test_preconditions.py::test_prerequisite_inspection_consent_and_privilege`,
+`tests/unit/test_preconditions.py::test_prerequisite_inspection_platforms_and_errors`).
 
 **Editable identity (P1).** The running distribution's PEP 610 `direct_url.json` says `editable`, its `url` is the `file://` URL of the checkout root, and
 `agentctl.__file__` resolves under `<root>/src/agentctl`. Any PEP 610 editable installer qualifies, and the dev tools are the `dev` extra because pipx has no
@@ -152,6 +213,8 @@ dependency-group support. Without the rule an older or non-editable install runs
 trap of hostbootstrap (`tests/unit/test_identity.py::test_non_editable_refused`, `tests/unit/test_identity.py::test_other_checkout_refused`).
 
 ## Tool Configuration
+
+The Python dev extra pins coverage and the hatchling backend used by packaging controls alongside the versions in P2. The static negative controls use the same installed tools and project configuration, with fixture targets copied outside the checkout. Only the ty leg receives the empty configuration home and APPDATA override; the other legs retain the allowed user configuration locations (`tests/integration/test_static_legs.py::test_ty_ignores_user_config`, `tests/unit/test_check_legs.py::test_leg_table_matches_oracle`).
 
 The configuration lives in `pyproject.toml`, co-designed by running the pinned tools on the package skeleton and then frozen: `config.pinned` holds the live
 ruff, ty, pytest and coverage tables equal to `tests/oracles/lint_config.toml`, and `ratchet.append-only` lets configuration only tighten against HEAD.
@@ -164,6 +227,7 @@ ignore = ["D203", "D213", "COM812"]
 [tool.ruff.lint.per-file-ignores]
 "src/agentctl/process.py" = ["S603", "S606"]
 "tests/**/*.py" = ["S101"]
+"src/agentctl/check/writeguard.py" = ["PTH115"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "typing.Any".msg = "Any switches type checking off; name the precise type."
@@ -190,6 +254,7 @@ markers = ["evidence(cls): the evidence class of the test: value, real or observ
 [tool.coverage.run]
 branch = true
 source = ["agentctl"]
+patch = ["subprocess"]
 
 [tool.coverage.report]
 fail_under = 100
@@ -200,6 +265,10 @@ fail_under = 100
   S101 is allowed in the tests because pytest asserts with plain `assert`. The co-design adds an entry only where
   a pinned tool proves the need. No `exclude`, `extend-exclude` or `fix` key exists, and `noqa` comments are
   banned by `src.suppression-ban`.
+  PTH115 is allowed only in the write-guard adapter: `os.readlink` preserves the raw link text that `Path.readlink`
+  normalises, and the guard hashes the literal link rather than a normalised path. A copied canary verifies the
+  exception's exact module scope (`tests/integration/test_static_legs.py::test_raw_link_rule_exception_is_narrow`,
+  `tests/integration/test_guard.py::test_write_detected`).
 - **ty.** ty has no strict switch, so every rule is set to `error`, including those that default to ignore.
   Ignore comments are disrespected, which leaves `ty: ignore` working, so `src.suppression-ban` bans it.
   ty merges a user-level configuration file and does not discover a pipx venv, so the leg passes `--python`
@@ -211,10 +280,23 @@ fail_under = 100
   The `evidence` marker is described in [testing](testing.md#evidence-classes).
 - **coverage.** No `omit`, `exclude_lines` or `exclude_also` key exists; a `pragma: no cover` stands only at a
   line the `src.suppression-ban` allowlist names.
-- **Haskell.** `fourmolu.yaml` and `.hlint.yaml` are committed in the Cabal project, the latter with no ignore
+  The subprocess patch collects actual-subject child interpreters into parallel files under the run directory.
+  Check combines those files before the report. Mutant killers clear coverage startup settings so baseline and
+  defective scratch copies cannot contribute to the package result.
+- **Haskell.** `fourmolu.yaml` and `.hlint.yaml` live in the Cabal project, the latter with no ignore
   entry, and the warnings stanza is in [code standards](code_standards.md).
 
+The write-guard includes ignored entries and records raw symlink text. Its installed-environment boundary hashes
+metadata and raw RECORD contents, then reads every literal CSV path. It avoids `importlib.metadata.files`, which
+can omit missing entries. Missing recorded files and unsupported or unreadable layouts produce a diagnostic
+(`tests/integration/test_guard.py::test_snapshot_error_boundaries`, `tests/integration/test_guard.py::test_record_schema`).
+Containment queries only registered observer pids and owned server paths, and both integrity finalizers run after
+a post-snapshot leg failure (`tests/integration/test_guard.py::test_ignored_write_detected`,
+`tests/integration/test_guard.py::test_venv_change_detected`, `tests/integration/test_guard.py::test_finalizers_run_after_failed_leg`).
+
 ## Lane Summary and Evidence Line
+
+The pytest leg includes each applicable mutation record as an ordinary collected case. A passing killer baseline, an exact-once patch and the recorded failure reason are all required; the independent scratch execution supplies no gate evidence or outer-session ids (`tests/governance/test_mutants.py::test_corpus`, `tests/governance/test_gate_plugin.py::test_manifest_matches_execution`).
 
 The `lane-summary` step reads the host observations `tests/harness/host.py` recorded with the run's nonce during the pytest leg and evaluates the lane table of
 [§ N](../../DEVELOPMENT_PLAN/development_plan_standards.md#n-the-single-gate-gate-kinds-and-host-lanes). It prints each lane as met or unmet with the
@@ -233,13 +315,19 @@ EVIDENCE <YYYY-MM-DD> ; <lane> ; agentctl check ; pass ; tree <sha256> ; <detail
   and resolved bytes; unreadable or escaping inputs fail. Build products and tool caches live outside those paths.
   Every covered change therefore stales a row; `DEVELOPMENT_PLAN/` lies outside, so recording a row never stales it
   (`tests/governance/test_plan_validator.py::test_plan_evidence_rows`).
+  The encoding includes the `src` and `tests` directory entries. Each entry supplies its POSIX relative path as
+  UTF-8, its kind as ASCII (`directory`, `file` or `symlink`), then its payloads. A directory supplies empty bytes,
+  a file its literal bytes, and a file symlink its raw link text followed by the resolved bytes. Every field has
+  an eight-byte unsigned big-endian length prefix. Entry order is lexical by relative path. Special entries and
+  unreadable or escaping links fail the digest (`tests/governance/test_run_evidence.py::test_digest_byte_vector_and_currency`,
+  `tests/governance/test_run_evidence.py::test_digest_link_bytes_and_errors`).
 - `<detail>` is a comma-separated list of `key=value` observations for the reader: OS and architecture, the
   observed tmux, psmux, claude and codex versions, and the ratchet baseline.
 
 The closing agent copies the line into its phase's `**Gate evidence**`; `plan.evidence-rows` recomputes the digest over `**Evidence covers**` and compares only
 the lane, against `**Host lane**`, and the digest. A digest proves the tree is current, not that a run happened: anyone can recompute it without running
 anything, so a row raises the cost of a false claim to recording a result that was not obtained, and holds only as far as [§
-P](../../DEVELOPMENT_PLAN/development_plan_standards.md#p-the-ratchet-and-the-users-commit-points) allows.
+P](../../DEVELOPMENT_PLAN/development_plan_standards.md#p-the-ratchet-and-automatic-closure) allows.
 
 ## Related
 

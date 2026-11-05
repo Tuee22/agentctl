@@ -1,0 +1,172 @@
+# Independent contract: decisions D-18 to D-20 and the published 0.2.6.2 SHA256SUMS.
+# Source: https://downloads.haskell.org/~ghcup/0.2.6.2/SHA256SUMS
+# These literals precede bootstrap implementation; no value comes from agentctl.
+
+[[case]]
+id = "pins.toolchain.versions"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "subject" = "toolchain-pins" }
+expected = { "ghc" = "9.12.4", "cabal" = "3.16.1.0" }
+
+[[case]]
+id = "pins.ghcup.download-version"
+requirement = "R3"
+quote = "idempotently installs ghcup in the manner appropriate for the OS in question"
+provenance = "decision:D-19"
+input = { "subject" = "ghcup-download-version" }
+expected = "0.2.6.2"
+
+[[case]]
+id = "pins.ghcup.reuse-floor"
+requirement = "R3"
+quote = "idempotently installs ghcup in the manner appropriate for the OS in question"
+provenance = "decision:D-18"
+input = { "subject" = "ghcup-reuse-floor" }
+expected = "0.1.50.2"
+
+[[case]]
+id = "pins.ghcup.linux.x86_64"
+requirement = "R3"
+quote = "idempotently installs ghcup in the manner appropriate for the OS in question"
+provenance = "tool:0.2.6.2:ghcup 0.2.6.2 binaries are served at"
+input = { "subject" = "ghcup-artifact", "family" = "Linux", "architecture" = "x86_64" }
+expected = { "url" = "https://downloads.haskell.org/~ghcup/0.2.6.2/x86_64-linux-ghcup-0.2.6.2", "sha256" = "9ed5da5449b48043a0d17e767c05d2ef585e25a639bb934329496c6d2fad9cf8" }
+
+[[case]]
+id = "pins.ghcup.linux.aarch64"
+requirement = "R3"
+quote = "idempotently installs ghcup in the manner appropriate for the OS in question"
+provenance = "tool:0.2.6.2:ghcup 0.2.6.2 binaries are served at"
+input = { "subject" = "ghcup-artifact", "family" = "Linux", "architecture" = "aarch64" }
+expected = { "url" = "https://downloads.haskell.org/~ghcup/0.2.6.2/aarch64-linux-ghcup-0.2.6.2", "sha256" = "65a5f05120288ee4f1a81d28825374b6af317456a351a586adfce90c6dc29e3b" }
+
+[[case]]
+id = "pins.ghcup.darwin.x86_64"
+requirement = "R3"
+quote = "idempotently installs ghcup in the manner appropriate for the OS in question"
+provenance = "tool:0.2.6.2:ghcup 0.2.6.2 binaries are served at"
+input = { "subject" = "ghcup-artifact", "family" = "Darwin", "architecture" = "x86_64" }
+expected = { "url" = "https://downloads.haskell.org/~ghcup/0.2.6.2/x86_64-apple-darwin-ghcup-0.2.6.2", "sha256" = "e713b9f213d7da01fa4791f39e04e0892b5c5f082d5a38712281f529bab88e56" }
+
+[[case]]
+id = "pins.ghcup.darwin.arm64"
+requirement = "R3"
+quote = "idempotently installs ghcup in the manner appropriate for the OS in question"
+provenance = "tool:0.2.6.2:ghcup 0.2.6.2 binaries are served at"
+input = { "subject" = "ghcup-artifact", "family" = "Darwin", "architecture" = "arm64" }
+expected = { "url" = "https://downloads.haskell.org/~ghcup/0.2.6.2/aarch64-apple-darwin-ghcup-0.2.6.2", "sha256" = "4e521e008fe0813db6db4b91cfeebd0c44c80c68afb458ea32a1c94cf5c7cc1d" }
+
+[[case]]
+id = "pins.ghcup.windows.x86_64"
+requirement = "R3"
+quote = "idempotently installs ghcup in the manner appropriate for the OS in question"
+provenance = "tool:0.2.6.2:ghcup 0.2.6.2 binaries are served at"
+input = { "subject" = "ghcup-artifact", "family" = "Windows", "architecture" = "x86_64" }
+expected = { "url" = "https://downloads.haskell.org/~ghcup/0.2.6.2/x86_64-mingw64-ghcup-0.2.6.2.exe", "sha256" = "94da902a2853b1de1df509d04da900a05258480759efdb4f654e66956b6f30db" }
+
+[[case]]
+id = "pins.style.versions"
+requirement = "R14"
+quote = "Also fourmolu + hlint"
+provenance = "decision:D-53"
+input = { "subject" = "style-pins" }
+expected = { "fourmolu" = "0.19.0.1", "hlint" = "3.10", "ghc_lib_parser" = "9.12.2.20250421" }
+
+[[case]]
+id = "pins.style.versions.compatible"
+requirement = "R14"
+quote = "Also fourmolu + hlint"
+provenance = "decision:D-54"
+input = { "subject" = "style-pins" }
+expected = { "fourmolu" = "0.19.0.1", "hlint" = "3.10", "ghc_lib_parser" = "9.12.3.20251228" }
+amends = "pins.style.versions"
+
+[[case]]
+id = "digest.core"
+requirement = "R5"
+quote = "c) builds the haskell binary"
+provenance = "decision:D-55"
+input = { subject = "binary-digest", edit = "app/Core.hs" }
+expected = true
+
+[[case]]
+id = "digest.library"
+requirement = "R5"
+quote = "c) builds the haskell binary"
+provenance = "decision:D-55"
+input = { subject = "binary-digest", edit = "src/Kernel.hs" }
+expected = true
+
+[[case]]
+id = "digest.tests"
+requirement = "R5"
+quote = "c) builds the haskell binary"
+provenance = "decision:D-55"
+input = { subject = "binary-digest", edit = "test/Main.hs" }
+expected = true
+
+[[case]]
+id = "digest.data"
+requirement = "R5"
+quote = "c) builds the haskell binary"
+provenance = "decision:D-55"
+input = { subject = "binary-digest", edit = "app/data.txt" }
+expected = true
+
+[[case]]
+id = "digest.cabal"
+requirement = "R5"
+quote = "c) builds the haskell binary"
+provenance = "decision:D-55"
+input = { subject = "binary-digest", edit = "agentctl-core.cabal" }
+expected = true
+
+[[case]]
+id = "digest.project"
+requirement = "R5"
+quote = "c) builds the haskell binary"
+provenance = "decision:D-55"
+input = { subject = "binary-digest", edit = "cabal.project" }
+expected = true
+
+[[case]]
+id = "digest.pins"
+requirement = "R5"
+quote = "c) builds the haskell binary"
+provenance = "decision:D-55"
+input = { subject = "binary-digest", edit = "pins" }
+expected = true
+
+[[case]]
+id = "digest.platform"
+requirement = "R5"
+quote = "c) builds the haskell binary"
+provenance = "decision:D-55"
+input = { subject = "binary-digest", edit = "platform" }
+expected = true
+
+[[case]]
+id = "digest.formatter"
+requirement = "R5"
+quote = "c) builds the haskell binary"
+provenance = "decision:D-55"
+input = { subject = "binary-digest", edit = "fourmolu.yaml" }
+expected = false
+
+[[case]]
+id = "digest.linter"
+requirement = "R5"
+quote = "c) builds the haskell binary"
+provenance = "decision:D-55"
+input = { subject = "binary-digest", edit = ".hlint.yaml" }
+expected = false
+
+[[case]]
+id = "digest.outside"
+requirement = "R5"
+quote = "c) builds the haskell binary"
+provenance = "decision:D-55"
+input = { subject = "binary-digest", edit = "outside.txt" }
+expected = false

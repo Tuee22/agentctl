@@ -1,0 +1,8 @@
+module AgentCtl.ReadyWitness (witness) where
+
+import AgentCtl.Agent (Agent (Claude))
+import AgentCtl.Mux (Family (Linux))
+import AgentCtl.Preflight (Failure, Ready, preflight)
+
+witness :: FilePath -> [(String, String)] -> IO (Either Failure Ready)
+witness = preflight Linux "ubuntu" Claude

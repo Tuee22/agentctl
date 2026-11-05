@@ -1,0 +1,43 @@
+[[mutant]]
+id = "M-adopt-stop-kills"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Sessions.hs"
+search = "stopCommand (Adopted _) = Nothing"
+replace = "stopCommand (Adopted view) = Command.Kill <$> (Adopt.viewSessionName view >>= either (const Nothing) Just . Name.makeSessionName)"
+killers = ["tests/unit/test_adopt_values.py::test_adopt_rows_match_oracle", "tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership"]
+reason = "adopted pane policy differs from ownership oracle"
+
+[[mutant]]
+id = "M-adopt-no-socket-revalidation"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Adopt.hs"
+search = "entrySocket entry == observationSocket observed"
+replace = 'entrySocket entry /= "" && observationSocket observed /= ""'
+killers = ["tests/unit/test_adopt_values.py::test_adopt_rows_match_oracle", "tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership"]
+reason = "adopted pane policy differs from ownership oracle"
+
+[[mutant]]
+id = "M-adopt-no-pid-revalidation"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Adopt.hs"
+search = "entryPid entry == observationPid observed"
+replace = "entryPid entry > 0 && observationPid observed > 0"
+killers = ["tests/unit/test_adopt_values.py::test_adopt_rows_match_oracle", "tests/e2e/test_adopt.py::test_stale_entry_after_server_restart"]
+reason = "adopted pane policy differs from ownership oracle"
+
+[[mutant]]
+id = "M-adopt-sets-session-options"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Sessions.hs"
+search = "Adopt.Register entry -> saveRegistry runtime (currentRegistry ++ [entry])"
+replace = '''Adopt.Register entry -> do
+            saveRegistry runtime (currentRegistry ++ [entry])
+            case current of
+              Nothing -> pure ()
+              Just observed -> case Name.makeSessionName (Adopt.observationSession observed) of
+                Left _ -> pure ()
+                Right name -> case Command.makeOptionValue "agentctl" of
+                  Nothing -> pure ()
+                  Just owner -> void (checkedCommand runtime (Command.SetIdentity name Command.Owner owner))'''
+killers = ["tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership"]
+reason = "adopted pane policy differs from ownership oracle"

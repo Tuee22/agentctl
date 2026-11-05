@@ -1,0 +1,4 @@
+rule = "plan.dependency_direction"
+path = "DEVELOPMENT_PLAN/phase-9-recovery-state-machine.md"
+search = "**Depends on**:"
+replace = "**Depends on**: [Phase 10 — Recovery supervisor](phase-10-supervisor.md)\n**Invalid**:"

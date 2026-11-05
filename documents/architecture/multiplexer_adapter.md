@@ -46,6 +46,25 @@ are in [failure and warnings](launch_contract.md#failure-and-warnings). The acce
 strings are rows of `tests/oracles/mux_commands.toml`, and a missing multiplexer is tested by running the
 subject under a constructed PATH that lacks it, never by inspecting the host.
 
+`AgentCtl.Mux.resolve` receives the OS family, Linux distribution, working directory and environment explicitly.
+It searches only those PATH directories for the native candidate, checks executability, canonicalises the chosen
+path, and runs `-V` through `AgentCtl.Process` with a ten-second deadline. Windows searches only `psmux.exe`, with
+case-insensitive environment keys; an alias never supplies a psmux capability. The opaque `Multiplexer` retains the
+checked kind, absolute path and observed version for the command to reuse.
+
+The version, candidate and remedy kernels run through the JSONL evaluator against independent rows
+(`tests/unit/test_mux_values.py::test_version_floor_oracle`,
+`tests/unit/test_mux_values.py::test_resolution_candidates_oracle`,
+`tests/unit/test_mux_values.py::test_remedy_oracle`). Native missing/present PATH controls and the host's version
+probe are separate from those value claims (`haskell:agentctl-core-test/MuxReal/absent-multiplexer-unavailable`,
+`haskell:agentctl-core-test/MuxReal/host-multiplexer-meets-floor`).
+
+`AgentCtl.Session.Name` also keeps its constructor private. It accepts nonempty ASCII letters, digits, `_` and `-`,
+with neither a leading dash nor `__`, and provides a text accessor for rendering. Independent acceptance cases and
+an external caller that fails to compile protect that boundary
+(`tests/unit/test_mux_values.py::test_session_name_oracle`,
+`tests/integration/test_mux_resolution.py::test_session_name_constructor_is_private`).
+
 ## The Typed Vocabulary and the One Runner
 
 `AgentCtl.Mux.Command` is closed: a value names one multiplexer action, `AgentCtl.Mux.Tmux` and
@@ -58,15 +77,23 @@ one command per invocation and never chains commands with `;`.
 |---|---|---|
 | create the agent session | `new-session -d -s <name> -P -F '#{pane_id}' -- <binary> pane-exec <spec>` | launch |
 | does the session exist | `has-session -t =<name>` | launch, sessions |
-| read sessions, options and panes | `list-sessions -F <format>`, `show-options -t =<name>`, `list-panes -s -t =<name> -F <format>` | launch, `list`, `status` |
+| read sessions, options and panes | `list-sessions -F <format>`, `show-options -t =<name>:`, `list-panes -s -t =<name> -F <format>` | launch, `list`, `status` |
 | read pane state | `display-message -p -t %<id> '#{pane_pid} #{pane_dead} #{pane_dead_status} #{pane_dead_signal}'` | launch, `status`, the supervisor |
-| set identity | `set-option -t =<name> @agentctl_<key> <value>` | launch |
+| inspect pane identity and hints | `display-message -p -t %<id> <format>` | adoption and revalidation; endpoint, pane and pid are identity, session and command text are hints |
+| set identity | `set-option -t =<name>: @agentctl_<key> <value>` | launch |
 | hold or release a dead pane | `set-option -p -t %<id> remain-on-exit on`, then `set-option -p -u -t %<id> remain-on-exit` | launch |
 | capture | `capture-pane -p -J -t %<id> -S -<lines>` | launch, `status`, the supervisor |
+| capture styled viewport | `capture-pane -p -e -t %<id> -S 0` | pane observation for `status` and the supervisor |
 | type text literally | `send-keys -l -t %<id> -- <text>` | the supervisor |
 | submit | `send-keys -t %<id> Enter` | the supervisor |
 | attach or switch | `attach-session -t =<name>`, `switch-client -t =<name>` | launch, `attach` |
 | end a session | `kill-session -t =<name>` | launch cleanup, `stop` |
+
+Pane observation reads dead state, cursor coordinates and dimensions through the inspection command before and
+after its plain and styled captures. Unequal snapshots retry within the caller's original deadline. Native
+faint/plain twins and a cursor change between snapshots exercise the production capture edge
+(`tests/integration/test_capture_real.py::test_capture_keeps_prompt_visuals`,
+`tests/integration/test_capture_real.py::test_capture_retries_changed_cursor`).
 
 There is no value for `kill-server`, `kill-pane`, `respawn-pane`, `respawn-window`, `run-shell`, `if-shell`,
 `pipe-pane`, `source-file`, a global `set-option -g`, or any command that takes a shell string. Production code
@@ -83,6 +110,22 @@ psmux = ["kill-session", "-t", "=api-claude"]
 provenance = "tool:tmux 3.4 tmux.1 target-session"
 ```
 
+The vocabulary's `Pane` and `OptionValue` constructors are private. Pane ids contain `%` followed by ASCII digits;
+identity values contain only nonempty ASCII letters, digits, `_`, `-` and `%`. Decoding rejects unknown actions,
+unknown identity keys, invalid names and pane ids, unsafe identity values and nonpositive capture lengths.
+Independent rows exercise every action on both renderers and these refusals
+(`tests/unit/test_mux_values.py::test_render_oracle`).
+
+The tmux terminal can close before the child exit status is published: `pane_dead` alone is insufficient.
+A reader waits, within its existing deadline, for a normal exit status or a signal name as well as terminal
+closure. A dead tmux pane with no published status requests SIGCHLD through `AgentCtl.Process.requestReap`, which
+reads and validates that backend's live server pid before notifying it. This requests normal child accounting
+without terminating the server or sending pane input; psmux never uses this path
+(`tests/unit/test_mux_values.py::test_reap_policy_oracle`). The dead-status kernel consumes the normalised positive signal number as `128 + signal`, otherwise
+its nonnegative exit status. Psmux
+uses only the nonnegative status read from its spec's status file, regardless of pane status or signal. Missing or
+negative status remains unavailable (`tests/unit/test_mux_values.py::test_dead_status_rule_oracle`).
+
 ## Targets and Session Options
 
 Every session target is `=NAME`, an exact match. Without the `=`, tmux tries a session id, the exact name, a
@@ -91,6 +134,10 @@ prefix and then an fnmatch pattern, so `has-session -t api` succeeds when only `
 whitelist excludes them. [Create or attach](launch_contract.md#create-or-attach) uses these targets for the
 re-attach and `switch-client`, and [sessions and ownership](sessions_and_ownership.md) for `kill-session -t =NAME`,
 the only command that ends anything.
+
+Tmux's set-option and show-options commands parse a pane target. Their session selector is `=NAME:`, retaining
+the exact session prefix while the colon identifies the session component. Psmux's session-option commands retain
+`=NAME` in their own renderer; their native behaviour is confirmed on its Windows lane.
 
 Panes are targeted by `%id`. A session target resolves to the active pane of the current window, which is
 the user's choice once they split a window, so every capture and send names the agent pane's id, the one
@@ -107,10 +154,11 @@ options:
 | `@agentctl_agent` | `claude` or `codex` |
 | `@agentctl_folder` | the canonical folder path, base64url-encoded without padding from its UTF-8 bytes |
 | `@agentctl_pane` | the agent pane's `%id` |
+| `@agentctl_status` | the private trampoline status-file path, encoded like the folder; retained dead psmux panes read their exit status from it |
 
 Options live and die with their session, so they never describe a session that has ended, and a server
-restart takes them away together with the pane ids they name. The folder is the one user-derived string that
-identity needs; encoding it draws the value from the same `[A-Za-z0-9_-]` set as session names, so no
+restart takes them away together with the pane ids they name. Encoding the folder and status path draws each
+value from the same `[A-Za-z0-9_-]` set as session names, so no
 multiplexer parsing rule can touch it, and `list` decodes it for display. agentctl sets no option on a session
 it does not own, never sets a global option, and holds remain-on-exit at pane scope only during the startup
 window, then unsets it so that the user's own setting applies again.
@@ -133,6 +181,7 @@ tmux applies its own parsing to parts of its command line:
 The adapter removes each hazard instead of escaping it:
 
 - `-s` receives only whitelisted names ([session names](launch_contract.md#session-names)).
+- `AgentCtl.Process.commandInvocation` builds both bounded and foreground calls with argv and cwd in separate fields.
 - `-c` is never passed. The `new-session` client runs with the canonical folder as its working directory, which
   tmux takes as the start directory, and the trampoline sets the agent's working directory from its spec.
 - The pane command is exactly three agentctl-generated elements: the absolute path of the published binary,
@@ -173,7 +222,7 @@ the tmux client's command line. The RIGHT form gives tmux nothing to expand, spl
 ## Isolation
 
 Production code has no isolation switch: it never passes `-L` or `-S`, and `src.no-test-branches` rejects any
-test-only path. Tests isolate it from outside, through the environment, as
+test-only path (`tests/governance/test_source_guards.py::test_no_test_branches_fixtures`). Tests isolate it from outside, through the environment, as
 [testing](../engineering/testing.md#isolation) records in full:
 
 - **tmux.** `TMUX_TMPDIR` points at a short test-owned directory, mode 0700, because tmux refuses a socket
@@ -194,7 +243,7 @@ Against a real private server the tests show an instant exit held by remain-on-e
 `ab-c`, the elements `x;`, `#{pane_id}` and `#(id)` arriving verbatim, and the pane environment equalling the
 caller's when the server started with a different one. The `containment` check step fails when a private
 server or an observer pid is still alive, or when a session carrying the run's nonce exists on the user's
-server. Real psmux runs only on a Windows host, and macOS tmux only on a Mac; until then psmux rendering is
+server (`tests/integration/test_mux_real.py::test_containment_sees_leftover_server`). Real psmux runs only on a Windows host, and macOS tmux only on a Mac; until then psmux rendering is
 proven as values.
 
 ## Related

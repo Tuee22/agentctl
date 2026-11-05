@@ -1,0 +1,71 @@
+[[mutant]]
+id = "M-machine-skip-confirm-idle"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs"
+search = "      SuspectedFailure -> beforeSend (\\_ _ -> Decision (state {stateMode = ConfirmIdle}) [] Continued)"
+replace = "      SuspectedFailure -> beforeSend (\\_ _ -> Decision (state {stateMode = Backoff}) [] Continued)"
+killers = ["tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle"]
+reason = "recovery transition differs from oracle"
+
+[[mutant]]
+id = "M-machine-skip-verify"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs"
+search = "      RecoverySent -> Decision (state {stateMode = Verify}) [] Continued"
+replace = "      RecoverySent -> Decision (state {stateMode = Monitoring}) [] Continued"
+killers = ["tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle"]
+reason = "recovery transition differs from oracle"
+
+[[mutant]]
+id = "M-machine-send-on-partial-input"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs"
+search = "step settings now observation state"
+replace = "step settings now observation state\n  | stateMode state == Backoff && observationClass observation == PartialInput = Decision state [SendRecovery] Continued"
+killers = ["haskell:agentctl-core-test/Machine/never-send-unsafe"]
+reason = "unsafe observation requested recovery"
+
+[[mutant]]
+id = "M-machine-send-during-working"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs"
+search = "step settings now observation state"
+replace = "step settings now observation state\n  | stateMode state == Backoff && observationClass observation == Working = Decision state [SendRecovery] Continued"
+killers = ["haskell:agentctl-core-test/Machine/never-send-unsafe"]
+reason = "unsafe observation requested recovery"
+
+[[mutant]]
+id = "M-machine-send-in-dialog"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs"
+search = "step settings now observation state"
+replace = "step settings now observation state\n  | stateMode state == Backoff && observationClass observation == ApprovalDialog = Decision state [SendRecovery] Continued"
+killers = ["haskell:agentctl-core-test/Machine/never-send-unsafe"]
+reason = "unsafe observation requested recovery"
+
+[[mutant]]
+id = "M-machine-refire-handled-fingerprint"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs"
+search = "fresh fingerprint state = maybe False (`Set.notMember` stateHandled state) fingerprint"
+replace = "fresh fingerprint state = maybe False (\\key -> Set.notMember key (Set.delete key (stateHandled state))) fingerprint"
+killers = ["haskell:agentctl-core-test/Machine/one-send-per-fingerprint"]
+reason = "handled fingerprint received another recovery"
+
+[[mutant]]
+id = "M-machine-unchanged-is-success"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs"
+search = "        | Just observation == sentObservation incident -> awaitAcknowledgement incident"
+replace = "        | Just observation == sentObservation incident -> finish Recovered"
+killers = ["tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle", "haskell:agentctl-core-test/Machine/verify-needs-change"]
+reason = "recovery transition differs from oracle"
+
+[[mutant]]
+id = "M-machine-retry-terminal-class"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs"
+search = "      Decision (state {stateMode = Escalate, stateIncident = Nothing, stateHandled = remember (observationFingerprint observation) (stateHandled state)}) [Notify (TerminalNotice category)] Escalated"
+replace = "      maybe (Decision state [] NoIncident) (\\key -> schedule (stateAttempt state) key False) (observationFingerprint observation)"
+killers = ["tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle"]
+reason = "recovery transition differs from oracle"

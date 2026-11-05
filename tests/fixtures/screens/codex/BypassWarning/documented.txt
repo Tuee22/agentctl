@@ -1,0 +1,6 @@
+OpenAI Codex
+
+Bypass approvals warning
+Commands run without asking for approval.
+› 1. Yes, I accept
+  2. Exit

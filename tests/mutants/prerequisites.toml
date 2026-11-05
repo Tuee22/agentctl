@@ -1,0 +1,53 @@
+[[mutant]]
+id = "M-prereq-skip-consent"
+operator = "short-circuit"
+target = "src/agentctl/bootstrap/prereqs.py"
+search = "return assume_yes or accepted"
+replace = "return True"
+killers = ["tests/integration/test_prereqs_consent.py::test_declined_spawns_nothing", "tests/unit/test_preconditions.py::test_prerequisite_precondition"]
+reason = "prerequisite consent was bypassed"
+
+[[mutant]]
+id = "M-prereq-sudo-may-prompt"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/prereqs.py"
+search = "(\"sudo\", \"-n\")"
+replace = "(\"sudo\",)"
+killers = ["tests/integration/test_prereqs_consent.py::test_non_tty_refuses_without_assume_yes"]
+reason = "sudo could prompt after --assume-yes"
+
+[[mutant]]
+id = "M-prereq-prompt-without-tty"
+operator = "short-circuit"
+target = "src/agentctl/bootstrap/prereqs.py"
+search = "if not facts.interactive and not facts.assume_yes:"
+replace = "if False:"
+killers = ["tests/integration/test_prereqs_consent.py::test_non_tty_refuses_without_assume_yes"]
+reason = "non-interactive run prompted"
+
+[[mutant]]
+id = "M-prereq-gmp-dropped"
+operator = "delete"
+target = "src/agentctl/bootstrap/prereqs.py"
+search = "    \"libgmp-dev\",\n"
+replace = ""
+killers = ["tests/unit/test_prereqs.py::test_package_sets_match_oracle", "tests/integration/test_prereqs_consent.py::test_accepted_runs_exact_argv"]
+reason = "prerequisite argv differs"
+
+[[mutant]]
+id = "M-prereq-probe-ignores-link"
+operator = "short-circuit"
+target = "src/agentctl/bootstrap/prereqs.py"
+search = "else link_gmp(compiler, context, execute)"
+replace = "else Ok(value=True)"
+killers = ["tests/integration/test_prereqs_real.py::test_probe_matches_independent_observer"]
+reason = "compiler presence replaced the GMP link probe"
+
+[[mutant]]
+id = "M-prereq-flag-dropped"
+operator = "replace-literal"
+target = "src/agentctl/cli.py"
+search = "check(request.family, assume_yes=assume_yes)"
+replace = "check(request.family, assume_yes=False)"
+killers = ["tests/integration/test_prereqs_consent.py::test_global_assume_yes_reaches_check"]
+reason = "global consent flag did not reach check"

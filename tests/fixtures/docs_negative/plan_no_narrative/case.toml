@@ -1,0 +1,4 @@
+rule = "plan.no_narrative"
+path = "DEVELOPMENT_PLAN/phase-14-windows-psmux-acceptance.md"
+search = "# Phase 14 — Windows and psmux acceptance"
+replace = "# Phase 14 — Historical Windows and psmux acceptance"

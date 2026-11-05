@@ -1,0 +1,107 @@
+[[mutant]]
+id = "M-audit-hook-blind-execv"
+operator = "delete"
+target = "src/agentctl/check/audit.py"
+search = "\"subprocess.Popen\", \"os.exec\", \"os.system\", \"os.posix_spawn\", \"os.spawn\""
+replace = "\"subprocess.Popen\", \"os.system\", \"os.posix_spawn\", \"os.spawn\""
+killers = ["tests/integration/test_spawn_audit.py::test_all_spawn_events_recorded"]
+reason = "spawn event was not recorded"
+
+[[mutant]]
+id = "M-audit-veto-disabled"
+operator = "short-circuit"
+target = "src/agentctl/check/audit.py"
+search = "            if denied:\n"
+replace = "            if False:\n"
+killers = ["tests/integration/test_spawn_audit.py::test_forbidden_spawn_vetoed"]
+reason = "forbidden sentinel executed"
+
+[[mutant]]
+id = "M-audit-nonce-reused"
+operator = "short-circuit"
+target = "src/agentctl/check/audit.py"
+search = "if value.get(\"nonce\") != nonce:"
+replace = "if False:"
+killers = ["tests/integration/test_spawn_audit.py::test_nonce_replay_rejected"]
+reason = "replayed nonce accepted"
+
+[[mutant]]
+id = "M-guard-process-allowlist-wide"
+operator = "widen"
+target = "src/agentctl/check/validator/source.py"
+search = "if relative == \"src/agentctl/process.py\":"
+replace = "if relative.startswith(\"src/agentctl/\"):"
+killers = ["tests/governance/test_source_guards.py::test_subprocess_import_outside_process_module"]
+reason = "src.one-process-module was bypassed"
+
+[[mutant]]
+id = "M-guard-noqa-blind"
+operator = "delete"
+target = "src/agentctl/check/validator/source.py"
+search = "r\"noqa|type:"
+replace = "r\"type:"
+killers = ["tests/governance/test_source_guards.py::test_suppression_ban_fixtures"]
+reason = "src.suppression-ban was bypassed"
+
+[[mutant]]
+id = "M-guard-test-branch-allowed"
+operator = "short-circuit"
+target = "src/agentctl/check/validator/source.py"
+search = "for key in keys"
+replace = "for key in ()"
+killers = ["tests/governance/test_source_guards.py::test_no_test_branches"]
+reason = "src.no-test-branches was bypassed"
+
+[[mutant]]
+id = "M-guard-login-spawn-allowed"
+operator = "short-circuit"
+target = "src/agentctl/check/validator/source.py"
+search = "if not isinstance(node, ast.Call) or not node.args:"
+replace = "if True:"
+killers = ["tests/governance/test_source_guards.py::test_no_login_construction"]
+reason = "src.no-login-construction was bypassed"
+
+[[mutant]]
+id = "M-guard-config-drift-allowed"
+operator = "short-circuit"
+target = "src/agentctl/check/validator/source.py"
+search = "if actual == effective[0].get(\"expected\")"
+replace = "if True"
+killers = ["tests/governance/test_source_guards.py::test_lint_config_matches_oracle"]
+reason = "config drift was accepted"
+
+[[mutant]]
+id = "M-guard-coverage-floor-lowered"
+operator = "replace-literal"
+target = "src/agentctl/check/legs.py"
+search = "\"--fail-under=100\""
+replace = "\"--fail-under=0\""
+killers = ["tests/governance/test_gate_plugin.py::test_coverage_gap_fails"]
+reason = "coverage gap was accepted"
+
+[[mutant]]
+id = "M-guard-static-leg-noop"
+operator = "replace-literal"
+target = "src/agentctl/check/legs.py"
+search = "\"-m\",\n                \"ruff\",\n                \"check\","
+replace = "\"-c\",\n                \"pass\",\n                \"check\","
+killers = ["tests/integration/test_static_legs.py::test_ruff_fires_on_fixture"]
+reason = "ruff leg did not reject its negative control"
+
+[[mutant]]
+id = "M-guard-type-severity-lowered"
+operator = "widen"
+target = "src/agentctl/check/legs.py"
+search = "\"--error-on-warning\","
+replace = "\"--error-on-warning\",\n                \"--warn\",\n                \"all\","
+killers = ["tests/integration/test_static_legs.py::test_ty_fires_on_fixture"]
+reason = "ty did not report an error"
+
+[[mutant]]
+id = "M-guard-user-config-leak"
+operator = "short-circuit"
+target = "src/agentctl/check/steps.py"
+search = "if tool == \"ty\""
+replace = "if False"
+killers = ["tests/integration/test_static_legs.py::test_ty_ignores_user_config"]
+reason = "user config weakened ty"

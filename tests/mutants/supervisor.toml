@@ -1,0 +1,162 @@
+[[mutant]]
+id = "M-super-pause-recorded-as-watched"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Watch.hs"
+search = "else update True Paused"
+replace = "else update False Paused"
+killers = ["tests/unit/test_watch_values.py::test_watch_transitions_oracle"]
+reason = "watch transition differs from oracle"
+
+[[mutant]]
+id = "M-super-watch-accepts-foreign"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Watch.hs"
+search = "kind `notElem` [ManagedTarget, AdoptedTarget]"
+replace = "kind `notElem` [ManagedTarget, AdoptedTarget, ForeignTarget]"
+killers = ["tests/unit/test_watch_values.py::test_watch_transitions_oracle"]
+reason = "watch transition differs from oracle"
+
+[[mutant]]
+id = "M-super-unwatch-kills"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Watch.hs"
+search = "        Just _ -> (changed (Map.delete target entries) Unwatched) {decisionCommands = Commands.plan Commands.Unwatch}"
+replace = "        Just _ -> case Name.makeSessionName target of\n          Right name -> (changed (Map.delete target entries) Unwatched) {decisionCommands = [Command.Kill name]}\n          Left _ -> (changed (Map.delete target entries) Unwatched) {decisionCommands = Commands.plan Commands.Unwatch}"
+killers = ["tests/unit/test_watch_values.py::test_watch_transitions_oracle"]
+reason = "watch transition differs from oracle"
+
+[[mutant]]
+id = "M-super-enter-in-literal"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Commands.hs"
+search = "Send family agent pane -> [Command.SendLiteral pane (Agent.recoveryText (Agent.table family agent)), Command.SendEnter pane]"
+replace = "Send family agent pane -> [Command.SendLiteral pane (Agent.recoveryText (Agent.table family agent) <> \"\\n\")]"
+killers = ["tests/unit/test_supervisor_values.py::test_command_plan_oracle"]
+reason = "supervisor command plan differs from oracle"
+
+[[mutant]]
+id = "M-super-stop-kills-watched"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Commands.hs"
+search = "-- Copyright (c) 2026 agentctl contributors.\nmodule AgentCtl.Supervisor.Commands (Intent (..), parseIntent, plan) where\n\nimport qualified AgentCtl.Agent as Agent\nimport qualified AgentCtl.Mux as Mux\nimport qualified AgentCtl.Mux.Command as Command\nimport Data.Text (Text)\n\ndata Intent = Send Mux.Family Agent.Agent Command.Pane | Wait | Notify | Unwatch | Shutdown | Escalate | Exited deriving (Eq, Show)\n\nparseIntent :: Mux.Family -> Agent.Agent -> Command.Pane -> Text -> Maybe Intent\nparseIntent family agent pane text = case text of\n  \"send\" -> Just (Send family agent pane)\n  \"wait\" -> Just Wait\n  \"notify\" -> Just Notify\n  \"unwatch\" -> Just Unwatch\n  \"shutdown\" -> Just Shutdown\n  \"escalate\" -> Just Escalate\n  \"exited\" -> Just Exited\n  _ -> Nothing\n\nplan :: Intent -> [Command.Command]\nplan intent = case intent of\n  Send family agent pane -> [Command.SendLiteral pane (Agent.recoveryText (Agent.table family agent)), Command.SendEnter pane]\n  Wait -> []\n  Notify -> []\n  Unwatch -> []\n  Shutdown -> []\n  Escalate -> []\n  Exited -> []\n"
+replace = "-- Copyright (c) 2026 agentctl contributors.\nmodule AgentCtl.Supervisor.Commands (Intent (..), parseIntent, plan) where\n\nimport qualified AgentCtl.Agent as Agent\nimport qualified AgentCtl.Mux as Mux\nimport qualified AgentCtl.Mux.Command as Command\nimport qualified AgentCtl.Session.Name as Name\nimport Data.Text (Text)\n\ndata Intent = Send Mux.Family Agent.Agent Command.Pane | Wait | Notify | Unwatch | Shutdown | Escalate | Exited deriving (Eq, Show)\n\nparseIntent :: Mux.Family -> Agent.Agent -> Command.Pane -> Text -> Maybe Intent\nparseIntent family agent pane text = case text of\n  \"send\" -> Just (Send family agent pane)\n  \"wait\" -> Just Wait\n  \"notify\" -> Just Notify\n  \"unwatch\" -> Just Unwatch\n  \"shutdown\" -> Just Shutdown\n  \"escalate\" -> Just Escalate\n  \"exited\" -> Just Exited\n  _ -> Nothing\n\nplan :: Intent -> [Command.Command]\nplan intent = case intent of\n  Send family agent pane -> [Command.SendLiteral pane (Agent.recoveryText (Agent.table family agent)), Command.SendEnter pane]\n  Wait -> []\n  Notify -> []\n  Unwatch -> []\n  Shutdown -> case Name.makeSessionName \"watched-claude\" of\n    Right name -> [Command.Kill name]\n    Left _ -> []\n  Escalate -> []\n  Exited -> []\n"
+killers = ["tests/unit/test_supervisor_values.py::test_command_plan_oracle"]
+reason = "supervisor command plan differs from oracle"
+
+[[mutant]]
+id = "M-super-respawn-on-exit"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Commands.hs"
+search = "-- Copyright (c) 2026 agentctl contributors.\nmodule AgentCtl.Supervisor.Commands (Intent (..), parseIntent, plan) where\n\nimport qualified AgentCtl.Agent as Agent\nimport qualified AgentCtl.Mux as Mux\nimport qualified AgentCtl.Mux.Command as Command\nimport Data.Text (Text)\n\ndata Intent = Send Mux.Family Agent.Agent Command.Pane | Wait | Notify | Unwatch | Shutdown | Escalate | Exited deriving (Eq, Show)\n\nparseIntent :: Mux.Family -> Agent.Agent -> Command.Pane -> Text -> Maybe Intent\nparseIntent family agent pane text = case text of\n  \"send\" -> Just (Send family agent pane)\n  \"wait\" -> Just Wait\n  \"notify\" -> Just Notify\n  \"unwatch\" -> Just Unwatch\n  \"shutdown\" -> Just Shutdown\n  \"escalate\" -> Just Escalate\n  \"exited\" -> Just Exited\n  _ -> Nothing\n\nplan :: Intent -> [Command.Command]\nplan intent = case intent of\n  Send family agent pane -> [Command.SendLiteral pane (Agent.recoveryText (Agent.table family agent)), Command.SendEnter pane]\n  Wait -> []\n  Notify -> []\n  Unwatch -> []\n  Shutdown -> []\n  Escalate -> []\n  Exited -> []\n"
+replace = "-- Copyright (c) 2026 agentctl contributors.\nmodule AgentCtl.Supervisor.Commands (Intent (..), parseIntent, plan) where\n\nimport qualified AgentCtl.Agent as Agent\nimport qualified AgentCtl.Mux as Mux\nimport qualified AgentCtl.Mux.Command as Command\nimport qualified AgentCtl.Session.Name as Name\nimport Data.Text (Text)\n\ndata Intent = Send Mux.Family Agent.Agent Command.Pane | Wait | Notify | Unwatch | Shutdown | Escalate | Exited deriving (Eq, Show)\n\nparseIntent :: Mux.Family -> Agent.Agent -> Command.Pane -> Text -> Maybe Intent\nparseIntent family agent pane text = case text of\n  \"send\" -> Just (Send family agent pane)\n  \"wait\" -> Just Wait\n  \"notify\" -> Just Notify\n  \"unwatch\" -> Just Unwatch\n  \"shutdown\" -> Just Shutdown\n  \"escalate\" -> Just Escalate\n  \"exited\" -> Just Exited\n  _ -> Nothing\n\nplan :: Intent -> [Command.Command]\nplan intent = case intent of\n  Send family agent pane -> [Command.SendLiteral pane (Agent.recoveryText (Agent.table family agent)), Command.SendEnter pane]\n  Wait -> []\n  Notify -> []\n  Unwatch -> []\n  Shutdown -> []\n  Escalate -> []\n  Exited -> case Name.makeSessionName \"watched-claude\" of\n    Right name -> [Command.Create name \"/owned/core\" \"/owned/launch.json\"]\n    Left _ -> []\n"
+killers = ["tests/unit/test_supervisor_values.py::test_command_plan_oracle"]
+reason = "supervisor command plan differs from oracle"
+
+[[mutant]]
+id = "M-super-escalation-sends-model"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Commands.hs"
+search = "Escalate -> []"
+replace = "Escalate -> maybe [] (\\pane -> [Command.SendLiteral pane \"/model\"]) (Command.makePane \"%3\")"
+killers = ["tests/unit/test_supervisor_values.py::test_command_plan_oracle"]
+reason = "supervisor command plan differs from oracle"
+
+[[mutant]]
+id = "M-super-guard-ignores-change"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Guard.hs"
+search = "normalise (observationText decision) == normalise (observationText current)"
+replace = "normalise (observationText decision) == normalise (observationText decision)"
+killers = ["tests/unit/test_supervisor_values.py::test_send_guard_oracle"]
+reason = "supervisor send guard differs from oracle"
+
+
+[[mutant]]
+id = "M-super-paused-target-stepped"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Poll.hs"
+search = "Watch.entryPaused entry -> closed \"paused\""
+replace = "Watch.entryPaused entry && Watch.entryRevision entry == 0 -> closed \"paused\""
+killers = ["tests/unit/test_supervisor_values.py::test_poll_step_oracle"]
+reason = "supervisor poll step differs from oracle"
+
+[[mutant]]
+id = "M-super-deadline-ignored"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Poll.hs"
+search = "Machine.step settings now observation state"
+replace = "Machine.step settings (max now (maybe now Machine.incidentDeadline (Machine.stateIncident state))) observation state"
+killers = ["tests/unit/test_supervisor_values.py::test_poll_step_oracle"]
+reason = "supervisor poll step differs from oracle"
+
+[[mutant]]
+id = "M-super-notify-stderr-only"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Poll.hs"
+search = "Notification level message [Stderr, DecisionLog]"
+replace = "Notification level message [Stderr]"
+killers = ["tests/unit/test_supervisor_values.py::test_poll_step_oracle"]
+reason = "supervisor poll step differs from oracle"
+
+[[mutant]]
+id = "M-super-log-skips-repeat"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Log.hs"
+search = "observationRecords <- observations"
+replace = "observationRecords <- if before == after then pure [] else observations"
+killers = ["tests/unit/test_supervisor_values.py::test_poll_records_oracle"]
+reason = "supervisor log records differ from oracle"
+
+[[mutant]]
+id = "M-super-log-drops-result"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Log.hs"
+search = "++ map Resolved (Poll.decisionResults decision)"
+replace = "++ []"
+killers = ["tests/unit/test_supervisor_values.py::test_poll_records_oracle"]
+reason = "supervisor log records differ from oracle"
+
+[[mutant]]
+id = "M-super-logs-prefix-match"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Log.hs"
+search = "filter ((== wanted) . recordTarget) records"
+replace = "filter (Text.isPrefixOf wanted . recordTarget) records"
+killers = ["tests/unit/test_supervisor_values.py::test_logs_selection_oracle"]
+reason = "supervisor log selection differs from oracle"
+
+[[mutant]]
+id = "M-super-log-ignores-truncated-tail"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Log.hs"
+search = "not writerActive && not (Text.null suffix)"
+replace = "not writerActive && not (Text.null suffix) && Text.isSuffixOf \"\\n\" suffix"
+killers = ["tests/unit/test_supervisor_values.py::test_log_decoding_oracle"]
+reason = "supervisor log decoding differs from oracle"
+
+[[mutant]]
+id = "M-super-log-accepts-extra-fields"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Log.hs"
+search = "sort (Keys.keys fields) == sort expected"
+replace = "all (\\key -> key `elem` Keys.keys fields) (sort expected)"
+killers = ["tests/unit/test_supervisor_values.py::test_log_decoding_oracle"]
+reason = "supervisor log decoding differs from oracle"
+
+[[mutant]]
+id = "M-super-commit-aborted-send"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Delivery.hs"
+search = "if Machine.SendRecovery `elem` Poll.decisionActions fresh then previous else Poll.decisionMemory fresh"
+replace = "Poll.decisionMemory fresh"
+killers = ["tests/unit/test_supervisor_values.py::test_delivery_commit_oracle"]
+reason = "supervisor delivery completion differs from oracle"
+
+[[mutant]]
+id = "M-super-failure-keeps-send-pending"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Supervisor/Delivery.hs"
+search = "Log.Failed -> finish failed"
+replace = "Log.Failed -> Completion previous (Just failed)"
+killers = ["tests/unit/test_supervisor_values.py::test_delivery_commit_oracle"]
+reason = "supervisor delivery completion differs from oracle"

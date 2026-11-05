@@ -1,0 +1,87 @@
+# Copyright (c) 2026 agentctl contributors.
+"""Nonce-bound native lock, publication-race and spawn failure observations."""
+
+import errno
+import json
+import os
+import shutil
+import sys
+from dataclasses import replace
+from pathlib import Path
+
+from agentctl.bootstrap import binary, build
+from agentctl.check.audit import event_arguments
+from agentctl.check.preconditions import exclusive_file
+from agentctl.hostfacts import current
+from agentctl.process import run
+from agentctl.result import Err, Ok
+
+mode, project, cache, data, home, pins, ghc, cabal, built, nonce = sys.argv[1:]
+project, cache, data, home, pins, built = map(Path, (project, cache, data, home, pins, built))
+host = current(cache)
+environment = dict(host.environment)
+environment.update({"HOME": str(home), "USERPROFILE": str(home),
+    **{f"XDG_{kind}_HOME": str(home / kind.lower())
+       for kind in ("CACHE", "CONFIG", "DATA", "STATE")}})
+host = replace(host, home=home, environment=tuple(environment.items()),
+               interactive=False, assume_yes=False)
+request = binary.Request(project, pins, host, data)
+selected = binary.load(pins)
+assert isinstance(selected, Ok)
+layout = binary.plan(request, selected.value)
+assert isinstance(layout, Ok)
+layout = layout.value
+context = build.BuildContext(project, layout.directory, host, build.Toolchain(ghc, cabal))
+if mode == "hash-read":
+    assert binary.publish(context, built, layout) == Ok(layout.binary)
+events = []
+lock_fd = None
+unlocked = 0 if host.family == "Windows" else 8
+
+def observe(event, arguments):
+    global lock_fd
+    if event in {"fcntl.flock", "msvcrt.locking"}:
+        if lock_fd is None:
+            lock_fd = arguments[0]
+        if arguments[0] == lock_fd and (
+            mode == "lock-io" or mode.endswith("-unlock") and arguments[1] == unlocked
+        ):
+            events.append({"nonce": nonce, "veto": "lock"})
+            raise OSError(errno.EIO, "owned native lock veto")
+    if event == "open" and mode == "hash-read" and arguments[0] == str(built):
+        events.append({"nonce": nonce, "veto": "hash"})
+        raise OSError(errno.EIO, "owned binary hash veto")
+    if event != "subprocess.Popen":
+        return
+    parsed = event_arguments(event, arguments)
+    assert isinstance(parsed, Ok)
+    argv = parsed.value.argv
+    blocked = ("install" in argv[1:] or "update" in argv[1:]
+               or mode in {"ensure-locate", "identify-locate"} and "list-bin" in argv[1:])
+    events.append({"nonce": nonce, "argv": list(argv), "blocked": blocked})
+    if blocked:
+        raise OSError("owned binary spawn veto")
+    if mode == "publish-race" and Path(argv[0]).stem == "agentctl-core":
+        layout.binary.parent.mkdir(parents=True)
+        shutil.copy2(built, layout.binary)
+
+sys.addaudithook(observe)
+control = run([sys.executable, "-c", "print('observer control')"], cwd=home, env=environment)
+assert isinstance(control, Ok) and control.value.code == 0
+if mode == "publish-race":
+    result = binary.publish(context, built, layout)
+    assert result == Ok(layout.binary)
+    assert layout.binary.read_bytes() == built.read_bytes()
+elif mode == "lock-io":
+    with exclusive_file(layout.directory / "build.lock") as result:
+        assert isinstance(result, Err) and "owned native lock veto" in result.error.message
+elif mode == "build-unlock":
+    result = build.compile_project(context)
+elif mode.startswith("ensure-"):
+    result = binary.ensure(request)
+else:
+    result = binary.identify(context, data, pins_file=pins)
+if mode not in {"publish-race", "lock-io"}:
+    assert isinstance(result, Err), result
+    assert "owned" in result.error.message
+print(json.dumps({"nonce": nonce, "events": events}))

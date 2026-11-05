@@ -1,0 +1,4 @@
+rule = "docs.phase_citation"
+path = "documents/operations/installation.md"
+search = ""
+replace = "\nPhase 2 provides the toolchain.\n"

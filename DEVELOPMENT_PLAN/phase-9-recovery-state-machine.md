@@ -1,6 +1,6 @@
 # Phase 9 — Recovery state machine and backoff
 
-**Status**: Planned
+**Status**: Done
 **Depends on**: [Phase 8 — Pane observation and classification](phase-8-pane-observation-and-classification.md)
 **Host lane**: any-host
 **Gate**: `agentctl check`
@@ -18,8 +18,8 @@ VERIFY and ESCALATE. `AgentCtl.Recovery.Backoff` computes each delay and each es
 observation is a screen class from [Phase 8 — Pane observation and classification](phase-8-pane-observation-and-classification.md),
 with the fingerprint of its error block where it has one and the normalised text it came from.
 
-- The actions form a closed type: wait until a deadline, send the agent's recovery text, notify, and
-  escalate. No constructor kills, respawns, switches models or logs in, so no decision of this phase
+- The actions form a closed type: wait until a deadline, send the agent's recovery text and notify.
+  Entering ESCALATE carries a terminal or unacknowledged error notice. No constructor kills, respawns, switches models or logs in, so no decision of this phase
   can ask for one; [Phase 10 — Recovery supervisor](phase-10-supervisor.md) renders the actions into
   multiplexer commands and closes R18, R17 and R19 over them.
 - Every (state, observation) cell is a row of `tests/oracles/recovery_transitions.toml`, and every
@@ -36,26 +36,26 @@ with the fingerprint of its error block where it has one and the normalised text
 |---|---|---|---|---|
 | R18.2 — input is never sent during active work, approval dialogs or partially typed input | `tests/oracles/recovery_transitions.toml` | value: agentctl-core-eval step cases for every cell, and a never-send property over generated observation sequences whose cover requires each unsafe class and a reachable send | `M-machine-send-on-partial-input`, `M-machine-send-during-working`, `M-machine-send-in-dialog` | `tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle`, `haskell:agentctl-core-test/Machine/never-send-unsafe` |
 | R18.3 — errors are fingerprinted so stale scrollback never re-triggers, and a new transition is required before another injection | `tests/oracles/recovery_transitions.toml` | value: agentctl-core-eval step cases for handled, stale and new fingerprints, and once-per-fingerprint and acknowledgement properties | `M-machine-refire-handled-fingerprint`, `M-machine-unchanged-is-success` | `tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle`, `haskell:agentctl-core-test/Machine/one-send-per-fingerprint`, `haskell:agentctl-core-test/Machine/verify-needs-change` |
-| R18.4 — backoff is bounded exponential with jitter, with escalating notifications | `tests/oracles/backoff.toml` | value: agentctl-core-eval delay and escalation cases, and seeded properties for the jitter bounds, growth to the cap and determinism | `M-backoff-uncapped`, `M-backoff-no-jitter`, `M-backoff-jitter-unbounded`, `M-backoff-notify-never-escalates` | `tests/unit/test_backoff.py::test_delays_and_escalations_match_oracle`, `haskell:agentctl-core-test/Backoff/within-bounds`, `haskell:agentctl-core-test/Backoff/grows-to-cap`, `haskell:agentctl-core-test/Backoff/seed-determines-delays` |
-| R18 — the recovery state machine runs MONITORING, SUSPECTED_FAILURE, CONFIRM_IDLE, BACKOFF, RECOVERY_SENT, VERIFY, then MONITORING or ESCALATE | `tests/oracles/recovery_transitions.toml` | value: agentctl-core-eval step cases for every cell of the transition table | `M-machine-skip-confirm-idle`, `M-machine-skip-verify` | `tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle` |
+| R18.4 — backoff is bounded exponential with jitter, with escalating notifications | `tests/oracles/backoff.toml` | value: agentctl-core-eval delay and escalation cases, and seeded properties for the jitter bounds, growth to the cap and determinism | `M-backoff-uncapped`, `M-backoff-no-jitter`, `M-backoff-jitter-unbounded`, `M-backoff-nonfinite-jitter-accepted`, `M-backoff-notify-never-escalates`, `M-backoff-attempt-not-advanced` | `tests/unit/test_backoff.py::test_delays_and_escalations_match_oracle`, `tests/unit/test_recovery_transitions.py::test_backoff_deadlines_match_oracle`, `haskell:agentctl-core-test/Backoff/within-bounds`, `haskell:agentctl-core-test/Backoff/grows-to-cap`, `haskell:agentctl-core-test/Backoff/seed-determines-delays` |
+| R18 — the recovery state machine runs MONITORING, SUSPECTED_FAILURE, CONFIRM_IDLE, BACKOFF, RECOVERY_SENT, VERIFY, then MONITORING or ESCALATE | `tests/oracles/recovery_transitions.toml` | value: agentctl-core-eval step cases for every cell of the transition table | `M-machine-skip-confirm-idle`, `M-machine-skip-verify`, `M-machine-retry-terminal-class` | `tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle` |
 
 ## Not Proven By This Gate
 
 - That a recovery text sent at a backoff deadline resumes a real agent after a genuine provider overload, which no lane can induce. — not proven by any phase.
 - That the concept note's default timings (30 s initial delay, multiplier 2, 900 s cap, jitter 0.2) suit a real provider's recovery time. — not proven by any phase.
 - That an empty input prompt beneath an overload error, as the classifiers recognise it, is the moment a real agent accepts input; the machine trusts the screen class it is given. — not proven by any phase.
-- Tamper resistance is bounded by [§ P](development_plan_standards.md#p-the-ratchet-and-the-users-commit-points): it holds against a HEAD the user has committed. — not proven by any phase.
+- Tamper resistance extends only to data already present in the available HEAD baseline ([§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure)); uncommitted inputs have no historical protection. — not proven by any phase.
 
 ## Sprints
 
-### Sprint 9.1: Transition function and safety predicates [Planned]
+### Sprint 9.1: Transition function and safety predicates [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs`, `src/agentctl/haskell/app/`, `src/agentctl/haskell/test/`, `tests/unit/test_recovery_transitions.py`
+**Status**: Done
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs`, `src/agentctl/haskell/src/AgentCtl/Observe/Classify.hs`, `src/agentctl/haskell/agentctl-core.cabal`, `tests/mutants/machine.toml`, `src/agentctl/haskell/app/`, `src/agentctl/haskell/test/`, `tests/unit/test_recovery_transitions.py`
 **Validation tests**: `tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle`, `haskell:agentctl-core-test/Machine/never-send-unsafe`, `haskell:agentctl-core-test/Machine/one-send-per-fingerprint`, `haskell:agentctl-core-test/Machine/verify-needs-change`
 **Mutants**: `M-machine-skip-confirm-idle`, `M-machine-skip-verify`, `M-machine-send-on-partial-input`, `M-machine-send-during-working`, `M-machine-send-in-dialog`, `M-machine-refire-handled-fingerprint`, `M-machine-unchanged-is-success`, `M-machine-retry-terminal-class`
 **Closes**: R18.2, R18.3
-**Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/engineering/testing.md`
+**Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/engineering/testing.md`, `documents/engineering/code_standards.md`
 
 #### Objective
 
@@ -97,14 +97,14 @@ moment it has proven safe.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 9.2: Bounded backoff with seeded jitter and escalation [Planned]
+### Sprint 9.2: Bounded backoff with seeded jitter and escalation [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Recovery/Backoff.hs`, `src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs`, `src/agentctl/haskell/app/`, `src/agentctl/haskell/test/`, `tests/unit/test_backoff.py`, `tests/unit/test_recovery_transitions.py`
+**Status**: Done
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Recovery/Backoff.hs`, `src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs`, `src/agentctl/haskell/agentctl-core.cabal`, `tests/mutants/backoff.toml`, `src/agentctl/haskell/app/`, `src/agentctl/haskell/test/`, `tests/unit/test_backoff.py`, `tests/unit/test_recovery_transitions.py`
 **Validation tests**: `tests/unit/test_backoff.py::test_delays_and_escalations_match_oracle`, `tests/unit/test_recovery_transitions.py::test_backoff_deadlines_match_oracle`, `haskell:agentctl-core-test/Backoff/within-bounds`, `haskell:agentctl-core-test/Backoff/grows-to-cap`, `haskell:agentctl-core-test/Backoff/seed-determines-delays`
-**Mutants**: `M-backoff-uncapped`, `M-backoff-no-jitter`, `M-backoff-jitter-unbounded`, `M-backoff-notify-never-escalates`, `M-backoff-attempt-not-advanced`
+**Mutants**: `M-backoff-uncapped`, `M-backoff-no-jitter`, `M-backoff-jitter-unbounded`, `M-backoff-nonfinite-jitter-accepted`, `M-backoff-notify-never-escalates`, `M-backoff-attempt-not-advanced`
 **Closes**: R18.4
 **Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/engineering/testing.md`
 
@@ -134,17 +134,17 @@ and make each retry raise a notification whose level escalates.
 
 1. For the oracle's policies and seeds, every delay lies within its row's bounds and every escalation level equals its row — `tests/unit/test_backoff.py::test_delays_and_escalations_match_oracle`; fails when a delay passes the cap or the level never rises; mutants `M-backoff-uncapped`, `M-backoff-notify-never-escalates`.
 2. The BACKOFF rows of `tests/oracles/recovery_transitions.toml` schedule their deadlines at the backoff delay of their attempt, and a fresh overload fingerprint after a send schedules the next attempt's delay — `tests/unit/test_recovery_transitions.py::test_backoff_deadlines_match_oracle`; fails when the attempt never advances; mutant `M-backoff-attempt-not-advanced`.
-3. For generated policies, attempts and seeds, each delay lies within the jitter band around the capped exponential delay — `haskell:agentctl-core-test/Backoff/within-bounds`; fails when jitter can leave the band; mutant `M-backoff-jitter-unbounded`.
+3. Finite valid policies produce delays within the jitter band over generated attempts and seeds, invalid and nonfinite policies are refused, and an attempt beyond machine integer range remains bounded — `haskell:agentctl-core-test/Backoff/within-bounds`; fails when jitter can leave the band; mutants `M-backoff-jitter-unbounded`, `M-backoff-nonfinite-jitter-accepted`.
 4. For generated policies, the jitter-free delay never decreases with the attempt, reaches the max delay after finitely many attempts and stays there — `haskell:agentctl-core-test/Backoff/grows-to-cap`; fails when the delay grows without bound; mutant `M-backoff-uncapped`.
 5. One seed gives one delay sequence, and the cover requires seed pairs whose sequences differ, as the positive control that jitter is applied — `haskell:agentctl-core-test/Backoff/seed-determines-delays`; fails when every seed gives the jitter-free delays; mutant `M-backoff-no-jitter`.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
 ## Remaining Work
 
-The whole phase: Sprints 9.1–9.2.
+None.
 
 ## Documentation Requirements
 

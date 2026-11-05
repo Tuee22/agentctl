@@ -1,0 +1,55 @@
+[[mutant]]
+id = "M-preflight-auth-before-mux"
+operator = "reorder"
+target = "src/agentctl/haskell/src/AgentCtl/Preflight.hs"
+search = "  NeedMux $ \\mux ->\n    NeedAgent $ \\path ->\n      NeedAuth path $ \\outcome ->\n        finish mux path outcome"
+replace = "  NeedAgent $ \\path ->\n    NeedAuth path $ \\outcome ->\n      NeedMux $ \\mux ->\n        finish mux path outcome"
+killers = ["tests/integration/test_preflight.py::test_order_mux_then_agent_then_auth"]
+reason = "auth ran before multiplexer"
+
+[[mutant]]
+id = "M-preflight-skip-auth"
+operator = "delete"
+target = "src/agentctl/haskell/src/AgentCtl/Preflight.hs"
+search = "      NeedAuth path $ \\outcome ->\n        finish mux path outcome"
+replace = "      finish mux path (Auth.Exited 0)"
+killers = ["tests/integration/test_preflight.py::test_order_mux_then_agent_then_auth"]
+reason = "preflight skipped auth status"
+
+[[mutant]]
+id = "M-preflight-export-ready-constructor"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Preflight.hs"
+search = "  ( Ready,\n"
+replace = "  ( Ready (..),\n"
+killers = ["tests/integration/test_ready_opaque.py::test_ready_constructor_is_not_exported"]
+reason = "Ready constructor escaped"
+
+[[mutant]]
+# A selected path is absolute and nonempty: keep the rejection disabled without a compile-time False guard.
+id = "M-preflight-accept-cmd-shim"
+operator = "short-circuit"
+target = "src/agentctl/haskell/src/AgentCtl/Agent.hs"
+search = "family == Windows && Text.toLower (Text.pack (Windows.takeExtension path)) /= \".exe\""
+replace = "family == Windows && null path"
+killers = ["tests/unit/test_agent_resolution.py::test_resolution_matches_oracle"]
+reason = "agent resolution differs from oracle"
+
+[[mutant]]
+id = "M-preflight-relative-agent-path"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Agent.hs"
+search = "| otherwise -> Right path"
+replace = "| otherwise -> Right (if family == Windows then Windows.takeFileName path else Posix.takeFileName path)"
+killers = ["tests/unit/test_agent_resolution.py::test_resolution_matches_oracle"]
+reason = "agent resolution differs from oracle"
+
+[[mutant]]
+id = "M-preflight-allow-logged-out"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Preflight.hs"
+search = "authAllowed Auth.LoggedOut = False"
+replace = "authAllowed Auth.LoggedOut = True"
+killers = ["tests/unit/test_preflight.py::test_failure_warnings_match_oracle"]
+reason = "preflight decision differs from oracle"
+

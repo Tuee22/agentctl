@@ -1,0 +1,415 @@
+[[case]]
+id = "auth.claude.0"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "claude", "outcome" = 0 }
+expected = "LoggedIn"
+
+[[case]]
+id = "auth.claude.1"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "claude", "outcome" = 1 }
+expected = "LoggedOut"
+
+[[case]]
+id = "auth.claude.2"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "claude", "outcome" = 2 }
+expected = "CheckFailed"
+
+[[case]]
+id = "auth.claude.127"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "claude", "outcome" = 127 }
+expected = "CheckFailed"
+
+[[case]]
+id = "auth.claude.signal"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "claude", "outcome" = "signal" }
+expected = "CheckFailed"
+
+[[case]]
+id = "auth.claude.timeout"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "claude", "outcome" = "timeout" }
+expected = "CheckFailed"
+
+[[case]]
+id = "auth.claude.spawn-error"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "claude", "outcome" = "spawn-error" }
+expected = "CheckFailed"
+
+[[case]]
+id = "login-shape.claude.0"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "claude", "args" = ["auth", "login"] }
+expected = true
+
+[[case]]
+id = "login-shape.claude.1"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "claude", "args" = ["--model", "opus", "auth", "login"] }
+expected = true
+
+[[case]]
+id = "login-shape.claude.2"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "claude", "args" = ["setup-token"] }
+expected = true
+
+[[case]]
+id = "login-shape.claude.3"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "claude", "args" = ["/login"] }
+expected = true
+
+[[case]]
+id = "login-shape.claude.4"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "claude", "args" = ["--", "/login device"] }
+expected = true
+
+[[case]]
+id = "login-shape.claude.5"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "claude", "args" = ["auth", "status"] }
+expected = false
+
+[[case]]
+id = "login-shape.claude.6"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "claude", "args" = ["logout"] }
+expected = false
+
+[[case]]
+id = "login-shape.claude.7"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "claude", "args" = ["--", "setup-token"] }
+expected = false
+
+[[case]]
+id = "login-shape.claude.8"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "claude", "args" = ["--", "please login"] }
+expected = false
+
+[[case]]
+id = "auth.remedy.claude"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "request:R13"
+input = { "subject" = "login-remedy", "agent" = "claude" }
+expected = "claude auth login"
+
+[[case]]
+id = "auth.codex.0"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "codex", "outcome" = 0 }
+expected = "LoggedIn"
+
+[[case]]
+id = "auth.codex.1"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "codex", "outcome" = 1 }
+expected = "LoggedOut"
+
+[[case]]
+id = "auth.codex.2"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "codex", "outcome" = 2 }
+expected = "CheckFailed"
+
+[[case]]
+id = "auth.codex.127"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "codex", "outcome" = 127 }
+expected = "CheckFailed"
+
+[[case]]
+id = "auth.codex.signal"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "codex", "outcome" = "signal" }
+expected = "CheckFailed"
+
+[[case]]
+id = "auth.codex.timeout"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "codex", "outcome" = "timeout" }
+expected = "CheckFailed"
+
+[[case]]
+id = "auth.codex.spawn-error"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { "subject" = "auth-classify", "agent" = "codex", "outcome" = "spawn-error" }
+expected = "CheckFailed"
+
+[[case]]
+id = "login-shape.codex.0"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "codex", "args" = ["login"] }
+expected = true
+
+[[case]]
+id = "login-shape.codex.1"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "codex", "args" = ["--model", "x", "login", "--device-auth"] }
+expected = true
+
+[[case]]
+id = "login-shape.codex.2"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "codex", "args" = ["--", "login"] }
+expected = false
+
+[[case]]
+id = "login-shape.codex.3"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "codex", "args" = ["logout"] }
+expected = false
+
+[[case]]
+id = "login-shape.codex.4"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { "subject" = "login-shaped", "agent" = "codex", "args" = ["resume", "--last"] }
+expected = false
+
+[[case]]
+id = "auth.remedy.codex"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "request:R13"
+input = { "subject" = "login-remedy", "agent" = "codex" }
+expected = "codex login"
+
+[[case]]
+id = "auth.warning.claude.logged-in"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { subject = "auth-warning", agent = "claude", outcome = 0 }
+expected = { exit = 0, lines = [] }
+
+[[case]]
+id = "auth.warning.claude.logged-out"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { subject = "auth-warning", agent = "claude", outcome = 1 }
+expected = { exit = 7, lines = ["agentctl: claude is not logged in, so no session was started.", "agentctl: log in yourself by typing: claude auth login"] }
+
+[[case]]
+id = "auth.warning.claude.failed"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { subject = "auth-warning", agent = "claude", outcome = 2 }
+expected = { exit = 8, lines = ["agentctl: could not tell whether claude is logged in: `claude auth status` exited 2.", "agentctl: run it yourself to see why; no session was started."] }
+
+[[case]]
+id = "auth.warning.claude.timeout"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { subject = "auth-warning", agent = "claude", outcome = "timeout" }
+expected = { exit = 8, lines = ["agentctl: could not tell whether claude is logged in: `claude auth status` timed out.", "agentctl: run it yourself to see why; no session was started."] }
+
+[[case]]
+id = "auth.warning.claude.signal"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { subject = "auth-warning", agent = "claude", outcome = "signal" }
+expected = { exit = 8, lines = ["agentctl: could not tell whether claude is logged in: `claude auth status` was terminated by a signal.", "agentctl: run it yourself to see why; no session was started."] }
+
+[[case]]
+id = "auth.warning.claude.unavailable"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { subject = "auth-warning", agent = "claude", outcome = "spawn-error" }
+expected = { exit = 8, lines = ["agentctl: could not tell whether claude is logged in: `claude auth status` could not be run.", "agentctl: run it yourself to see why; no session was started."] }
+
+[[case]]
+id = "auth.warning.codex.logged-in"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { subject = "auth-warning", agent = "codex", outcome = 0 }
+expected = { exit = 0, lines = [] }
+
+[[case]]
+id = "auth.warning.codex.logged-out"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { subject = "auth-warning", agent = "codex", outcome = 1 }
+expected = { exit = 7, lines = ["agentctl: codex is not logged in, so no session was started.", "agentctl: log in yourself by typing: codex login"] }
+
+[[case]]
+id = "auth.warning.codex.failed"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { subject = "auth-warning", agent = "codex", outcome = 2 }
+expected = { exit = 8, lines = ["agentctl: could not tell whether codex is logged in: `codex login status` exited 2.", "agentctl: run it yourself to see why; no session was started."] }
+
+[[case]]
+id = "auth.warning.codex.timeout"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { subject = "auth-warning", agent = "codex", outcome = "timeout" }
+expected = { exit = 8, lines = ["agentctl: could not tell whether codex is logged in: `codex login status` timed out.", "agentctl: run it yourself to see why; no session was started."] }
+
+[[case]]
+id = "auth.warning.codex.signal"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { subject = "auth-warning", agent = "codex", outcome = "signal" }
+expected = { exit = 8, lines = ["agentctl: could not tell whether codex is logged in: `codex login status` was terminated by a signal.", "agentctl: run it yourself to see why; no session was started."] }
+
+[[case]]
+id = "auth.warning.codex.unavailable"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-16"
+input = { subject = "auth-warning", agent = "codex", outcome = "spawn-error" }
+expected = { exit = 8, lines = ["agentctl: could not tell whether codex is logged in: `codex login status` could not be run.", "agentctl: run it yourself to see why; no session was started."] }
+
+[[case]]
+id = "login-shape.claude.slash-suffix"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { subject = "login-shaped", agent = "claude", args = ["/login-extra"] }
+expected = false
+
+[[case]]
+id = "login-shape.claude.slash-tab"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { subject = "login-shaped", agent = "claude", args = ["--", "/login\tdevice"] }
+expected = true
+
+[[case]]
+id = "login-shape.claude.slash-unicode-space"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { subject = "login-shaped", agent = "claude", args = ["/login device"] }
+expected = true
+
+[[case]]
+id = "login-shape.claude.positional-auth"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { subject = "login-shaped", agent = "claude", args = ["--", "auth", "login"] }
+expected = false
+
+[[case]]
+id = "login-shape.claude.nonadjacent"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { subject = "login-shaped", agent = "claude", args = ["auth", "--verbose", "login"] }
+expected = false
+
+[[case]]
+id = "login-refusal.warning.claude.0"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { subject = "login-refusal-warning", agent = "claude", args = ["auth", "login"] }
+expected = { exit = 2, lines = ["agentctl: login commands must be run yourself: claude auth login"] }
+
+[[case]]
+id = "login-refusal.warning.claude.1"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { subject = "login-refusal-warning", agent = "claude", args = ["setup-token"] }
+expected = { exit = 2, lines = ["agentctl: login commands must be run yourself: claude auth login"] }
+
+[[case]]
+id = "login-refusal.warning.claude.2"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { subject = "login-refusal-warning", agent = "claude", args = ["--", "/login device"] }
+expected = { exit = 2, lines = ["agentctl: login commands must be run yourself: claude auth login"] }
+
+[[case]]
+id = "login-refusal.warning.codex.3"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { subject = "login-refusal-warning", agent = "codex", args = ["login"] }
+expected = { exit = 2, lines = ["agentctl: login commands must be run yourself: codex login"] }
+
+[[case]]
+id = "login-refusal.warning.codex.4"
+requirement = "R13"
+quote = "agentctl should instruct the user to do so themselves with the appropriate command (eg claude auth login)"
+provenance = "decision:D-12"
+input = { subject = "login-refusal-warning", agent = "codex", args = ["--", "login"] }
+expected = { exit = 0, lines = [] }

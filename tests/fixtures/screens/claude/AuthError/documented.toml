@@ -1,0 +1,4 @@
+provenance = "documented"
+source = "https://platform.claude.com/docs/en/api/errors"
+evidence = "authentication_error"
+note = "Illustrative fixture assembled from documented behavior and UI vocabulary; not a captured session or a claim about an exact live screen."

@@ -1,0 +1,83 @@
+cabal-version: 3.12
+name: agentctl-core
+version: 0.1.0.0
+build-type: Simple
+license: NONE
+synopsis: Native terminal-agent management kernels
+extra-source-files: src/AgentCtl/native_utf8.h
+
+common warnings
+  ghc-options: -Wall -Wcompat -Werror -Wpartial-fields -Wincomplete-uni-patterns
+               -Wincomplete-record-updates -Wredundant-constraints -Wunused-packages
+  default-language: Haskell2010
+  default-extensions: OverloadedStrings
+
+common executable-runtime
+  ghc-options: -threaded
+
+library
+  import: warnings
+  hs-source-dirs: src
+  exposed-modules: AgentCtl.Protocol, AgentCtl.Process, AgentCtl.Mux, AgentCtl.Session.Name
+                 , AgentCtl.Mux.Command, AgentCtl.Mux.Tmux, AgentCtl.Mux.Psmux
+                 , AgentCtl.PaneExec.Spec, AgentCtl.Native, AgentCtl.PaneExec
+                 , AgentCtl.Agent, AgentCtl.Agent.Argv, AgentCtl.Agent.Auth, AgentCtl.Preflight
+                 , AgentCtl.Launch, AgentCtl.Paths, AgentCtl.Sessions, AgentCtl.Session.Identity, AgentCtl.Adopt
+                 , AgentCtl.Observe.Normalize, AgentCtl.Observe.Fingerprint, AgentCtl.Observe.Capture
+                 , AgentCtl.Observe.Classify, AgentCtl.Observe.Classify.Claude, AgentCtl.Observe.Classify.Codex
+                 , AgentCtl.Observe.Classify.Agent
+                 , AgentCtl.Observe.Classify.Input
+                 , AgentCtl.Recovery.Machine, AgentCtl.Recovery.Backoff
+                 , AgentCtl.Supervisor.Watch, AgentCtl.Supervisor.Lock
+                 , AgentCtl.Supervisor.Commands, AgentCtl.Supervisor.Guard
+                 , AgentCtl.Supervisor.Poll
+                 , AgentCtl.Supervisor.Settings
+                 , AgentCtl.Supervisor.Log
+                 , AgentCtl.Supervisor.Log.File
+                 , AgentCtl.Supervisor.Delivery
+                 , AgentCtl.Supervisor, AgentCtl.Supervisor.Runtime
+  other-modules: AgentCtl.Mux.Types, AgentCtl.Agent.Types
+  c-sources: src/AgentCtl/native_fs.c, src/AgentCtl/native_process.c, src/AgentCtl/native_stop.c
+  cc-options: -std=c11 -Wall -Wextra -Werror
+  build-depends: base >=4.21 && <4.22, aeson >=2.3.2 && <2.4, async >=2.2.5 && <2.3, bytestring >=0.12 && <0.13, text >=2.1 && <2.2, process >=1.6.26 && <1.7, directory >=1.3.10 && <1.4, filepath >=1.5.5 && <1.6, containers >=0.7 && <0.8, temporary >=1.3 && <1.4
+              , cryptohash-sha256 ==0.11.102.1
+              , base64-bytestring ==1.2.1.0, transformers >=0.6 && <0.7
+              , optparse-applicative ==0.19.0.0
+              , time >=1.14 && <1.15
+
+executable agentctl-core
+  import: warnings, executable-runtime
+  hs-source-dirs: app
+  main-is: Core.hs
+  build-depends: base >=4.21 && <4.22, agentctl-core, aeson >=2.3.2 && <2.4, bytestring >=0.12 && <0.13, text >=2.1 && <2.2, directory >=1.3.10 && <1.4
+              , optparse-applicative ==0.19.0.0
+
+executable agentctl-core-eval
+  import: warnings, executable-runtime
+  hs-source-dirs: app
+  main-is: Eval.hs
+  build-depends: base >=4.21 && <4.22, agentctl-core, aeson >=2.3.2 && <2.4, bytestring >=0.12 && <0.13, text >=2.1 && <2.2
+
+executable agentctl-fake-agent
+  import: warnings, executable-runtime
+  hs-source-dirs: app
+  main-is: FakeAgent.hs
+  other-modules: ScriptedAgent, SupervisorFixture
+  c-sources: app/fake_signals.c
+  cc-options: -std=c11 -Wall -Wextra -Werror
+  build-depends: base >=4.21 && <4.22, agentctl-core, aeson >=2.3.2 && <2.4, bytestring >=0.12 && <0.13, text >=2.1 && <2.2
+              , directory >=1.3.10 && <1.4, filepath >=1.5.5 && <1.6, temporary >=1.3 && <1.4, async >=2.2.5 && <2.3
+              , time >=1.14 && <1.15
+
+test-suite agentctl-core-test
+  import: warnings, executable-runtime
+  type: exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is: Main.hs
+  c-sources: test/state_fixture.c, test/console_fixture.c
+  cc-options: -std=c11 -Wall -Wextra -Werror
+  other-modules: MuxTests, SpecTests, MuxFixture, AgentTests, AgentFixture, NameTests, ObserveTests, RecoveryTests, SupervisorTests, ConsoleFixture
+  build-depends: base >=4.21 && <4.22, agentctl-core, tasty >=1.5.4 && <1.6, tasty-hunit >=0.10 && <0.11, tasty-ant-xml ==1.1.9
+              , bytestring >=0.12 && <0.13, text >=2.1 && <2.2, directory >=1.3.10 && <1.4, filepath >=1.5.5 && <1.6, temporary >=1.3 && <1.4
+              , containers >=0.7 && <0.8, aeson >=2.3.2 && <2.4
+              , async >=2.2.5 && <2.3

@@ -1,0 +1,28 @@
+# Copyright (c) 2026 agentctl contributors.
+"""Discover and reuse a real ghcup only inside a redirected private prefix."""
+
+import json
+import sys
+from dataclasses import replace
+from pathlib import Path
+
+from agentctl.bootstrap.ghcup import provide
+from agentctl.bootstrap.pins import Asset, load
+from agentctl.check.audit import install
+from agentctl.hostfacts import architecture, current, gather
+from agentctl.result import Ok
+
+directory, log, nonce, url, digest = sys.argv[1:]
+assert isinstance(install(Path(log), nonce), Ok)
+context = replace(current(Path(directory) / "cache"), cwd=Path(directory))
+assert context.family in {"Linux", "Darwin", "Windows"}
+pins = load()
+assert isinstance(pins, Ok)
+selected = replace(
+    pins.value,
+    assets=(Asset(context.family, architecture(context.family, context.machine), url, digest),),
+)
+facts = gather(context, selected)
+assert isinstance(facts, Ok), facts
+result = provide(facts.value, selected)
+print(json.dumps({"ok": isinstance(result, Ok), "path": str(result.value) if isinstance(result, Ok) else result.error.message}))

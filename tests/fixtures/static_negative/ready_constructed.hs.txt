@@ -1,0 +1,9 @@
+module AgentCtl.ReadyWitness (witness) where
+
+import AgentCtl.Agent (Agent (Claude))
+import AgentCtl.Agent.Auth (AuthState (LoggedIn))
+import AgentCtl.Mux (Multiplexer)
+import AgentCtl.Preflight
+
+witness :: Multiplexer -> Ready
+witness mux = VerifiedReady mux Claude "/tools/claude" LoggedIn

@@ -1,0 +1,4 @@
+rule = "docs.links"
+path = "documents/operations/installation.md"
+search = ""
+replace = "\n[negative](#missing-anchor)\n"

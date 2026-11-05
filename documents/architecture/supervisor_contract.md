@@ -25,12 +25,19 @@
 `AgentCtl.Observe.Capture` runs `capture-pane -p -J -t %<id> -S -100` on the agent pane, the id in
 `@agentctl_pane` for a managed session or the registry's revalidated pane id for an adopted one, decodes the
 output as UTF-8 and reads the pane's dead state with it, so `Exited` never depends on text. The pure
-`AgentCtl.Observe.Normalize` unifies line endings, strips trailing spaces, drops trailing blank lines and keeps
-the bounded tail; normalising twice equals normalising once
+`AgentCtl.Observe.Normalize` converts CRLF and bare CR to LF, strips trailing spaces and tabs from each line,
+drops trailing blank lines and keeps the final 100 lines without a trailing newline. Leading indentation and
+non-ASCII text are preserved; normalising twice equals normalising once
 (`tests/integration/test_capture_real.py::test_capture_roundtrip_on_private_server`,
 `haskell:agentctl-core-test/Normalize/idempotent`).
 
-`AgentCtl.Observe.Fingerprint` gives each error block the SHA-256 of its normalised text alone. Redraws,
+Capture also reads an unjoined styled viewport with `capture-pane -p -e -S 0` and native cursor coordinates and
+dimensions. Matching pane facts before and after these reads establish the visual snapshot; a changing snapshot
+retries within the caller's existing deadline. Numeric facts use a printable delimiter so their parsing remains
+stable under the C locale. The joined text remains the normalized classification and fingerprint input.
+
+`AgentCtl.Observe.Fingerprint` represents an error block with separate preceding text, error content and following
+text. Only the normalised error content enters its UTF-8 SHA-256 hash, rendered as lowercase hexadecimal. Redraws,
 scrolling, surrounding output and a second occurrence of identical error text keep the fingerprint; a changed
 normalised error block changes it (`haskell:agentctl-core-test/Fingerprint/stable-under-redraw`,
 `haskell:agentctl-core-test/Fingerprint/different-error-differs`). Bounded captures expose no reliable absolute
@@ -75,6 +82,20 @@ directory names, every precedence pair is decided by its dominating element, and
 it shows (`tests/unit/test_screen_classes.py::test_fixtures_classify_as_their_directory`,
 `tests/unit/test_screen_classes.py::test_precedence_pairs`, `haskell:agentctl-core-test/Classify/dead-pane-is-exited`).
 
+Each text file has a sibling TOML sidecar. Both provenance kinds require `evidence` and a `note` explaining the
+fixture's scope. A documented sidecar carries its official HTTPS `source`; a captured sidecar instead requires
+`agent_version` and the exact `capture_command`. An optional `baseline` names an overload fixture for the same
+agent, making the precedence comparison explicit. Documented examples assemble the documented behavior and UI
+vocabulary and state that they are illustrative; they do not attest to a live screen or an exact agent version.
+
+The classifiers share precedence and latest-event selection while retaining per-agent prompts and markers. A
+nonempty prompt is `PartialInput` unless matching styled rows show an explicit faint suggestion and the cursor is
+at the input's start. Ordinary draft text at Home, whitespace drafts, a moved cursor and missing or conflicting
+evidence remain blocked. Color numbers inside extended SGR sequences cannot stand in for the faint attribute.
+Error recognition requires an empty prompt and a recognized error in the latest
+output line above it. Later ordinary output prevents an old error from classifying the screen as a failure; an
+unrecognized error remains `Unknown`. Classified errors carry their separate error block for fingerprinting.
+
 What stays unproven is stated, never implied. A class backed only by `documented` fixtures is consistent with its
 docs, not with a real screen; a genuine overload, usage limit, auth error or context exhaustion cannot be
 produced on demand, so those classes stay unproven unless a sanctioned capture meets one. Live classification
@@ -86,8 +107,8 @@ in a folder the user has already trusted.
 
 `AgentCtl.Recovery.Machine` is a pure, total step function from the backoff policy, the state and one
 observation, a screen class with its fingerprint or a deadline reached, to the next state and a list of actions.
-The actions are a closed type, waiting until a deadline, sending the recovery text, notifying and escalating,
-with no constructor that kills, respawns, switches models or logs in. An incident follows one unhandled
+The actions are a closed type: waiting until a deadline, sending the recovery text and notifying. Escalation
+enters ESCALATE with a terminal or unacknowledged error notice. No action kills, respawns, switches models or logs in. An incident follows one unhandled
 `Overloaded` fingerprint `f` and counts its attempt `n`; "hard" means `UsageLimit`, `AuthError`,
 `ContextExhausted` or `LoginScreen`, and "blocking" means `TrustDialog`, `BypassWarning`, `ApprovalDialog` or
 `PartialInput`. The first row that matches applies:
@@ -120,6 +141,14 @@ that each fingerprint gets at most one send (`haskell:agentctl-core-test/Machine
 that a screen unchanged through the verify deadline escalates (`haskell:agentctl-core-test/Machine/verify-needs-change`).
 In the running loop every logged decision equals the oracle row for its state and observation.
 
+The pure state carries an ordered handled set, an arbitrary-precision attempt number, the incident deadline and
+the seeded generator state. Fingerprint identities are generic keys; the supervisor supplies content fingerprints
+and the evaluator supplies independent oracle aliases to the same function. Baseline capture records an existing
+error as handled. A new incident requires three matching overload observations before scheduling backoff, and only
+a still-matching, unhandled overload at the deadline yields a send. Missing incident or fingerprint data cannot
+yield a send (`haskell:agentctl-core-test/Machine/never-send-unsafe`,
+`haskell:agentctl-core-test/Machine/one-send-per-fingerprint`).
+
 ## Safety Rules
 
 The concept note's nine rules, as this contract holds them:
@@ -144,6 +173,18 @@ The concept note's nine rules, as this contract holds them:
 maximum delay, times `1 + u` with `u` drawn uniformly from `[-jitter, +jitter]`, capped at the maximum again, so
 no delay exceeds it. The generator is seeded: a test supplies the seed and the same seed yields the same delays,
 while `supervisor run` seeds it from the clock. `tests/oracles/backoff.toml` holds the bounds per attempt.
+
+Policies require finite values: positive initial delay, multiplier greater than one, maximum at least initial,
+and jitter from zero inclusive to one exclusive. The generator advances a Word64 using a linear congruential
+step and takes its high 53 bits for the jitter fraction. It advances only when scheduling a retry, so polling
+never moves an existing deadline. The capped exponential base determines the notification level.
+
+A wait carries its retry record. The confirmation's explicit notification can name the same record, and the
+pure notification projection delivers that notice once per decision. A fresh overload in VERIFY therefore
+keeps the transition table's wait action and also carries its next policy-eligible retry notice. Deadline controls
+compare actual scheduled times and notices to the independent zero-jitter oracle rows, including the next attempt
+and the send immediately at its deadline
+(`tests/unit/test_recovery_transitions.py::test_backoff_deadlines_match_oracle`).
 
 | Flag of `supervisor run` | Default |
 |---|---|
@@ -171,6 +212,9 @@ class and, for `LoginScreen` and `AuthError`, the command the user types, such a
    (`tests/unit/test_supervisor_values.py::test_send_guard_oracle`,
    `tests/e2e/test_supervisor_scenarios.py::test_screen_change_aborts_send`). The guard narrows the gap to one
    capture but cannot close it: a key the user presses in that instant is not seen, and no phase proves otherwise.
+   This is the same plain-text normalisation used for observations; ANSI escape bytes inside plain capture text
+   remain content. Equality also requires an overload and a present fingerprint, so an identical blocked screen
+   cannot authorize a send.
 3. The text goes as `send-keys -l -t %<id> -- <text>`, then a separate `send-keys -t %<id> Enter`: `-l` types the
    text as characters, never reading a word such as `Enter` or `C-c` as a key name, and the separate Enter
    submits it as one keystroke rather than as a newline inside the text.
@@ -201,6 +245,33 @@ class and, for `LoginScreen` and `AuthError`, the command the user types, such a
   notification and any open incident ends. SIGINT or SIGTERM abandons a pending send, releases the lock and exits
   0 without an ending multiplexer command,
   ending no session (R17).
+
+Watch transitions are a pure kernel with independent rows covering every command, eligibility kind and existing
+intent state. Effective changes advance the registry and entry revisions; repeats preserve the persisted bytes.
+Watch commands serialize reload, transition and publication under the short native `watch.lock`, with a five-second
+contention bound. The supervisor holds the same lock while checking current intent immediately before a send.
+Between protected polling sections it yields twenty milliseconds with the lock released, allowing watch commands
+to acquire it even when native work exceeds the poll interval. The guard and send stay in the same protected section
+(`tests/e2e/test_supervisor_scenarios.py::test_paused_target_never_sent`).
+The process-wide stop scope restores prior handlers when it exits; native Windows console Ctrl+C and Ctrl+Break
+set the same stop request as its C runtime SIGINT/SIGTERM handlers. No handler performs logging or multiplexer I/O.
+Native lifecycle acceptance sends SIGINT and SIGTERM to the owned POSIX child. On Windows a test-only fixture
+starts the controller in a second private multiplexer console and sends Ctrl+C or Ctrl+Break after verifying that
+the supervisor-lock PID belongs to that console. It requires the actual controller to exit before teardown can
+send another stop request, then proves lock reuse and unchanged managed and adopted pane identities
+(`tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`). Windows console results require a
+native Windows host.
+The pure poll kernel first requests a capture only for an active entry. Its per-target memory retains handled
+fingerprints through pause, unwatch and rewatch for that supervisor process. Dropping an incident handles its
+fingerprint and records `ended`; a revision change establishes a fresh baseline. A planned send state is committed
+only after delivery, and an aborted guard steps the fresh observation from the prior state.
+One target receives at most one guard/send offer per poll. If that fresh step proposes another send, the proposal
+is recorded and delivery waits for the next poll without marking the unsent fingerprint handled. A command failure
+handles the incident, escalates and records `unresolved`; an identity change without a safe capture ends the old
+incident and resets the baseline.
+The entry revision lets a later poll detect a pause and resume even if the paused state occurred between polls
+(`tests/unit/test_watch_values.py::test_watch_transitions_oracle`,
+`tests/e2e/test_watch_commands.py::test_list_and_status_show_watch_state`).
 
 ## The Decision Log
 

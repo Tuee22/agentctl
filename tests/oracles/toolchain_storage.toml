@@ -1,0 +1,63 @@
+[[case]]
+id = "bootstrap.storage.0"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-50"
+input = { "ghc_ready" = false, "cabal_ready" = false, "shared" = false }
+expected = [11811160064, 4294967296]
+
+[[case]]
+id = "bootstrap.storage.1"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-50"
+input = { "ghc_ready" = false, "cabal_ready" = false, "shared" = true }
+expected = [16106127360, 0]
+
+[[case]]
+id = "bootstrap.storage.2"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-50"
+input = { "ghc_ready" = true, "cabal_ready" = false, "shared" = false }
+expected = [1073741824, 4294967296]
+
+[[case]]
+id = "bootstrap.storage.3"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-50"
+input = { "ghc_ready" = true, "cabal_ready" = false, "shared" = true }
+expected = [5368709120, 0]
+
+[[case]]
+id = "bootstrap.storage.4"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-50"
+input = { "ghc_ready" = false, "cabal_ready" = true, "shared" = false }
+expected = [10737418240, 4294967296]
+
+[[case]]
+id = "bootstrap.storage.5"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-50"
+input = { "ghc_ready" = false, "cabal_ready" = true, "shared" = true }
+expected = [15032385536, 0]
+
+[[case]]
+id = "bootstrap.storage.6"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-50"
+input = { "ghc_ready" = true, "cabal_ready" = true, "shared" = false }
+expected = [0, 0]
+
+[[case]]
+id = "bootstrap.storage.7"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-50"
+input = { "ghc_ready" = true, "cabal_ready" = true, "shared" = true }
+expected = [0, 0]

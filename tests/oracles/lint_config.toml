@@ -1,0 +1,25 @@
+[[case]]
+id = "config.python"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-32"
+input = { "subject" = "lint-config" }
+expected = { "ruff" = { "lint" = { "select" = ["ALL"], "ignore" = ["D203", "D213", "COM812"], "per-file-ignores" = { "src/agentctl/process.py" = ["S603", "S606"], "tests/**/*.py" = ["S101"] }, "flake8-tidy-imports" = { "banned-api" = { "typing.Any" = { "msg" = "Name the precise type." }, "typing.cast" = { "msg" = "Parse into the type instead." }, "typing.no_type_check" = { "msg" = "Every function is type checked." }, "unittest.mock" = { "msg" = "Observe real effects instead." } } } } }, "ty" = { "rules" = { "all" = "error" }, "analysis" = { "respect-type-ignore-comments" = false }, "terminal" = { "error-on-warning" = true } }, "pytest" = { "minversion" = "9.0", "strict" = true, "filterwarnings" = ["error"], "testpaths" = ["tests"], "markers" = ["evidence(cls): the evidence class: value, real or observer"] }, "coverage" = { "run" = { "branch" = true, "source" = ["agentctl"] }, "report" = { "fail_under" = 100 } } }
+
+[[case]]
+id = "config.python.raw-links"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-32"
+input = { "subject" = "lint-config" }
+expected = { "ruff" = { "lint" = { "select" = ["ALL"], "ignore" = ["D203", "D213", "COM812"], "per-file-ignores" = { "src/agentctl/process.py" = ["S603", "S606"], "tests/**/*.py" = ["S101"], "src/agentctl/check/writeguard.py" = ["PTH115"] }, "flake8-tidy-imports" = { "banned-api" = { "typing.Any" = { "msg" = "Name the precise type." }, "typing.cast" = { "msg" = "Parse into the type instead." }, "typing.no_type_check" = { "msg" = "Every function is type checked." }, "unittest.mock" = { "msg" = "Observe real effects instead." } } } } }, "ty" = { "rules" = { "all" = "error" }, "analysis" = { "respect-type-ignore-comments" = false }, "terminal" = { "error-on-warning" = true } }, "pytest" = { "minversion" = "9.0", "strict" = true, "filterwarnings" = ["error"], "testpaths" = ["tests"], "markers" = ["evidence(cls): the evidence class: value, real or observer"] }, "coverage" = { "run" = { "branch" = true, "source" = ["agentctl"] }, "report" = { "fail_under" = 100 } } }
+amends = "config.python"
+
+[[case]]
+id = "config.python.subprocess-coverage"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-32"
+input = { "subject" = "lint-config" }
+expected = { "ruff" = { "lint" = { "select" = ["ALL"], "ignore" = ["D203", "D213", "COM812"], "per-file-ignores" = { "src/agentctl/process.py" = ["S603", "S606"], "tests/**/*.py" = ["S101"], "src/agentctl/check/writeguard.py" = ["PTH115"] }, "flake8-tidy-imports" = { "banned-api" = { "typing.Any" = { "msg" = "Name the precise type." }, "typing.cast" = { "msg" = "Parse into the type instead." }, "typing.no_type_check" = { "msg" = "Every function is type checked." }, "unittest.mock" = { "msg" = "Observe real effects instead." } } } } }, "ty" = { "rules" = { "all" = "error" }, "analysis" = { "respect-type-ignore-comments" = false }, "terminal" = { "error-on-warning" = true } }, "pytest" = { "minversion" = "9.0", "strict" = true, "filterwarnings" = ["error"], "testpaths" = ["tests"], "markers" = ["evidence(cls): the evidence class: value, real or observer"] }, "coverage" = { "run" = { "branch" = true, "source" = ["agentctl"], "patch" = ["subprocess"] }, "report" = { "fail_under" = 100 } } }
+amends = "config.python.raw-links"

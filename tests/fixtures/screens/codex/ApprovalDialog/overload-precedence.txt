@@ -1,0 +1,10 @@
+OpenAI Codex
+
+ERROR: The server is overloaded. Please retry.
+
+› 
+
+Would you like to run the following command?
+› 1. Yes
+  2. No
+Esc to cancel

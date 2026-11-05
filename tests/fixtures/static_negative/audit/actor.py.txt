@@ -1,0 +1,39 @@
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+from agentctl.check.audit import install
+from agentctl.result import Ok
+
+mode, log, nonce, sentinel = sys.argv[1:]
+assert isinstance(install(Path(log), nonce), Ok)
+program = "from pathlib import Path; import sys; Path(sys.argv[1]).write_text('executed')"
+argv = [sys.executable, "-c", program, sentinel]
+if mode == "subprocess":
+    subprocess.run(argv, check=True)
+elif mode == "exec":
+    os.execv(sys.executable, argv)
+elif mode == "system":
+    assert os.system("echo " + nonce) == 0
+elif mode == "native":
+    if os.name == "nt":
+        assert os.spawnv(os.P_WAIT, sys.executable, argv) == 0
+    else:
+        pid = os.posix_spawn(sys.executable, argv, os.environ)
+        assert os.waitpid(pid, 0)[1] == 0
+elif mode == "veto":
+    try:
+        subprocess.run(["sudo", *argv[1:]], executable=sys.executable, check=True)
+    except PermissionError:
+        pass
+    else:
+        raise RuntimeError("forbidden sentinel executed")
+elif mode == "malformed":
+    subprocess.run(argv, check=True)
+    try:
+        sys.audit("os.exec")
+    except OSError as error:
+        assert "unparseable event" in str(error)
+    else:
+        raise RuntimeError("malformed event accepted")

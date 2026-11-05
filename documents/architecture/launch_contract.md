@@ -45,6 +45,9 @@ canonical folder, compared case-folded on Windows. The first row that applies de
 | both names belong to other sessions | refuse, naming the session that holds the hash form |
 
 A session agentctl does not own, or another folder's, never matches, so launch never attaches to it or ends it.
+Windows compares session names case-folded while preserving the selected session's actual spelling for attachment;
+missing owner, agent or folder options always make a session foreign. The pure naming module uses the shared
+closed identity in `AgentCtl.Agent.Types`, which `AgentCtl.Agent` re-exports, without importing the mux IO adapter.
 From `/home/ana/src/api`, `agentctl claude` creates `api-claude`; from `/home/ana/work/api` it then creates
 `api-fe49ec32-claude`, and running it there again re-attaches to that session. Names and decisions are compared
 with the oracle rows, each hash recomputed by Python's hashlib (`tests/unit/test_session_names.py::test_session_names_match_oracle`,
@@ -53,7 +56,9 @@ with the oracle rows, each hash recomputed by Python's hashlib (`tests/unit/test
 
 ## Argument Assembly
 
-`AgentCtl.Agent.Argv` builds the argv from the agent table in `AgentCtl.Agent` and the raw ARGS:
+`AgentCtl.Agent.Argv.launchArgv` builds the argv from the closed agent table in `AgentCtl.Agent` and the raw ARGS.
+The table also owns executable names, auth argv, login remedies and variants, OS install hints and literal recovery
+text; `tests/unit/test_agent_table.py::test_agent_table_matches_oracle` checks every field on every OS family:
 
 | Agent | Mandatory flags, in order | Removed before the first bare `--` |
 |---|---|---|
@@ -90,8 +95,9 @@ know each mandatory flag while rejecting a nonce-named one.
 
 ## Login Refusals
 
-agentctl never runs a login command, never types a login into a REPL, and refuses login-shaped ARGS before
-anything is spawned (R13):
+`AgentCtl.Agent.Argv.checkedArgv` applies the login refusal before calling the pure assembly kernel. Launch uses
+this checked operation before preflight. Its error renderer returns exit 2 with the primary login remedy and
+does not repeat user arguments: agentctl refuses login-shaped ARGS before anything is spawned (R13):
 
 | Agent | Refused when ARGS contain | The user types instead |
 |---|---|---|
@@ -116,17 +122,25 @@ both agents, a preflight records one auth-status probe and no login
 
 ## Preflight
 
-`AgentCtl.Preflight` runs three checks in order, stops at the first failure, and creates nothing: no session,
+`AgentCtl.Preflight` builds a pure closed program with multiplexer, agent and auth requests. Its I/O interpreter
+runs those requests in order, stops at the first failure, and creates nothing: no session,
 no spec and no state.
 
 1. **Multiplexer.** tmux or psmux resolves and meets its floor ([multiplexer adapter](multiplexer_adapter.md)).
 2. **Agent.** `claude` or `codex` resolves on PATH to an absolute path. On Windows only a native `.exe`, found
    through PATHEXT, qualifies: a `.cmd` or `.bat` shim started through CreateProcessW has its arguments
-   re-parsed by cmd.exe, which would expose verbatim ARGS to injection.
+   re-parsed by cmd.exe, which would expose verbatim ARGS to injection. PATH directories are searched in order;
+   Windows tries PATHEXT entries in order and compares names case-insensitively. The first executable match decides,
+   including a shim refusal without falling through to a later native file. Relative PATH entries are joined to the
+   absolute caller directory; POSIX names compare case-sensitively. Native filesystem observations feed this pure
+   selector, and the selected path is canonicalised once.
 3. **Login.** `claude auth status` or `codex login status` runs by absolute path in the caller's environment,
    the one the trampoline later gives the pane, and only its exit code counts: 0 is logged in, 1 is logged out,
    and any other exit, a signal, a failure to start or no exit within 10 s is `check failed`.
 
+The shared runner's status-only operation drains both streams as bytes without decoding them. Invalid UTF-8
+therefore cannot change a successful exit into a failed auth check
+(`haskell:agentctl-core-test/ProcessReal/status-only-ignores-bytes`).
 Exit codes alone decide, because claude prints JSON on stdout and codex writes only to stderr in wording that
 changes between versions; a usage error or a hung probe never tells a logged-in user to log in again. Success is
 `Ready`, whose constructor `AgentCtl.Preflight` does not export, and `AgentCtl.Launch` creates a session only
@@ -138,7 +152,7 @@ The rows in `tests/oracles/auth_status.toml` cover exits 0, 1, 2 and 127, a sign
 variables, `DISABLE_AUTOUPDATER=1`), exit 1 (`tests/integration/test_agent_real.py::test_logged_out_by_construction`).
 With no tmux on a constructed PATH the fake agent records nothing, against the same PATH with tmux
 (`tests/integration/test_preflight.py::test_order_mux_then_agent_then_auth`), and `ready_constructed.hs.txt`
-constructs the private constructor as an expression and fails with `GHC-88464`, while its twin
+constructs the private `VerifiedReady` constructor as an expression and fails with `GHC-88464`, while its twin
 `ready_from_preflight.hs.txt` compiles
 (`tests/integration/test_ready_opaque.py::test_ready_constructor_is_not_exported`).
 
@@ -146,11 +160,12 @@ constructs the private constructor as an expression and fails with `GHC-88464`, 
 
 Warnings go to the binary's stderr, which is the user's own terminal, never into the pane, where they would
 vanish with the session. Every line starts `agentctl: `, and `tests/oracles/preflight.toml` holds each line per
-class and OS (`tests/unit/test_preflight.py::test_failure_warnings_match_oracle`):
+class and OS (`tests/unit/test_preflight.py::test_failure_warnings_match_oracle`). Install hints start with
+`agentctl: install it with: ` followed by the exact agent or multiplexer remedy:
 
 | Class | Exit | Warning |
 |---|---|---|
-| Login-shaped ARGS | 2 | `` `auth login` is a login command, and agentctl never runs one. Type it yourself: claude auth login `` |
+| Login-shaped ARGS | 2 | `login commands must be run yourself: claude auth login` (or `codex login`) |
 | Multiplexer missing | 3 | `tmux 3.2 or later is required, and none was found on PATH.`, then the install hint |
 | Multiplexer below its floor | 4 | `tmux 3.1c at /usr/bin/tmux is older than 3.2, the oldest version agentctl supports.`, then the hint |
 | Agent missing | 5 | `claude was not found on PATH.`, then the install hint |
@@ -228,6 +243,11 @@ and the real agents' rejections inside the window by running the trampoline dire
 codex (`tests/integration/test_agent_argv_real.py::test_final_argv_accepted_logged_out`); a real rejection
 relayed through `agentctl` itself needs a logged-in agent and is proven by no phase.
 
+A closed terminal can precede child accounting. When tmux has no published status, the process runner reads that
+backend's server pid and sends SIGCHLD to request normal child reaping, then the observer continues waiting for the
+actual status. This handles libutempter's temporary signal-handler replacement without sending pane input or
+changing the required exit status. psmux continues reading the trampoline's private status file.
+
 ## The Pane Trampoline
 
 The pane command is `agentctl-core pane-exec <spec>`, both paths absolute, run by `AgentCtl.PaneExec`;
@@ -241,7 +261,9 @@ The pane command is `agentctl-core pane-exec <spec>`, both paths absolute, run b
   that the next launch replaces.
 - **Refusal.** A spec that is not a regular file, is not owned by the invoking user, or is more permissive than
   0600 in a directory more permissive than 0700 is refused; on Windows it takes the access rules of the per-user
-  directory it sits in.
+  directory it sits in. Native owner-SID and DACL observations establish Windows privacy; reparse points, null
+  DACLs and unsupported ACE forms are refused. The bounded snapshot and the common access model are defined in
+  [files and state](../reference/files_and_state.md#launch-specs).
 - **Lifetime.** The trampoline deletes the spec right after reading it; a launch whose pane never started
   deletes its own, and nothing else reads one.
 - **Environment.** The agent gets the caller's environment from the spec, except `TERM`, `TMUX` and

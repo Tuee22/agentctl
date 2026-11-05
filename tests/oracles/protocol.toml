@@ -1,0 +1,63 @@
+[[case]]
+id = "protocol.handshake"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-52"
+input = { line = '{"subject":"handshake"}' }
+expected = { protocol = 1, commands = ["claude", "codex", "list", "status", "attach", "stop", "adopt", "watch", "unwatch", "pause", "resume-watch", "logs", "supervisor"] }
+
+[[case]]
+id = "protocol.handoff.current"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-52"
+input = { line = '{"subject":"handoff","version":"1"}' }
+expected = true
+
+[[case]]
+id = "protocol.handoff.missing"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-52"
+input = { line = '{"subject":"handoff"}' }
+expected = false
+
+[[case]]
+id = "protocol.handoff.other"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-52"
+input = { line = '{"subject":"handoff","version":"0"}' }
+expected = false
+
+[[case]]
+id = "protocol.invalid.syntax"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-52"
+input = { line = 'invalid JSON' }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "protocol.invalid.subject"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-52"
+input = { line = '{"subject":"unknown"}' }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "protocol.invalid.type"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-52"
+input = { line = '[]' }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "protocol.invalid.empty"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-52"
+input = { line = '' }
+expected = { error = "invalid-case" }

@@ -37,12 +37,16 @@ pane `%3` on that server.
 command reads them from the live server; nothing caches them. Options live and die with the session, so a
 session the user ends with tmux, or one lost to a server restart, simply stops being listed. The same options
 let launch find a folder's session and re-attach ([create or attach](launch_contract.md#create-or-attach)).
+Launch also records its private trampoline status-file path in `@agentctl_status`, encoded like the folder.
+Queries read that file for a retained dead psmux pane, while tmux supplies native exit and signal status. An
+unpublished dead-pane status waits within the existing query deadline; an unavailable status never becomes success.
 
 **Adopted panes.** The adopted registry is `<state>/adopted.json`, rewritten atomically (a temporary file
 renamed into place); [files and state](../reference/files_and_state.md) owns its format. Each entry holds the
 server's endpoint identity in the `socket` field, the pane id, the pid of the pane's first process at adoption and
 the agent. The adapter supplies a tmux socket path or an opaque psmux identity containing the namespace and
-addressed server; Windows need not have a filesystem socket. Every use revalidates the entry: its endpoint must
+addressed server: its opaque string encodes a JSON array of `psmux`, the reported namespace and the stable session
+id. Windows need not have a filesystem socket. Every use revalidates the entry: its endpoint must
 name the live server the command talks to, and the pane id must exist
 there with the recorded pid. An entry whose server is gone, whose pane id is missing or whose pid differs,
 because the server restarted and reused the id, is **stale**: `list` and `status` show it as stale, nothing
@@ -78,9 +82,28 @@ and `adopt` takes the agent from `--agent` rather than guessing it from the proc
     `agentctl: api is not a session agentctl manages; nothing was stopped.`
 - **`adopt PANE --agent claude|codex`** reads the pane's `#{pane_pid}` and records the entry. It refuses with a
   non-zero exit, recording nothing, when the pane does not exist, belongs to a managed session, or is already
-  adopted. It sets no option, sends no key and ends nothing: adopting a pane transfers no ownership.
+  adopted, or when it is no longer alive. It sets no option, sends no key and ends nothing: adopting a pane transfers
+  no ownership.
 
 ## What Each Command May Touch
+
+`list` prints a tab-separated table headed `NAME`, `AGENT`, `FOLDER`, `STATE`, `EXIT`, `CLIENTS`,
+`PANE`, `PID`, `KIND`, `SESSION` and `COMMAND`. Folder, session and command cells are JSON strings, preserving quotes,
+separators and control characters without splitting a row. The final columns show the containing session and the
+adopted pane's current-command hint; hints never establish identity. A running pane has `STATE` `alive` and no exit
+status, shown as `-`; a retained dead managed pane has `STATE` `dead` and its actual exit status. An adopted pane's
+unavailable status is also `-`, since psmux's native status variable is a placeholder and a foreign pane has no
+agentctl trampoline status file. A stale entry shows its recorded pane and pid and no current hint. An empty result
+still prints the header. The pure ownership rows and
+the native server tests agree on these facts (`tests/unit/test_sessions_values.py::test_list_rows_match_oracle`,
+`tests/e2e/test_sessions.py::test_list_shows_only_managed`,
+`tests/e2e/test_sessions.py::test_status_reports_dead_pane`).
+
+`status` appends `SCREEN`, the pane's current [screen class](supervisor_contract.md#screen-classes-and-fixture-provenance).
+Each invocation takes a fresh capture and selects the classifier from the managed agent option or adopted registry
+entry. A stale adopted entry displays `Unknown` without capturing an unvalidated pane
+(`tests/e2e/test_status_screen.py::test_screen_column_shows_fixture_class`,
+`tests/e2e/test_status_screen.py::test_screen_column_uses_the_agents_classifier`).
 
 | Action | Managed | Adopted | Foreign |
 |---|---|---|---|
@@ -150,6 +173,12 @@ RIGHT  launch writes the @agentctl_* options, and list reads them from the live 
 
 A file keeps listing a session after the user ends it with tmux or the server restarts, so `list` shows
 ghosts and `stop` aims at names that may now belong to another session.
+
+`list` and `status` append `WATCHED` and `PAUSED` as `yes` or `no`. Watch intent is independent of ownership:
+registered foreign panes remain adopted, and pausing or unwatching changes only the watch registry. Repeated watch
+preserves an existing pause, and effective changes advance the target's revision for the next supervisor baseline
+(`tests/e2e/test_watch_commands.py::test_list_and_status_show_watch_state`,
+`tests/e2e/test_watch_commands.py::test_unwatch_never_touches_session`).
 
 ## Related
 

@@ -1,0 +1,1681 @@
+
+[[case]]
+id = "supervisor.forbidden-policy"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "forbidden-policy" }
+expected = { "verbs" = ["kill-session", "kill-server", "kill-pane", "respawn-pane", "respawn-window", "new-session", "new-window"], "tokens" = ["/model", "/login", "claude auth login", "claude setup-token", "codex login"] }
+
+[[case]]
+id = "command-plan.linux.claude.3.send"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%3", "action" = "send" }
+expected = [["send-keys", "-l", "-t", "%3", "--", "Continue the interrupted task from the last completed step."], ["send-keys", "-t", "%3", "Enter"]]
+
+[[case]]
+id = "command-plan.linux.claude.3.wait"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%3", "action" = "wait" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.claude.3.notify"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%3", "action" = "notify" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.claude.3.unwatch"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%3", "action" = "unwatch" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.claude.3.shutdown"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%3", "action" = "shutdown" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.claude.3.escalate"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%3", "action" = "escalate" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.claude.3.exited"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%3", "action" = "exited" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.claude.21.send"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%21", "action" = "send" }
+expected = [["send-keys", "-l", "-t", "%21", "--", "Continue the interrupted task from the last completed step."], ["send-keys", "-t", "%21", "Enter"]]
+
+[[case]]
+id = "command-plan.linux.claude.21.wait"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%21", "action" = "wait" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.claude.21.notify"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%21", "action" = "notify" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.claude.21.unwatch"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%21", "action" = "unwatch" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.claude.21.shutdown"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%21", "action" = "shutdown" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.claude.21.escalate"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%21", "action" = "escalate" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.claude.21.exited"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "claude", "pane" = "%21", "action" = "exited" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.codex.3.send"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%3", "action" = "send" }
+expected = [["send-keys", "-l", "-t", "%3", "--", "Continue the interrupted task from the last saved checkpoint."], ["send-keys", "-t", "%3", "Enter"]]
+
+[[case]]
+id = "command-plan.linux.codex.3.wait"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%3", "action" = "wait" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.codex.3.notify"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%3", "action" = "notify" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.codex.3.unwatch"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%3", "action" = "unwatch" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.codex.3.shutdown"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%3", "action" = "shutdown" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.codex.3.escalate"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%3", "action" = "escalate" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.codex.3.exited"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%3", "action" = "exited" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.codex.21.send"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%21", "action" = "send" }
+expected = [["send-keys", "-l", "-t", "%21", "--", "Continue the interrupted task from the last saved checkpoint."], ["send-keys", "-t", "%21", "Enter"]]
+
+[[case]]
+id = "command-plan.linux.codex.21.wait"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%21", "action" = "wait" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.codex.21.notify"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%21", "action" = "notify" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.codex.21.unwatch"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%21", "action" = "unwatch" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.codex.21.shutdown"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%21", "action" = "shutdown" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.codex.21.escalate"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%21", "action" = "escalate" }
+expected = []
+
+[[case]]
+id = "command-plan.linux.codex.21.exited"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Linux", "agent" = "codex", "pane" = "%21", "action" = "exited" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.claude.3.send"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%3", "action" = "send" }
+expected = [["send-keys", "-l", "-t", "%3", "--", "Continue the interrupted task from the last completed step."], ["send-keys", "-t", "%3", "Enter"]]
+
+[[case]]
+id = "command-plan.darwin.claude.3.wait"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%3", "action" = "wait" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.claude.3.notify"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%3", "action" = "notify" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.claude.3.unwatch"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%3", "action" = "unwatch" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.claude.3.shutdown"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%3", "action" = "shutdown" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.claude.3.escalate"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%3", "action" = "escalate" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.claude.3.exited"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%3", "action" = "exited" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.claude.21.send"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%21", "action" = "send" }
+expected = [["send-keys", "-l", "-t", "%21", "--", "Continue the interrupted task from the last completed step."], ["send-keys", "-t", "%21", "Enter"]]
+
+[[case]]
+id = "command-plan.darwin.claude.21.wait"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%21", "action" = "wait" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.claude.21.notify"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%21", "action" = "notify" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.claude.21.unwatch"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%21", "action" = "unwatch" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.claude.21.shutdown"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%21", "action" = "shutdown" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.claude.21.escalate"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%21", "action" = "escalate" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.claude.21.exited"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "claude", "pane" = "%21", "action" = "exited" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.codex.3.send"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%3", "action" = "send" }
+expected = [["send-keys", "-l", "-t", "%3", "--", "Continue the interrupted task from the last saved checkpoint."], ["send-keys", "-t", "%3", "Enter"]]
+
+[[case]]
+id = "command-plan.darwin.codex.3.wait"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%3", "action" = "wait" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.codex.3.notify"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%3", "action" = "notify" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.codex.3.unwatch"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%3", "action" = "unwatch" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.codex.3.shutdown"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%3", "action" = "shutdown" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.codex.3.escalate"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%3", "action" = "escalate" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.codex.3.exited"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%3", "action" = "exited" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.codex.21.send"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%21", "action" = "send" }
+expected = [["send-keys", "-l", "-t", "%21", "--", "Continue the interrupted task from the last saved checkpoint."], ["send-keys", "-t", "%21", "Enter"]]
+
+[[case]]
+id = "command-plan.darwin.codex.21.wait"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%21", "action" = "wait" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.codex.21.notify"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%21", "action" = "notify" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.codex.21.unwatch"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%21", "action" = "unwatch" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.codex.21.shutdown"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%21", "action" = "shutdown" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.codex.21.escalate"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%21", "action" = "escalate" }
+expected = []
+
+[[case]]
+id = "command-plan.darwin.codex.21.exited"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Darwin", "agent" = "codex", "pane" = "%21", "action" = "exited" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.claude.3.send"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%3", "action" = "send" }
+expected = [["send-keys", "-l", "-t", "%3", "--", "Continue the interrupted task from the last completed step."], ["send-keys", "-t", "%3", "Enter"]]
+
+[[case]]
+id = "command-plan.windows.claude.3.wait"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%3", "action" = "wait" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.claude.3.notify"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%3", "action" = "notify" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.claude.3.unwatch"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%3", "action" = "unwatch" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.claude.3.shutdown"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%3", "action" = "shutdown" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.claude.3.escalate"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%3", "action" = "escalate" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.claude.3.exited"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%3", "action" = "exited" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.claude.21.send"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%21", "action" = "send" }
+expected = [["send-keys", "-l", "-t", "%21", "--", "Continue the interrupted task from the last completed step."], ["send-keys", "-t", "%21", "Enter"]]
+
+[[case]]
+id = "command-plan.windows.claude.21.wait"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%21", "action" = "wait" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.claude.21.notify"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%21", "action" = "notify" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.claude.21.unwatch"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%21", "action" = "unwatch" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.claude.21.shutdown"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%21", "action" = "shutdown" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.claude.21.escalate"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%21", "action" = "escalate" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.claude.21.exited"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "claude", "pane" = "%21", "action" = "exited" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.codex.3.send"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%3", "action" = "send" }
+expected = [["send-keys", "-l", "-t", "%3", "--", "Continue the interrupted task from the last saved checkpoint."], ["send-keys", "-t", "%3", "Enter"]]
+
+[[case]]
+id = "command-plan.windows.codex.3.wait"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%3", "action" = "wait" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.codex.3.notify"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%3", "action" = "notify" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.codex.3.unwatch"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%3", "action" = "unwatch" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.codex.3.shutdown"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%3", "action" = "shutdown" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.codex.3.escalate"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%3", "action" = "escalate" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.codex.3.exited"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%3", "action" = "exited" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.codex.21.send"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%21", "action" = "send" }
+expected = [["send-keys", "-l", "-t", "%21", "--", "Continue the interrupted task from the last saved checkpoint."], ["send-keys", "-t", "%21", "Enter"]]
+
+[[case]]
+id = "command-plan.windows.codex.21.wait"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%21", "action" = "wait" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.codex.21.notify"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%21", "action" = "notify" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.codex.21.unwatch"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%21", "action" = "unwatch" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.codex.21.shutdown"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%21", "action" = "shutdown" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.codex.21.escalate"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%21", "action" = "escalate" }
+expected = []
+
+[[case]]
+id = "command-plan.windows.codex.21.exited"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "command-plan", "family" = "Windows", "agent" = "codex", "pane" = "%21", "action" = "exited" }
+expected = []
+
+[[case]]
+id = "send-guard.identical"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" } }
+expected = true
+
+[[case]]
+id = "send-guard.line-ending-equivalent"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\r\n›", "screen" = "Overloaded", "fingerprint" = "error-a" } }
+expected = true
+
+[[case]]
+id = "send-guard.ansi-redraw-equivalent"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "\u001b[31mError: capacity overloaded\u001b[0m\n›", "screen" = "Overloaded", "fingerprint" = "error-a" } }
+expected = true
+
+[[case]]
+id = "send-guard.changed-input"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n› typed draft", "screen" = "Overloaded", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.changed-text-same-fingerprint"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\nnew output\n›", "screen" = "Overloaded", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.changed-fingerprint"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-b" } }
+expected = false
+
+[[case]]
+id = "send-guard.missing-fingerprint"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "" } }
+expected = false
+
+[[case]]
+id = "send-guard.class-working"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "Working", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.class-trustdialog"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "TrustDialog", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.class-bypasswarning"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "BypassWarning", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.class-approvaldialog"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "ApprovalDialog", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.class-partialinput"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "PartialInput", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.class-usagelimit"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "UsageLimit", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.class-autherror"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "AuthError", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.class-contextexhausted"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "ContextExhausted", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.class-loginscreen"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "LoginScreen", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.class-exited"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "Exited", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.class-idleprompt"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "IdlePrompt", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.class-unknown"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Overloaded", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "Unknown", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.identical-unsafe-working"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Working", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "Working", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.identical-unsafe-partialinput"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "PartialInput", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "PartialInput", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.identical-unsafe-unknown"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "request:R18"
+input = { "subject" = "send-guard", "decision" = { "text" = "Error: capacity overloaded\n›", "screen" = "Unknown", "fingerprint" = "error-a" }, "current" = { "text" = "Error: capacity overloaded\n›", "screen" = "Unknown", "fingerprint" = "error-a" } }
+expected = false
+
+[[case]]
+id = "send-guard.ansi-is-content"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-72"
+amends = "send-guard.ansi-redraw-equivalent"
+input = { subject = "send-guard", decision = { text = "Error: capacity overloaded\n›", screen = "Overloaded", fingerprint = "error-a" }, current = { text = "\u001b[31mError: capacity overloaded\u001b[0m\n›", screen = "Overloaded", fingerprint = "error-a" } }
+expected = false
+
+[[case]]
+id = "poll.active-needs-capture"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true }
+
+[[case]]
+id = "poll.steady-idle"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/MONITORING/IdlePrompt/none", "capture" = true, "stepped" = true, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [] }
+
+[[case]]
+id = "poll.opens-fresh-overload"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/MONITORING/Overloaded/opened", "capture" = true, "stepped" = true, "revision" = 3, "state" = "SUSPECTED_FAILURE", "actions" = [], "incident" = "opened", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "notices" = [], "results" = [] }
+
+[[case]]
+id = "poll.ignores-handled-overload"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "old", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/MONITORING/Overloaded/none", "capture" = true, "stepped" = true, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [] }
+
+[[case]]
+id = "poll.paused.monitoring"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "paused" }
+
+[[case]]
+id = "poll.unwatched.monitoring"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 0, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "unwatched" }
+
+[[case]]
+id = "poll.paused.suspected_failure"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "SUSPECTED_FAILURE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "paused" }
+
+[[case]]
+id = "poll.unwatched.suspected_failure"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "SUSPECTED_FAILURE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 0, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "unwatched" }
+
+[[case]]
+id = "poll.paused.confirm_idle"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "CONFIRM_IDLE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "paused" }
+
+[[case]]
+id = "poll.unwatched.confirm_idle"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "CONFIRM_IDLE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 0, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "unwatched" }
+
+[[case]]
+id = "poll.paused.backoff"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "paused" }
+
+[[case]]
+id = "poll.unwatched.backoff"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 0, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "unwatched" }
+
+[[case]]
+id = "poll.paused.recovery_sent"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "RECOVERY_SENT", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "paused" }
+
+[[case]]
+id = "poll.unwatched.recovery_sent"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "RECOVERY_SENT", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 0, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "unwatched" }
+
+[[case]]
+id = "poll.paused.verify"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "paused" }
+
+[[case]]
+id = "poll.unwatched.verify"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 0, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "unwatched" }
+
+[[case]]
+id = "poll.paused.escalate"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "ESCALATE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "paused" }
+
+[[case]]
+id = "poll.unwatched.escalate"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "ESCALATE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = false, "stepped" = false, "revision" = 0, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "unwatched" }
+
+[[case]]
+id = "poll.start-baseline.overloaded"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.start-baseline.usagelimit"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "UsageLimit", "fingerprint" = "usage", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old", "usage"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.start-baseline.autherror"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "AuthError", "fingerprint" = "auth", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["auth", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.start-baseline.contextexhausted"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "ContextExhausted", "fingerprint" = "context", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["context", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.start-baseline.idleprompt"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.start-baseline.working"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.start-baseline.trustdialog"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.start-baseline.bypasswarning"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.start-baseline.approvaldialog"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.start-baseline.partialinput"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.start-baseline.loginscreen"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "LoginScreen", "fingerprint" = "login", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["login", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.start-baseline.exited"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.start-baseline.unknown"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.resume-between-polls"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 5, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "b", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 5, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "b", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "baseline" }
+
+[[case]]
+id = "poll.rewatch-keeps-handled"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 6, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "capture" = true, "stepped" = false, "revision" = 6, "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = [], "rule" = "baseline" }
+
+[[case]]
+id = "poll.deadline.99-999"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 99.999, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/BACKOFF/Overloaded/continued", "capture" = true, "stepped" = true, "revision" = 3, "state" = "BACKOFF", "actions" = [], "incident" = "continued", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "notices" = [], "results" = [] }
+
+[[case]]
+id = "poll.deadline.100"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/BACKOFF/Overloaded/continued", "capture" = true, "stepped" = true, "revision" = 3, "state" = "RECOVERY_SENT", "actions" = ["send"], "incident" = "continued", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 130, "seed" = 1, "notices" = [], "results" = [] }
+
+[[case]]
+id = "poll.deadline.100-001"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100.001, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/BACKOFF/Overloaded/continued", "capture" = true, "stepped" = true, "revision" = 3, "state" = "RECOVERY_SENT", "actions" = ["send"], "incident" = "continued", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 130.001, "seed" = 1, "notices" = [], "results" = [] }
+
+[[case]]
+id = "poll.confirmation-schedules-one-notice"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "CONFIRM_IDLE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/CONFIRM_IDLE/Overloaded/continued", "capture" = true, "stepped" = true, "revision" = 3, "state" = "BACKOFF", "actions" = ["wait", "notify"], "incident" = "continued", "handled" = ["old"], "attempt" = 1, "deadline" = 130, "seed" = 7806831264735756412, "notices" = [{ "level" = "info", "message" = "retry attempt 1 in 30.0 s", "sinks" = ["stderr", "log"] }], "results" = [] }
+
+[[case]]
+id = "poll.verify-fresh-schedules-notice"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "b", "incident_fingerprint" = "a", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/VERIFY/Overloaded/continued", "capture" = true, "stepped" = true, "revision" = 3, "state" = "BACKOFF", "actions" = ["wait"], "incident" = "continued", "handled" = ["a", "old"], "attempt" = 2, "deadline" = 160, "seed" = 7806831264735756412, "notices" = [{ "level" = "info", "message" = "retry attempt 2 in 60.0 s", "sinks" = ["stderr", "log"] }], "results" = [] }
+
+[[case]]
+id = "poll.verify-third-attempt-has-no-notice"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "b", "incident_fingerprint" = "a", "handled" = ["a", "old"], "attempt" = 2, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/VERIFY/Overloaded/continued", "capture" = true, "stepped" = true, "revision" = 3, "state" = "BACKOFF", "actions" = ["wait"], "incident" = "continued", "handled" = ["a", "old"], "attempt" = 3, "deadline" = 220, "seed" = 7806831264735756412, "notices" = [], "results" = [] }
+
+[[case]]
+id = "poll.terminal.usagelimit"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "UsageLimit", "fingerprint" = "usagelimit", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/MONITORING/UsageLimit/escalated", "capture" = true, "stepped" = true, "revision" = 3, "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["old", "usagelimit"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "error", "message" = "requires attention: UsageLimit", "sinks" = ["stderr", "log"] }], "results" = ["escalated"] }
+
+[[case]]
+id = "poll.terminal.autherror"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "AuthError", "fingerprint" = "autherror", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/MONITORING/AuthError/escalated", "capture" = true, "stepped" = true, "revision" = 3, "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["autherror", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "error", "message" = "requires attention: AuthError", "sinks" = ["stderr", "log"] }], "results" = ["escalated"] }
+
+[[case]]
+id = "poll.terminal.contextexhausted"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "ContextExhausted", "fingerprint" = "contextexhausted", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/MONITORING/ContextExhausted/escalated", "capture" = true, "stepped" = true, "revision" = 3, "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["contextexhausted", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "error", "message" = "requires attention: ContextExhausted", "sinks" = ["stderr", "log"] }], "results" = ["escalated"] }
+
+[[case]]
+id = "poll.terminal.loginscreen"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "LoginScreen", "fingerprint" = "loginscreen", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/MONITORING/LoginScreen/escalated", "capture" = true, "stepped" = true, "revision" = 3, "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["loginscreen", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "error", "message" = "requires attention: LoginScreen", "sinks" = ["stderr", "log"] }], "results" = ["escalated"] }
+
+[[case]]
+id = "poll.terminal.exited"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/MONITORING/Exited/escalated", "capture" = true, "stepped" = true, "revision" = 3, "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "error", "message" = "requires attention: Exited", "sinks" = ["stderr", "log"] }], "results" = ["escalated"] }
+
+[[case]]
+id = "poll.verify-unchanged-no-ack"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/VERIFY/Overloaded/not-acknowledged", "capture" = true, "stepped" = true, "revision" = 3, "state" = "ESCALATE", "actions" = ["notify"], "incident" = "not-acknowledged", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "error", "message" = "recovery text was not acknowledged", "sinks" = ["stderr", "log"] }], "results" = ["not-acknowledged"] }
+
+[[case]]
+id = "poll.verify-recovered.working"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "a", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "changed" }
+expected = { "rule" = "step/VERIFY/Working/recovered", "capture" = true, "stepped" = true, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "recovered", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["recovered"] }
+
+[[case]]
+id = "poll.verify-recovered.idleprompt"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "a", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "changed" }
+expected = { "rule" = "step/VERIFY/IdlePrompt/recovered", "capture" = true, "stepped" = true, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "recovered", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["recovered"] }
+
+[[case]]
+id = "poll.blocked-incident-ends"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-73"
+input = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }
+expected = { "rule" = "step/BACKOFF/PartialInput/ended", "capture" = true, "stepped" = true, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"] }
+
+[[case]]
+id = "delivery.sent-commits"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "sent", "fresh" = {  } }
+expected = { "memory" = { "revision" = 3, "state" = "RECOVERY_SENT", "fingerprint" = "a", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 130, "seed" = 1, "sent" = true }, "decision" = {  } }
+
+[[case]]
+id = "delivery.failure-does-not-retry"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "failed", "fresh" = {  } }
+expected = { "memory" = { "revision" = 3, "state" = "ESCALATE", "fingerprint" = "", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = false, "stepped" = false, "revision" = 3, "state" = "ESCALATE", "actions" = [], "incident" = "escalated", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "error", "message" = "recovery send failed", "sinks" = ["stderr", "log"] }], "results" = ["unresolved"], "rule" = "send-failed" } }
+
+[[case]]
+id = "delivery.identity-change-rebases"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = {  } }
+expected = { "memory" = { "revision" = 0, "state" = "MONITORING", "fingerprint" = "", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = false, "stepped" = false, "revision" = 0, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "warning", "message" = "target identity changed before recovery", "sinks" = ["stderr", "log"] }], "results" = ["ended"], "rule" = "identity-changed" } }
+
+[[case]]
+id = "delivery.aborted-partialinput"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "PartialInput", "fingerprint" = "", "text" = "fresh PartialInput" } }
+expected = { "memory" = { "revision" = 3, "state" = "MONITORING", "fingerprint" = "", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "step/BACKOFF/PartialInput/ended" } }
+
+[[case]]
+id = "delivery.aborted-working"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "Working", "fingerprint" = "", "text" = "fresh Working" } }
+expected = { "memory" = { "revision" = 3, "state" = "MONITORING", "fingerprint" = "", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "step/BACKOFF/Working/ended" } }
+
+[[case]]
+id = "delivery.aborted-idleprompt"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "IdlePrompt", "fingerprint" = "", "text" = "fresh IdlePrompt" } }
+expected = { "memory" = { "revision" = 3, "state" = "MONITORING", "fingerprint" = "", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "step/BACKOFF/IdlePrompt/ended" } }
+
+[[case]]
+id = "delivery.aborted-trustdialog"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "TrustDialog", "fingerprint" = "", "text" = "fresh TrustDialog" } }
+expected = { "memory" = { "revision" = 3, "state" = "MONITORING", "fingerprint" = "", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "step/BACKOFF/TrustDialog/ended" } }
+
+[[case]]
+id = "delivery.aborted-bypasswarning"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "BypassWarning", "fingerprint" = "", "text" = "fresh BypassWarning" } }
+expected = { "memory" = { "revision" = 3, "state" = "MONITORING", "fingerprint" = "", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "step/BACKOFF/BypassWarning/ended" } }
+
+[[case]]
+id = "delivery.aborted-approvaldialog"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "ApprovalDialog", "fingerprint" = "", "text" = "fresh ApprovalDialog" } }
+expected = { "memory" = { "revision" = 3, "state" = "MONITORING", "fingerprint" = "", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "step/BACKOFF/ApprovalDialog/ended" } }
+
+[[case]]
+id = "delivery.aborted-unknown"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "Unknown", "fingerprint" = "", "text" = "fresh Unknown" } }
+expected = { "memory" = { "revision" = 3, "state" = "MONITORING", "fingerprint" = "", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [], "results" = ["ended"], "rule" = "step/BACKOFF/Unknown/ended" } }
+
+[[case]]
+id = "delivery.aborted-usagelimit"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "UsageLimit", "fingerprint" = "b", "text" = "fresh UsageLimit" } }
+expected = { "memory" = { "revision" = 3, "state" = "ESCALATE", "fingerprint" = "", "handled" = ["b", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["b", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "error", "message" = "requires attention: UsageLimit", "sinks" = ["stderr", "log"] }], "results" = ["escalated"], "rule" = "step/BACKOFF/UsageLimit/escalated" } }
+
+[[case]]
+id = "delivery.aborted-autherror"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "AuthError", "fingerprint" = "b", "text" = "fresh AuthError" } }
+expected = { "memory" = { "revision" = 3, "state" = "ESCALATE", "fingerprint" = "", "handled" = ["b", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["b", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "error", "message" = "requires attention: AuthError", "sinks" = ["stderr", "log"] }], "results" = ["escalated"], "rule" = "step/BACKOFF/AuthError/escalated" } }
+
+[[case]]
+id = "delivery.aborted-contextexhausted"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "ContextExhausted", "fingerprint" = "b", "text" = "fresh ContextExhausted" } }
+expected = { "memory" = { "revision" = 3, "state" = "ESCALATE", "fingerprint" = "", "handled" = ["b", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["b", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "error", "message" = "requires attention: ContextExhausted", "sinks" = ["stderr", "log"] }], "results" = ["escalated"], "rule" = "step/BACKOFF/ContextExhausted/escalated" } }
+
+[[case]]
+id = "delivery.aborted-loginscreen"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "LoginScreen", "fingerprint" = "b", "text" = "fresh LoginScreen" } }
+expected = { "memory" = { "revision" = 3, "state" = "ESCALATE", "fingerprint" = "", "handled" = ["b", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["b", "old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "error", "message" = "requires attention: LoginScreen", "sinks" = ["stderr", "log"] }], "results" = ["escalated"], "rule" = "step/BACKOFF/LoginScreen/escalated" } }
+
+[[case]]
+id = "delivery.aborted-exited"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "Exited", "fingerprint" = "", "text" = "fresh Exited" } }
+expected = { "memory" = { "revision" = 3, "state" = "ESCALATE", "fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["old"], "attempt" = 1, "deadline" = 0, "seed" = 1, "notices" = [{ "level" = "error", "message" = "requires attention: Exited", "sinks" = ["stderr", "log"] }], "results" = ["escalated"], "rule" = "step/BACKOFF/Exited/escalated" } }
+
+[[case]]
+id = "delivery.aborted-new-fingerprint"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "Overloaded", "fingerprint" = "b", "text" = "new overload" } }
+expected = { "memory" = { "revision" = 3, "state" = "SUSPECTED_FAILURE", "fingerprint" = "b", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "SUSPECTED_FAILURE", "actions" = [], "incident" = "replaced", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "notices" = [], "results" = [], "rule" = "step/BACKOFF/Overloaded/replaced" } }
+
+[[case]]
+id = "delivery.aborted-same-fingerprint-defers-send"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-75"
+input = { "subject" = "delivery-completion", "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" }, "outcome" = "aborted", "fresh" = { "screen" = "Overloaded", "fingerprint" = "a", "text" = "changed surrounding output" } }
+expected = { "memory" = { "revision" = 3, "state" = "BACKOFF", "fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "sent" = false }, "decision" = { "capture" = true, "stepped" = true, "revision" = 3, "state" = "RECOVERY_SENT", "actions" = ["send"], "incident" = "continued", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 130, "seed" = 1, "notices" = [], "results" = [], "rule" = "step/BACKOFF/Overloaded/continued" } }
+
+[[case]]
+id = "scenario.recovery-working.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "recovery-working", "agent" = "claude", "frames" = ["IdlePrompt", "Overloaded", "Working"] }
+expected = { "received" = "Continue the interrupted task from the last completed step.\r", "attempts" = ["sent"], "result" = "recovered", "final_state" = "MONITORING" }
+
+[[case]]
+id = "scenario.recovery-idleprompt.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "recovery-idleprompt", "agent" = "claude", "frames" = ["IdlePrompt", "Overloaded", "IdlePrompt"] }
+expected = { "received" = "Continue the interrupted task from the last completed step.\r", "attempts" = ["sent"], "result" = "recovered", "final_state" = "MONITORING" }
+
+[[case]]
+id = "scenario.recovery-overloaded.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "recovery-overloaded", "agent" = "claude", "frames" = ["IdlePrompt", "Overloaded", "Overloaded"] }
+expected = { "received" = "Continue the interrupted task from the last completed step.\r", "attempts" = ["sent"], "result" = "not-acknowledged", "final_state" = "ESCALATE" }
+
+[[case]]
+id = "scenario.terminal-usagelimit.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "terminal-usagelimit", "agent" = "claude", "frames" = ["IdlePrompt", "UsageLimit"] }
+expected = { "received" = "", "attempts" = [], "result" = "escalated", "level" = "error", "message" = "requires attention: UsageLimit" }
+
+[[case]]
+id = "scenario.terminal-autherror.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "terminal-autherror", "agent" = "claude", "frames" = ["IdlePrompt", "AuthError"] }
+expected = { "received" = "", "attempts" = [], "result" = "escalated", "level" = "error", "message" = "requires attention: AuthError" }
+
+[[case]]
+id = "scenario.terminal-contextexhausted.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "terminal-contextexhausted", "agent" = "claude", "frames" = ["IdlePrompt", "ContextExhausted"] }
+expected = { "received" = "", "attempts" = [], "result" = "escalated", "level" = "error", "message" = "requires attention: ContextExhausted" }
+
+[[case]]
+id = "scenario.terminal-exited.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "terminal-exited", "agent" = "claude", "frames" = ["IdlePrompt", "Exited"] }
+expected = { "received" = "", "attempts" = [], "result" = "escalated", "level" = "error", "message" = "requires attention: Exited" }
+
+[[case]]
+id = "scenario.terminal-loginscreen.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "terminal-loginscreen", "agent" = "claude", "frames" = ["IdlePrompt", "LoginScreen"] }
+expected = { "received" = "", "attempts" = [], "result" = "escalated", "level" = "error", "message" = "requires attention: LoginScreen" }
+
+[[case]]
+id = "scenario.unsafe-working.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "unsafe-working", "agent" = "claude", "frames" = ["IdlePrompt", "Working/overload-precedence.txt"] }
+expected = { "class" = "Working", "received" = "", "attempts" = [] }
+
+[[case]]
+id = "scenario.unsafe-approvaldialog.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "unsafe-approvaldialog", "agent" = "claude", "frames" = ["IdlePrompt", "ApprovalDialog/overload-precedence.txt"] }
+expected = { "class" = "ApprovalDialog", "received" = "", "attempts" = [] }
+
+[[case]]
+id = "scenario.unsafe-partialinput.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "unsafe-partialinput", "agent" = "claude", "frames" = ["IdlePrompt", "PartialInput/overload-precedence.txt"] }
+expected = { "class" = "PartialInput", "received" = "", "attempts" = [] }
+
+[[case]]
+id = "scenario.unsafe-trustdialog.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "unsafe-trustdialog", "agent" = "claude", "frames" = ["IdlePrompt", "TrustDialog/documented.txt"] }
+expected = { "class" = "TrustDialog", "received" = "", "attempts" = [] }
+
+[[case]]
+id = "scenario.unsafe-bypasswarning.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "unsafe-bypasswarning", "agent" = "claude", "frames" = ["IdlePrompt", "BypassWarning/documented.txt"] }
+expected = { "class" = "BypassWarning", "received" = "", "attempts" = [] }
+
+[[case]]
+id = "scenario.stale-baseline.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "stale-baseline", "agent" = "claude", "frames" = ["Overloaded"] }
+expected = { "class" = "Overloaded", "received" = "", "attempts" = [] }
+
+[[case]]
+id = "scenario.pause-resume.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "pause-resume", "agent" = "claude", "frames" = ["IdlePrompt", "Overloaded"] }
+expected = { "received" = "", "attempts" = [], "baseline_class" = "Overloaded" }
+
+[[case]]
+id = "scenario.changed-guard.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "changed-guard", "agent" = "claude", "frames" = ["IdlePrompt", "Overloaded", "Overloaded/header-one.txt", "Overloaded/header-two.txt", "PartialInput"] }
+expected = { "received" = "", "attempts" = ["aborted", "aborted", "aborted"], "class" = "Overloaded", "same_fingerprint" = true }
+
+[[case]]
+id = "scenario.failed-command.claude"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "failed-command", "agent" = "claude", "frames" = ["IdlePrompt", "Overloaded"] }
+expected = { "received" = "", "attempts" = ["failed"], "result" = "unresolved", "level" = "error" }
+
+[[case]]
+id = "scenario.recovery-working.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "recovery-working", "agent" = "codex", "frames" = ["IdlePrompt", "Overloaded", "Working"] }
+expected = { "received" = "Continue the interrupted task from the last saved checkpoint.\r", "attempts" = ["sent"], "result" = "recovered", "final_state" = "MONITORING" }
+
+[[case]]
+id = "scenario.recovery-idleprompt.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "recovery-idleprompt", "agent" = "codex", "frames" = ["IdlePrompt", "Overloaded", "IdlePrompt"] }
+expected = { "received" = "Continue the interrupted task from the last saved checkpoint.\r", "attempts" = ["sent"], "result" = "recovered", "final_state" = "MONITORING" }
+
+[[case]]
+id = "scenario.recovery-overloaded.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "recovery-overloaded", "agent" = "codex", "frames" = ["IdlePrompt", "Overloaded", "Overloaded"] }
+expected = { "received" = "Continue the interrupted task from the last saved checkpoint.\r", "attempts" = ["sent"], "result" = "not-acknowledged", "final_state" = "ESCALATE" }
+
+[[case]]
+id = "scenario.terminal-usagelimit.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "terminal-usagelimit", "agent" = "codex", "frames" = ["IdlePrompt", "UsageLimit"] }
+expected = { "received" = "", "attempts" = [], "result" = "escalated", "level" = "error", "message" = "requires attention: UsageLimit" }
+
+[[case]]
+id = "scenario.terminal-autherror.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "terminal-autherror", "agent" = "codex", "frames" = ["IdlePrompt", "AuthError"] }
+expected = { "received" = "", "attempts" = [], "result" = "escalated", "level" = "error", "message" = "requires attention: AuthError" }
+
+[[case]]
+id = "scenario.terminal-contextexhausted.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "terminal-contextexhausted", "agent" = "codex", "frames" = ["IdlePrompt", "ContextExhausted"] }
+expected = { "received" = "", "attempts" = [], "result" = "escalated", "level" = "error", "message" = "requires attention: ContextExhausted" }
+
+[[case]]
+id = "scenario.terminal-exited.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "terminal-exited", "agent" = "codex", "frames" = ["IdlePrompt", "Exited"] }
+expected = { "received" = "", "attempts" = [], "result" = "escalated", "level" = "error", "message" = "requires attention: Exited" }
+
+[[case]]
+id = "scenario.terminal-loginscreen.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "terminal-loginscreen", "agent" = "codex", "frames" = ["IdlePrompt", "LoginScreen"] }
+expected = { "received" = "", "attempts" = [], "result" = "escalated", "level" = "error", "message" = "requires attention: LoginScreen" }
+
+[[case]]
+id = "scenario.unsafe-working.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "unsafe-working", "agent" = "codex", "frames" = ["IdlePrompt", "Working/overload-precedence.txt"] }
+expected = { "class" = "Working", "received" = "", "attempts" = [] }
+
+[[case]]
+id = "scenario.unsafe-approvaldialog.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "unsafe-approvaldialog", "agent" = "codex", "frames" = ["IdlePrompt", "ApprovalDialog/overload-precedence.txt"] }
+expected = { "class" = "ApprovalDialog", "received" = "", "attempts" = [] }
+
+[[case]]
+id = "scenario.unsafe-partialinput.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "unsafe-partialinput", "agent" = "codex", "frames" = ["IdlePrompt", "PartialInput/overload-precedence.txt"] }
+expected = { "class" = "PartialInput", "received" = "", "attempts" = [] }
+
+[[case]]
+id = "scenario.unsafe-trustdialog.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "unsafe-trustdialog", "agent" = "codex", "frames" = ["IdlePrompt", "TrustDialog/documented.txt"] }
+expected = { "class" = "TrustDialog", "received" = "", "attempts" = [] }
+
+[[case]]
+id = "scenario.unsafe-bypasswarning.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "unsafe-bypasswarning", "agent" = "codex", "frames" = ["IdlePrompt", "BypassWarning/documented.txt"] }
+expected = { "class" = "BypassWarning", "received" = "", "attempts" = [] }
+
+[[case]]
+id = "scenario.stale-baseline.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "stale-baseline", "agent" = "codex", "frames" = ["Overloaded"] }
+expected = { "class" = "Overloaded", "received" = "", "attempts" = [] }
+
+[[case]]
+id = "scenario.pause-resume.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "pause-resume", "agent" = "codex", "frames" = ["IdlePrompt", "Overloaded"] }
+expected = { "received" = "", "attempts" = [], "baseline_class" = "Overloaded" }
+
+[[case]]
+id = "scenario.changed-guard.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "changed-guard", "agent" = "codex", "frames" = ["IdlePrompt", "Overloaded", "Overloaded/header-one.txt", "Overloaded/header-two.txt", "PartialInput"] }
+expected = { "received" = "", "attempts" = ["aborted", "aborted", "aborted"], "class" = "Overloaded", "same_fingerprint" = true }
+
+[[case]]
+id = "scenario.failed-command.codex"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "supervisor-scenario", "name" = "failed-command", "agent" = "codex", "frames" = ["IdlePrompt", "Overloaded"] }
+expected = { "received" = "", "attempts" = ["failed"], "result" = "unresolved", "level" = "error" }
+
+[[case]]
+id = "scenario.stop-interrupt.both"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "supervisor-scenario", "name" = "stop-interrupt", "agent" = "both", "frames" = ["IdlePrompt"] }
+expected = { "exit" = 0, "ownership" = ["managed", "adopted"], "pane_identity" = "unchanged" }
+
+[[case]]
+id = "scenario.stop-terminate.both"
+requirement = "R17"
+quote = "adopted sessions are not killed by stopping the supervisor"
+provenance = "request:R17"
+input = { "subject" = "supervisor-scenario", "name" = "stop-terminate", "agent" = "both", "frames" = ["IdlePrompt"] }
+expected = { "exit" = 0, "ownership" = ["managed", "adopted"], "pane_identity" = "unchanged" }
+
+[[case]]
+id = "scenario.forbidden-native.both"
+requirement = "R19"
+quote = "Never automatically switch models or restart arbitrary crashed processes"
+provenance = "request:R19"
+input = { "subject" = "supervisor-scenario", "name" = "forbidden-native", "agent" = "both", "frames" = [["Unknown", "Exited"], ["IdlePrompt", "AuthError"], ["IdlePrompt", "LoginScreen"]] }
+expected = { "live_received" = "", "crash_launches" = 1, "crash_pane_identity" = "unchanged", "live_pane_identity" = "unchanged", "forbidden_verbs" = ["kill-session", "kill-server", "kill-pane", "respawn-pane", "respawn-window", "new-session", "new-window"], "forbidden_tokens" = ["/model", "/login", "claude auth login", "claude setup-token", "codex login"] }

@@ -1,0 +1,2 @@
+# Copyright (c) 2026 agentctl contributors.
+"""A clean module paired with the unused-import negative."""

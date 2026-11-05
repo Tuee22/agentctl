@@ -1,0 +1,17 @@
+[[mutant]]
+id = "M-classify-status-stale-capture"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Sessions.hs"
+search = 'selectedScreen = screen'
+replace = 'selectedScreen = screen {Capture.screenText = if agent == Agent.Claude then "Claude Code\n❯" else "OpenAI Codex\n›", Capture.screenDead = False}'
+killers = ["tests/e2e/test_status_screen.py::test_screen_column_shows_fixture_class"]
+reason = "status screen differs from current fixture"
+
+[[mutant]]
+id = "M-classify-status-other-agent"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Classify/Agent.hs"
+search = 'classify Codex = Codex.classify'
+replace = 'classify Codex = \screen -> const (Claude.classify screen) (Codex.classify screen)'
+killers = ["tests/e2e/test_status_screen.py::test_screen_column_uses_the_agents_classifier"]
+reason = "status selected another agent's classifier"

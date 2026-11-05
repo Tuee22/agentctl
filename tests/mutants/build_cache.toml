@@ -1,0 +1,62 @@
+[[mutant]]
+id = "M-cache-digest-omits-cabal-file"
+operator = "delete"
+target = "src/agentctl/bootstrap/cache.py"
+search = "for entry in sorted(files, key=lambda entry: entry.path)"
+replace = "for entry in sorted((entry for entry in files if entry.path != 'agentctl-core.cabal'), key=lambda entry: entry.path)"
+killers = ["tests/unit/test_digest.py::test_oracle_rows"]
+reason = "binary digest differs from rule"
+
+[[mutant]]
+id = "M-cache-digest-includes-style-config"
+operator = "widen"
+target = "src/agentctl/bootstrap/cache.py"
+search = "paths = (project / \"agentctl-core.cabal\", project / \"cabal.project\")"
+replace = "paths = (project / \"agentctl-core.cabal\", project / \"cabal.project\", project / \"fourmolu.yaml\")"
+killers = ["tests/unit/test_digest.py::test_oracle_rows"]
+reason = "binary digest differs from rule"
+
+[[mutant]]
+id = "M-cache-hit-ignored"
+operator = "short-circuit"
+target = "src/agentctl/bootstrap/binary.py"
+search = "    return layout.binary.is_file()\n"
+replace = "    return False\n"
+killers = ["tests/integration/test_build_cache.py::test_second_run_spawns_nothing"]
+reason = "digest hit rebuilt or probed the toolchain"
+
+[[mutant]]
+id = "M-cache-nonatomic-publish"
+operator = "widen"
+target = "src/agentctl/bootstrap/binary.py"
+search = "    if isinstance(compiled, Err):\n        return compiled\n"
+replace = "    if isinstance(compiled, Err):\n        layout.binary.parent.mkdir(parents=True, exist_ok=True)\n        return compiled\n"
+killers = ["tests/integration/test_build_cache.py::test_failed_build_keeps_previous"]
+reason = "failed build exposed a partial digest"
+
+[[mutant]]
+id = "M-cache-skip-handshake"
+operator = "short-circuit"
+target = "src/agentctl/bootstrap/binary.py"
+search = "        accepted = verify_handshake(context, candidate)\n"
+replace = "        accepted = Ok(None)\n"
+killers = ["tests/integration/test_build_cache.py::test_handshake_mismatch_rejected"]
+reason = "wrong protocol was published"
+
+[[mutant]]
+id = "M-cache-identity-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/bootstrap/binary.py"
+search = "    if built_hash != published_hash:\n"
+replace = "    if False:\n"
+killers = ["tests/integration/test_build_cache.py::test_identity_step_rejects_foreign_binary"]
+reason = "foreign binary was accepted by identity"
+
+[[mutant]]
+id = "M-cache-identity-step-dropped"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = "        identity.IdentityStep(\n            context,\n            root / \"src/agentctl/haskell\",\n            directories(family, os.environ, Path.home()).data,\n        ),\n"
+replace = ""
+killers = ["tests/unit/test_check_steps.py::test_step_table_equals_oracle"]
+reason = "gate step table differs from oracle"

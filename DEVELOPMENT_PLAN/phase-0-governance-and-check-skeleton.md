@@ -1,6 +1,6 @@
 # Phase 0 — Governance, documentation standards and the check skeleton
 
-**Status**: Active
+**Status**: Done
 **Depends on**: nothing
 **Host lane**: any-host
 **Gate**: `agentctl check`
@@ -41,13 +41,13 @@ to Haskell rather than introducing another directory policy.
 - That the direct negative fixtures or later mutants exhaust every possible weakness in a test's assertions. — not proven by any phase.
 - A current evidence digest proves the covered bytes, not that a gate run happened. — not proven by any phase.
 - Completeness of the concept-note disposition cannot be re-checked once agentctl-plan.md is deleted. — not proven by any phase.
-- Tamper resistance is bounded by [§ P](development_plan_standards.md#p-the-ratchet-and-the-users-commit-points): it holds against a HEAD the user has committed. — not proven by any phase.
+- Tamper resistance extends only to data already present in the available HEAD baseline ([§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure)); uncommitted inputs have no historical protection. — not proven by any phase.
 
 ## Sprints
 
-### Sprint 0.1: Governed plan and documentation suite [Active]
+### Sprint 0.1: Governed plan and documentation suite [Done]
 
-**Status**: Active
+**Status**: Done
 **Implementation**: `DEVELOPMENT_PLAN/`, `documents/`
 **Validation tests**: `tests/governance/test_doc_validator.py::test_live_docs_clean`, `tests/governance/test_plan_validator.py::test_live_plan_clean`
 **Mutants**: none — the content is examined by the two validators; their negative transformations belong to Sprints 0.4 and 0.5
@@ -72,13 +72,13 @@ Preserve the user's requirements and decisions as a complete constructive plan a
 
 #### Remaining Work
 
-Pass the documentation validator (Sprint 0.4) and the plan validator (Sprint 0.5) over this tree.
+None.
 
-### Sprint 0.2: Package skeleton and the check command [Planned]
+### Sprint 0.2: Package skeleton and the check command [Done]
 
-**Status**: Planned
-**Implementation**: `pyproject.toml`, `src/agentctl/__init__.py`, `src/agentctl/cli.py`, `src/agentctl/result.py`, `src/agentctl/process.py`, `src/agentctl/paths.py`, `src/agentctl/check/legs.py`, `src/agentctl/check/steps.py`, `src/agentctl/check/preconditions.py`, `tests/harness/oracle.py`, `tests/oracles/command_surface.toml`, `tests/oracles/check_legs.toml`, `tests/unit/test_cli.py`, `tests/unit/test_check_legs.py`, `tests/unit/test_identity.py`, `tests/unit/test_paths.py`, `tests/integration/test_static_legs.py`, `tests/fixtures/static_negative/`
-**Validation tests**: `tests/unit/test_cli.py::test_cli_is_click_group`, `tests/unit/test_cli.py::test_check_rejects_arguments`, `tests/unit/test_check_legs.py::test_leg_table_matches_oracle`, `tests/unit/test_check_legs.py::test_failing_leg_fails_check`, `tests/unit/test_check_legs.py::test_empty_target_set_fails`, `tests/unit/test_identity.py::test_non_editable_refused`, `tests/unit/test_identity.py::test_other_checkout_refused`, `tests/unit/test_paths.py::test_xdg_overrides_on_every_os`, `tests/integration/test_static_legs.py::test_ruff_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ruff_format_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ty_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ty_ignores_user_config`
+**Status**: Done
+**Implementation**: `pyproject.toml`, `src/agentctl/__init__.py`, `src/agentctl/cli.py`, `src/agentctl/result.py`, `src/agentctl/process.py`, `src/agentctl/paths.py`, `src/agentctl/check/legs.py`, `src/agentctl/check/steps.py`, `src/agentctl/check/preconditions.py`, `tests/harness/oracle.py`, `tests/oracles/command_surface.toml`, `tests/oracles/check_legs.toml`, `tests/support.txt`, `tests/harness/trees.py`, `tests/unit/test_cli.py`, `tests/unit/test_check_legs.py`, `tests/unit/test_identity.py`, `tests/unit/test_paths.py`, `tests/integration/test_static_legs.py`, `tests/fixtures/static_negative/`
+**Validation tests**: `tests/unit/test_cli.py::test_cli_is_click_group`, `tests/unit/test_cli.py::test_check_rejects_arguments`, `tests/unit/test_check_legs.py::test_leg_table_matches_oracle`, `tests/unit/test_check_legs.py::test_failing_leg_fails_check`, `tests/unit/test_check_legs.py::test_empty_target_set_fails`, `tests/unit/test_identity.py::test_non_editable_refused`, `tests/unit/test_identity.py::test_other_checkout_refused`, `tests/unit/test_paths.py::test_xdg_overrides_on_every_os`, `tests/integration/test_static_legs.py::test_ruff_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ruff_format_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ty_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ty_ignores_user_config`, `tests/integration/test_static_legs.py::test_raw_link_rule_exception_is_narrow`
 **Mutants**: `M-legs-drop-pytest`, `M-legs-drop-ty`, `M-legs-ignore-exit`, `M-legs-empty-target`, `M-legs-ty-rule-warn`, `M-legs-ty-user-config-leak`
 **Closes**: R2
 **Docs to update**: `documents/engineering/quality_gate.md`, `documents/engineering/code_standards.md`, `documents/reference/cli_reference.md`, `documents/reference/files_and_state.md`
@@ -89,12 +89,12 @@ Install one permanent click application whose check command actually runs the pi
 
 #### Deliverables
 
-- A hatchling `src` package, console entry point and `dev` extra; Python is at least 3.12, click is pinned to 8.5.0, ruff to 0.17.3, ty to 0.0.95 and pytest to 9.2.0; coverage receives a verified exact pin.
+- A hatchling `src` package, console entry point and `dev` extra; Python is at least 3.12, click is pinned to 8.5.0, ruff to 0.17.3, ty to 0.0.95, pytest to 9.2.0 and coverage to 7.17.0.
 - The click group exposes `check` with no command arguments and the global `--assume-yes`; it provides no placeholder passthrough command. `Result`, the one process module and the directory policy are real minimal utilities used by check.
 - `preconditions.py` implements P1–P5: PEP 610 editable identity and module location, exact installed pins, the Python floor, a git work tree and a state-directory single-run lock. Preconditions for absent capabilities arrive with those capabilities, never as canned successes.
 - `steps.py` owns a fresh temporary run directory, nonce and scrubbed child environment; `legs.py` supplies the Python legs in oracle order, using `sys.executable`, explicit configuration, no fix/cache writes, an isolated ty configuration home and non-empty filesystem target walks.
 - `tests/harness/oracle.py` compares pure subjects with independently authored TOML rows without importing `agentctl`; the initial command and Python-leg rows carry request or decision provenance and grow with implemented capabilities.
-- The ruff, ty, pytest and coverage configuration is co-designed with the pinned tools, then recorded for freezing by the gate-integrity apparatus. Strict ty means every rule is an error, ignore comments are disrespected and warnings fail; user configuration cannot weaken it.
+- The ruff, ty, pytest and coverage configuration is co-designed with the pinned tools, including the raw-link reader's narrowly scoped PTH115 exception, then recorded for freezing by the gate-integrity apparatus. Strict ty means every rule is an error, ignore comments are disrespected and warnings fail; user configuration cannot weaken it.
 - The verdict propagates every failed or unrun leg, with its name; temporary cache, pytest and tool output lives under the run directory, and every leg is demonstrated rejecting a copied `*.py.txt` negative with a passing twin.
 
 #### Validation
@@ -106,14 +106,15 @@ Install one permanent click application whose check command actually runs the pi
 5. Paths obey the supplied XDG roots across OS-family inputs — `tests/unit/test_paths.py::test_xdg_overrides_on_every_os`; fails when a Windows or Darwin case chooses a platform default over its override, with unset-variable default cases as twins; no mutant: the directory cases are direct value evidence.
 6. Each real pinned static tool rejects its own negative and accepts its valid twin — `tests/integration/test_static_legs.py::test_ruff_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ruff_format_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ty_fires_on_fixture`; fails if F401, a formatting difference or the chosen implicit-type diagnostic is absent or merely a warning; mutant `M-legs-ty-rule-warn`.
 7. A user ty configuration cannot downgrade the negative — `tests/integration/test_static_legs.py::test_ty_ignores_user_config`; fails when a fake configuration home turns its error into a pass, while the same fixture fails under the isolated home and its valid twin passes; mutant `M-legs-ty-user-config-leak`.
+8. The raw-link canary passes only at the approved module path and the same source elsewhere reports PTH115 — `tests/integration/test_static_legs.py::test_raw_link_rule_exception_is_narrow`; fails when the exception is removed or widened; no mutant: the real pinned linter supplies both controls.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 0.3: Test-discipline gate plugin [Planned]
+### Sprint 0.3: Test-discipline gate plugin [Done]
 
-**Status**: Planned
+**Status**: Done
 **Implementation**: `src/agentctl/check/gate_plugin.py`, `src/agentctl/check/legs.py`, `tests/governance/test_gate_plugin.py`, `pyproject.toml`
 **Validation tests**: `tests/governance/test_gate_plugin.py::test_skip_fails_session`, `tests/governance/test_gate_plugin.py::test_xfail_fails_session`, `tests/governance/test_gate_plugin.py::test_selector_under_check_fails`, `tests/governance/test_gate_plugin.py::test_deselection_fails_session`, `tests/governance/test_gate_plugin.py::test_orphan_module_fails`, `tests/governance/test_gate_plugin.py::test_evidence_marker_required`, `tests/governance/test_gate_plugin.py::test_manifest_matches_execution`
 **Mutants**: `M-plugin-allow-skip`, `M-plugin-allow-xfail`, `M-plugin-allow-selector`, `M-plugin-orphan-blind`, `M-plugin-manifest-collected-only`
@@ -128,7 +129,7 @@ Make the pytest leg mean the entire collected suite executed successfully, with 
 
 - Check explicitly loads `agentctl.check.gate_plugin`, disables third-party plugin autoload, removes `PYTEST_ADDOPTS` and `PYTEST_PLUGINS`, and runs the whole `tests` root with pytester and no cache provider.
 - Under check the plugin fails any skip, skipif, xfail, xpass, importorskip or deselection and refuses selectors, including `-k`, `-m`, node ids and last-failed options; nested pytester negatives are isolated sessions whose expected failure is asserted by the outer test.
-- `tests.orphan-modules` joins collected test modules to sprint citations, and every Python file under `tests/` is collected or explicitly declared support. Support declarations cannot hide a file matching the test-module naming convention.
+- `tests.orphan-modules` joins collected test modules to sprint citations, and every Python file under `tests/` is collected or explicitly declared in `tests/support.txt`. Support declarations cannot hide a file matching the test-module naming convention.
 - Every pytest test carries exactly one registered evidence marker, `value`, `real` or `observer`; a missing, duplicate or unknown class fails, and `owed` is never a test marker.
 - The plugin exports separate collected, executed and passed node-id sets with the fresh run nonce. Collection alone cannot stand for execution, and an empty collection fails.
 
@@ -142,11 +143,11 @@ Make the pytest leg mean the entire collected suite executed successfully, with 
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 0.4: Documentation validator [Planned]
+### Sprint 0.4: Documentation validator [Done]
 
-**Status**: Planned
+**Status**: Done
 **Implementation**: `src/agentctl/check/validator/docs.py`, `src/agentctl/check/steps.py`, `tests/governance/test_doc_validator.py`, `tests/fixtures/docs_negative/`
 **Validation tests**: `tests/governance/test_doc_validator.py::test_docs_metadata`, `tests/governance/test_doc_validator.py::test_docs_structure`, `tests/governance/test_doc_validator.py::test_docs_taxonomy`, `tests/governance/test_doc_validator.py::test_docs_links`, `tests/governance/test_doc_validator.py::test_docs_owning_phase`, `tests/governance/test_doc_validator.py::test_docs_no_status`, `tests/governance/test_doc_validator.py::test_docs_phase_citation`, `tests/governance/test_doc_validator.py::test_docs_binary_unnamed`, `tests/governance/test_doc_validator.py::test_docs_enforcement_cited`, `tests/governance/test_doc_validator.py::test_live_docs_clean`
 **Mutants**: `M-docval-skip-anchor`, `M-docval-binary-name-blind`, `M-docval-taxonomy-open`
@@ -174,11 +175,11 @@ Turn each documentation rule into a pure check with a minimal rejecting fixture 
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 0.5: Plan validator core [Planned]
+### Sprint 0.5: Plan validator core [Done]
 
-**Status**: Planned
+**Status**: Done
 **Implementation**: `src/agentctl/check/validator/plan.py`, `src/agentctl/check/steps.py`, `tests/governance/test_plan_validator.py`, `tests/fixtures/docs_negative/`
 **Validation tests**: `tests/governance/test_plan_validator.py::test_plan_fileset`, `tests/governance/test_plan_validator.py::test_plan_header`, `tests/governance/test_plan_validator.py::test_plan_status_harmony`, `tests/governance/test_plan_validator.py::test_plan_sprint_structure`, `tests/governance/test_plan_validator.py::test_plan_status_consequences`, `tests/governance/test_plan_validator.py::test_plan_dependency_direction`, `tests/governance/test_plan_validator.py::test_plan_requirements_table`, `tests/governance/test_plan_validator.py::test_plan_legacy_ledger`, `tests/governance/test_plan_validator.py::test_plan_disposition_table`, `tests/governance/test_plan_validator.py::test_plan_no_narrative`, `tests/governance/test_plan_validator.py::test_live_plan_clean`
 **Mutants**: `M-planval-forward-dependency`, `M-planval-closure-at-least-once`, `M-planval-status-table-blind`, `M-planval-open-header`
@@ -209,11 +210,11 @@ Validate the plan's structural truth without demanding artifacts of capabilities
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 0.6: Root entry documents [Planned]
+### Sprint 0.6: Root entry documents [Done]
 
-**Status**: Planned
+**Status**: Done
 **Implementation**: `README.md`, `AGENTS.md`, `CLAUDE.md`, `src/agentctl/check/validator/docs.py`, `tests/governance/test_doc_validator.py`, `tests/fixtures/docs_negative/docs_root_entry/`
 **Validation tests**: `tests/governance/test_doc_validator.py::test_docs_root_entry`, `tests/governance/test_doc_validator.py::test_live_docs_clean`, `tests/governance/test_plan_validator.py::test_live_plan_clean`
 **Mutants**: `M-docval-root-pointer-extra-rule`, `M-docval-root-index-blind`
@@ -227,8 +228,8 @@ Provide one reader entry point and one agent-policy home, with CLAUDE.md importi
 #### Deliverables
 
 - The root `README.md` describes the project, links both indexes and exposes only commands whose owning phase is built. It carries no phase status and never names the internal binary.
-- `AGENTS.md` states plan-order execution, the single gate, no staging/commit/push, no login or direct binary/cabal commands, no skips/suppressions or weakened oracle/mutant data, the isolation rules, and the fixed live folder.
-- The policy states the one sanctioned screen-fixture capture procedure and its quota implications; ordinary check runs send no live input and never answer dialogs.
+- `AGENTS.md` states plan-order execution, the single gate, automatic closure without a commit or human checkpoint, no staging/commit/push, no login or direct binary/cabal commands, no skips/suppressions or weakened oracle/mutant data, the isolation rules, and the fixed live folder.
+- The policy states the optional screen-fixture capture procedure and its quota implications outside gate closure; ordinary check runs send no live input and never answer dialogs.
 - `CLAUDE.md` contains its metadata block, one pointer sentence and `@AGENTS.md`, without parallel rules; `README.md` and `CLAUDE.md` use Reference only and `AGENTS.md` Authoritative source.
 - `docs.root-entry` requires the root files, links and pointer shape from this sprint onward, with no permanent missing-root exception; the complete documentation and plan validators run over the full governed tree.
 
@@ -240,13 +241,11 @@ Provide one reader entry point and one agent-policy home, with CLAUDE.md importi
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
 ## Remaining Work
 
-Sprint 0.1 is Active: pass the documentation validator (Sprint 0.4) and the plan validator (Sprint 0.5) over this
-tree. Sprints 0.2–0.6 are Planned: implement the package and Python check, the gate plugin, both validators and the
-root entry documents, then pass `agentctl check` with this phase's live Validation tests collected and executed.
+None.
 
 ## Documentation Requirements
 

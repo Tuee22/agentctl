@@ -1,0 +1,24 @@
+[[case]]
+id = "style.install.arguments"
+requirement = "R14"
+quote = "Also fourmolu + hlint"
+provenance = "decision:D-53"
+input = { subject = "style-install" }
+expected = ["install", "fourmolu-0.19.0.1", "hlint-3.10", "--ignore-project", "--install-method=copy", "--overwrite-policy=never", "--installdir=<staged>", "-w", "<ghc>", "--builddir=<build>", "--index-state=<index>", "--constraint=ghc-lib-parser==9.12.2.20250421", "--jobs=2"]
+
+[[case]]
+id = "style.config.keys"
+requirement = "R14"
+quote = "Also fourmolu + hlint"
+provenance = "decision:D-53"
+input = { subject = "style-keys" }
+expected = ["indentation", "column-limit", "function-arrows", "comma-style", "import-export-style", "import-grouping", "indent-wheres", "record-brace-space", "newlines-between-decls", "haddock-style", "haddock-style-module", "haddock-location-signature", "let-style", "in-style", "if-style", "single-constraint-parens", "single-deriving-parens", "sort-constraints", "sort-derived-classes", "sort-deriving-clauses", "trailing-section-operators", "unicode", "respectful", "fixities", "reexports", "local-modules"]
+
+[[case]]
+id = "style.install.arguments.compatible"
+requirement = "R14"
+quote = "Also fourmolu + hlint"
+provenance = "decision:D-54"
+input = { subject = "style-install" }
+expected = ["install", "fourmolu-0.19.0.1", "hlint-3.10", "--ignore-project", "--install-method=copy", "--overwrite-policy=never", "--installdir=<staged>", "-w", "<ghc>", "--builddir=<build>", "--index-state=<index>", "--constraint=ghc-lib-parser==9.12.3.20251228", "--jobs=2"]
+amends = "style.install.arguments"

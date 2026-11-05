@@ -1,0 +1,58 @@
+[[mutant]]
+id = "M-capture-ignore-cursor-change"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Capture.hs"
+search = "if before == after"
+replace = "if before == before"
+killers = ["tests/integration/test_capture_real.py::test_capture_retries_changed_cursor"]
+reason = "capture accepted changed native cursor snapshots"
+
+[[mutant]]
+id = "M-capture-no-join"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Mux/Tmux.hs"
+search = 'Capture pane count -> ["capture-pane", "-p", "-J", "-t", text (paneText pane), "-S", "-" ++ show count]'
+replace = 'Capture pane count -> ["capture-pane", "-p", "-t", text (paneText pane), "-S", "-" ++ show count]'
+killers = ["tests/integration/test_capture_real.py::test_capture_roundtrip_on_private_server"]
+reason = "native capture differs from independently normalized fixture"
+
+[[mutant]]
+id = "M-capture-locale-decoding"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Process.hs"
+search = '''decodeOutput status outBytes errBytes =
+  case (Text.decodeUtf8' outBytes, Text.decodeUtf8' errBytes) of
+    (Right outText, Right errText) -> Right (Output status outText errText)
+    (Left exception, _) -> Left (InvalidUtf8 (Text.pack (show exception)))
+    (_, Left exception) -> Left (InvalidUtf8 (Text.pack (show exception)))'''
+replace = '''decodeOutput status outBytes errBytes =
+  Right (Output status (Text.decodeLatin1 outBytes) (Text.decodeLatin1 errBytes))'''
+killers = ["tests/integration/test_capture_real.py::test_capture_roundtrip_on_private_server"]
+reason = "native capture differs from independently normalized fixture"
+
+[[mutant]]
+id = "M-capture-normalise-not-idempotent"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Normalize.hs"
+search = 'Text.splitOn "\n" (lineEndings screen)'
+replace = 'Text.splitOn "\n" (lineEndings ("\n" <> screen))'
+killers = ["haskell:agentctl-core-test/Normalize/idempotent"]
+reason = "screen normalisation changed on second pass"
+
+[[mutant]]
+id = "M-capture-fingerprint-constant"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Fingerprint.hs"
+search = 'SHA256.hash (Text.encodeUtf8 (normalise (errorText block)))'
+replace = 'SHA256.hash (Text.encodeUtf8 (Text.take 0 (normalise (errorText block))))'
+killers = ["haskell:agentctl-core-test/Fingerprint/different-error-differs"]
+reason = "error fingerprint differs from independent SHA-256"
+
+[[mutant]]
+id = "M-capture-fingerprint-includes-redraw"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Fingerprint.hs"
+search = 'SHA256.hash (Text.encodeUtf8 (normalise (errorText block)))'
+replace = 'SHA256.hash (Text.encodeUtf8 (normalise (precedingText block <> errorText block <> followingText block)))'
+killers = ["haskell:agentctl-core-test/Fingerprint/stable-under-redraw"]
+reason = "error fingerprint included surrounding output or redraw"

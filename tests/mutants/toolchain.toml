@@ -1,0 +1,53 @@
+[[mutant]]
+id = "M-boot-spawn-adds-set"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/toolchain.py"
+search = "(str(action.executable), *action.arguments),"
+replace = "(str(action.executable), *action.arguments, \"--set\"),"
+killers = ["tests/integration/test_toolchain.py::test_argv_never_sets"]
+reason = "toolchain install argv changed default selection"
+
+[[mutant]]
+id = "M-boot-ghc-from-path"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/toolchain.py"
+search = "numeric_version(path, context)"
+replace = "numeric_version(\"ghc\", context)"
+killers = ["tests/integration/test_toolchain.py::test_whereis_paths_used_verbatim"]
+reason = "recorded tool paths were not used verbatim"
+
+[[mutant]]
+id = "M-boot-links-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/bootstrap/toolchain.py"
+search = "if before.value != after.value:"
+replace = "if False:"
+killers = ["tests/integration/test_toolchain.py::test_default_links_unchanged_by_step"]
+reason = "default selection changes were ignored"
+
+[[mutant]]
+id = "M-boot-ghcup-on-warm-run"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/toolchain.py"
+search = "return Ok(Toolchain(facts.ghc, facts.cabal))"
+replace = "command(GhcupCommand(facts.ghcup_destination, (\"--numeric-version\",)), context)\n        return Ok(Toolchain(facts.ghc, facts.cabal))"
+killers = ["tests/integration/test_toolchain.py::test_warm_run_spawns_only_version_checks"]
+reason = "warm toolchain called ghcup"
+
+[[mutant]]
+id = "M-boot-recipe-stage-a-root"
+operator = "replace-literal"
+target = "tests/lanes/clean-host.Dockerfile"
+search = "USER agentctl\nWORKDIR /work/agentctl"
+replace = "USER root\nWORKDIR /work/agentctl"
+killers = ["tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle"]
+reason = "clean-host recipe differs"
+
+[[mutant]]
+id = "M-boot-step-not-run"
+operator = "short-circuit"
+target = "src/agentctl/check/steps.py"
+search = "run_step(leg)"
+replace = "0"
+killers = ["tests/unit/test_toolchain_gate.py::test_readiness_failures_and_gate_step"]
+reason = "toolchain-ensure was bypassed"

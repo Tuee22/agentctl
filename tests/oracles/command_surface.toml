@@ -1,0 +1,615 @@
+[[case]]
+id = "surface.python"
+requirement = "R2"
+quote = "agentctl is a click application using pytest"
+provenance = "request:R2"
+input = { "subject" = "command-surface", "scope" = "python" }
+expected = { "commands" = ["check"], "global_options" = ["--assume-yes"] }
+
+[[case]]
+id = "surface.complete"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "request:R6"
+input = { "subject" = "command-surface", "scope" = "complete" }
+expected = { "commands" = ["check", "claude", "codex", "list", "status", "attach", "stop", "adopt", "watch", "unwatch", "pause", "resume-watch", "logs", "supervisor"], "global_options" = ["--assume-yes"] }
+
+[[case]]
+id = "handoff.mode.linux"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-62"
+input = { subject = "handoff-mode", family = "Linux" }
+expected = "execve"
+
+[[case]]
+id = "handoff.mode.darwin"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-62"
+input = { subject = "handoff-mode", family = "Darwin" }
+expected = "execve"
+
+[[case]]
+id = "handoff.mode.windows"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-62"
+input = { subject = "handoff-mode", family = "Windows" }
+expected = "child"
+
+[[case]]
+id = "watch.watch.managed.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "watch", "target" = "api-claude", "kind" = "managed", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = false, "revision" = 5 } } }, "commands" = [], "exit" = 0, "message" = "watching" }
+
+[[case]]
+id = "watch.watch.managed.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "watch", "target" = "api-claude", "kind" = "managed", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = false, "revision" = 3 } } }, "commands" = [], "exit" = 0, "message" = "already-watched" }
+
+[[case]]
+id = "watch.watch.managed.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "watch", "target" = "api-claude", "kind" = "managed", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = true, "revision" = 3 } } }, "commands" = [], "exit" = 0, "message" = "already-watched" }
+
+[[case]]
+id = "watch.watch.adopted.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "watch", "target" = "%3", "kind" = "adopted", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = false, "revision" = 5 } } }, "commands" = [], "exit" = 0, "message" = "watching" }
+
+[[case]]
+id = "watch.watch.adopted.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "watch", "target" = "%3", "kind" = "adopted", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = false, "revision" = 3 } } }, "commands" = [], "exit" = 0, "message" = "already-watched" }
+
+[[case]]
+id = "watch.watch.adopted.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "watch", "target" = "%3", "kind" = "adopted", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = true, "revision" = 3 } } }, "commands" = [], "exit" = 0, "message" = "already-watched" }
+
+[[case]]
+id = "watch.watch.foreign.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "watch", "target" = "foreign", "kind" = "foreign", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 1, "message" = "refuse-target" }
+
+[[case]]
+id = "watch.watch.foreign.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "watch", "target" = "foreign", "kind" = "foreign", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = false, "revision" = 3 } } }, "commands" = [], "exit" = 1, "message" = "refuse-target" }
+
+[[case]]
+id = "watch.watch.foreign.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "watch", "target" = "foreign", "kind" = "foreign", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = true, "revision" = 3 } } }, "commands" = [], "exit" = 1, "message" = "refuse-target" }
+
+[[case]]
+id = "watch.watch.missing.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "watch", "target" = "absent", "kind" = "missing", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 1, "message" = "refuse-target" }
+
+[[case]]
+id = "watch.watch.missing.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "watch", "target" = "absent", "kind" = "missing", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = false, "revision" = 3 } } }, "commands" = [], "exit" = 1, "message" = "refuse-target" }
+
+[[case]]
+id = "watch.watch.missing.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "watch", "target" = "absent", "kind" = "missing", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = true, "revision" = 3 } } }, "commands" = [], "exit" = 1, "message" = "refuse-target" }
+
+[[case]]
+id = "watch.unwatch.managed.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "unwatch", "target" = "api-claude", "kind" = "managed", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 0, "message" = "not-watched" }
+
+[[case]]
+id = "watch.unwatch.managed.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "unwatch", "target" = "api-claude", "kind" = "managed", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 0, "message" = "unwatched" }
+
+[[case]]
+id = "watch.unwatch.managed.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "unwatch", "target" = "api-claude", "kind" = "managed", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 0, "message" = "unwatched" }
+
+[[case]]
+id = "watch.unwatch.adopted.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "unwatch", "target" = "%3", "kind" = "adopted", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 0, "message" = "not-watched" }
+
+[[case]]
+id = "watch.unwatch.adopted.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "unwatch", "target" = "%3", "kind" = "adopted", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 0, "message" = "unwatched" }
+
+[[case]]
+id = "watch.unwatch.adopted.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "unwatch", "target" = "%3", "kind" = "adopted", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 0, "message" = "unwatched" }
+
+[[case]]
+id = "watch.unwatch.foreign.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "unwatch", "target" = "foreign", "kind" = "foreign", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 0, "message" = "not-watched" }
+
+[[case]]
+id = "watch.unwatch.foreign.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "unwatch", "target" = "foreign", "kind" = "foreign", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 0, "message" = "unwatched" }
+
+[[case]]
+id = "watch.unwatch.foreign.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "unwatch", "target" = "foreign", "kind" = "foreign", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 0, "message" = "unwatched" }
+
+[[case]]
+id = "watch.unwatch.missing.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "unwatch", "target" = "absent", "kind" = "missing", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 0, "message" = "not-watched" }
+
+[[case]]
+id = "watch.unwatch.missing.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "unwatch", "target" = "absent", "kind" = "missing", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 0, "message" = "unwatched" }
+
+[[case]]
+id = "watch.unwatch.missing.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "unwatch", "target" = "absent", "kind" = "missing", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 0, "message" = "unwatched" }
+
+[[case]]
+id = "watch.pause.managed.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "pause", "target" = "api-claude", "kind" = "managed", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 1, "message" = "not-watched" }
+
+[[case]]
+id = "watch.pause.managed.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "pause", "target" = "api-claude", "kind" = "managed", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = true, "revision" = 5 } } }, "commands" = [], "exit" = 0, "message" = "paused" }
+
+[[case]]
+id = "watch.pause.managed.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "pause", "target" = "api-claude", "kind" = "managed", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = true, "revision" = 3 } } }, "commands" = [], "exit" = 0, "message" = "already-paused" }
+
+[[case]]
+id = "watch.pause.adopted.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "pause", "target" = "%3", "kind" = "adopted", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 1, "message" = "not-watched" }
+
+[[case]]
+id = "watch.pause.adopted.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "pause", "target" = "%3", "kind" = "adopted", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = true, "revision" = 5 } } }, "commands" = [], "exit" = 0, "message" = "paused" }
+
+[[case]]
+id = "watch.pause.adopted.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "pause", "target" = "%3", "kind" = "adopted", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = true, "revision" = 3 } } }, "commands" = [], "exit" = 0, "message" = "already-paused" }
+
+[[case]]
+id = "watch.pause.foreign.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "pause", "target" = "foreign", "kind" = "foreign", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 1, "message" = "not-watched" }
+
+[[case]]
+id = "watch.pause.foreign.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "pause", "target" = "foreign", "kind" = "foreign", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = true, "revision" = 5 } } }, "commands" = [], "exit" = 0, "message" = "paused" }
+
+[[case]]
+id = "watch.pause.foreign.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "pause", "target" = "foreign", "kind" = "foreign", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = true, "revision" = 3 } } }, "commands" = [], "exit" = 0, "message" = "already-paused" }
+
+[[case]]
+id = "watch.pause.missing.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "pause", "target" = "absent", "kind" = "missing", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 1, "message" = "not-watched" }
+
+[[case]]
+id = "watch.pause.missing.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "pause", "target" = "absent", "kind" = "missing", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = true, "revision" = 5 } } }, "commands" = [], "exit" = 0, "message" = "paused" }
+
+[[case]]
+id = "watch.pause.missing.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "pause", "target" = "absent", "kind" = "missing", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = true, "revision" = 3 } } }, "commands" = [], "exit" = 0, "message" = "already-paused" }
+
+[[case]]
+id = "watch.resume-watch.managed.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "resume-watch", "target" = "api-claude", "kind" = "managed", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 1, "message" = "not-watched" }
+
+[[case]]
+id = "watch.resume-watch.managed.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "resume-watch", "target" = "api-claude", "kind" = "managed", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = false, "revision" = 3 } } }, "commands" = [], "exit" = 0, "message" = "already-watched" }
+
+[[case]]
+id = "watch.resume-watch.managed.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "resume-watch", "target" = "api-claude", "kind" = "managed", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "api-claude" = { "paused" = false, "revision" = 5 } } }, "commands" = [], "exit" = 0, "message" = "resumed" }
+
+[[case]]
+id = "watch.resume-watch.adopted.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "resume-watch", "target" = "%3", "kind" = "adopted", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 1, "message" = "not-watched" }
+
+[[case]]
+id = "watch.resume-watch.adopted.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "resume-watch", "target" = "%3", "kind" = "adopted", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = false, "revision" = 3 } } }, "commands" = [], "exit" = 0, "message" = "already-watched" }
+
+[[case]]
+id = "watch.resume-watch.adopted.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "resume-watch", "target" = "%3", "kind" = "adopted", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 5, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "%3" = { "paused" = false, "revision" = 5 } } }, "commands" = [], "exit" = 0, "message" = "resumed" }
+
+[[case]]
+id = "watch.resume-watch.foreign.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "resume-watch", "target" = "foreign", "kind" = "foreign", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 1, "message" = "refuse-target" }
+
+[[case]]
+id = "watch.resume-watch.foreign.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "resume-watch", "target" = "foreign", "kind" = "foreign", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = false, "revision" = 3 } } }, "commands" = [], "exit" = 1, "message" = "refuse-target" }
+
+[[case]]
+id = "watch.resume-watch.foreign.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "resume-watch", "target" = "foreign", "kind" = "foreign", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "foreign" = { "paused" = true, "revision" = 3 } } }, "commands" = [], "exit" = 1, "message" = "refuse-target" }
+
+[[case]]
+id = "watch.resume-watch.missing.absent"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "resume-watch", "target" = "absent", "kind" = "missing", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 } } }, "commands" = [], "exit" = 1, "message" = "refuse-target" }
+
+[[case]]
+id = "watch.resume-watch.missing.watched"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "resume-watch", "target" = "absent", "kind" = "missing", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = false, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = false, "revision" = 3 } } }, "commands" = [], "exit" = 1, "message" = "refuse-target" }
+
+[[case]]
+id = "watch.resume-watch.missing.paused"
+requirement = "R18.6"
+quote = "Support manual pause and opt-out"
+provenance = "decision:D-70"
+input = { "subject" = "watch-transition", "command" = "resume-watch", "target" = "absent", "kind" = "missing", "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = true, "revision" = 3 } } } }
+expected = { "registry" = { "revision" = 4, "watched" = { "control-codex" = { "paused" = false, "revision" = 1 }, "absent" = { "paused" = true, "revision" = 3 } } }, "commands" = [], "exit" = 1, "message" = "refuse-target" }
+
+[[case]]
+id = "run-flags.defaults"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = [] }
+expected = { "poll" = 5, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0.2 }
+
+[[case]]
+id = "run-flags.override-poll"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--poll-seconds", "0.1"] }
+expected = { "poll" = 0.1, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0.2 }
+
+[[case]]
+id = "run-flags.override-initial"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--initial-delay-seconds", "45"] }
+expected = { "poll" = 5, "initial" = 45, "maximum" = 900, "multiplier" = 2, "jitter" = 0.2 }
+
+[[case]]
+id = "run-flags.override-maximum"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--max-delay-seconds", "1800"] }
+expected = { "poll" = 5, "initial" = 30, "maximum" = 1800, "multiplier" = 2, "jitter" = 0.2 }
+
+[[case]]
+id = "run-flags.override-multiplier"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--multiplier", "3"] }
+expected = { "poll" = 5, "initial" = 30, "maximum" = 900, "multiplier" = 3, "jitter" = 0.2 }
+
+[[case]]
+id = "run-flags.override-jitter"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--jitter-fraction", "0"] }
+expected = { "poll" = 5, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0 }
+
+[[case]]
+id = "run-flags.all-overrides"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--poll-seconds", "0.2", "--initial-delay-seconds", "0.5", "--max-delay-seconds", "4", "--multiplier", "1.5", "--jitter-fraction", "0"] }
+expected = { "poll" = 0.2, "initial" = 0.5, "maximum" = 4, "multiplier" = 1.5, "jitter" = 0 }
+
+[[case]]
+id = "run-flags.refuse-poll-zero"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--poll-seconds", "0"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-poll-negative"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--poll-seconds", "-1"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-initial-zero"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--initial-delay-seconds", "0"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-initial-negative"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--initial-delay-seconds", "-1"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-maximum-too-small"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--max-delay-seconds", "29"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-multiplier-one"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--multiplier", "1"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-multiplier-zero"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--multiplier", "0"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-jitter-negative"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--jitter-fraction", "-0.1"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-jitter-one"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--jitter-fraction", "1"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-jitter-over-one"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--jitter-fraction", "2"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-poll-nan"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--poll-seconds", "NaN"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-initial-infinite"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--initial-delay-seconds", "Infinity"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-maximum-infinite"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--max-delay-seconds", "1e309"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-multiplier-infinite"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--multiplier", "1e309"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-jitter-nan"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--jitter-fraction", "NaN"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-unknown-option"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--unknown", "1"] }
+expected = { "error" = "invalid-timing" }
+
+[[case]]
+id = "run-flags.refuse-recovery-text-not-configurable"
+requirement = "R18"
+quote = "Supervise capacity/overload failures without changing the selected model"
+provenance = "decision:D-39"
+input = { "subject" = "run-flag-defaults", "args" = ["--recovery-text", "arbitrary text"] }
+expected = { "error" = "invalid-timing" }

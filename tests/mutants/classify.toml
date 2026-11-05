@@ -1,0 +1,89 @@
+[[mutant]]
+id = "M-classify-usage-limit-as-overload"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Classify.hs"
+search = 'matches (usageMarkers rules) line = Just UsageLimit'
+replace = 'matches (usageMarkers rules) line = Just Overloaded'
+killers = ["tests/unit/test_screen_classes.py::test_fixtures_classify_as_their_directory"]
+reason = "screen class differs from fixture directory"
+
+[[mutant]]
+id = "M-classify-auth-error-as-overload"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Classify.hs"
+search = 'matches (authMarkers rules) line = Just AuthError'
+replace = 'matches (authMarkers rules) line = Just Overloaded'
+killers = ["tests/unit/test_screen_classes.py::test_fixtures_classify_as_their_directory"]
+reason = "screen class differs from fixture directory"
+
+[[mutant]]
+id = "M-classify-context-as-overload"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Classify.hs"
+search = 'matches (contextMarkers rules) line = Just ContextExhausted'
+replace = 'matches (contextMarkers rules) line = Just Overloaded'
+killers = ["tests/unit/test_screen_classes.py::test_fixtures_classify_as_their_directory"]
+reason = "screen class differs from fixture directory"
+
+[[mutant]]
+id = "M-classify-overload-over-approval"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Classify.hs"
+search = '| matches (approvalMarkers rules) text = result ApprovalDialog'
+replace = '| matches (approvalMarkers rules) text = result (if matches (overloadMarkers rules) text then Overloaded else ApprovalDialog)'
+killers = ["tests/unit/test_screen_classes.py::test_precedence_pairs"]
+reason = "screen precedence differs from fixture pair"
+
+[[mutant]]
+id = "M-classify-ignore-partial-input"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Classify.hs"
+search = 'not (Text.null input) -> result PartialInput'
+replace = 'not (Text.null input) && Text.null (promptMarker rules) -> result PartialInput'
+killers = ["tests/unit/test_screen_classes.py::test_precedence_pairs"]
+reason = "screen precedence differs from fixture pair"
+
+[[mutant]]
+id = "M-classify-overload-over-working"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Classify.hs"
+search = '| matches ["esc to interrupt"] text -> result Working'
+replace = '| matches ["esc to interrupt"] text -> result (if matches (overloadMarkers rules) text then Overloaded else Working)'
+killers = ["tests/unit/test_screen_classes.py::test_precedence_pairs"]
+reason = "screen precedence differs from fixture pair"
+
+[[mutant]]
+id = "M-classify-dead-pane-by-text"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Classify.hs"
+search = '| screenDead screen = result Exited'
+replace = '| screenDead screen && matches ["exited"] (screenText screen) = result Exited'
+killers = ["haskell:agentctl-core-test/Classify/dead-pane-is-exited"]
+reason = "pane death was inferred from text"
+
+[[mutant]]
+id = "M-classify-placeholder-as-partial"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Classify/Input.hs"
+search = 'visualCursorX visual == start && all (\(character, faint) -> isSpace character || faint) body -> ""'
+replace = 'visualCursorX visual == start && all (\(character, faint) -> isSpace character || faint) body -> supplied'
+killers = ["haskell:agentctl-core-test/Classify/placeholder-needs-visual-evidence"]
+reason = "empty composer suggestion was treated as a draft"
+
+[[mutant]]
+id = "M-classify-placeholder-ignores-style"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Classify/Input.hs"
+search = 'visualCursorX visual == start && all (\(character, faint) -> isSpace character || faint) body -> ""'
+replace = 'visualCursorX visual == start -> ""'
+killers = ["haskell:agentctl-core-test/Classify/placeholder-needs-visual-evidence"]
+reason = "classifier accepted a draft as a placeholder"
+
+[[mutant]]
+id = "M-classify-placeholder-ignores-cursor"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Observe/Classify/Input.hs"
+search = 'visualCursorX visual == start && all (\(character, faint) -> isSpace character || faint) body -> ""'
+replace = 'all (\(character, faint) -> isSpace character || faint) body -> ""'
+killers = ["haskell:agentctl-core-test/Classify/placeholder-needs-visual-evidence"]
+reason = "classifier accepted a draft as a placeholder"

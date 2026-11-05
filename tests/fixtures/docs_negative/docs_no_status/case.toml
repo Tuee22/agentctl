@@ -1,0 +1,4 @@
+rule = "docs.no_status"
+path = "documents/operations/installation.md"
+search = ""
+replace = "\n[Toolchain bootstrap](../../DEVELOPMENT_PLAN/phase-2-toolchain-bootstrap.md) is Done.\n"

@@ -1,0 +1,4 @@
+rule = "docs.root_entry"
+path = "CLAUDE.md"
+search = "@AGENTS.md"
+replace = "@AGENTS.md\n\nAlways add a second policy rule."

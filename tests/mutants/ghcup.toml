@@ -1,0 +1,50 @@
+[[mutant]]
+id = "M-ghcup-overwrite-existing"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/ghcup.py"
+search = "return Ok(facts.ghcup.path)"
+replace = "facts.ghcup.path.unlink()\n        return download(asset, facts.ghcup.path)"
+killers = ["tests/integration/test_ghcup.py::test_present_ghcup_untouched"]
+reason = "existing ghcup was replaced or downloaded"
+
+[[mutant]]
+id = "M-ghcup-skip-verify"
+operator = "short-circuit"
+target = "src/agentctl/bootstrap/ghcup.py"
+search = "if digest != asset.sha256:"
+replace = "if False:"
+killers = ["tests/integration/test_ghcup.py::test_sha_mismatch_refused_no_file"]
+reason = "unverified ghcup bytes were published"
+
+[[mutant]]
+id = "M-ghcup-nonatomic-write"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/ghcup.py"
+search = '''staged = Path(temporary) / "download"
+            verified = fetch(asset, staged)
+            if isinstance(verified, Err):
+                return verified
+            if asset.family != "Windows":
+                staged.chmod(0o755)
+            if destination.exists() or destination.is_symlink():
+                return Err(
+                    GhcupError("ghcup destination changed during download; retry")
+                )
+            staged.replace(destination)'''
+replace = '''staged = destination
+            verified = fetch(asset, staged)
+            if isinstance(verified, Err):
+                return verified
+            if asset.family != "Windows":
+                staged.chmod(0o755)'''
+killers = ["tests/integration/test_ghcup.py::test_truncated_download_leaves_nothing"]
+reason = "partial ghcup was published in place"
+
+[[mutant]]
+id = "M-ghcup-edits-rc"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/ghcup.py"
+search = "return Ok(destination)"
+replace = "(Path.home() / \".bashrc\").write_text(\"export PATH=$PATH:$HOME/.ghcup/bin\\n\", encoding=\"utf-8\")\n        return Ok(destination)"
+killers = ["tests/integration/test_ghcup.py::test_no_rc_file_written"]
+reason = "ghcup installation edited an rc file"

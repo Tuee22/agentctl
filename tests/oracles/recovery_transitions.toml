@@ -1,0 +1,2919 @@
+[[case]]
+id = "machine.monitoring.exited.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.exited.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.exited.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.exited.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.trustdialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.trustdialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.trustdialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.trustdialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.bypasswarning.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.bypasswarning.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.bypasswarning.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.bypasswarning.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.approvaldialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.approvaldialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.approvaldialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.approvaldialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.loginscreen.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.loginscreen.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.loginscreen.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.loginscreen.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.partialinput.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.partialinput.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.partialinput.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.partialinput.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.working.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.working.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.working.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.working.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.usagelimit.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.usagelimit.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.usagelimit.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.usagelimit.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.autherror.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.autherror.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.autherror.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.autherror.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.contextexhausted.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.contextexhausted.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.contextexhausted.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.contextexhausted.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.overloaded.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "SUSPECTED_FAILURE", "actions" = [], "incident" = "opened", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.overloaded.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "SUSPECTED_FAILURE", "actions" = [], "incident" = "opened", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.overloaded.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "SUSPECTED_FAILURE", "actions" = [], "incident" = "opened", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.overloaded.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "SUSPECTED_FAILURE", "actions" = [], "incident" = "opened", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.idleprompt.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.idleprompt.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.idleprompt.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.idleprompt.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.unknown.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.unknown.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.unknown.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.monitoring.unknown.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.exited.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.exited.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.exited.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.exited.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.trustdialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.trustdialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.trustdialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.trustdialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.bypasswarning.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.bypasswarning.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.bypasswarning.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.bypasswarning.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.approvaldialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.approvaldialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.approvaldialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.approvaldialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.loginscreen.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.loginscreen.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.loginscreen.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.loginscreen.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.partialinput.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.partialinput.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.partialinput.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.partialinput.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.working.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.working.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.working.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.working.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.usagelimit.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.usagelimit.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.usagelimit.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.usagelimit.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.autherror.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.autherror.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.autherror.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.autherror.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.contextexhausted.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.contextexhausted.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.contextexhausted.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.contextexhausted.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.overloaded.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "CONFIRM_IDLE", "actions" = [], "incident" = "continued", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.overloaded.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "SUSPECTED_FAILURE", "actions" = [], "incident" = "replaced", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.overloaded.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "CONFIRM_IDLE", "actions" = [], "incident" = "continued", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.overloaded.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "SUSPECTED_FAILURE", "actions" = [], "incident" = "replaced", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.idleprompt.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.idleprompt.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.idleprompt.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.idleprompt.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.unknown.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.unknown.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.unknown.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.suspected_failure.unknown.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "SUSPECTED_FAILURE", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.exited.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.exited.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.exited.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.exited.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.trustdialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.trustdialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.trustdialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.trustdialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.bypasswarning.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.bypasswarning.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.bypasswarning.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.bypasswarning.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.approvaldialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.approvaldialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.approvaldialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.approvaldialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.loginscreen.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.loginscreen.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.loginscreen.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.loginscreen.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.partialinput.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.partialinput.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.partialinput.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.partialinput.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.working.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.working.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.working.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.working.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.usagelimit.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.usagelimit.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.usagelimit.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.usagelimit.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.autherror.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.autherror.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.autherror.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.autherror.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.contextexhausted.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.contextexhausted.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.contextexhausted.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.contextexhausted.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.overloaded.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "BACKOFF", "actions" = ["wait", "notify"], "incident" = "continued", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.overloaded.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "SUSPECTED_FAILURE", "actions" = [], "incident" = "replaced", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.overloaded.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "BACKOFF", "actions" = ["wait", "notify"], "incident" = "continued", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.overloaded.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "SUSPECTED_FAILURE", "actions" = [], "incident" = "replaced", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.idleprompt.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.idleprompt.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.idleprompt.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.idleprompt.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.unknown.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.unknown.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.unknown.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.confirm_idle.unknown.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "CONFIRM_IDLE", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.exited.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.exited.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.exited.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.exited.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.trustdialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.trustdialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.trustdialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.trustdialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.bypasswarning.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.bypasswarning.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.bypasswarning.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.bypasswarning.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.approvaldialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.approvaldialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.approvaldialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.approvaldialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.loginscreen.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.loginscreen.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.loginscreen.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.loginscreen.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.partialinput.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.partialinput.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.partialinput.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.partialinput.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.working.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.working.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.working.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.working.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.usagelimit.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.usagelimit.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.usagelimit.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.usagelimit.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.autherror.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.autherror.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.autherror.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.autherror.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.contextexhausted.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.contextexhausted.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.contextexhausted.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.contextexhausted.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.overloaded.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "BACKOFF", "actions" = [], "incident" = "continued", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.overloaded.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "SUSPECTED_FAILURE", "actions" = [], "incident" = "replaced", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.overloaded.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "RECOVERY_SENT", "actions" = ["send"], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.overloaded.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "SUSPECTED_FAILURE", "actions" = [], "incident" = "replaced", "handled" = [], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.idleprompt.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.idleprompt.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.idleprompt.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.idleprompt.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.unknown.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.unknown.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.unknown.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.backoff.unknown.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "BACKOFF", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = [], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.exited.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.exited.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.exited.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.exited.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.trustdialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.trustdialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.trustdialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.trustdialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.bypasswarning.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.bypasswarning.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.bypasswarning.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.bypasswarning.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.approvaldialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.approvaldialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.approvaldialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.approvaldialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.loginscreen.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.loginscreen.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.loginscreen.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.loginscreen.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.partialinput.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.partialinput.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.partialinput.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.partialinput.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.working.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.working.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.working.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.working.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.usagelimit.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.usagelimit.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.usagelimit.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.usagelimit.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.autherror.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.autherror.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.autherror.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.autherror.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.contextexhausted.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.contextexhausted.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.contextexhausted.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.contextexhausted.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.overloaded.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.overloaded.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.overloaded.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.overloaded.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.idleprompt.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.idleprompt.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.idleprompt.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.idleprompt.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.unknown.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.unknown.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.unknown.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.recovery_sent.unknown.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "RECOVERY_SENT", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.exited.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.exited.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.exited.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.exited.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.trustdialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.trustdialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.trustdialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.trustdialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.bypasswarning.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.bypasswarning.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.bypasswarning.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.bypasswarning.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.approvaldialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.approvaldialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.approvaldialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.approvaldialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.loginscreen.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.loginscreen.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.loginscreen.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.loginscreen.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.partialinput.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.partialinput.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.partialinput.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.partialinput.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "ended", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.working.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "recovered", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.working.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "recovered", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.working.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "recovered", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.working.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "recovered", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.usagelimit.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.usagelimit.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.usagelimit.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.usagelimit.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.autherror.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.autherror.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.autherror.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.autherror.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.contextexhausted.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.contextexhausted.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.contextexhausted.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.contextexhausted.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "escalated", "handled" = ["f", "hard"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.overloaded.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.overloaded.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "BACKOFF", "actions" = ["wait"], "incident" = "continued", "handled" = ["f"], "attempt" = 2 }
+
+[[case]]
+id = "machine.verify.overloaded.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "not-acknowledged", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.overloaded.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "BACKOFF", "actions" = ["wait"], "incident" = "continued", "handled" = ["f"], "attempt" = 2 }
+
+[[case]]
+id = "machine.verify.idleprompt.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "recovered", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.idleprompt.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "recovered", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.idleprompt.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "recovered", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.idleprompt.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "recovered", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.unknown.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.unknown.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "VERIFY", "actions" = [], "incident" = "continued", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.unknown.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "not-acknowledged", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.verify.unknown.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "VERIFY", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "f", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = ["notify"], "incident" = "not-acknowledged", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.exited.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.exited.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.exited.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.exited.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.trustdialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.trustdialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.trustdialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.trustdialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.bypasswarning.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.bypasswarning.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.bypasswarning.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.bypasswarning.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.approvaldialog.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.approvaldialog.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.approvaldialog.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.approvaldialog.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.loginscreen.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.loginscreen.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.loginscreen.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.loginscreen.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "LoginScreen", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.partialinput.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.partialinput.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.partialinput.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.partialinput.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.working.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.working.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.working.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.working.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.usagelimit.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.usagelimit.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.usagelimit.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.usagelimit.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "UsageLimit", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.autherror.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.autherror.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.autherror.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.autherror.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "AuthError", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.contextexhausted.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.contextexhausted.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.contextexhausted.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.contextexhausted.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "ContextExhausted", "fingerprint" = "hard", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.overloaded.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.overloaded.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.overloaded.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.overloaded.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Overloaded", "fingerprint" = "g", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.idleprompt.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.idleprompt.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.idleprompt.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.idleprompt.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.unknown.0.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.unknown.0.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = false }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.unknown.1.0"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.escalate.unknown.1.1"
+requirement = "R18.2"
+quote = "Never send input during active work, approval dialogs, or partially typed user input"
+provenance = "request:R18"
+input = { "subject" = "recovery-transition", "state" = "ESCALATE", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "ESCALATE", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }
+
+[[case]]
+id = "machine.handled.baseline"
+requirement = "R18.3"
+quote = "Fingerprint errors to avoid retrying stale scrollback"
+provenance = "request:R18.3"
+input = { "subject" = "recovery-transition", "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "f", "incident_fingerprint" = "", "handled" = ["f"], "attempt" = 1, "deadline_reached" = true }
+expected = { "state" = "MONITORING", "actions" = [], "incident" = "none", "handled" = ["f"], "attempt" = 1 }

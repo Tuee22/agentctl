@@ -1,6 +1,6 @@
 # Phase 1 — Gate-integrity apparatus
 
-**Status**: Planned
+**Status**: Done
 **Depends on**: [Phase 0 — Governance, documentation standards and the check skeleton](phase-0-governance-and-check-skeleton.md)
 **Host lane**: any-host
 **Gate**: `agentctl check`
@@ -12,7 +12,7 @@
 ## Phase Objective
 
 This phase gives the check skeleton the apparatus that bounds R20's claim. The request-derived oracles are
-written before any product code and frozen at the user's commit point. Every run exercises its mutants, checks
+authored independently before product code. Every run exercises its mutants, checks
 the checkout and interpreter it uses, and joins the plan's completion claims to results from that run.
 [Testing](../documents/engineering/testing.md) owns the mechanics; [the quality gate](../documents/engineering/quality_gate.md)
 owns the steps and configuration.
@@ -32,24 +32,25 @@ owns the steps and configuration.
 |---|---|---|---|---|
 | R20 — expected values have independent provenance before the implementation | `tests/oracles/launch_argv.toml`, `tests/oracles/session_names.toml`, `tests/oracles/preflight.toml`, `tests/oracles/auth_status.toml`, `tests/oracles/recovery_transitions.toml`, `tests/oracles/backoff.toml` | value: row-schema, quote, provenance and import checks over minimal oracle trees | `M-oracle-quote-unchecked`, `M-oracle-subject-import-allowed` | `tests/governance/test_oracles.py::test_quote_must_match_requirement`, `tests/governance/test_oracles.py::test_loader_imports_no_subject` |
 | R20 — every deliberate defect is killed for its named reason in this run | `tests/mutants/gate.toml` | real: pytester baseline and defective scratch subjects, with exact patch and reason checks | `M-mutant-any-failure-counts`, `M-mutant-survivor-accepted` | `tests/governance/test_mutants.py::test_wrong_reason_rejected`, `tests/governance/test_mutants.py::test_survivor_rejected` |
-| R20 — gate data cannot weaken against HEAD and check cannot change its subject or environment | `tests/oracles/lint_config.toml` | value: append-only comparison over committed and working rows; real: temporary checkouts and disposable venvs expose changed files, refs and installed distributions | `M-ratchet-allow-edit`, `M-guard-skip-ignored`, `M-guard-venv-unchecked` | `tests/governance/test_ratchet.py::test_edited_row_rejected`, `tests/integration/test_guard.py::test_ignored_write_detected`, `tests/integration/test_guard.py::test_venv_change_detected` |
-| R20 — process boundaries, suppression bans and static legs are observed rather than asserted by the subject | `tests/oracles/lint_config.toml` | observer: spawn audit records allowed and vetoed events with fresh nonces; real: pinned tools reject copied negative fixtures | `M-audit-hook-blind-execv`, `M-guard-process-allowlist-wide`, `M-guard-noqa-blind` | `tests/integration/test_spawn_audit.py::test_all_spawn_events_recorded`, `tests/governance/test_source_guards.py::test_subprocess_import_outside_process_module`, `tests/governance/test_source_guards.py::test_suppression_ban_fixtures` |
-| R20 — completion and evidence refer to tests and lanes of the current run | `tests/oracles/check_steps.toml` | value: closure and evidence fixtures; real: pytester manifests joined to this run's collected, executed and passed ids | `M-evidence-nonce-unchecked`, `M-evidence-missing-citation-allowed`, `M-evidence-lane-refusal-off` | `tests/governance/test_run_evidence.py::test_manifest_nonce_required`, `tests/governance/test_plan_validator.py::test_plan_cited_ids`, `tests/unit/test_lane.py::test_refusal_when_done_lane_unmet` |
+| R20 — gate data cannot weaken against HEAD and check cannot change its subject or environment | `tests/oracles/lint_config.toml` | value: append-only comparison over committed and working rows; real: temporary checkouts and disposable venvs expose changed files, refs and installed distributions; real: an owned observer pid is detected live and accepted after reaping; observer: an independent hook records snapshot reads around a failed tool; owed: windows-psmux-acceptance | `M-ratchet-allow-edit`, `M-guard-skip-ignored`, `M-guard-ref-unchecked`, `M-guard-venv-unchecked`, `M-guard-containment-blind` | `tests/governance/test_ratchet.py::test_edited_row_rejected`, `tests/integration/test_guard.py::test_ignored_write_detected`, `tests/integration/test_guard.py::test_venv_change_detected`, `tests/integration/test_guard.py::test_ref_change_detected`, `tests/integration/test_guard.py::test_containment_detects_owned_leak`, `tests/integration/test_guard.py::test_finalizers_run_after_failed_leg` |
+| R20 — process boundaries, suppression bans and static legs are observed rather than asserted by the subject | `tests/oracles/lint_config.toml` | value: source and configuration choices match their negative controls; observer: spawn audit records allowed and vetoed events with fresh nonces; real: pinned tools reject copied negative fixtures | `M-audit-hook-blind-execv`, `M-guard-process-allowlist-wide`, `M-guard-noqa-blind` | `tests/integration/test_spawn_audit.py::test_all_spawn_events_recorded`, `tests/governance/test_source_guards.py::test_subprocess_import_outside_process_module`, `tests/governance/test_source_guards.py::test_suppression_ban_fixtures`, `tests/integration/test_static_legs.py::test_ty_fires_on_fixture` |
+| R20 — completion and evidence refer to tests and lanes of the current run | `tests/oracles/check_steps.toml` | value: closure and evidence fixtures; real: pytester manifests joined to this run's collected, executed and passed ids | `M-evidence-nonce-unchecked`, `M-evidence-missing-citation-allowed`, `M-evidence-lane-refusal-off` | `tests/governance/test_run_evidence.py::test_manifest_nonce_required`, `tests/governance/test_plan_validator.py::test_plan_cited_ids`, `tests/unit/test_lane.py::test_refusal_when_done_lane_unmet`, `tests/governance/test_gate_plugin.py::test_manifest_matches_execution` |
 
 ## Not Proven By This Gate
 
 - That an oracle captures every interpretation of natural-language intent, beyond its recorded cases and provenance. — not proven by any phase.
-- That request-derived oracles predate their implementation without the user's commit establishing that boundary. — not proven by any phase.
+- That request-derived oracles predate their implementation when that ordering has no independent historical evidence. — not proven by any phase.
 - That a host-acceptance evidence row describes a run that happened; its digest proves the covered tree is current. — not proven by any phase.
 - Containment of a process that crosses neither a registered observer nor a private-server boundary. — not proven by any phase.
-- Tamper resistance is bounded by [§ P](development_plan_standards.md#p-the-ratchet-and-the-users-commit-points): it holds against a HEAD the user has committed. — not proven by any phase.
+- Native Windows observer liveness queries. — owed to [Phase 14 — Windows and psmux acceptance](phase-14-windows-psmux-acceptance.md).
+- Tamper resistance extends only to data already present in the available HEAD baseline ([§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure)); uncommitted inputs have no historical protection. — not proven by any phase.
 
 ## Sprints
 
-### Sprint 1.1: Oracle store and request-derived oracles [Planned]
+### Sprint 1.1: Oracle store and request-derived oracles [Done]
 
-**Status**: Planned
-**Implementation**: `tests/harness/oracle.py`, `src/agentctl/check/validator/plan.py`, `tests/oracles/launch_argv.toml`, `tests/oracles/session_names.toml`, `tests/oracles/preflight.toml`, `tests/oracles/auth_status.toml`, `tests/oracles/recovery_transitions.toml`, `tests/oracles/backoff.toml`, `tests/oracles/check_steps.toml`, `tests/oracles/lint_config.toml`, `tests/governance/test_oracles.py`
+**Status**: Done
+**Implementation**: `tests/harness/oracle.py`, `src/agentctl/check/steps.py`, `tests/oracles/command_surface.toml`, `tests/oracles/check_legs.toml`, `tests/oracles/launch_argv.toml`, `tests/oracles/session_names.toml`, `tests/oracles/preflight.toml`, `tests/oracles/auth_status.toml`, `tests/oracles/recovery_transitions.toml`, `tests/oracles/backoff.toml`, `tests/oracles/check_steps.toml`, `tests/oracles/lint_config.toml`, `tests/governance/test_oracles.py`
 **Validation tests**: `tests/governance/test_oracles.py::test_quote_must_match_requirement`, `tests/governance/test_oracles.py::test_duplicate_row_id_rejected`, `tests/governance/test_oracles.py::test_loader_imports_no_subject`, `tests/governance/test_oracles.py::test_provenance_resolves`, `tests/governance/test_oracles.py::test_empty_oracle_rejected`, `tests/governance/test_oracles.py::test_amendment_chain_resolves`
 **Mutants**: `M-oracle-quote-unchecked`, `M-oracle-duplicate-allowed`, `M-oracle-subject-import-allowed`, `M-oracle-provenance-unresolved`, `M-oracle-empty-accepted`, `M-oracle-amendment-cycle-allowed`
 **Closes**: none
@@ -68,7 +69,7 @@ Anchor expected values to the request, recorded decisions and verified tool fact
   row in `rationale.md`; missing ids, duplicate ids and unresolved provenance fail. An amendment names a prior row
   of the same requirement, forms no cycle and leaves the prior row intact; the latest valid amendment supplies
   the effective expectation, while the whole chain remains available to the ratchet.
-- `assert_oracle` imports no `agentctl` module, accepts the subject from its caller, compares every effective row
+- `assert_oracle` imports no `agentctl` module, accepts the subject from its caller, and `assert_rows` compares every effective row
   and reports mismatches by row id; an empty file fails. An expected digest is derived from the stated rule in the
   test rather than by importing the subject's digest helper.
 - Freeze argv and agent-table rows, session-name cases, preflight order and auth classifications, recovery state
@@ -76,7 +77,8 @@ Anchor expected values to the request, recorded decisions and verified tool fact
   with provenance `decision:D-48`. The full check-step and leg shapes are specification data, including later
   capabilities; only a step whose introducing sprint is built is executable, and no not-yet-built step claims a pass.
 - Freeze the co-designed lint configuration from Sprint 0.2, and validate the existing command-surface and leg
-  oracle rows with the same schema. The user's commit after this phase freezes these expectations before product work.
+  oracle rows with the same schema. Corrections append an amendment, and using the expectations or advancing to
+  product work never requires a commit or human review.
 
 #### Validation
 
@@ -89,13 +91,13 @@ Anchor expected values to the request, recorded decisions and verified tool fact
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 1.2: Mutant runner and corpus [Planned]
+### Sprint 1.2: Mutant runner and corpus [Done]
 
-**Status**: Planned
+**Status**: Done
 **Implementation**: `src/agentctl/check/mutants.py`, `tests/mutants/gate.toml`, `tests/governance/test_mutants.py`, `tests/fixtures/static_negative/`
-**Validation tests**: `tests/governance/test_mutants.py::test_corpus`, `tests/governance/test_mutants.py::test_wrong_reason_rejected`, `tests/governance/test_mutants.py::test_survivor_rejected`, `tests/governance/test_mutants.py::test_exact_once_required`, `tests/governance/test_mutants.py::test_operator_set_closed`, `tests/governance/test_mutants.py::test_corpus_killer_rejected`, `tests/governance/test_mutants.py::test_baseline_must_pass`, `tests/governance/test_mutants.py::test_runner_restores_scratch_tree`
+**Validation tests**: `tests/governance/test_mutants.py::test_corpus`, `tests/governance/test_mutants.py::test_wrong_reason_rejected`, `tests/governance/test_mutants.py::test_survivor_rejected`, `tests/governance/test_mutants.py::test_exact_once_required`, `tests/governance/test_mutants.py::test_operator_set_closed`, `tests/governance/test_mutants.py::test_corpus_killer_rejected`, `tests/governance/test_mutants.py::test_parameter_killers_execute_current_cases`, `tests/governance/test_mutants.py::test_baseline_must_pass`, `tests/governance/test_mutants.py::test_runner_restores_scratch_tree`
 **Mutants**: `M-mutant-any-failure-counts`, `M-mutant-survivor-accepted`, `M-mutant-multiple-match-accepted`, `M-mutant-unknown-operator-accepted`, `M-mutant-baseline-unchecked`
 **Closes**: none
 **Docs to update**: `documents/engineering/testing.md`, `documents/engineering/quality_gate.md`
@@ -107,6 +109,9 @@ Require each deliberate defect to change a passing baseline into the specific fa
 #### Deliverables
 
 - A record holds id, operator, relative target, search and replacement text, killer node ids and reason substring.
+  An ordinary pytest node may select one ASCII-named parameter case; live nodes, corpus recursion and malformed
+  selectors remain invalid. Every selected killer must pass its baseline and fail by name under the defect;
+  a missing parameter case is a baseline failure with its node and child output.
   Operators are exactly `delete`, `negate`, `replace-literal`, `reorder`, `widen` and `short-circuit`; an unknown
   operator, missing killer or target escaping the scratch copy fails before execution.
 - The runner copies the checkout into a run-owned scratch tree, requires the search text to match exactly once,
@@ -138,20 +143,20 @@ Require each deliberate defect to change a passing baseline into the specific fa
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 1.3: Ratchet, write-guard and venv integrity [Planned]
+### Sprint 1.3: Ratchet, write-guard and venv integrity [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/check/ratchet.py`, `src/agentctl/check/writeguard.py`, `src/agentctl/check/steps.py`, `tests/governance/test_ratchet.py`, `tests/governance/test_forbidden_surfaces.py`, `tests/integration/test_guard.py`
-**Validation tests**: `tests/governance/test_ratchet.py::test_deleted_row_rejected`, `tests/governance/test_ratchet.py::test_edited_row_rejected`, `tests/governance/test_ratchet.py::test_amends_row_accepted`, `tests/governance/test_ratchet.py::test_head_adapter_real`, `tests/governance/test_ratchet.py::test_config_weakening_rejected`, `tests/governance/test_forbidden_surfaces.py::test_fixture_and_live_tree`, `tests/integration/test_guard.py::test_write_detected`, `tests/integration/test_guard.py::test_ignored_write_detected`, `tests/integration/test_guard.py::test_ref_change_detected`, `tests/integration/test_guard.py::test_venv_change_detected`, `tests/integration/test_guard.py::test_containment_detects_owned_leak`
+**Status**: Done
+**Implementation**: `src/agentctl/check/ratchet.py`, `src/agentctl/check/writeguard.py`, `src/agentctl/check/steps.py`, `src/agentctl/check/validator/source.py`, `src/agentctl/process.py`, `tests/harness/git.py`, `tests/support.txt`, `tests/oracles/forbidden_surfaces.toml`, `tests/mutants/integrity.toml`, `.gitignore`, `pyproject.toml`, `tests/oracles/lint_config.toml`, `tests/governance/test_ratchet.py`, `tests/governance/test_forbidden_surfaces.py`, `tests/integration/test_guard.py`
+**Validation tests**: `tests/governance/test_ratchet.py::test_deleted_row_rejected`, `tests/governance/test_ratchet.py::test_edited_row_rejected`, `tests/governance/test_ratchet.py::test_amends_row_accepted`, `tests/governance/test_ratchet.py::test_head_adapter_real`, `tests/governance/test_ratchet.py::test_config_weakening_rejected`, `tests/governance/test_forbidden_surfaces.py::test_fixture_and_live_tree`, `tests/integration/test_guard.py::test_write_detected`, `tests/integration/test_guard.py::test_ignored_write_detected`, `tests/integration/test_guard.py::test_ref_change_detected`, `tests/integration/test_guard.py::test_venv_change_detected`, `tests/integration/test_guard.py::test_containment_detects_owned_leak`, `tests/integration/test_guard.py::test_finalizers_run_after_failed_leg`
 **Mutants**: `M-ratchet-allow-edit`, `M-ratchet-allow-delete`, `M-ratchet-config-widened`, `M-guard-parallel-runner-allowed`, `M-guard-skip-ignored`, `M-guard-ref-unchecked`, `M-guard-venv-unchecked`, `M-guard-containment-blind`
 **Closes**: none
 **Docs to update**: `documents/engineering/testing.md`, `documents/engineering/quality_gate.md`
 
 #### Objective
 
-Hold gate data to the user's committed baseline and keep the tested tree, refs and interpreter unchanged during check.
+Hold gate data to the available HEAD baseline and keep the tested tree, refs and interpreter unchanged during check.
 
 #### Deliverables
 
@@ -185,13 +190,13 @@ Hold gate data to the user's committed baseline and keep the tested tree, refs a
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 1.4: Spawn audit, source guards and coverage [Planned]
+### Sprint 1.4: Spawn audit, source guards and coverage [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/check/audit.py`, `src/agentctl/check/validator/source.py`, `src/agentctl/check/legs.py`, `tests/harness/nonce.py`, `tests/integration/test_spawn_audit.py`, `tests/governance/test_source_guards.py`, `tests/governance/test_gate_plugin.py`, `tests/integration/test_static_legs.py`
-**Validation tests**: `tests/integration/test_spawn_audit.py::test_all_spawn_events_recorded`, `tests/integration/test_spawn_audit.py::test_forbidden_spawn_vetoed`, `tests/integration/test_spawn_audit.py::test_nonce_replay_rejected`, `tests/governance/test_source_guards.py::test_subprocess_import_outside_process_module`, `tests/governance/test_source_guards.py::test_suppression_ban_fixtures`, `tests/governance/test_source_guards.py::test_no_test_branches`, `tests/governance/test_source_guards.py::test_no_login_construction`, `tests/governance/test_source_guards.py::test_lint_config_matches_oracle`, `tests/governance/test_source_guards.py::test_live_tree_clean`, `tests/governance/test_gate_plugin.py::test_coverage_gap_fails`, `tests/integration/test_static_legs.py::test_ruff_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ruff_format_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ty_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ty_ignores_user_config`
+**Status**: Done
+**Implementation**: `src/agentctl/check/audit.py`, `src/agentctl/check/validator/source.py`, `src/agentctl/check/legs.py`, `tests/harness/nonce.py`, `tests/integration/test_spawn_audit.py`, `tests/governance/test_source_guards.py`, `tests/governance/test_gate_plugin.py`, `tests/integration/test_static_legs.py`, `src/agentctl/check/preconditions.py`, `src/agentctl/check/steps.py`, `tests/mutants/source.toml`, `tests/fixtures/static_negative/audit/actor.py.txt`, `tests/integration/test_runtime_boundaries.py`, `pyproject.toml`, `tests/oracles/lint_config.toml`, `src/agentctl/check/writeguard.py`, `src/agentctl/check/gate_plugin.py`, `src/agentctl/check/validator/plan.py`, `src/agentctl/cli.py`
+**Validation tests**: `tests/integration/test_spawn_audit.py::test_all_spawn_events_recorded`, `tests/integration/test_spawn_audit.py::test_forbidden_spawn_vetoed`, `tests/integration/test_spawn_audit.py::test_nonce_replay_rejected`, `tests/governance/test_source_guards.py::test_subprocess_import_outside_process_module`, `tests/governance/test_source_guards.py::test_suppression_ban_fixtures`, `tests/governance/test_source_guards.py::test_no_test_branches`, `tests/governance/test_source_guards.py::test_no_login_construction`, `tests/governance/test_source_guards.py::test_lint_config_matches_oracle`, `tests/governance/test_source_guards.py::test_live_tree_clean`, `tests/governance/test_gate_plugin.py::test_coverage_gap_fails`, `tests/integration/test_static_legs.py::test_ruff_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ruff_format_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ty_fires_on_fixture`, `tests/integration/test_static_legs.py::test_ty_ignores_user_config`, `tests/integration/test_spawn_audit.py::test_windows_command_line_and_veto_policy`, `tests/integration/test_spawn_audit.py::test_audit_input_boundaries`, `tests/integration/test_spawn_audit.py::test_malformed_event_refused`, `tests/governance/test_source_guards.py::test_invalid_and_empty_source_tree`, `tests/governance/test_source_guards.py::test_invalid_config_schema`, `tests/integration/test_runtime_boundaries.py::test_process_errors_and_teardown`, `tests/integration/test_runtime_boundaries.py::test_owned_child_escalation`, `tests/integration/test_runtime_boundaries.py::test_single_run_lock_releases`, `tests/integration/test_runtime_boundaries.py::test_preconditions_real_interpreters`, `tests/integration/test_runtime_boundaries.py::test_leg_followups_and_failures`, `tests/governance/test_ratchet.py::test_ratchet_parser_boundaries`, `tests/governance/test_ratchet.py::test_corrupt_and_missing_baselines`, `tests/governance/test_ratchet.py::test_git_read_vetoes`, `tests/unit/test_identity.py::test_python_floor`, `tests/governance/test_source_guards.py::test_coverage_exception_scope`, `tests/governance/test_gate_plugin.py::test_plugin_collection_boundaries`, `tests/governance/test_mutants.py::test_mutant_input_boundaries`, `tests/governance/test_mutants.py::test_mutant_filesystem_and_baseline_failures`, `tests/integration/test_guard.py::test_snapshot_error_boundaries`, `tests/integration/test_guard.py::test_invalid_observer_registry`, `tests/integration/test_guard.py::test_record_schema`, `tests/integration/test_guard.py::test_finalizer_outcomes`, `tests/integration/test_guard.py::test_validation_failure_stages`, `tests/integration/test_guard.py::test_gate_read_and_oracle_vetoes`, `tests/integration/test_guard.py::test_ref_and_liveness_read_errors`, `tests/integration/test_runtime_boundaries.py::test_check_command_failure_paths`, `tests/integration/test_runtime_boundaries.py::test_owned_child_decoding_failure`
 **Mutants**: `M-audit-hook-blind-execv`, `M-audit-veto-disabled`, `M-audit-nonce-reused`, `M-guard-process-allowlist-wide`, `M-guard-noqa-blind`, `M-guard-test-branch-allowed`, `M-guard-login-spawn-allowed`, `M-guard-config-drift-allowed`, `M-guard-coverage-floor-lowered`, `M-guard-static-leg-noop`, `M-guard-type-severity-lowered`, `M-guard-user-config-leak`
 **Closes**: none
 **Docs to update**: `documents/engineering/testing.md`, `documents/engineering/quality_gate.md`, `documents/engineering/code_standards.md`
@@ -233,14 +238,14 @@ Observe process effects without replacing the subject and prove that source, lin
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 1.5: Plan closure rules, lane summary and evidence line [Planned]
+### Sprint 1.5: Plan closure rules, lane summary and evidence line [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/check/evidence.py`, `src/agentctl/check/lanes.py`, `src/agentctl/check/validator/plan.py`, `src/agentctl/check/steps.py`, `tests/harness/host.py`, `tests/governance/test_run_evidence.py`, `tests/governance/test_plan_validator.py`, `tests/unit/test_lane.py`
-**Validation tests**: `tests/governance/test_run_evidence.py::test_manifest_nonce_required`, `tests/governance/test_run_evidence.py::test_collected_executed_passed_equal`, `tests/governance/test_run_evidence.py::test_every_mutant_has_current_case`, `tests/governance/test_plan_validator.py::test_plan_gate_integrity`, `tests/governance/test_plan_validator.py::test_plan_cited_ids`, `tests/governance/test_plan_validator.py::test_plan_cited_paths`, `tests/governance/test_plan_validator.py::test_plan_evidence_rows`, `tests/governance/test_plan_validator.py::test_plan_lanes`, `tests/governance/test_plan_validator.py::test_validator_non_vacuous`, `tests/unit/test_lane.py::test_refusal_when_done_lane_unmet`, `tests/unit/test_lane.py::test_acceptance_lane_not_refused`, `tests/unit/test_lane.py::test_evidence_printed_only_after_full_pass`
-**Mutants**: `M-evidence-nonce-unchecked`, `M-evidence-missing-citation-allowed`, `M-evidence-missing-mutant-allowed`, `M-evidence-path-unchecked`, `M-evidence-digest-unchecked`, `M-evidence-lane-refusal-off`, `M-evidence-empty-target-accepted`, `M-evidence-printed-after-failure`
+**Status**: Done
+**Implementation**: `src/agentctl/check/evidence.py`, `src/agentctl/check/lanes.py`, `src/agentctl/check/validator/plan.py`, `src/agentctl/check/steps.py`, `tests/harness/host.py`, `tests/governance/test_run_evidence.py`, `tests/governance/test_plan_validator.py`, `tests/unit/test_lane.py`, `src/agentctl/resources/python-startup.pth`, `pyproject.toml`, `tests/oracles/python_startup.toml`, `tests/integration/test_python_startup.py`, `src/agentctl/check/plan_data.py`, `src/agentctl/check/validator/closure.py`, `src/agentctl/check/gate_plugin.py`, `.gitattributes`, `tests/mutants/evidence.toml`
+**Validation tests**: `tests/governance/test_run_evidence.py::test_manifest_nonce_required`, `tests/governance/test_run_evidence.py::test_collected_executed_passed_equal`, `tests/governance/test_run_evidence.py::test_every_mutant_has_current_case`, `tests/governance/test_plan_validator.py::test_plan_gate_integrity`, `tests/governance/test_plan_validator.py::test_plan_cited_ids`, `tests/governance/test_plan_validator.py::test_plan_cited_paths`, `tests/governance/test_plan_validator.py::test_plan_evidence_rows`, `tests/governance/test_plan_validator.py::test_plan_lanes`, `tests/governance/test_plan_validator.py::test_validator_non_vacuous`, `tests/unit/test_lane.py::test_refusal_when_done_lane_unmet`, `tests/unit/test_lane.py::test_acceptance_lane_not_refused`, `tests/unit/test_lane.py::test_evidence_printed_only_after_full_pass`, `tests/integration/test_python_startup.py::test_startup_precedes_editable_imports`
+**Mutants**: `M-evidence-nonce-unchecked`, `M-evidence-missing-citation-allowed`, `M-evidence-missing-mutant-allowed`, `M-evidence-path-unchecked`, `M-evidence-digest-unchecked`, `M-evidence-lane-refusal-off`, `M-evidence-empty-target-accepted`, `M-evidence-printed-after-failure`, `M-evidence-startup-bytecode`
 **Closes**: R20
 **Docs to update**: `documents/engineering/testing.md`, `documents/engineering/quality_gate.md`, `documents/documentation_standards.md`
 
@@ -252,6 +257,10 @@ Make status consequences and evidence rows depend on the current run's tests, mu
 
 - `post-run-verifier` requires this run's nonce and equal collected, executed and passed pytest id sets; no skip,
   deselection or zero-test result qualifies. Each corpus record has its passing parametrized case in that manifest.
+- The isolated application environment disables import bytecode through its packaged startup policy before the
+  console entry imports the editable package. This keeps the covered tree independent of interpreter version and
+  checkout path, including the outer command before re-execution. The gate still redirects its tool caches and
+  explicit coverage data to the run directory.
 - `plan.cited-ids` requires every Done sprint's cited pytest id to have passed now; Haskell ids must appear in the
   suite listing and passing tasty report once the Haskell suite exists. `plan.cited-paths` requires each Done
   sprint's Implementation paths to exist and rejects `.build/` and log citations. These closure joins activate
@@ -274,8 +283,8 @@ Make status consequences and evidence rows depend on the current run's tests, mu
   cannot stale itself because the plan is outside Evidence covers. A covered
   change reopens a Done acceptance phase and clears its evidence in the same change.
 - Only a full passing run prints the EVIDENCE row for each met lane, with the literal gate `agentctl check`, the
-  current UTC date, tree digest and host detail. The row proves currency, not that a run occurred. The user's
-  commit freezes this phase's request-derived oracles before product implementation begins.
+  current UTC date, tree digest and host detail. The row proves currency, not that a run occurred. Closure and
+  product implementation proceed from executable evidence without a commit, human approval or interactive step.
 
 #### Validation
 
@@ -285,14 +294,15 @@ Make status consequences and evidence rows depend on the current run's tests, mu
 4. An empty owned target set fails while one valid subject passes; a Planned owner reports not applicable — `tests/governance/test_plan_validator.py::test_validator_non_vacuous`; fails when an applicable empty walk passes; mutant `M-evidence-empty-target-accepted`.
 5. Constructed lane facts refuse a Done mux-host phase without a multiplexer, accept it with one, and report an unmet acceptance lane without refusing — `tests/governance/test_plan_validator.py::test_plan_lanes`, `tests/unit/test_lane.py::test_refusal_when_done_lane_unmet`, `tests/unit/test_lane.py::test_acceptance_lane_not_refused`; fails when the Done lane is waived; mutant `M-evidence-lane-refusal-off`.
 6. Every earlier-step and finalizer failure suppresses the evidence row, while the fully passing control prints the expected lane and digest — `tests/unit/test_lane.py::test_evidence_printed_only_after_full_pass`; fails when a row is printed after failure; mutant `M-evidence-printed-after-failure`.
+7. The installed startup policy and wheel mapping match the frozen oracle, and a real child leaves no import bytecode beside a `-S` control that writes it — `tests/integration/test_python_startup.py::test_startup_precedes_editable_imports`; fails when the packaged policy changes; mutant `M-evidence-startup-bytecode`.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
 ## Remaining Work
 
-The whole phase: Sprints 1.1–1.5.
+None.
 
 ## Documentation Requirements
 
@@ -303,7 +313,7 @@ The whole phase: Sprints 1.1–1.5.
 **Engineering docs to create/update:**
 
 - `documents/engineering/testing.md` — oracle provenance and amendments, named-reason mutants, observer nonces,
-  source guards, the ratchet and the user's commit boundary.
+  source guards, the ratchet and automatic closure with the available baseline's historical limits.
 - `documents/engineering/quality_gate.md` — the run-integrity steps, redirected bytecode, coverage, closure joins,
   lane evaluation and the evidence line's honest limit.
 - `documents/engineering/code_standards.md` — the source guards, narrow process-module rule and suppression ban.

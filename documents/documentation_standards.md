@@ -9,8 +9,8 @@
 These rules govern every page under `documents/` and the three root documents; plan files follow
 [development_plan_standards.md](../DEVELOPMENT_PLAN/development_plan_standards.md), whose
 [§ J](../DEVELOPMENT_PLAN/development_plan_standards.md#j-readme-and-documents-harmony) is the plan's side of the same
-harmony. A rule that a `docs.*` check covers ends by naming the check and its test; a rule that names no check is
-applied when the user reviews the change.
+harmony. A rule that a `docs.*` check covers ends by naming the check and its test. Agents apply authoring rules
+that name no check; optional human review adds no gate-closure requirement.
 
 ## TL;DR
 
@@ -64,8 +64,10 @@ The repository root holds three entry documents, all written by
   never names the core binary.
 - **`AGENTS.md`** is the authoritative policy for agents working in the repository: they never run `git add`,
   `git commit` or `git push`; they take up work in the order the plan's README gives; `agentctl check` is the only gate;
+  commits, human review and interactive actions never gate closure or phase advancement;
   they never run a login command, call the core binary or `cabal` directly, weaken an oracle or a mutant, or add a skip
-  or a suppression. It also states the isolation and live-folder rules and the one sanctioned capture of screen fixtures.
+  or a suppression. It also states the isolation and live-folder rules and the optional capture of screen fixtures
+  outside gate closure.
 - **`CLAUDE.md`** is a pointer: its metadata block, one sentence sending the reader to `AGENTS.md`, and the import line
   `@AGENTS.md`. It states no rule of its own, so the two files cannot disagree.
 
@@ -114,7 +116,7 @@ Each fact has one home, and every other page links it.
 | Facts about external tools | [external_tool_facts.md](reference/external_tool_facts.md) |
 | Expected values the tests compare against | the oracles under `tests/oracles/` and the screen fixtures under `tests/fixtures/screens/` |
 
-- **Prose homes and data homes.** A prose home states a rule; a data home is the committed file the tests read for it.
+- **Prose homes and data homes.** A prose home states a rule; a data home is the independently authored file the tests read for it.
   Neither restates the other: the page states the rule and names the file, and the file holds the cases. A page quotes
   a value from a data home only as an example, and a user-facing page quotes a command where the reader needs it, such
   as an install command or a remedy, and links where it comes from.
@@ -123,7 +125,7 @@ Each fact has one home, and every other page links it.
 - **Disagreements.** A page that disagrees with the plan about what a phase builds is reconciled to the plan in the same
   change. A page that disagrees with its data home means the change that introduced the disagreement is wrong: the fix
   corrects the page or appends an oracle row naming the row it amends, and never edits a committed row
-  ([§ P](../DEVELOPMENT_PLAN/development_plan_standards.md#p-the-ratchet-and-the-users-commit-points)).
+  ([§ P](../DEVELOPMENT_PLAN/development_plan_standards.md#p-the-ratchet-and-automatic-closure)).
 
 Checked by `docs.no-status` (`tests/governance/test_doc_validator.py::test_docs_no_status`).
 
@@ -166,6 +168,9 @@ Checked by `docs.links` (`tests/governance/test_doc_validator.py::test_docs_link
   test proving it: `tests/<tier>/test_<x>.py::test_<y>` or `haskell:agentctl-core-test/<Group>/<case>`. A product
   contract stated as what the owning phase builds needs no inline id, because that phase's Gate Integrity table names
   its tests.
+- **Automatic validation.** Every validation criterion names an executable test and its observable outcome. Human
+  review, a git commit, a clean worktree, a manual attestation, answered dialog or authorized capture is never a
+  closure criterion. Optional human activities and claims no automated gate proves stay outside validation.
 
 ```text
 WRONG: The core binary will resolve the agent to an absolute path.
@@ -270,6 +275,14 @@ remain required throughout (`tests/governance/test_doc_validator.py::test_docs_r
 Mutants with the `M-docval-` prefix, recorded under `tests/mutants/`, each weaken one of these checks and name its test
 as their killer ([testing.md](engineering/testing.md#mutants)). The `plan.*` checks that validate `DEVELOPMENT_PLAN/` are
 listed, with the sprints that land them, in [development_plan_standards.md](../DEVELOPMENT_PLAN/development_plan_standards.md).
+
+Completion citations join the current gate's observations. A Done sprint's implementation paths must exist,
+and each cited test must have passed in this run; parametrized citations expand to the collected cases
+(`tests/governance/test_plan_validator.py::test_plan_cited_paths`,
+`tests/governance/test_plan_validator.py::test_plan_cited_ids`). Acceptance rows retain their lane and the current
+covered-tree digest, with the encoding and limits defined by the
+[quality gate](engineering/quality_gate.md#lane-summary-and-evidence-line)
+(`tests/governance/test_plan_validator.py::test_plan_evidence_rows`).
 
 ## Related
 

@@ -15,8 +15,8 @@
   claude or codex.
 - The core binary, `agentctl-core`, owns everything after bootstrap: the multiplexer, the agent argv,
   preflight, launch, session management and the supervisor. Every warning after bootstrap is the binary's.
-- Every command except `check` passes through raw. `main(argv)` in `src/agentctl/cli.py` splits the tail
-  before click parses anything, and the binary dispatches `claude` and `codex` on its raw arguments before
+- Every command except `check` passes through raw. `main(argv)` in `src/agentctl/cli.py` lets the group parse global options, then
+  `RawCommand` preserves the entire tail before command parsing, and the binary dispatches `claude` and `codex` on its raw arguments before
   option parsing, so ARGS reach the agent byte for byte.
 - The handoff is `execve` on POSIX and a child process whose exit status becomes agentctl's on Windows. The
   binary is never on PATH, answers a handshake (protocol version and command list), and refuses to run
@@ -39,6 +39,9 @@ a first run meets them:
    the pinned binary with urllib and verifies its published SHA-256.
 4. **GHC and cabal.** `src/agentctl/bootstrap/toolchain.py` installs the pins without changing the user's
    default selection and invokes both by the absolute paths `ghcup whereis` prints.
+   It verifies both versions before atomically recording those strings; a warm ensure runs only their two version
+   checks. `check/toolchain.py` supplies native readiness observations and invokes the same selection-preserving
+   code path (`tests/integration/test_toolchain.py::test_warm_run_spawns_only_version_checks`).
 5. **The build.** `src/agentctl/bootstrap/build.py` builds the bundled Cabal project into
    `cache/build/<digest>` and publishes the binary atomically into `data/bin/<digest>`; a digest hit builds
    nothing.
@@ -69,8 +72,9 @@ A parser that interprets the tail would change it: click claims `--help` for its
 `--` as its own separator, so `agentctl claude -- --yolo` would reach the agent without its `--`. Both layers
 therefore split before they parse.
 
-- **Python.** `main(argv)` reads global options up to the first token that names a command. When that command
-  is a passthrough command, every token after it is the raw tail, which goes to the binary unchanged:
+- **Python.** `main(argv)` enters the click group, which reads global options before the command. A passthrough
+  command uses `RawCommand.parse_args` to retain every tail element without a command parser, and its invoke method
+  returns explicit transport data to the group dispatcher. The tail goes to the binary unchanged:
   `agentctl --assume-yes claude --model opus -- fix` forwards `claude --model opus -- fix`, while
   `agentctl claude --assume-yes` forwards `--assume-yes` to claude. Only `check` and the global options are
   parsed by click, and click's command table lists the passthrough commands so that `agentctl --help`
@@ -92,7 +96,10 @@ therefore split before they parse.
 ## The Handoff
 
 `bootstrap/handoff.py` builds the binary's argv as the command name followed by the raw tail, and sets the
-protocol version and the absolute `cache`, `data` and `state` paths in the binary's environment.
+protocol version and the absolute `cache`, `data` and `state` paths in the binary's environment as
+`AGENTCTL_CACHE_DIR`, `AGENTCTL_DATA_DIR` and `AGENTCTL_STATE_DIR`. `AgentCtl.Paths` validates these supplied
+paths and derives only owned subdirectories; it never computes a per-user location. The handoff also supplies
+`AGENTCTL_DISTRIBUTION` for the platform-specific install hints.
 
 - **POSIX: `execve`.** On Unix the new executable is loaded into the current process with the same process
   id. The binary then owns the user's terminal, signals and exit status directly, and no Python process
@@ -111,6 +118,13 @@ to show the child's status survives (`tests/integration/test_handoff.py::test_ch
 The handshake is the binary's answer to one question: which protocol version it speaks and which commands it
 provides. It carries no digest and needs no CPP; the binary's identity is the sha256 of the path
 `cabal list-bin` prints, which [the binary build](../engineering/binary_build.md) owns.
+
+The protocol version is `1`, supplied as `AGENTCTL_PROTOCOL_VERSION`; `--handshake` answers a JSON object with
+`protocol` and `commands`. The command list excludes Python's `check`. Missing and different versions refuse
+ordinary commands before dispatch, and the JSONL evaluator checks the same pure protocol kernel against
+`tests/oracles/protocol.toml`
+(`tests/integration/test_haskell_legs.py::test_direct_invocation_refused`,
+`tests/integration/test_eval_executable.py::test_every_case_answered`).
 
 - Python publishes a build only after the binary answers with the protocol version Python expects, and the
   passthrough table is compared with the command list the binary answers.

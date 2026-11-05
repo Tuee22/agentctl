@@ -1,0 +1,4 @@
+rule = "plan.legacy_ledger"
+path = "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md"
+search = ""
+replace = "\n| bad | `bad` | wrong | [Phase 999 — Missing](phase-999-missing.md) |\n"

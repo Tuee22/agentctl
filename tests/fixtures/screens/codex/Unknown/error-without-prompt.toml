@@ -1,0 +1,4 @@
+provenance = "documented"
+source = "https://developers.openai.com/api/docs/guides/error-codes"
+evidence = "overloaded"
+note = "Illustrative fixture assembled from documented behavior and UI vocabulary; not a captured session or a claim about an exact live screen."

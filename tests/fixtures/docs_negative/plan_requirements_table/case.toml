@@ -1,0 +1,4 @@
+rule = "plan.requirements_table"
+path = "DEVELOPMENT_PLAN/00-overview.md"
+search = "`agentctl is a click application using pytest`"
+replace = "`this quote is absent from the request`"

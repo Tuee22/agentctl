@@ -7,9 +7,10 @@
 > **Purpose**: State where the Cabal project lives and why, how a digest of its sources and pins keys the build, how the binary is built, published and identified, and what the wheel and sdist carry.
 
 This page is the prose home of R5 in the [requirements table](../../DEVELOPMENT_PLAN/00-overview.md#requirements);
-its data home is `tests/oracles/pins.toml`. One build function in `src/agentctl/bootstrap/build.py` does
-everything below, and both the passthrough commands and `agentctl check` call it, so the binary a user runs
-is built exactly as the gate builds it. The GHC and cabal it uses come from the
+its data home is `tests/oracles/pins.toml`. `src/agentctl/bootstrap/cache.py` computes source identity,
+`bootstrap/binary.py` orchestrates reuse and publication, and `bootstrap/build.py` owns the one Cabal path.
+The application and `agentctl check` share that path, so the binary a user runs is built as the gate builds it.
+The GHC and cabal it uses come from the
 [toolchain bootstrap](toolchain_bootstrap.md); how the binary is handed a command, and the handshake it
 answers, are in [the Python and Haskell boundary](../architecture/python_haskell_boundary.md).
 
@@ -21,7 +22,7 @@ The Cabal project is a directory of the Python package, `src/agentctl/haskell/`:
 |---|---|
 | `agentctl-core.cabal` | the `AgentCtl.*` library, the executables `agentctl-core`, `agentctl-core-eval` and `agentctl-fake-agent`, the test suite `agentctl-core-test`, and the common warnings stanza of the [code standards](code_standards.md) |
 | `cabal.project` | the pinned Hackage `index-state` |
-| `fourmolu.yaml`, `.hlint.yaml` | the committed style configuration the `fourmolu` and `hlint` legs read |
+| `fourmolu.yaml`, `.hlint.yaml` | the repository style configuration the `fourmolu` and `hlint` legs read |
 | `app/`, `src/`, `test/` | the executables' mains, the library, and the tasty suite |
 
 It lives inside the package for three reasons:
@@ -45,14 +46,18 @@ the first edit, and its directory walk ignores `.gitignore`, so a checkout with 
 
 ## The Digest
 
-The digest is a SHA-256 over three inputs, each path and each body entering length-prefixed so that no two
-different inputs produce the same byte stream:
+The digest is a SHA-256 over three inputs. Each field has an eight-byte unsigned big-endian byte length followed
+by its bytes, so field boundaries are unambiguous:
 
 1. the relative POSIX path and the bytes of `agentctl-core.cabal`, `cabal.project`, and every file under
    `app/`, `src/` and `test/`, in sorted path order;
 2. the bytes of `src/agentctl/bootstrap/pins.toml`, which holds the GHC and cabal pins;
 3. the host's platform triple, the one that selects the ghcup pin, so a home directory shared between machines
    never hands one of them the other's binary.
+
+Paths use UTF-8 and the triple uses ASCII. Directory entries contribute no bytes. Missing required files,
+symlinks, special files and incomplete directory traversal refuse the build rather than silently omitting inputs
+(`tests/unit/test_digest.py::test_inventory_and_protocol_boundaries`).
 
 `fourmolu.yaml` and `.hlint.yaml` change no binary and are left out, as is everything outside the project
 except the pins, so a documentation or Python edit never rebuilds Haskell. `tests/unit/test_digest.py::test_oracle_rows`
@@ -67,8 +72,10 @@ A command that needs the binary takes these steps, and stops at the first that a
 
 1. **Digest hit.** If `data/bin/<digest>/agentctl-core` (`agentctl-core.exe` on Windows) exists, nothing is built
    and nothing is spawned before the handoff (`tests/integration/test_build_cache.py::test_second_run_spawns_nothing`).
-2. **Lock.** Otherwise the build takes a lock in `cache/build/<digest>` and looks again, so concurrent
-   invocations build once and the others find the published binary.
+2. **Lock.** Otherwise the build takes the native advisory lock `cache/build/<digest>/build.lock` and looks again,
+   so a waiter reuses the published winner (`tests/integration/test_build_cache.py::test_waiter_uses_published_winner`).
+   Contention waits for at most 30 minutes; other kernel errors refuse immediately. Scope exit releases the lock,
+   including exceptions (`tests/integration/test_binary_boundaries.py::test_native_lock_contention_timeout_and_exception_release`).
 3. **Toolchain.** The provisioning plan of the [toolchain bootstrap](toolchain_bootstrap.md) runs, and is empty on
    a provisioned host.
 4. **Index.** `cabal update` runs only when the private package index does not yet reach the pinned
@@ -76,10 +83,11 @@ A command that needs the binary takes these steps, and stops at the first that a
    network request.
 5. **Build.** `<cabal> build exe:agentctl-core --enable-tests -w <ghc> --builddir=<cache>/build/<digest>`, run in
    the project directory with absolute `<cabal>` and `<ghc>` from `ghcup whereis`.
-6. **Publish.** The file `cabal list-bin exe:agentctl-core` names, under the same flags, is copied into a
+6. **Publish.** Under `data/locks/<digest>.publish.lock`, the file `cabal list-bin exe:agentctl-core` names is copied into a
    temporary directory under `data/bin/`, asked for the handshake, and only when it answers with the protocol
-   version Python expects is that directory renamed to `data/bin/<digest>`. A rename that finds the digest
-   already published discards the copy.
+   version Python expects is that directory renamed to `data/bin/<digest>`. A winner found before publication is
+   retained. Owned staging directories are removed, while every published digest directory stays untouched
+   (`tests/integration/test_binary_boundaries.py::test_native_lock_spawn_hash_and_publication_race_controls`).
 
 The flags are the ones check's `cabal-build` leg uses, which builds `all` instead of one executable
 ([the eight legs](quality_gate.md#the-eight-legs)). `--enable-tests` therefore gives a user's build the same
@@ -87,6 +95,19 @@ solver plan as the gate's without compiling the tests, and a binary published by
 one check's identity step compares. A failed build or a wrong handshake publishes nothing and leaves every
 other digest's directory as it was (`tests/integration/test_build_cache.py::test_failed_build_keeps_previous`,
 `tests/integration/test_build_cache.py::test_handshake_mismatch_rejected`).
+
+Index preparation runs from the owned Cabal directory, including configuration initialization, so Cabal's own
+configuration cache stays outside the bundled sources. A warm receipt requires both the exact project pin and
+the private package index. Missing or unreadable pins, project-local overrides and failed updates produce typed
+build errors and cannot publish a successful receipt
+(`tests/integration/test_build_boundaries.py::test_private_index_receipt_and_failure_boundaries`,
+`tests/unit/test_haskell_gate.py::test_index_pin_and_owned_environment`).
+
+Internal native executions use this same resolver. `build.execute_binary` captures the result;
+`build.start_binary` returns an owned child handle with the same explicit handoff and settings, and its caller
+waits for and reaps that child. Background calls accept no supplied input. Real controls cover working execution,
+unknown targets, an unavailable working directory and the input refusal
+(`tests/integration/test_pane_exec.py::test_background_binary_errors`).
 
 **A private cabal directory.** Every cabal invocation sets `CABAL_DIR` to `cache/cabal`, which then holds
 cabal's configuration, the package index and the store. The user's cabal configuration therefore cannot change
@@ -97,7 +118,9 @@ recompiles only the project's own components. The formats of these directories a
 [files and state](../reference/files_and_state.md).
 
 **Never on PATH.** `[project.scripts]` in `pyproject.toml` names only `agentctl`, so pipx links nothing else;
-agentctl writes into no directory on PATH; and the binary refuses to run without the handoff. A user never
+agentctl writes into no directory on PATH; and public binary commands refuse to run without the handoff. The
+internal pane-exec command consumes its private launch spec as [the launch contract](../architecture/launch_contract.md#the-pane-trampoline)
+defines. A user never
 needs its path, and no user-facing document names it.
 
 ## Binary Identity
@@ -122,14 +145,14 @@ this run; a stub placed at the digest path, or a binary published from other sou
 
 ## Packaging
 
-- **Wheel.** The `agentctl` package, including `agentctl/haskell/` with every tracked file under
+- **Wheel.** The `agentctl` package, including `agentctl/haskell/` with every checkout file under
   `src/agentctl/haskell/`, and `agentctl/bootstrap/pins.toml`.
 - **sdist.** Every file the VCS does not ignore, which includes the Cabal project, `tests/` and `pyproject.toml`.
 - **What never ships.** `.gitignore` lists `dist-newstyle/`. Check builds outside the tree, so a
   `dist-newstyle/` exists only after an inner-loop `cabal build` in the checkout, and hatchling's selection
   leaves it out. No binary is committed or shipped: every host compiles its own from the bundled sources.
 
-A wheel and an sdist built from a copy of the checkout must contain every tracked file under
+A wheel and an sdist built from a copy of the checkout must contain every checkout file under
 `src/agentctl/haskell/` and no `dist-newstyle/` path
 (`tests/integration/test_haskell_legs.py::test_wheel_ships_haskell_sources`). That a non-editable install
 provisions and builds from those sources on a pristine host is confirmed by

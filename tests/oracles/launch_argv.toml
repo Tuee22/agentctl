@@ -1,0 +1,359 @@
+[[case]]
+id = "agents.claude"
+requirement = "R10"
+quote = "claude always includes \"--dangerously-skip-permissions\""
+provenance = "decision:D-48"
+input = { "subject" = "agent-table", "agent" = "claude" }
+expected = { "mandatory_flags" = ["--dangerously-skip-permissions"], "auth_args" = ["auth", "status"], "recovery_text" = "Continue the interrupted task from the last completed step." }
+
+[[case]]
+id = "argv.claude.0"
+requirement = "R10"
+quote = "claude always includes \"--dangerously-skip-permissions\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "claude", "executable" = "/tools/claude", "args" = [] }
+expected = ["/tools/claude", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "argv.claude.1"
+requirement = "R10"
+quote = "claude always includes \"--dangerously-skip-permissions\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "claude", "executable" = "/tools/claude", "args" = ["--model", "opus"] }
+expected = ["/tools/claude", "--model", "opus", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "argv.claude.2"
+requirement = "R10"
+quote = "claude always includes \"--dangerously-skip-permissions\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "claude", "executable" = "/tools/claude", "args" = ["", "line\nnext", "x;", "#{pane_id}", "$(command)"] }
+expected = ["/tools/claude", "", "line\nnext", "x;", "#{pane_id}", "$(command)", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "argv.claude.3"
+requirement = "R10"
+quote = "claude always includes \"--dangerously-skip-permissions\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "claude", "executable" = "/tools/claude", "args" = ["--", "--yolo"] }
+expected = ["/tools/claude", "--dangerously-skip-permissions", "--", "--yolo"]
+
+[[case]]
+id = "argv.claude.4"
+requirement = "R10"
+quote = "claude always includes \"--dangerously-skip-permissions\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "claude", "executable" = "/tools/claude", "args" = ["--dangerously-skip-permissions", "--dangerously-skip-permissions"] }
+expected = ["/tools/claude", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "argv.claude.5"
+requirement = "R10"
+quote = "claude always includes \"--dangerously-skip-permissions\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "claude", "executable" = "/tools/claude", "args" = ["--", "--", "--dangerously-skip-permissions"] }
+expected = ["/tools/claude", "--dangerously-skip-permissions", "--", "--", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "agents.codex"
+requirement = "R11"
+quote = "codex always includes \"--dangerously-bypass-approvals-and-sandbox --no-daemon\""
+provenance = "decision:D-48"
+input = { "subject" = "agent-table", "agent" = "codex" }
+expected = { "mandatory_flags" = ["--dangerously-bypass-approvals-and-sandbox", "--no-daemon"], "auth_args" = ["login", "status"], "recovery_text" = "Continue the interrupted task from the last saved checkpoint." }
+
+[[case]]
+id = "argv.codex.0"
+requirement = "R11"
+quote = "codex always includes \"--dangerously-bypass-approvals-and-sandbox --no-daemon\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "codex", "executable" = "/tools/codex", "args" = [] }
+expected = ["/tools/codex", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "argv.codex.1"
+requirement = "R11"
+quote = "codex always includes \"--dangerously-bypass-approvals-and-sandbox --no-daemon\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "codex", "executable" = "/tools/codex", "args" = ["--model", "opus"] }
+expected = ["/tools/codex", "--model", "opus", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "argv.codex.2"
+requirement = "R11"
+quote = "codex always includes \"--dangerously-bypass-approvals-and-sandbox --no-daemon\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "codex", "executable" = "/tools/codex", "args" = ["", "line\nnext", "x;", "#{pane_id}", "$(command)"] }
+expected = ["/tools/codex", "", "line\nnext", "x;", "#{pane_id}", "$(command)", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "argv.codex.3"
+requirement = "R11"
+quote = "codex always includes \"--dangerously-bypass-approvals-and-sandbox --no-daemon\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "codex", "executable" = "/tools/codex", "args" = ["--", "--yolo"] }
+expected = ["/tools/codex", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon", "--", "--yolo"]
+
+[[case]]
+id = "argv.codex.4"
+requirement = "R11"
+quote = "codex always includes \"--dangerously-bypass-approvals-and-sandbox --no-daemon\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "codex", "executable" = "/tools/codex", "args" = ["--dangerously-bypass-approvals-and-sandbox", "--no-daemon", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"] }
+expected = ["/tools/codex", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "argv.codex.5"
+requirement = "R11"
+quote = "codex always includes \"--dangerously-bypass-approvals-and-sandbox --no-daemon\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "codex", "executable" = "/tools/codex", "args" = ["--", "--", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"] }
+expected = ["/tools/codex", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon", "--", "--", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "argv.codex.6"
+requirement = "R11"
+quote = "codex always includes \"--dangerously-bypass-approvals-and-sandbox --no-daemon\""
+provenance = "decision:D-10"
+input = { "subject" = "launch-argv", "agent" = "codex", "executable" = "/tools/codex", "args" = ["--yolo", "resume", "--last"] }
+expected = ["/tools/codex", "resume", "--last", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "agents.details.linux.claude"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-48"
+input = { subject = "agent-details", agent = "claude", family = "Linux" }
+expected = { "executable" = "claude", "mandatory_flags" = ["--dangerously-skip-permissions"], "aliases" = [], "auth_args" = ["auth", "status"], "remedy" = "claude auth login", "login_variants" = ["claude auth login --console", "claude auth login --sso"], "install_hint" = "curl -fsSL https://claude.ai/install.sh | bash", "recovery_text" = "Continue the interrupted task from the last completed step." }
+
+[[case]]
+id = "agents.details.linux.codex"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-48"
+input = { subject = "agent-details", agent = "codex", family = "Linux" }
+expected = { "executable" = "codex", "mandatory_flags" = ["--dangerously-bypass-approvals-and-sandbox", "--no-daemon"], "aliases" = ["--yolo"], "auth_args" = ["login", "status"], "remedy" = "codex login", "login_variants" = ["codex login --device-auth"], "install_hint" = "curl -fsSL https://chatgpt.com/codex/install.sh | sh", "recovery_text" = "Continue the interrupted task from the last saved checkpoint." }
+
+[[case]]
+id = "agents.details.darwin.claude"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-48"
+input = { subject = "agent-details", agent = "claude", family = "Darwin" }
+expected = { "executable" = "claude", "mandatory_flags" = ["--dangerously-skip-permissions"], "aliases" = [], "auth_args" = ["auth", "status"], "remedy" = "claude auth login", "login_variants" = ["claude auth login --console", "claude auth login --sso"], "install_hint" = "curl -fsSL https://claude.ai/install.sh | bash", "recovery_text" = "Continue the interrupted task from the last completed step." }
+
+[[case]]
+id = "agents.details.darwin.codex"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-48"
+input = { subject = "agent-details", agent = "codex", family = "Darwin" }
+expected = { "executable" = "codex", "mandatory_flags" = ["--dangerously-bypass-approvals-and-sandbox", "--no-daemon"], "aliases" = ["--yolo"], "auth_args" = ["login", "status"], "remedy" = "codex login", "login_variants" = ["codex login --device-auth"], "install_hint" = "curl -fsSL https://chatgpt.com/codex/install.sh | sh", "recovery_text" = "Continue the interrupted task from the last saved checkpoint." }
+
+[[case]]
+id = "agents.details.windows.claude"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-48"
+input = { subject = "agent-details", agent = "claude", family = "Windows" }
+expected = { "executable" = "claude.exe", "mandatory_flags" = ["--dangerously-skip-permissions"], "aliases" = [], "auth_args" = ["auth", "status"], "remedy" = "claude auth login", "login_variants" = ["claude auth login --console", "claude auth login --sso"], "install_hint" = "winget install Anthropic.ClaudeCode", "recovery_text" = "Continue the interrupted task from the last completed step." }
+
+[[case]]
+id = "agents.details.windows.codex"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-48"
+input = { subject = "agent-details", agent = "codex", family = "Windows" }
+expected = { "executable" = "codex.exe", "mandatory_flags" = ["--dangerously-bypass-approvals-and-sandbox", "--no-daemon"], "aliases" = ["--yolo"], "auth_args" = ["login", "status"], "remedy" = "codex login", "login_variants" = ["codex login --device-auth"], "install_hint" = "powershell -ExecutionPolicy ByPass -c \"irm https://chatgpt.com/codex/install.ps1 | iex\"", "recovery_text" = "Continue the interrupted task from the last saved checkpoint." }
+
+[[case]]
+id = "agents.closed.agent-table"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-48"
+input = { subject = "agent-table", agent = "unknown", family = "Linux" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "agents.closed.agent-details"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-48"
+input = { subject = "agent-details", agent = "unknown", family = "Linux" }
+expected = { error = "invalid-case" }
+
+[[case]]
+id = "through.claude.separator"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "claude", executable = "/tools/claude", args = ["--"] }
+expected = ["/tools/claude", "--dangerously-skip-permissions", "--"]
+
+[[case]]
+id = "through.claude.separator-yolo"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "claude", executable = "/tools/claude", args = ["--", "--yolo"] }
+expected = ["/tools/claude", "--dangerously-skip-permissions", "--", "--yolo"]
+
+[[case]]
+id = "through.claude.help"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "claude", executable = "/tools/claude", args = ["--help"] }
+expected = ["/tools/claude", "--help", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "through.claude.short-help"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "claude", executable = "/tools/claude", args = ["-h"] }
+expected = ["/tools/claude", "-h", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "through.claude.empty"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "claude", executable = "/tools/claude", args = [""] }
+expected = ["/tools/claude", "", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "through.claude.semicolon"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "claude", executable = "/tools/claude", args = ["x;"] }
+expected = ["/tools/claude", "x;", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "through.claude.format"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "claude", executable = "/tools/claude", args = ["#{pane_id}"] }
+expected = ["/tools/claude", "#{pane_id}", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "through.claude.substitution"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "claude", executable = "/tools/claude", args = ["$(id)"] }
+expected = ["/tools/claude", "$(id)", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "through.claude.newline"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "claude", executable = "/tools/claude", args = ["one\ntwo"] }
+expected = ["/tools/claude", "one\ntwo", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "through.claude.unicode"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "claude", executable = "/tools/claude", args = ["λ日"] }
+expected = ["/tools/claude", "λ日", "--dangerously-skip-permissions"]
+
+[[case]]
+id = "through.claude.repeated-separator"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "claude", executable = "/tools/claude", args = ["--", "--", ""] }
+expected = ["/tools/claude", "--dangerously-skip-permissions", "--", "--", ""]
+
+[[case]]
+id = "through.codex.separator"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["--"] }
+expected = ["/tools/codex", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon", "--"]
+
+[[case]]
+id = "through.codex.separator-yolo"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["--", "--yolo"] }
+expected = ["/tools/codex", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon", "--", "--yolo"]
+
+[[case]]
+id = "through.codex.help"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["--help"] }
+expected = ["/tools/codex", "--help", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "through.codex.short-help"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["-h"] }
+expected = ["/tools/codex", "-h", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "through.codex.empty"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = [""] }
+expected = ["/tools/codex", "", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "through.codex.semicolon"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["x;"] }
+expected = ["/tools/codex", "x;", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "through.codex.format"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["#{pane_id}"] }
+expected = ["/tools/codex", "#{pane_id}", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "through.codex.substitution"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["$(id)"] }
+expected = ["/tools/codex", "$(id)", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "through.codex.newline"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["one\ntwo"] }
+expected = ["/tools/codex", "one\ntwo", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "through.codex.unicode"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["λ日"] }
+expected = ["/tools/codex", "λ日", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "through.codex.repeated-separator"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "request:R9"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["--", "--", ""] }
+expected = ["/tools/codex", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon", "--", "--", ""]

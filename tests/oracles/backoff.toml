@@ -1,0 +1,223 @@
+[[case]]
+id = "backoff.default.1.1"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 1, "seed" = 1 }
+expected = { "minimum" = 24, "maximum" = 36, "level" = "info", "notify" = true }
+
+[[case]]
+id = "backoff.default.1.37"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 1, "seed" = 37 }
+expected = { "minimum" = 24, "maximum" = 36, "level" = "info", "notify" = true }
+
+[[case]]
+id = "backoff.default.1.4294967295"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 1, "seed" = 4294967295 }
+expected = { "minimum" = 24, "maximum" = 36, "level" = "info", "notify" = true }
+
+[[case]]
+id = "backoff.default.2.1"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 2, "seed" = 1 }
+expected = { "minimum" = 48, "maximum" = 72, "level" = "info", "notify" = true }
+
+[[case]]
+id = "backoff.default.2.37"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 2, "seed" = 37 }
+expected = { "minimum" = 48, "maximum" = 72, "level" = "info", "notify" = true }
+
+[[case]]
+id = "backoff.default.2.4294967295"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 2, "seed" = 4294967295 }
+expected = { "minimum" = 48, "maximum" = 72, "level" = "info", "notify" = true }
+
+[[case]]
+id = "backoff.default.3.1"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 3, "seed" = 1 }
+expected = { "minimum" = 96, "maximum" = 144, "level" = "info", "notify" = false }
+
+[[case]]
+id = "backoff.default.3.37"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 3, "seed" = 37 }
+expected = { "minimum" = 96, "maximum" = 144, "level" = "info", "notify" = false }
+
+[[case]]
+id = "backoff.default.3.4294967295"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 3, "seed" = 4294967295 }
+expected = { "minimum" = 96, "maximum" = 144, "level" = "info", "notify" = false }
+
+[[case]]
+id = "backoff.default.4.1"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 4, "seed" = 1 }
+expected = { "minimum" = 192, "maximum" = 288, "level" = "info", "notify" = true }
+
+[[case]]
+id = "backoff.default.4.37"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 4, "seed" = 37 }
+expected = { "minimum" = 192, "maximum" = 288, "level" = "info", "notify" = true }
+
+[[case]]
+id = "backoff.default.4.4294967295"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 4, "seed" = 4294967295 }
+expected = { "minimum" = 192, "maximum" = 288, "level" = "info", "notify" = true }
+
+[[case]]
+id = "backoff.default.5.1"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 5, "seed" = 1 }
+expected = { "minimum" = 384, "maximum" = 576, "level" = "info", "notify" = false }
+
+[[case]]
+id = "backoff.default.5.37"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 5, "seed" = 37 }
+expected = { "minimum" = 384, "maximum" = 576, "level" = "info", "notify" = false }
+
+[[case]]
+id = "backoff.default.5.4294967295"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 5, "seed" = 4294967295 }
+expected = { "minimum" = 384, "maximum" = 576, "level" = "info", "notify" = false }
+
+[[case]]
+id = "backoff.default.6.1"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 6, "seed" = 1 }
+expected = { "minimum" = 720, "maximum" = 900, "level" = "warning", "notify" = false }
+
+[[case]]
+id = "backoff.default.6.37"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 6, "seed" = 37 }
+expected = { "minimum" = 720, "maximum" = 900, "level" = "warning", "notify" = false }
+
+[[case]]
+id = "backoff.default.6.4294967295"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 6, "seed" = 4294967295 }
+expected = { "minimum" = 720, "maximum" = 900, "level" = "warning", "notify" = false }
+
+[[case]]
+id = "backoff.default.8.1"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 8, "seed" = 1 }
+expected = { "minimum" = 720, "maximum" = 900, "level" = "warning", "notify" = true }
+
+[[case]]
+id = "backoff.default.8.37"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 8, "seed" = 37 }
+expected = { "minimum" = 720, "maximum" = 900, "level" = "warning", "notify" = true }
+
+[[case]]
+id = "backoff.default.8.4294967295"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 8, "seed" = 4294967295 }
+expected = { "minimum" = 720, "maximum" = 900, "level" = "warning", "notify" = true }
+
+[[case]]
+id = "backoff.default.64.1"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 64, "seed" = 1 }
+expected = { "minimum" = 720, "maximum" = 900, "level" = "warning", "notify" = true }
+
+[[case]]
+id = "backoff.default.64.37"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 64, "seed" = 37 }
+expected = { "minimum" = 720, "maximum" = 900, "level" = "warning", "notify" = true }
+
+[[case]]
+id = "backoff.default.64.4294967295"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "decision:D-39"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.2, "attempt" = 64, "seed" = 4294967295 }
+expected = { "minimum" = 720, "maximum" = 900, "level" = "warning", "notify" = true }
+
+[[case]]
+id = "backoff.zero-jitter.1"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "request:R18.4"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.0, "attempt" = 1, "seed" = 1 }
+expected = { "minimum" = 30, "maximum" = 30 }
+
+[[case]]
+id = "backoff.zero-jitter.2"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "request:R18.4"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.0, "attempt" = 2, "seed" = 1 }
+expected = { "minimum" = 60, "maximum" = 60 }
+
+[[case]]
+id = "backoff.zero-jitter.6"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "request:R18.4"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.0, "attempt" = 6, "seed" = 1 }
+expected = { "minimum" = 900, "maximum" = 900 }
+
+[[case]]
+id = "backoff.zero-jitter.64"
+requirement = "R18.4"
+quote = "Use bounded exponential backoff with jitter"
+provenance = "request:R18.4"
+input = { "subject" = "backoff", "initial" = 30, "multiplier" = 2, "maximum" = 900, "jitter" = 0.0, "attempt" = 64, "seed" = 1 }
+expected = { "minimum" = 900, "maximum" = 900 }

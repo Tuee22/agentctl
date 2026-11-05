@@ -1,0 +1,641 @@
+# Independent prerequisite package and consent cases from toolchain_bootstrap.md, D-21 and versioned package-manager facts.
+
+[[case]]
+id = "prerequisites.packages.ubuntu.user.interactive"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "tool:2.7.14:apt-get install -y"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "ubuntu", "major" = 24, "is_root" = false, "assume_yes" = false }
+expected = { "kind" = "packages", "packages" = ["build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config"], "commands" = [["sudo", "apt-get", "update"], ["sudo", "apt-get", "install", "-y", "build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config"]] }
+
+[[case]]
+id = "prerequisites.packages.ubuntu.user.assume-yes"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "tool:2.7.14:apt-get install -y"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "ubuntu", "major" = 24, "is_root" = false, "assume_yes" = true }
+expected = { "kind" = "packages", "packages" = ["build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config"], "commands" = [["sudo", "-n", "apt-get", "update"], ["sudo", "-n", "apt-get", "install", "-y", "build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config"]] }
+
+[[case]]
+id = "prerequisites.packages.ubuntu.root.interactive"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "tool:2.7.14:apt-get install -y"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "ubuntu", "major" = 24, "is_root" = true, "assume_yes" = false }
+expected = { "kind" = "packages", "packages" = ["build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config"], "commands" = [["apt-get", "update"], ["apt-get", "install", "-y", "build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config"]] }
+
+[[case]]
+id = "prerequisites.packages.ubuntu.root.assume-yes"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "tool:2.7.14:apt-get install -y"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "ubuntu", "major" = 24, "is_root" = true, "assume_yes" = true }
+expected = { "kind" = "packages", "packages" = ["build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config"], "commands" = [["apt-get", "update"], ["apt-get", "install", "-y", "build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config"]] }
+
+[[case]]
+id = "prerequisites.packages.debian.user.interactive"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "tool:2.7.14:apt-get install -y"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "debian", "major" = 13, "is_root" = false, "assume_yes" = false }
+expected = { "kind" = "packages", "packages" = ["build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config", "libncurses6", "libtinfo6"], "commands" = [["sudo", "apt-get", "update"], ["sudo", "apt-get", "install", "-y", "build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config", "libncurses6", "libtinfo6"]] }
+
+[[case]]
+id = "prerequisites.packages.debian.user.assume-yes"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "tool:2.7.14:apt-get install -y"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "debian", "major" = 13, "is_root" = false, "assume_yes" = true }
+expected = { "kind" = "packages", "packages" = ["build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config", "libncurses6", "libtinfo6"], "commands" = [["sudo", "-n", "apt-get", "update"], ["sudo", "-n", "apt-get", "install", "-y", "build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config", "libncurses6", "libtinfo6"]] }
+
+[[case]]
+id = "prerequisites.packages.debian.root.interactive"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "tool:2.7.14:apt-get install -y"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "debian", "major" = 13, "is_root" = true, "assume_yes" = false }
+expected = { "kind" = "packages", "packages" = ["build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config", "libncurses6", "libtinfo6"], "commands" = [["apt-get", "update"], ["apt-get", "install", "-y", "build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config", "libncurses6", "libtinfo6"]] }
+
+[[case]]
+id = "prerequisites.packages.debian.root.assume-yes"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "tool:2.7.14:apt-get install -y"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "debian", "major" = 13, "is_root" = true, "assume_yes" = true }
+expected = { "kind" = "packages", "packages" = ["build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config", "libncurses6", "libtinfo6"], "commands" = [["apt-get", "update"], ["apt-get", "install", "-y", "build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config", "libncurses6", "libtinfo6"]] }
+
+[[case]]
+id = "prerequisites.packages.fedora.user.interactive"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "tool:5:global `-y`"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "fedora", "major" = 43, "is_root" = false, "assume_yes" = false }
+expected = { "kind" = "packages", "packages" = ["gcc", "gcc-c++", "gmp", "gmp-devel", "make", "ncurses", "ncurses-compat-libs", "xz", "perl"], "commands" = [["sudo", "dnf", "install", "-y", "gcc", "gcc-c++", "gmp", "gmp-devel", "make", "ncurses", "ncurses-compat-libs", "xz", "perl"]] }
+
+[[case]]
+id = "prerequisites.packages.fedora.user.assume-yes"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "tool:5:global `-y`"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "fedora", "major" = 43, "is_root" = false, "assume_yes" = true }
+expected = { "kind" = "packages", "packages" = ["gcc", "gcc-c++", "gmp", "gmp-devel", "make", "ncurses", "ncurses-compat-libs", "xz", "perl"], "commands" = [["sudo", "-n", "dnf", "install", "-y", "gcc", "gcc-c++", "gmp", "gmp-devel", "make", "ncurses", "ncurses-compat-libs", "xz", "perl"]] }
+
+[[case]]
+id = "prerequisites.packages.fedora.root.interactive"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "tool:5:global `-y`"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "fedora", "major" = 43, "is_root" = true, "assume_yes" = false }
+expected = { "kind" = "packages", "packages" = ["gcc", "gcc-c++", "gmp", "gmp-devel", "make", "ncurses", "ncurses-compat-libs", "xz", "perl"], "commands" = [["dnf", "install", "-y", "gcc", "gcc-c++", "gmp", "gmp-devel", "make", "ncurses", "ncurses-compat-libs", "xz", "perl"]] }
+
+[[case]]
+id = "prerequisites.packages.fedora.root.assume-yes"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "tool:5:global `-y`"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "fedora", "major" = 43, "is_root" = true, "assume_yes" = true }
+expected = { "kind" = "packages", "packages" = ["gcc", "gcc-c++", "gmp", "gmp-devel", "make", "ncurses", "ncurses-compat-libs", "xz", "perl"], "commands" = [["dnf", "install", "-y", "gcc", "gcc-c++", "gmp", "gmp-devel", "make", "ncurses", "ncurses-compat-libs", "xz", "perl"]] }
+
+[[case]]
+id = "prerequisites.packages.ubuntu.22.unsupported"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "ubuntu", "major" = 22, "is_root" = false, "assume_yes" = true }
+expected = { "kind" = "refused", "reason" = "prerequisites-unverified" }
+
+[[case]]
+id = "prerequisites.packages.debian.12.unsupported"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "debian", "major" = 12, "is_root" = false, "assume_yes" = true }
+expected = { "kind" = "refused", "reason" = "prerequisites-unverified" }
+
+[[case]]
+id = "prerequisites.packages.arch.0.unsupported"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "arch", "major" = 0, "is_root" = false, "assume_yes" = true }
+expected = { "kind" = "refused", "reason" = "prerequisites-unverified" }
+
+[[case]]
+id = "prerequisites.packages.other.0.unsupported"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "other", "major" = 0, "is_root" = false, "assume_yes" = true }
+expected = { "kind" = "refused", "reason" = "prerequisites-unverified" }
+
+[[case]]
+id = "prerequisites.packages.ubuntu.0.unsupported"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "ubuntu", "major" = 0, "is_root" = false, "assume_yes" = true }
+expected = { "kind" = "refused", "reason" = "prerequisites-unverified" }
+
+[[case]]
+id = "prerequisites.packages.darwin"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "package-set", "family" = "Darwin", "distribution" = "other", "major" = 0, "is_root" = false, "assume_yes" = true }
+expected = { "kind" = "xcode", "packages" = [], "commands" = [["xcode-select", "--install"]] }
+
+[[case]]
+id = "prerequisites.packages.windows"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "package-set", "family" = "Windows", "distribution" = "other", "major" = 0, "is_root" = false, "assume_yes" = true }
+expected = { "kind" = "none", "packages" = [], "commands" = [] }
+
+[[case]]
+id = "prerequisites.consent.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "consent-policy", "assume_yes" = false, "accepted" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.consent.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "consent-policy", "assume_yes" = false, "accepted" = true }
+expected = true
+
+[[case]]
+id = "prerequisites.consent.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "consent-policy", "assume_yes" = true, "accepted" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.consent.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "consent-policy", "assume_yes" = true, "accepted" = true }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.0.0.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = false, "assume_yes" = false, "is_root" = false, "passwordless" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.0.0.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = false, "assume_yes" = false, "is_root" = false, "passwordless" = true }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.0.0.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = false, "assume_yes" = false, "is_root" = true, "passwordless" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.0.0.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = false, "assume_yes" = false, "is_root" = true, "passwordless" = true }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.0.1.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = false, "assume_yes" = true, "is_root" = false, "passwordless" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.0.1.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = false, "assume_yes" = true, "is_root" = false, "passwordless" = true }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.0.1.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = false, "assume_yes" = true, "is_root" = true, "passwordless" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.0.1.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = false, "assume_yes" = true, "is_root" = true, "passwordless" = true }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.1.0.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = true, "assume_yes" = false, "is_root" = false, "passwordless" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.1.0.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = true, "assume_yes" = false, "is_root" = false, "passwordless" = true }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.1.0.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = true, "assume_yes" = false, "is_root" = true, "passwordless" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.1.0.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = true, "assume_yes" = false, "is_root" = true, "passwordless" = true }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.1.1.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = true, "assume_yes" = true, "is_root" = false, "passwordless" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.1.1.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = true, "assume_yes" = true, "is_root" = false, "passwordless" = true }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.1.1.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = true, "assume_yes" = true, "is_root" = true, "passwordless" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.1.1.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prerequisite-precondition", "ready" = true, "assume_yes" = true, "is_root" = true, "passwordless" = true }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.darwin.0.0.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = false, "assume_yes" = false, "is_root" = false, "passwordless" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.darwin.0.0.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = false, "assume_yes" = false, "is_root" = false, "passwordless" = true }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.darwin.0.0.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = false, "assume_yes" = false, "is_root" = true, "passwordless" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.darwin.0.0.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = false, "assume_yes" = false, "is_root" = true, "passwordless" = true }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.darwin.0.1.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = false, "assume_yes" = true, "is_root" = false, "passwordless" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.darwin.0.1.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = false, "assume_yes" = true, "is_root" = false, "passwordless" = true }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.darwin.0.1.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = false, "assume_yes" = true, "is_root" = true, "passwordless" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.darwin.0.1.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = false, "assume_yes" = true, "is_root" = true, "passwordless" = true }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.darwin.1.0.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = true, "assume_yes" = false, "is_root" = false, "passwordless" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.darwin.1.0.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = true, "assume_yes" = false, "is_root" = false, "passwordless" = true }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.darwin.1.0.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = true, "assume_yes" = false, "is_root" = true, "passwordless" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.darwin.1.0.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = true, "assume_yes" = false, "is_root" = true, "passwordless" = true }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.darwin.1.1.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = true, "assume_yes" = true, "is_root" = false, "passwordless" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.darwin.1.1.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = true, "assume_yes" = true, "is_root" = false, "passwordless" = true }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.darwin.1.1.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = true, "assume_yes" = true, "is_root" = true, "passwordless" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.darwin.1.1.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Darwin", "ready" = true, "assume_yes" = true, "is_root" = true, "passwordless" = true }
+expected = true
+
+[[case]]
+id = "prerequisites.prompt-answer.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prompt-answer", "answer" = "y" }
+expected = true
+
+[[case]]
+id = "prerequisites.prompt-answer.2"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prompt-answer", "answer" = "yes" }
+expected = true
+
+[[case]]
+id = "prerequisites.prompt-answer.3"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prompt-answer", "answer" = " YES " }
+expected = true
+
+[[case]]
+id = "prerequisites.prompt-answer.4"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prompt-answer", "answer" = "n" }
+expected = false
+
+[[case]]
+id = "prerequisites.prompt-answer.5"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prompt-answer", "answer" = "" }
+expected = false
+
+[[case]]
+id = "prerequisites.prompt-answer.6"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prompt-answer", "answer" = "unexpected" }
+expected = false
+
+[[case]]
+id = "prerequisites.prompt-answer.7"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "request:R15"
+input = { "subject" = "prompt-answer", "answer" = 1 }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.unverified.0.0.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = false, "assume_yes" = false, "is_root" = false, "passwordless" = false, "verified_packages" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.unverified.0.0.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = false, "assume_yes" = false, "is_root" = false, "passwordless" = true, "verified_packages" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.unverified.0.0.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = false, "assume_yes" = false, "is_root" = true, "passwordless" = false, "verified_packages" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.unverified.0.0.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = false, "assume_yes" = false, "is_root" = true, "passwordless" = true, "verified_packages" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.unverified.0.1.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = false, "assume_yes" = true, "is_root" = false, "passwordless" = false, "verified_packages" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.unverified.0.1.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = false, "assume_yes" = true, "is_root" = false, "passwordless" = true, "verified_packages" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.unverified.0.1.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = false, "assume_yes" = true, "is_root" = true, "passwordless" = false, "verified_packages" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.unverified.0.1.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = false, "assume_yes" = true, "is_root" = true, "passwordless" = true, "verified_packages" = false }
+expected = false
+
+[[case]]
+id = "prerequisites.precondition.unverified.1.0.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = true, "assume_yes" = false, "is_root" = false, "passwordless" = false, "verified_packages" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.unverified.1.0.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = true, "assume_yes" = false, "is_root" = false, "passwordless" = true, "verified_packages" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.unverified.1.0.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = true, "assume_yes" = false, "is_root" = true, "passwordless" = false, "verified_packages" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.unverified.1.0.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = true, "assume_yes" = false, "is_root" = true, "passwordless" = true, "verified_packages" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.unverified.1.1.0.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = true, "assume_yes" = true, "is_root" = false, "passwordless" = false, "verified_packages" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.unverified.1.1.0.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = true, "assume_yes" = true, "is_root" = false, "passwordless" = true, "verified_packages" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.unverified.1.1.1.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = true, "assume_yes" = true, "is_root" = true, "passwordless" = false, "verified_packages" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.precondition.unverified.1.1.1.1"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "prerequisite-precondition", "family" = "Linux", "ready" = true, "assume_yes" = true, "is_root" = true, "passwordless" = true, "verified_packages" = false }
+expected = true
+
+[[case]]
+id = "prerequisites.packages.boundary.ubuntu.23"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "ubuntu", "major" = 23, "is_root" = false, "assume_yes" = true }
+expected = { "kind" = "packages", "packages" = ["build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config"], "commands" = [["sudo", "-n", "apt-get", "update"], ["sudo", "-n", "apt-get", "install", "-y", "build-essential", "curl", "libgmp-dev", "libgmp10", "libncurses-dev", "pkg-config"]] }
+
+[[case]]
+id = "prerequisites.packages.boundary.fedora.0"
+requirement = "R15"
+quote = "Install with consent"
+provenance = "decision:D-21"
+input = { "subject" = "package-set", "family" = "Linux", "distribution" = "fedora", "major" = 0, "is_root" = false, "assume_yes" = true }
+expected = { "kind" = "packages", "packages" = ["gcc", "gcc-c++", "gmp", "gmp-devel", "make", "ncurses", "ncurses-compat-libs", "xz", "perl"], "commands" = [["sudo", "-n", "dnf", "install", "-y", "gcc", "gcc-c++", "gmp", "gmp-devel", "make", "ncurses", "ncurses-compat-libs", "xz", "perl"]] }

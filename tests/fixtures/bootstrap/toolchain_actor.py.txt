@@ -1,0 +1,61 @@
+# Copyright (c) 2026 agentctl contributors.
+"""Owned, audited toolchain attempts with no reachable installer executable."""
+
+import json
+import os
+import shutil
+import sys
+from dataclasses import replace
+from pathlib import Path
+
+from agentctl.bootstrap import toolchain
+from agentctl.bootstrap.pins import Version, load
+from agentctl.bootstrap.plan import GhcupCommand
+from agentctl.check.audit import install
+from agentctl.hostfacts import HostContext, HostFacts, Prerequisite, current, expected_probes, ghcup_destination
+from agentctl.process import run
+from agentctl.result import Err, Ok, Result
+
+mode, directory, log, nonce, ghc, cabal = sys.argv[1:]
+directory = Path(directory)
+home = directory / "home"
+home.mkdir()
+environment = {key: value for key, value in os.environ.items() if key not in {"GHCUP_USE_XDG_DIRS", "XDG_BIN_HOME"}}
+environment.update({"HOME": str(home), "USERPROFILE": str(home), "PATH": "", "GHCUP_INSTALL_BASE_PREFIX": str(home)})
+context = replace(current(directory / "cache"), home=home, cwd=directory, environment=tuple(environment.items()), interactive=False)
+pins = load()
+assert isinstance(pins, Ok)
+assert isinstance(install(Path(log), nonce), Ok)
+control = run([sys.executable, "-c", "print('observer control')"], cwd=directory, env=environment)
+assert isinstance(control, Ok) and control.value.code == 0
+if mode in {"ghc", "cabal"}:
+    assert context.family in {"Linux", "Darwin", "Windows"}
+    candidate = ghcup_destination(context.family, environment, home)
+    candidate.parent.mkdir(parents=True)
+    harmless = Path(os.environ["SYSTEMROOT"]) / "System32/where.exe" if context.family == "Windows" else Path(shutil.which("false"))
+    shutil.copy2(harmless, candidate)
+    def version_probe(path: str, _context: HostContext) -> Version | None:
+        return pins.value.ghcup_floor if path == str(candidate.resolve()) else pins.value.ghc if path == ghc else None
+    def prerequisites(_context: HostContext):
+        return Ok(tuple(Prerequisite(name, True) for name in expected_probes(context.family)))
+    if mode == "cabal":
+        assert toolchain.record(toolchain.Toolchain(ghc, str(directory / "missing-cabal")), context.cache) == Ok(toolchain.Toolchain(ghc, str(directory / "missing-cabal")))
+    result = toolchain.ensure(context, pins.value, prerequisites, inspect_versions=version_probe)
+    assert isinstance(result, Err)
+    payload = {"refused": True}
+else:
+    tools = toolchain.Toolchain(ghc, cabal)
+    if mode == "whereis":
+        facts = HostFacts("Linux", "x86_64", directory / "unexecuted-ghcup", None, None, None)
+        actions = (GhcupCommand(facts.ghcup_destination, ("whereis", "ghc", "9.12.4")), GhcupCommand(facts.ghcup_destination, ("whereis", "cabal", "3.16.1.0")))
+        def answer(action: GhcupCommand, context: HostContext) -> Result[str, toolchain.ToolchainError]:
+            return Ok(ghc if action.arguments[1] == "ghc" else cabal)
+        result = toolchain.apply(facts, pins.value, context, actions, toolchain.Actuation(invoke=answer))
+    else:
+        assert mode == "warm"
+        assert toolchain.record(tools, context.cache) == Ok(tools)
+        result = toolchain.ensure(context, pins.value)
+    assert result == Ok(tools), result
+    payload = {"ghc": result.value.ghc, "cabal": result.value.cabal}
+    payload["record"] = (context.cache / "toolchain-paths.toml").read_text(encoding="utf-8")
+print(json.dumps(payload))

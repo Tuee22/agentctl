@@ -1,0 +1,98 @@
+[[mutant]]
+id = "M-launch-keep-session-on-instant-exit"
+operator = "delete"
+target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"
+search = "Plan [CaptureOutput, KillSession, ReportExit] status"
+replace = "Plan [CaptureOutput, ReportExit] status"
+killers = ["tests/unit/test_launch_plan.py::test_launch_plan_matches_oracle"]
+reason = "launch plan differs from oracle"
+
+[[mutant]]
+id = "M-launch-warn-into-pane"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"
+search = "relay _ captured = io (Text.hPutStr stderr captured)"
+replace = "relay runtime captured = do\n  pane <- requirePane runtime\n  _ <- checkedCommand runtime (Command.SendLiteral pane captured)\n  pure ()"
+killers = ["tests/e2e/test_launch.py::test_instant_exit_relays_output_and_leaves_nothing"]
+reason = "instant exit output was not relayed to stderr"
+
+[[mutant]]
+id = "M-launch-kill-on-reattach"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"
+search = "Reattach -> Plan ([NoticeIgnored | hasArguments]"
+replace = "Reattach -> Plan ([KillSession] ++ [NoticeIgnored | hasArguments]"
+killers = ["tests/e2e/test_launch.py::test_rerun_reattaches_without_preflight"]
+reason = "reattachment replaced the original session"
+
+[[mutant]]
+id = "M-launch-reattach-dead"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"
+search = "[] -> execute runtime DeadLeftover"
+replace = "[] -> execute runtime Reattach"
+killers = ["tests/e2e/test_launch.py::test_dead_leftover_pane_is_replaced"]
+reason = "dead pane was reattached"
+
+[[mutant]]
+id = "M-launch-preflight-on-reattach"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"
+search = "Reattach -> Plan ([NoticeIgnored | hasArguments]"
+replace = "Reattach -> Plan ([CheckPreflight] ++ [NoticeIgnored | hasArguments]"
+killers = ["tests/e2e/test_launch.py::test_rerun_reattaches_without_preflight"]
+reason = "reattachment reran preflight or recreated the session"
+
+[[mutant]]
+id = "M-launch-env-not-caller"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"
+search = "(Map.fromList (requestEnvironment supplied))"
+replace = "(Map.filterWithKey (\\key _ -> key `notElem` [\"CLAUDE_CONFIG_DIR\", \"CODEX_HOME\", \"CALLER_ONLY\"]) (Map.fromList (requestEnvironment supplied)))"
+killers = ["tests/e2e/test_launch.py::test_creates_named_session_with_flags_last"]
+reason = "launch lost caller environment"
+
+[[mutant]]
+id = "M-launch-skip-launch-argv"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"
+search = "launchArguments (requestFamily supplied) (requestAgent supplied) (Preflight.readyExecutable verified) (requestArguments supplied)"
+replace = "Preflight.readyExecutable verified : requestArguments supplied"
+killers = ["tests/e2e/test_launch.py::test_creates_named_session_with_flags_last"]
+reason = "launched argv differs from required argument assembly"
+
+[[mutant]]
+id = "M-launch-wrong-agent-row"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"
+search = "Agent.table family agent"
+replace = "Agent.table family (if agent == Agent.Claude then Agent.Codex else Agent.Claude)"
+killers = ["tests/e2e/test_launch.py::test_creates_named_session_with_flags_last", "tests/integration/test_agent_argv_real.py::test_final_argv_accepted_logged_out"]
+reason = "launched argv differs from required argument assembly"
+
+[[mutant]]
+id = "M-launch-cwd-on-mux-line"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Process.hs"
+search = "(Command.arguments (renderCommand kind command))"
+replace = "(case command of Command.Create {} -> take 1 (Command.arguments (renderCommand kind command)) ++ [\"-c\", workingDirectory context] ++ drop 1 (Command.arguments (renderCommand kind command)); _ -> Command.arguments (renderCommand kind command))"
+killers = ["tests/unit/test_mux_values.py::test_invocation_cwd_stays_off_argv", "tests/e2e/test_launch.py::test_hostile_folder_name_runs_nothing"]
+reason = "native invocation moved caller data onto mux argv"
+
+[[mutant]]
+id = "M-launch-exit-zero-on-failure"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"
+search = "(max 1 status)"
+replace = "(min 0 status)"
+killers = ["tests/unit/test_launch_plan.py::test_launch_plan_matches_oracle"]
+reason = "launch plan differs from oracle"
+
+[[mutant]]
+id = "M-launch-notty-attaches"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"
+search = "handover False _ = PrintAttach"
+replace = "handover False _ = AttachClient"
+killers = ["tests/unit/test_launch_plan.py::test_launch_plan_matches_oracle"]
+reason = "launch plan differs from oracle"

@@ -15,8 +15,8 @@
 ## Phase Objective
 
 This phase adds no code. It closes on the same `agentctl check`, run on a host meeting the macos lane: Darwin,
-`xcode-select -p` succeeding, tmux at least 3.2, and agent-host. A person completes the Xcode Command Line Tools dialog
-and runs `brew install tmux` before the run; check never runs `xcode-select --install`. Tests adapt only to the OS
+`xcode-select -p` succeeding, tmux at least 3.2, and agent-host. Existing host capabilities are observed automatically;
+GUI setup is outside validation, and check never runs or waits for `xcode-select --install`. Tests adapt only to the OS
 family, the multiplexer kind, the login state and the toolchain provenance, so the darwin run is the same suite taking
 its darwin branches. What this host confirms:
 
@@ -50,6 +50,7 @@ repeats.
 | R6 — the handoff to the core binary is execve on Darwin | `tests/oracles/command_surface.toml` | owed: macos-acceptance | none — this phase adds no code | `tests/unit/test_handoff.py::test_handoff_mode_by_os_family`, `tests/integration/test_passthrough.py::test_warm_passthrough_spawns_only_the_binary` |
 | R7 — agentctl claude and agentctl codex launch into a Homebrew tmux session on Darwin | `tests/oracles/mux_commands.toml` | owed: macos-acceptance | none — this phase adds no code | `tests/e2e/test_launch.py::test_creates_named_session_with_flags_last` |
 | R12.1 — Homebrew tmux resolves, meets its floor and drives private servers | `tests/oracles/mux_commands.toml` | owed: macos-acceptance | none — this phase adds no code | `tests/integration/test_mux_real.py::test_private_server_roundtrip` |
+| R17 — native Darwin SIGINT and SIGTERM stop the supervisor and preserve watched panes | `tests/oracles/forbidden_actions.toml` | owed: macos-acceptance | none — this phase adds no code | `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions` |
 
 ## Not Proven By This Gate
 
@@ -59,10 +60,11 @@ repeats.
 - The toolchain provenance the host does not have: a Mac with its own ghcup confirms reuse, and one without confirms the pinned darwin download. — not proven by any phase.
 - The pinned ghcup download through a python.org Python whose certificate store was never installed, where urllib fails certificate verification. — not proven by any phase.
 - A logged-in launch on macOS, whose lane requires no login and which has no `/proc` for the argv check. — not proven by any phase.
-- Tamper resistance is bounded by [§ P](development_plan_standards.md#p-the-ratchet-and-the-users-commit-points): it holds against a HEAD the user has committed. — not proven by any phase.
+- Tamper resistance extends only to data already present in the available HEAD baseline ([§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure)); uncommitted inputs have no historical protection. — not proven by any phase.
 
 ## Confirms
 
+- R20 — Darwin snapshots preserve private spec bytes and native owner/mode facts, and missing or oversized files fail (owed by [Phase 4 — Multiplexer adapter](phase-4-multiplexer-adapter.md)).
 - R3 — on Darwin the plan selects the darwin ghcup 0.2.6.2 asset for the host's architecture and its pinned SHA-256, and the host's provenance branch holds: an existing ghcup at or above 0.1.50.2 untouched, or the pinned asset downloaded, verified and used (owed by [Phase 2 — Toolchain bootstrap](phase-2-toolchain-bootstrap.md)).
 - R15 — on a Mac the prerequisite probe is `xcode-select -p`, its verdict agrees with the test's own independent check, and with the Command Line Tools present the plan installs nothing (owed by [Phase 2 — Toolchain bootstrap](phase-2-toolchain-bootstrap.md)).
 - R13 — with an empty `CLAUDE_CONFIG_DIR`, `claude auth status` exits 1 although the user's own login may be in the Keychain, because the Keychain entry is keyed to the config dir (owed by [Phase 5 — Agent adapters and preflight](phase-5-agent-adapters-and-preflight.md)).
@@ -70,13 +72,15 @@ repeats.
 - R7 — `agentctl claude` and `agentctl codex` launch into a Homebrew tmux session on Darwin, the fake agent recording the final argv in place of `/proc` (owed by [Phase 6 — Launch command and passthrough](phase-6-launch-and-passthrough.md)).
 - R12.1 — Homebrew's tmux resolves on PATH, meets the 3.2 floor and runs the private-server tests within macOS's socket-path limit (owed by [Phase 4 — Multiplexer adapter](phase-4-multiplexer-adapter.md)).
 
+- R17 — native Darwin SIGINT and SIGTERM stop the supervisor and preserve watched panes without ending any managed or adopted target (owed by [Phase 10 — Recovery supervisor](phase-10-supervisor.md)).
+
 ## Sprints
 
 ### Sprint 13.1: macOS run and evidence [Planned]
 
 **Status**: Planned
 **Implementation**: none — this phase adds no code
-**Validation tests**: `tests/unit/test_ghcup.py::test_pins_match_oracle`, `tests/unit/test_plan.py::test_plan_oracle`, `tests/e2e/test_fresh_bootstrap.py::test_ghcup_digest_matches_pin`, `tests/integration/test_prereqs_real.py::test_probe_matches_independent_observer`, `tests/integration/test_agent_real.py::test_logged_out_by_construction`, `tests/unit/test_handoff.py::test_handoff_mode_by_os_family`, `tests/integration/test_passthrough.py::test_warm_passthrough_spawns_only_the_binary`, `tests/e2e/test_launch.py::test_creates_named_session_with_flags_last`, `tests/integration/test_mux_real.py::test_private_server_roundtrip`
+**Validation tests**: `tests/unit/test_ghcup.py::test_pins_match_oracle`, `tests/unit/test_plan.py::test_plan_oracle`, `tests/e2e/test_fresh_bootstrap.py::test_ghcup_digest_matches_pin`, `tests/integration/test_prereqs_real.py::test_probe_matches_independent_observer`, `tests/integration/test_agent_real.py::test_logged_out_by_construction`, `tests/unit/test_handoff.py::test_handoff_mode_by_os_family`, `tests/integration/test_passthrough.py::test_warm_passthrough_spawns_only_the_binary`, `tests/e2e/test_launch.py::test_creates_named_session_with_flags_last`, `tests/integration/test_mux_real.py::test_private_server_roundtrip`, `haskell:agentctl-core-test/SpecReal/snapshot-is-owned-and-private`, `haskell:agentctl-core-test/SpecReal/missing-spec-is-refused`, `haskell:agentctl-core-test/SpecReal/oversized-spec-is-refused`, `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`
 **Mutants**: none — this phase adds no code
 **Closes**: none
 **Docs to update**: none — this phase changes no document
@@ -124,6 +128,9 @@ Record the EVIDENCE line of a passing `agentctl check` on a Mac that meets the m
 9. A private Homebrew tmux server starts under a short `TMUX_TMPDIR`, runs the vocabulary and is torn down —
    `tests/integration/test_mux_real.py::test_private_server_roundtrip`; fails when the socket path exceeds its limit
    or a rendered command misbehaves; no mutant: this phase adds no code.
+
+10. Native SIGINT and SIGTERM stop the foreground supervisor with exit 0, release its lock and preserve managed and adopted pane identities —
+   `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`; fails on an ignored native stop request, a non-zero exit, a held lock or any changed target identity; no mutant: this phase adds no code.
 
 #### Remaining Work
 

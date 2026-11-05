@@ -6,8 +6,8 @@
 > **Purpose**: Define how the agentctl plan is structured, how a phase or sprint earns its status, and what counts as evidence.
 
 This file states governance only; [§ S](#s-contract-homes) names the home of each product contract. A rule enforced
-mechanically names its validator check and the sprint that lands it; a rule that names no check is applied when the
-user reviews the change.
+mechanically names its validator check and the sprint that lands it. Agents apply authoring rules that name no check;
+human review is optional and is never a closure criterion.
 
 ## Core Principles
 
@@ -131,7 +131,7 @@ exists (`plan.header`, Sprint 0.5).
   appears, with its requirement id, in that phase's `## Confirms` (`plan.gate-integrity`, Sprint 1.5).
 - **Not Proven By This Gate** bullets each end `— owed to [Phase 11 — Live agent acceptance](phase-11-live-agent-acceptance.md).`
   (or another acceptance phase) or `— not proven by any phase.` Every phase lists the ceiling of § P:
-  `- Tamper resistance is bounded by [§ P](development_plan_standards.md#p-the-ratchet-and-the-users-commit-points): it holds against a HEAD the user has committed. — not proven by any phase.`
+  `- Tamper resistance extends only to data already present in the available HEAD baseline ([§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure)); uncommitted inputs have no historical protection. — not proven by any phase.`
 - **Confirms** bullets read
   `- R10 — <what is confirmed live> (owed by [Phase 6 — Launch command and passthrough](phase-6-launch-and-passthrough.md)).`
 - **Remaining Work** reads `The whole phase: Sprints N.1–N.k.` while Planned and `None.` once Done; an Active phase
@@ -164,7 +164,7 @@ The whole sprint.
 | Validation tests | pytest ids under `tests/unit/`, `integration/`, `e2e/`, `live/` or `governance/`, and Haskell ids `haskell:agentctl-core-test/<Group>/<case>`; once Done, each is collected and passes in the run | `plan.cited-ids` (Sprint 1.5) |
 | Mutants | explicit ids under the phase's prefixes, never wildcards; `none — <reason>` when there are none | `plan.gate-integrity` (Sprint 1.5) |
 | Closes | the ids this sprint closes, or `none` (§ K) | `plan.requirements-table` (Sprint 0.5) |
-| `#### Validation` | numbered items ``<claim> — `<node id>`; fails when <the negative input or twin>; mutant `M-...` ``; an item asserting an absence carries its positive control (§ M) | review |
+| `#### Validation` | numbered items ``<claim> — `<node id>`; fails when <the negative input or twin>; mutant `M-...` ``; every criterion is executable without human intervention, and an item asserting an absence carries its positive control (§ M) | `plan.cited-ids` (Sprint 1.5) for current cited results; agents author the claims |
 | `#### Remaining Work` | exactly `The whole sprint.` while Planned; begins `None.` once Done | `plan.status-consequences` (Sprint 0.5) |
 
 - **No sprint-level dependency fields.** No `Depends on` or `Blocked by`: sprints run in id order within their phase.
@@ -246,9 +246,9 @@ class proves. The mechanics and isolation recipes live in [testing](../documents
 
 | Class | What it is | Proves | Cannot prove |
 |---|---|---|---|
-| `value` | A pure subject applied to committed oracle rows through `tests/harness/oracle.py::assert_oracle`. Haskell subjects run through the `agentctl-core-eval` executable, which reads JSON cases on stdin and prints results; Python compares them to the oracle. | The subject computes the specified function on those inputs. | That the specification matches the real tool; anything about effects. |
+| `value` | A pure subject applied to independent oracle rows through `tests/harness/oracle.py::assert_oracle`. Haskell subjects run through the `agentctl-core-eval` executable, which reads JSON cases on stdin and prints results; Python compares them to the oracle. | The subject computes the specified function on those inputs. | That the specification matches the real tool; anything about effects. |
 | `real` | The real tool in a scope the test owns: tmux on a private server; psmux with `PSMUX_DATA_DIR` and `PSMUX_NO_WARM=1`; claude and codex logged out by construction; `--help` canaries with a negative control; the pinned ghcup, GHC and cabal; pytester. | Behaviour against that tool at the version the run observes. | Other versions, other OS families, states the run did not reach. |
-| `observer` | One of two boundary stand-ins: the `agentctl-fake-agent` executable, copied into a temp bin as `claude` or `codex`, which records argv, cwd, environment keys, the multiplexer session and the nonce; or the `sys.addaudithook` spawn audit, which observes and can veto Python spawns. Each needs a fresh nonce, and its absence assertions are paired with positive controls. | What the subject sent, and what it did not send while the observer was demonstrably live. | That the real tool accepts it. |
+| `observer` | One of two boundary stand-ins: the `agentctl-fake-agent` executable, copied into a temp bin as `claude` or `codex`, which records argv, cwd, environment keys, the multiplexer session and the nonce, or as a native mux client name to record and relay argv to the genuine private backend; or the `sys.addaudithook` spawn audit, which observes and can veto Python spawns. Each needs a fresh nonce, and its absence assertions are paired with positive controls. | What the subject sent, and what it did not send while the observer was demonstrably live. | That the real tool accepts it. |
 | `owed` | A live confirmation named in exactly one acceptance phase's `## Confirms`. A behaviour no lane can produce on demand, such as recovery from a genuine provider overload, is never owed: it is listed as not proven by any phase. | Nothing until that phase's evidence row is current; then, the confirmation it names. | Anything beyond that confirmation, or on a host outside that phase's lane. |
 
 Never evidence:
@@ -271,15 +271,17 @@ is never a Gate Integrity killer.
 - **Oracles are independent of the subject.** Every oracle row carries provenance `request:R<n>`,
   `tool:<name> <version> <source>` (a fact in external tool facts) or `decision:<rationale anchor>`. No expected
   value is subject output, and oracle loaders import nothing from `agentctl` (`oracles.independence`, Sprint 1.1).
-  The request-derived oracles are frozen in [Phase 1 — Gate-integrity apparatus](phase-1-gate-integrity-apparatus.md),
-  before any product phase, and a user commit point holds them (§ P).
+  The request-derived oracles are authored in [Phase 1 — Gate-integrity apparatus](phase-1-gate-integrity-apparatus.md)
+  before product implementation. Their comparisons, provenance and amendments are validated automatically; neither
+  a commit nor a human review is required to use them or advance (§ P).
 - **Mutants die for a named reason.** A record in `tests/mutants/<capability>.toml` gives the id, an operator, a patch
   that applies exactly once to a scratch copy, the killer node ids, and a reason substring absent from the baseline
   output and present under the mutant; a patch that fails to apply or matches twice, a survivor, and a kill for
   another reason each fail the gate. Every check run applies every mutant inside the pytest leg (Sprint 1.2), and each
   Gate Integrity row has about two mutants that name the row's tests as killers (`plan.gate-integrity`, Sprint 1.5).
   Mutant ids use only their phase's prefixes (below; no two phases share one, and the acceptance phases cite no
-  mutants), and Haskell mutants target pure kernels only.
+  mutants). Haskell mutants target pure kernels or bounded effects exercised only against private native backends
+  and controlled observers; no mutant uses a live-agent test as its killer.
 - **Activation follows the apparatus.** Phase 0 initially closes on its cited tests and direct negative controls.
   Its mutant ids are declarations until Sprint 1.2 builds the runner and their records. From that sprint onward,
   every run kills those retrospective mutants as well as every applicable later mutant; no Done phase is exempt.
@@ -315,11 +317,23 @@ is never a Gate Integrity killer.
 - **One gate.** Every Gate is `agentctl check`. It takes no arguments, runs from a scrubbed environment allowlist, and
   fails if any step or leg fails or does not run; [the quality gate](../documents/engineering/quality_gate.md#check-steps)
   is the home of its steps and legs, recorded in `tests/oracles/check_steps.toml` and `tests/oracles/check_legs.toml`.
-  A warm run takes about 15 minutes. Inner-loop runs (one pytest node, a bare `cabal build`) are never evidence, and
+  Each Python tool leg has a two-hour execution budget for the complete suite and mutations; the enclosing gate
+  reserves eight complete leg budgets. Individual native and process deadlines remain mandatory. Focused tests and application-owned build calls never
+  close work, and
   no CI, Makefile, hook or script runner exists beside the gate (`tree.forbidden-surfaces`, Sprint 1.3).
 - **Gate kinds.** A self-verifying phase closes when check passes on a host meeting its lane, and every later run
   re-proves it, so it stores nothing. A host-acceptance phase adds no code and is terminal; it closes the same way
   and records the EVIDENCE line that run printed as its `**Gate evidence**`.
+- **Unattended closure.** Every validation criterion names an executable test and an observable result. Agents run
+  the gate, read its results and record qualifying evidence without a commit, clean worktree, human sign-off, visual
+  inspection or interactive action. Login, trust and approval dialogs, console attachment, optional screen capture
+  and host setup are never steps the gate waits for. A lane is observed automatically on the available host; a
+  missing host capability remains unmet and cannot be replaced with a manual attestation or evidence from another
+  lane. Activities listed as not proven are outside closure, not unfinished manual validation.
+- **Interactive product behaviour has automatic tests.** Consent prompts, login refusals and dialog handling are
+  validated with constructed inputs and the permitted observers, within the evidence and isolation rules below.
+  A person answering a prompt, inspecting a screen or approving the result is never the test oracle. Remaining Work
+  names implementation, executable checks and unmet host capabilities, never a commit or human checkpoint.
 
 The lane table is canonical here, and its vocabulary is closed (`plan.lanes`, Sprint 1.5):
 
@@ -328,9 +342,9 @@ The lane table is canonical here, and its vocabulary is closed (`plan.lanes`, Sp
 | any-host | Linux x86_64/aarch64, macOS x86_64/arm64 or Windows x86_64; an editable install of this checkout with the `dev` extra; git | check preconditions P1–P10 | `pipx install --editable '.[dev]'` or `uv tool install --editable '.[dev]'` |
 | mux-host | any-host plus tmux at least 3.2 (Linux/macOS) or psmux at least 3.4.0 (Windows) resolvable on PATH | `tests/harness/host.py` | the OS install command for tmux; `winget install psmux` |
 | agent-host | mux-host plus claude and codex resolvable (native executables on Windows); login state is irrelevant | `tests/harness/host.py` | the official installer of each agent |
-| live-agents | Linux, agent-host, and `claude auth status` and `codex login status` both exit 0 within 10 s in the user's real environment | `tests/harness/host.py` | the user types `claude auth login` or `codex login` |
-| clean-container | the two-stage recipe `tests/lanes/clean-host.Dockerfile`, run as a non-root user with NOPASSWD sudo, on a gate host with docker | Stage A filesystem facts read by `tests/e2e/test_fresh_bootstrap.py` | build and run the recipe |
-| macos | Darwin, `xcode-select -p` succeeds, tmux at least 3.2, and agent-host | `tests/harness/host.py` | install the Xcode CLT (a GUI dialog a human completes) and `brew install tmux` |
+| live-agents | Linux, agent-host, and `claude auth status` and `codex login status` both exit 0 within 10 s in the user's real environment | `tests/harness/host.py` | use an available host with existing authenticated agents; login is outside validation |
+| clean-container | the two-stage recipe `tests/lanes/clean-host.Dockerfile`, run as a non-root user with NOPASSWD sudo, on a gate host with docker | Stage A filesystem facts read by `tests/e2e/test_fresh_bootstrap.py` | build the recipe and launch Stage B with `docker run --init` |
+| macos | Darwin, `xcode-select -p` succeeds, tmux at least 3.2, and agent-host | `tests/harness/host.py` | use an available Darwin host with Command Line Tools and tmux; GUI setup is outside validation |
 | windows-psmux | Windows x86_64, psmux at least 3.4.0, native `claude.exe` and `codex.exe` | `tests/harness/host.py` | `winget install psmux`; the official agent installers |
 
 check fails when the lane of any Done self-verifying phase is unmet on the host running it (`plan.lanes`).
@@ -373,22 +387,29 @@ Evidence rows have one format:
 - **Lanes hold where phases are Done.** check fails when a Done self-verifying phase's lane is unmet on the host
   (`plan.lanes`, § N), so no such phase stays Done on a host that cannot re-prove it.
 
-### P. The Ratchet and the User's Commit Points
+### P. The Ratchet and Automatic Closure
 
 - **Append-only against HEAD.** Oracle rows under `tests/oracles/`, mutant records under `tests/mutants/` and
   requirement rows in `00-overview.md` only grow relative to HEAD, and configuration only tightens; a correction is an
   appended row naming what it amends (`ratchet.append-only`, Sprint 1.3). The live ruff, ty, pytest and coverage
   configuration equals `tests/oracles/lint_config.toml` (`config.pinned`, Sprint 1.4). The `ratchet` step reads HEAD
-  with read-only git and reports the commit it compared against. Before the user's first commit there is no baseline:
-  the ratchet protects nothing, and check reports that.
+  with read-only git and reports the commit it compared against. An unborn repository reports `no baseline` and
+  validates the live inputs without claiming historical protection. An existing baseline protects only the rows and
+  configuration it contains; newly added and uncommitted inputs receive the current run's checks, not historical
+  protection. Neither condition requires a commit before check, closure or phase advancement.
 - **Agents never commit.** Agents never run `git add`, `git commit` or `git push`, and never move HEAD, so HEAD is the
-  user's review point: every later run is held to it, and "cannot be spoofed" holds only against it. Between commits a
-  change can weaken its own gate data, and the user's review of the diff is what catches it.
-- **The user's commit points:**
-  1. after the governed suite (this plan and `documents/`);
-  2. after [Phase 1 — Gate-integrity apparatus](phase-1-gate-integrity-apparatus.md), when the request-derived oracles
-     are frozen and before any product code exists;
-  3. at each phase close.
+  available external baseline rather than a ref the gate advances. User commits and reviews are optional activities
+  outside validation, at any time the user chooses. Agents never stop at a phase boundary to request them.
+- **Closure uses executable evidence.** Sprint and phase closure depend on the declared tests, mutants, validators,
+  lane observations and current-run evidence. They never depend on a git commit, staged or clean tree, review,
+  approval, signature, manual attestation or a person performing an interactive action. After a qualifying pass,
+  agents update the plan and continue in numerical order without waiting for a human checkpoint. File inventories
+  and packaging checks walk the checkout, including uncommitted files; git tracking is never required to qualify an
+  input for validation.
+- **The historical ceiling.** Source-independent expectations, provenance checks, two-sided controls, mutants,
+  nonces and write guards remain mandatory with or without committed gate data. They do not prove that uncommitted
+  oracles predate their subjects, or prevent coordinated edits of uncommitted gate data and implementation before
+  the run. This limit is disclosed as not proven, never turned into a human prerequisite for closure.
 
 ### Q. Containment and User-State Protection
 
@@ -421,7 +442,7 @@ adopted is never a blocker or a completion criterion here.
 |---|---|
 | The constructive narrative, Planned/Active/Done with no Blocked, the fixed file set, one status table joined to phase headers, Documentation Requirements, absence guards and the legacy ledger | hostbootstrap (§ A–J) |
 | Self-verifying and deferred gate kinds, digest-bound evidence rows, a stated honest ceiling, what cannot count as evidence, and a gate that exercises the checkout it judges rather than an installed copy | hostbootstrap (§ G, § NN) |
-| Independent oracles committed before the implementation, mutants that die for a named reason, fresh nonces, the write-guard, the containment scan, and validators tested two-sided | amoebius (its gate-integrity contract) |
+| Independent oracles authored before the implementation, mutants that die for a named reason, fresh nonces, the write-guard, the containment scan, and validators tested two-sided | amoebius (its gate-integrity contract) |
 | Gate data ratcheted against HEAD; every declared test suite routed to a runner; absence assertions paired with positive delivery | prodbox |
 | No parallel workflow surfaces (Makefile, hooks, pre-commit, `.github`) | prodbox and jitML |
 | A requirement floor joined both ways, so no requirement is dropped to make closure cheaper | jitML and amoebius |

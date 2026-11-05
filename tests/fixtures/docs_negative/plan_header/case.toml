@@ -1,0 +1,4 @@
+rule = "plan.header"
+path = "DEVELOPMENT_PLAN/phase-14-windows-psmux-acceptance.md"
+search = "**Gate**: `agentctl check`"
+replace = "**Gate**: `agentctl check`\n**Extra**: invalid"

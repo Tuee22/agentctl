@@ -1,0 +1,4 @@
+rule = "docs.taxonomy"
+path = "documents/guides/setup.md"
+search = ""
+replace = "# Negative category\n"

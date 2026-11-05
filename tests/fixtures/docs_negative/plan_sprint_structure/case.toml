@@ -1,0 +1,4 @@
+rule = "plan.sprint_structure"
+path = "DEVELOPMENT_PLAN/phase-14-windows-psmux-acceptance.md"
+search = "[Planned]"
+replace = "[Active]"

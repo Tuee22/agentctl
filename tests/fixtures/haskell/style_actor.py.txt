@@ -1,0 +1,78 @@
+# Copyright (c) 2026 agentctl contributors.
+"""Private native style observer with an unreachable package installer."""
+
+import json
+import os
+import shutil
+import sys
+from dataclasses import replace
+from pathlib import Path
+
+from agentctl.bootstrap import build, style, toolchain
+from agentctl.bootstrap.pins import load
+from agentctl.check.audit import event_arguments
+from agentctl.check.style import StyleStep, run_step
+from agentctl.hostfacts import current
+from agentctl.process import run
+from agentctl.result import Err, Ok
+
+mode, folder, project, cache, ghc, harmless, nonce = sys.argv[1:]
+folder, project = Path(folder), Path(project)
+folder.mkdir(parents=True)
+host = current(Path(cache))
+home = folder / "home"
+home.mkdir()
+environment = dict(host.environment)
+environment.update({"HOME": str(home), "USERPROFILE": str(home), **{
+    f"XDG_{kind}_HOME": str(folder / kind.lower()) for kind in ("CACHE", "CONFIG", "DATA", "STATE")
+}})
+host = replace(host, home=home, cache=folder / "cache", environment=tuple(environment.items()))
+selected = load()
+assert isinstance(selected, Ok)
+context = build.BuildContext(project, folder / "build", host, build.Toolchain(ghc, harmless))
+assert isinstance(toolchain.record(context.tools, host.cache), Ok)
+private = context.cabal_directory
+index = private / "packages/hackage.haskell.org/01-index.tar"
+index.parent.mkdir(parents=True)
+index.touch()
+(private / "agentctl-index-state").write_text("2026-10-31T00:00:00Z", encoding="utf-8")
+if mode in {"warm", "leg-veto"}:
+    source = style.paths(style.directory(Path(cache), selected.value), host.family)
+    target_directory = style.directory(host.cache, selected.value)
+    target_directory.mkdir(parents=True)
+    target = style.paths(target_directory, host.family)
+    for original, copied in ((source.fourmolu, target.fourmolu), (source.hlint, target.hlint)):
+        try:
+            copied.hardlink_to(original)
+        except OSError:
+            shutil.copy2(original, copied)
+events = []
+def observe(event, arguments):
+    if event != "subprocess.Popen":
+        return
+    parsed = event_arguments(event, arguments)
+    assert isinstance(parsed, Ok)
+    argv = parsed.value.argv
+    blocked = "install" in argv[1:] or (
+        mode == "leg-veto" and Path(argv[0]).stem == "fourmolu" and "--version" not in argv[1:]
+    )
+    events.append({"nonce": nonce, "argv": list(argv), "blocked": blocked})
+    if blocked:
+        raise OSError("owned style boundary veto")
+sys.addaudithook(observe)
+control = run([sys.executable, "-c", "print('observer control')"], cwd=folder, env=environment)
+assert isinstance(control, Ok) and control.value.code == 0
+if mode == "leg-veto":
+    result = run_step(StyleStep("fourmolu", host, project, selected))
+    assert result != 0
+elif mode == "warm":
+    result = build.ensure_style_tools(context, selected.value)
+    assert isinstance(result, Ok), "warm style ensure attempted installation"
+elif mode == "cold":
+    result = build.ensure_style_tools(context, selected.value)
+    assert isinstance(result, Err) and "owned style boundary veto" in result.error.message
+    assert not style.directory(context.host.cache, selected.value).exists()
+    assert not tuple((context.host.cache / "tools").iterdir())
+else:
+    raise AssertionError("unknown observer mode")
+print(json.dumps({"nonce": nonce, "events": events}))

@@ -1,0 +1,4 @@
+rule = "plan.disposition_table"
+path = "DEVELOPMENT_PLAN/rationale.md"
+search = "| adopted | [00-overview.md](00-overview.md#architecture) |"
+replace = "| invalid | [00-overview.md](00-overview.md#architecture) |"

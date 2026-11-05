@@ -1,0 +1,122 @@
+# Independent P7/P8/P10 boundary cases from quality_gate.md and toolchain_bootstrap.md.
+# Budgets and observed capacity use arbitrary equal units; the policy compares their values.
+
+[[case]]
+id = "bootstrap.preconditions.equal-budget"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Linux", "architecture" = "x86_64", "ghcup_free" = 10, "cache_free" = 10, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = true, "hackage_reachable" = true }
+expected = []
+
+[[case]]
+id = "bootstrap.preconditions.ghcup-short"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Linux", "architecture" = "x86_64", "ghcup_free" = 9, "cache_free" = 10, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = true, "hackage_reachable" = true }
+expected = ["P7: free space in ghcup's directory and agentctl's cache for missing toolchain pins"]
+
+[[case]]
+id = "bootstrap.preconditions.cache-short"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Linux", "architecture" = "x86_64", "ghcup_free" = 10, "cache_free" = 9, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = true, "hackage_reachable" = true }
+expected = ["P7: free space in ghcup's directory and agentctl's cache for missing toolchain pins"]
+
+[[case]]
+id = "bootstrap.preconditions.both-short"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Linux", "architecture" = "x86_64", "ghcup_free" = 9, "cache_free" = 9, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = true, "hackage_reachable" = true }
+expected = ["P7: free space in ghcup's directory and agentctl's cache for missing toolchain pins"]
+
+[[case]]
+id = "bootstrap.preconditions.downloads-unreachable"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Linux", "architecture" = "x86_64", "ghcup_free" = 10, "cache_free" = 10, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = false, "hackage_reachable" = true }
+expected = ["P8: connect to a network reaching downloads.haskell.org and hackage.haskell.org; a first run or pin change needs it"]
+
+[[case]]
+id = "bootstrap.preconditions.hackage-unreachable"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Linux", "architecture" = "x86_64", "ghcup_free" = 10, "cache_free" = 10, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = true, "hackage_reachable" = false }
+expected = ["P8: connect to a network reaching downloads.haskell.org and hackage.haskell.org; a first run or pin change needs it"]
+
+[[case]]
+id = "bootstrap.preconditions.both-unreachable"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Linux", "architecture" = "x86_64", "ghcup_free" = 10, "cache_free" = 10, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = false, "hackage_reachable" = false }
+expected = ["P8: connect to a network reaching downloads.haskell.org and hackage.haskell.org; a first run or pin change needs it"]
+
+[[case]]
+id = "bootstrap.preconditions.warm-offline"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Linux", "architecture" = "x86_64", "ghcup_free" = 0, "cache_free" = 0, "ghcup_required" = 0, "cache_required" = 0, "pins_ready" = true, "downloads_reachable" = false, "hackage_reachable" = false }
+expected = []
+
+[[case]]
+id = "bootstrap.preconditions.windows-arm64"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Windows", "architecture" = "arm64", "ghcup_free" = 10, "cache_free" = 10, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = true, "hackage_reachable" = true }
+expected = ["P10: no GHC bindist for this platform; use Linux x86_64/aarch64, macOS x86_64/arm64 or Windows x86_64"]
+
+[[case]]
+id = "bootstrap.preconditions.unsupported-architecture"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Linux", "architecture" = "unsupported", "ghcup_free" = 10, "cache_free" = 10, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = true, "hackage_reachable" = true }
+expected = ["P10: no GHC bindist for this platform; use Linux x86_64/aarch64, macOS x86_64/arm64 or Windows x86_64"]
+
+[[case]]
+id = "bootstrap.preconditions.all-unmet"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Windows", "architecture" = "arm64", "ghcup_free" = 0, "cache_free" = 0, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = false, "hackage_reachable" = false }
+expected = ["P7: free space in ghcup's directory and agentctl's cache for missing toolchain pins", "P8: connect to a network reaching downloads.haskell.org and hackage.haskell.org; a first run or pin change needs it", "P10: no GHC bindist for this platform; use Linux x86_64/aarch64, macOS x86_64/arm64 or Windows x86_64"]
+
+[[case]]
+id = "bootstrap.preconditions.linux-aarch64"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Linux", "architecture" = "aarch64", "ghcup_free" = 10, "cache_free" = 10, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = true, "hackage_reachable" = true }
+expected = []
+
+[[case]]
+id = "bootstrap.preconditions.darwin-x86_64"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Darwin", "architecture" = "x86_64", "ghcup_free" = 10, "cache_free" = 10, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = true, "hackage_reachable" = true }
+expected = []
+
+[[case]]
+id = "bootstrap.preconditions.darwin-arm64"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Darwin", "architecture" = "arm64", "ghcup_free" = 10, "cache_free" = 10, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = true, "hackage_reachable" = true }
+expected = []
+
+[[case]]
+id = "bootstrap.preconditions.windows-x86_64"
+requirement = "R4"
+quote = "b) installs cabal"
+provenance = "decision:D-20"
+input = { "family" = "Windows", "architecture" = "x86_64", "ghcup_free" = 10, "cache_free" = 10, "ghcup_required" = 10, "cache_required" = 10, "pins_ready" = false, "downloads_reachable" = true, "hackage_reachable" = true }
+expected = []

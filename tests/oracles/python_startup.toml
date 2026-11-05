@@ -1,0 +1,7 @@
+[[case]]
+id = "check.python.startup"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-33"
+input = { "subject" = "private-python-startup", "source" = "src/agentctl/resources/python-startup.pth" }
+expected = { "destination" = "00_agentctl_no_bytecode.pth", "contents" = "# Copyright (c) 2026 agentctl contributors.\nimport sys; sys.dont_write_bytecode = True\n" }

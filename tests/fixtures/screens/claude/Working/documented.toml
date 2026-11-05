@@ -1,0 +1,4 @@
+provenance = "documented"
+source = "https://code.claude.com/docs/en/interactive-mode"
+evidence = "interrupt"
+note = "Illustrative fixture assembled from documented behavior and UI vocabulary; not a captured session or a claim about an exact live screen."

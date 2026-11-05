@@ -28,8 +28,12 @@ Provisioning is one pure function between two thin effectful edges.
 3. **Apply.** `bootstrap/prereqs.py`, `bootstrap/ghcup.py` and `bootstrap/toolchain.py` carry out the actions
    in order, spawning only through `src/agentctl/process.py`, and stop at the first failure with a typed error.
 
+Cold host facts gain the results of the prerequisite probes through `bootstrap/prereqs.py::observe`; the result is
+another frozen value for the pure planner. Warm facts remain unchanged without a prerequisite probe
+(`tests/unit/test_prereqs.py::test_observation_completes_cold_facts_and_preserves_warm_pins`).
+
 Gathering stops early on a provisioned host. When the GHC and cabal paths recorded by the last resolution,
-kept in agentctl's `cache` directory, answer `--numeric-version` with the pins, the facts say so and nothing
+kept as absolute strings in `cache/toolchain-paths.toml`, answer `--numeric-version` with the pins, the facts say so and nothing
 else is observed: a warm run spawns those two version checks and no ghcup, probe, package manager or network
 request (`tests/integration/test_toolchain.py::test_warm_run_spawns_only_version_checks`). Check's
 precondition P9 probes the prerequisites on its own account, because its build legs need them.
@@ -63,7 +67,7 @@ never depends on ([code standards](code_standards.md)).
 
 libffi is not probed: GHC 9.12.4 bundles it ([decision D-21](../../DEVELOPMENT_PLAN/rationale.md#decisions)),
 so the `libffi-dev` and `libffi8` entries of ghcup's own requirement lists are dropped from every set below.
-When any probe fails, the plan installs the host's whole set in one package-manager run and probes again; a
+When any probe fails, the plan installs the host's whole set in one installation transaction and probes again; a
 probe that still fails is a typed error naming it, never a second install.
 
 | Host | Package manager | Packages installed after consent |
@@ -76,8 +80,9 @@ probe that still fails is a typed error naming it, never a second install.
 | Windows | none | nothing |
 
 The apt actions are `apt-get update` then `apt-get install -y` with the set, so a host with empty or stale
-package lists still resolves it. The dnf and pacman argv are rows of `tests/oracles/prerequisites.toml`, each
-with `tool:` provenance. The verified facts give no Arch package set, only ghcup's generic Linux list
+package lists still resolves it. The apt and dnf argv, consent outcomes and Arch refusal are rows of
+`tests/oracles/prerequisites.toml`, anchored to versioned tool facts, the request and D-21.
+The verified facts give no Arch package set, only ghcup's generic Linux list
 (`curl g++ gcc gmp make ncurses realpath xz-utils pkg-config`), whose names are not package names on every
 distribution. A host without a verified row, Arch Linux included, therefore gets a refusal when a probe fails:
 it names the failed probes and that generic list, and runs no package manager.
@@ -90,14 +95,15 @@ decides how privilege is obtained.
 | Run | Consent | Privilege |
 |---|---|---|
 | Started as `agentctl --assume-yes <command>`, interactive or not | the flag | `sudo -n`, which fails rather than prompts; nothing as root |
-| Interactive, without the flag: standard input and standard error are terminals | a `[y/N]` prompt on standard error that shows the exact commands; anything but `y` or `yes` declines | `sudo`, which may ask for the user's password; nothing as root |
+| Interactive, without the flag: standard input and standard error are terminals | one `[y/N]` prompt on standard error showing the exact commands; only `y` or `yes`, ignoring case and surrounding whitespace, consents | `sudo`, which may ask for the user's password; nothing as root |
 | Non-interactive without the flag, `agentctl check` included | none, because nothing may prompt | none: the plan is a refusal |
 
 A decline or refusal spawns nothing, prints the exact commands for the user to type, and exits non-zero; a
 `sudo -n` that needs a password is reported the same way. On macOS, consent runs `xcode-select --install`,
 which needs no sudo and opens the dialog; agentctl then exits non-zero and asks the user to finish the dialog
-and run the command again. `agentctl check` never prompts: its precondition P9 holds only when the
-prerequisites are present or the run was started with `--assume-yes` as root or with passwordless sudo
+and run the command again. `agentctl check` never prompts or opens that dialog: P9 needs existing Command Line
+Tools on macOS. On Linux, P9 holds when the probes are ready or a verified package set is installable after
+`--assume-yes` as root or with passwordless sudo; the privilege observation is `sudo -n true`
 ([preconditions](quality_gate.md#preconditions)).
 
 ```console
@@ -114,16 +120,25 @@ No test runs a package manager, sudo or `xcode-select --install`. The spawn audi
 and vetoes it, records the probe's compiler spawn without vetoing it, and tests answer the prompt through click's
 `CliRunner` input. A declined prompt must record no package-manager
 spawn beside the probe spawn that shows the audit was live
-(`tests/integration/test_prereqs_consent.py::test_declined_spawns_nothing`), an accepted one must record the
-oracle argv with the run's nonce (`tests/integration/test_prereqs_consent.py::test_accepted_runs_exact_argv`),
+(`tests/integration/test_prereqs_consent.py::test_declined_spawns_nothing`). Each approved command is attempted
+individually under the hook and compared with its oracle argv and nonce, while a batch stops at its first veto
+(`tests/integration/test_prereqs_consent.py::test_accepted_runs_exact_argv`),
 and a non-interactive run without the flag must refuse
 (`tests/integration/test_prereqs_consent.py::test_non_tty_refuses_without_assume_yes`).
+The actors' PATHs contain no installer binaries, so removing a veto still cannot reach the host's package manager.
+Successful command ordering and the single post-install probe are value controls; the actual apt sequence is owed
+to [Clean-host bootstrap acceptance](../../DEVELOPMENT_PLAN/phase-12-clean-container-acceptance.md).
+The actual click dispatcher passes the global option to the check child
+(`tests/integration/test_prereqs_consent.py::test_global_assume_yes_reaches_check`).
 
 ## ghcup
 
 **Reuse.** agentctl looks for ghcup where the user's environment says it lives: first the location
 `GHCUP_INSTALL_BASE_PREFIX` or `GHCUP_USE_XDG_DIRS` names, when set; then `ghcup` on PATH; then the default,
 `~/.ghcup/bin/ghcup` or `C:\ghcup\bin\ghcup.exe` (`tests/unit/test_hostfacts.py::test_ghcup_discovery_order`).
+On Unix, the presence of `GHCUP_USE_XDG_DIRS`, an empty value included, selects `XDG_BIN_HOME/ghcup` or
+`~/.local/bin/ghcup` ahead of the ordinary prefix. Windows ignores XDG and uses `<prefix>\ghcup\bin\ghcup.exe`,
+with `C:\` as its default prefix. An absent environment-selected file still permits PATH and default discovery.
 A ghcup whose `--numeric-version` is at or above 0.1.50.2 is
 reused as it is, never replaced or upgraded ([decision D-18](../../DEVELOPMENT_PLAN/rationale.md#decisions)),
 because it is a tool the user owns. One below the floor, or one that does not answer, is a refusal whose remedy
@@ -142,12 +157,19 @@ binaries; that file is never fetched at run time.
 | macOS arm64 | `https://downloads.haskell.org/~ghcup/0.2.6.2/aarch64-apple-darwin-ghcup-0.2.6.2` | `4e521e008fe0813db6db4b91cfeebd0c44c80c68afb458ea32a1c94cf5c7cc1d` |
 | Windows x86_64 | `https://downloads.haskell.org/~ghcup/0.2.6.2/x86_64-mingw64-ghcup-0.2.6.2.exe` | `94da902a2853b1de1df509d04da900a05258480759efdb4f654e66956b6f30db` |
 
-The bytes go to a temporary file in the destination directory and are hashed there; only a match is made
+The bytes go to a mode-0600 file in a private temporary directory under the destination directory and are hashed
+as they are written in bounded chunks. An advertised Content-Length must equal the received byte count. Only a match is made
 executable (mode 0755 on POSIX) and renamed onto the final path, `~/.ghcup/bin/ghcup`
 (`$GHCUP_INSTALL_BASE_PREFIX/.ghcup/bin/ghcup` when the variable is set) or `C:\ghcup\bin\ghcup.exe`. A digest
 mismatch or a truncated body deletes the temporary file and leaves nothing at the final path. A local HTTP
 server owned by the test serves correct, corrupted and truncated bytes into a test-owned
 `GHCUP_INSTALL_BASE_PREFIX` (`tests/integration/test_ghcup.py::test_sha_mismatch_refused_no_file`,
+`tests/integration/test_ghcup.py::test_truncated_download_leaves_nothing`).
+
+An occupied destination is refused before downloading and checked again before publication, preserving a file that
+appears while bytes are being received. Failed requests, malformed lengths, unsupported responses and filesystem
+errors are typed failures; temporary artifacts are removed on all those paths
+(`tests/integration/test_ghcup.py::test_download_errors_are_typed`,
 `tests/integration/test_ghcup.py::test_truncated_download_leaves_nothing`).
 
 **Never.** agentctl edits no shell rc or profile file, so the installed ghcup is not on PATH and is always
@@ -194,6 +216,18 @@ found or placed, always with the tool subcommand:
   before and after this code path runs, comparing each link target, or its bytes where it is not a link, and
   check fails if either changed (`tests/integration/test_toolchain.py::test_default_links_unchanged_by_step`).
 
+`bootstrap/toolchain.py` interprets the planner's actions with explicit command and prerequisite adapters. It stops
+at the first failure and publishes `cache/toolchain-paths.toml` only after both absolute paths answer their pins.
+The record is written with mode 0600 in a private temporary directory, then renamed into place. A failed command,
+relative whereis result or wrong version leaves the existing record intact
+(`tests/unit/test_toolchain.py::test_apply_sequence_and_verified_record`,
+`tests/unit/test_toolchain.py::test_apply_refuses_partial_or_failed_resolution`,
+`tests/unit/test_toolchain.py::test_record_atomicity_and_storage_failure`).
+
+Selection checks cover the configured ghcup binary directory and the discovered executable's directory, including
+Windows `.exe` entries. They compare after a typed provisioning failure as well as after success; an unreadable
+entry is a failure (`tests/integration/test_toolchain.py::test_default_observation_failures`).
+
 ## The Clean-Lane Recipe
 
 `tests/lanes/clean-host.Dockerfile` is the recipe of the `clean-container` lane, which
@@ -213,9 +247,15 @@ sudo, because claude refuses its bypass flag as root and because a root run woul
   `pipx install --force --editable '.[dev]'`, and runs plain `agentctl check`, so the gate literal never
   changes.
 
-The clean recipe, or native macOS/Windows acceptance preparation, uses `tests/harness/host.py` to record observed
-absence of ghcup, GHC and cabal before the first provisioning command. This harness-owned pre-bootstrap record
-contains the host, the probed prefix and a fresh nonce; agentctl never writes it. Existing native toolchains receive
+The closing agent launches Stage B with `docker run --init`. Docker's init process reaps orphaned native children,
+so the gate can require every observer PID to disappear after teardown, as it does on a native host. The image's
+command remains `agentctl check`; child reaping is part of the container's execution environment.
+
+The clean recipe and the gate use `tests/harness/host.py` with its standard-library-only
+`tests/harness/bootstrap_origin.py` helper to record observed absence of ghcup, GHC and cabal before the first
+provisioning command. This happens automatically when the observed PATH and configured prefix contain none of
+those tools. This harness-owned pre-bootstrap record
+contains the host, the probed prefix and a fresh nonce; the provisioning code never writes it. Existing native toolchains receive
 no absence record and confirm reuse. The harness calls the toolchain agentctl-installed only with that initial
 absence record and matching current prefix, and the user's otherwise; that provenance is the only thing
 `tests/e2e/test_fresh_bootstrap.py` branches on. For an agentctl-installed toolchain it reads the resulting filesystem facts, never a journal
@@ -227,7 +267,16 @@ or `cabal` while the versioned entries resolve (`tests/e2e/test_fresh_bootstrap.
 reuse contract instead: the run resolved the user's ghcup, at or above the floor, and wrote no second one. A
 value test reads the Dockerfile itself, so a recipe that installs git, a compiler or tmux in Stage A, runs as
 root, or changes either stage's command fails on every host
-(`tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle`).
+(`tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle`). The absence witness is
+`state/pre-bootstrap.json`; a mismatched prefix is refused, and an existing witness is never rewritten
+(`tests/integration/test_bootstrap_origin.py::test_absence_record_precedes_first_file`,
+`tests/integration/test_bootstrap_origin.py::test_existing_tool_and_mismatched_witness`). A partial or previously
+unobserved toolchain receives no clean-host claim: an initially absent ghcup still has to match its download pin,
+and an existing ghcup has to preserve its independently observed bytes.
+
+The current run's `bootstrap-host.json` records the binary and selection entries before provisioning. The
+clean-container lane additionally requires Docker's filesystem marker and the recipe's Stage A absence observation;
+native absence alone does not qualify it. Stage B's `CMD` runs a fresh plain `agentctl check` when the container starts.
 
 ## What Each Step Proves
 

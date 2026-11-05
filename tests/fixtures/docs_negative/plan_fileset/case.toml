@@ -1,0 +1,4 @@
+rule = "plan.fileset"
+path = "DEVELOPMENT_PLAN/extra.md"
+search = ""
+replace = "# Extra file\n"

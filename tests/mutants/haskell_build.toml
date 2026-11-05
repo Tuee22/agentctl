@@ -1,0 +1,71 @@
+[[mutant]]
+id = "M-build-drop-werror"
+operator = "delete"
+target = "src/agentctl/haskell/agentctl-core.cabal"
+search = "-Wall -Wcompat -Werror -Wpartial-fields"
+replace = "-Wall -Wcompat -Wpartial-fields"
+killers = ["tests/integration/test_haskell_legs.py::test_werror_fires"]
+reason = "unused binding did not fail the Werror build"
+
+[[mutant]]
+id = "M-build-routing-blind"
+operator = "short-circuit"
+target = "src/agentctl/check/haskell.py"
+search = "return Err(build.BuildError(\"Unrouted or missing Cabal component\"))"
+replace = "return Ok(found)"
+killers = ["tests/integration/test_haskell_legs.py::test_every_suite_routed"]
+reason = "unrouted suite was accepted"
+
+[[mutant]]
+id = "M-build-user-cabal-dir"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/build.py"
+search = "\"CABAL_DIR\": str(context.cabal_directory),"
+replace = "\"CABAL_DIR\": str(context.host.home / \".cabal\"),"
+killers = ["tests/integration/test_haskell_legs.py::test_user_cabal_config_ignored"]
+reason = "user Cabal configuration replaced the private directory"
+
+[[mutant]]
+id = "M-build-tests-disabled"
+operator = "delete"
+target = "src/agentctl/bootstrap/build.py"
+search = "        \"--enable-tests\",\n"
+replace = ""
+killers = ["tests/unit/test_check_legs.py::test_leg_table_matches_oracle"]
+reason = "Cabal build flags differ from oracle"
+
+[[mutant]]
+id = "M-build-handoff-unchecked"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Protocol.hs"
+search = "validHandoff supplied = supplied == Just (show protocolVersion)"
+replace = "validHandoff supplied = supplied /= Nothing"
+killers = ["tests/integration/test_haskell_legs.py::test_direct_invocation_refused"]
+reason = "core accepted invocation without the handoff"
+
+[[mutant]]
+id = "M-build-handshake-drops-commands"
+operator = "delete"
+target = "src/agentctl/haskell/src/AgentCtl/Protocol.hs"
+search = "    \"logs\",\n"
+replace = ""
+killers = ["haskell:agentctl-core-test/Handshake/protocol-fields"]
+reason = "handshake command list differs"
+
+[[mutant]]
+id = "M-build-eval-drops-case"
+operator = "delete"
+target = "src/agentctl/haskell/app/Eval.hs"
+search = "answers = map answer"
+replace = "answers = map answer . drop 1"
+killers = ["tests/integration/test_eval_executable.py::test_every_case_answered"]
+reason = "eval skipped or reordered a case"
+
+[[mutant]]
+id = "M-build-wheel-excludes-haskell"
+operator = "delete"
+target = "pyproject.toml"
+search = "[tool.hatch.build.targets.wheel.force-include]"
+replace = "[tool.hatch.build.targets.wheel]\nexclude = [\"src/agentctl/haskell\"]\n\n[tool.hatch.build.targets.wheel.force-include]"
+killers = ["tests/integration/test_haskell_legs.py::test_wheel_ships_haskell_sources"]
+reason = "wheel excludes Haskell checkout sources"

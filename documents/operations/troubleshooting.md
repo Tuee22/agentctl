@@ -35,6 +35,11 @@ have 2.7. There, install a newer tmux, for example from Homebrew, which also pro
 release of the OS. On Windows agentctl runs `psmux` itself, never psmux's `tmux` alias, so another `tmux` on PATH, such
 as MSYS2's or Cygwin's, does not count.
 
+An unrecognised version answer is refused with that raw answer quoted in the typed diagnostic; it is never treated
+as a new enough version. On an unrecognised Linux distribution, the remedy names tmux 3.2 or later and the OS package
+manager without inventing an apt or dnf command. The core checks availability and prints the remedy; it does not
+install a multiplexer or change its configuration.
+
 ## Agent Missing
 
 **What you see.** A warning that `claude` or `codex` was not found on PATH, with the official install command for your
@@ -86,8 +91,7 @@ credential store; run `codex login status` to see which.
 
 ## Login-Shaped ARGS Refused
 
-**What you see.** A warning that your ARGS hold a login command, which agentctl never runs, naming the command to type
-yourself; exit 2. It covers `agentctl claude auth login`, `agentctl claude setup-token`, a `/login` argument, and
+**What you see.** A warning that login commands must be run yourself, naming the appropriate command; exit 2. It covers `agentctl claude auth login`, `agentctl claude setup-token`, a `/login` argument, and
 `agentctl codex login`, and nothing was started.
 
 **What to type.** The login command in your own shell, such as `claude auth login` or `codex login`, then the agentctl
@@ -139,7 +143,7 @@ Any ARGS that make the agent print something and exit at once end the same way, 
 
 **What you see.** A warning that GHC needs OS packages this host lacks, listing the exact commands that install them,
 and saying that nothing was installed; the exit is non-zero. It appears when the run has no terminal to ask in and
-`--assume-yes` was not given, when you answer anything but `y` at the `[y/N]` prompt, when `--assume-yes` meets a sudo
+`--assume-yes` was not given, when you decline the `[y/N]` prompt, when `--assume-yes` meets a sudo
 that needs a password, and on a host whose package set agentctl has not verified, such as Arch Linux, where it names the
 failed probes instead of running a package manager.
 
@@ -151,8 +155,10 @@ $ agentctl --assume-yes list        # consent in advance; sudo -n, so passwordle
 $ sudo apt-get update && sudo apt-get install -y <packages the warning lists>
 ```
 
-The last line is the Ubuntu and Debian form; use the commands the warning prints. On macOS the prerequisite is the Xcode
-Command Line Tools: type `xcode-select --install`, finish the dialog it opens, then run agentctl again.
+The prompt accepts `y` or `yes`, ignoring case and surrounding spaces; every other answer declines. The last command
+is the Ubuntu and Debian form; use the commands the warning prints. On macOS the prerequisite is the Xcode Command Line
+Tools. `agentctl check` requires them to be installed already; it never opens a setup dialog. Use a host with the tools
+installed for automated validation. Interactive setup with `xcode-select --install` is outside the gate.
 
 ## ghcup Below the Floor
 
@@ -165,6 +171,15 @@ answer `--numeric-version`; the exit is non-zero. agentctl never replaces or upg
 $ ghcup upgrade
 ```
 
+## ghcup Download Failed Verification
+
+**What you see.** A warning that the download was truncated, its SHA-256 did not match the pin, or a verified ghcup
+could not be downloaded. The command exits non-zero and removes its temporary download.
+
+**What to type.** Retry with a working network and writable ghcup destination. An occupied or changed destination
+means another executable appeared after discovery; retry so agentctl gathers its version. Preserve an existing ghcup
+and use its reported upgrade remedy when it is below the floor. Do not disable digest verification.
+
 ## Unsupported Platform
 
 **What you see.** A warning naming the OS and architecture agentctl found and the platforms it supports: Linux on x86_64
@@ -172,6 +187,18 @@ or aarch64, macOS on x86_64 or arm64, and Windows on x86_64. Nothing was install
 
 **What to type.** Nothing fixes this on that host: the pinned GHC and cabal are not built for it, Windows on ARM64
 included. Run agentctl on a supported host.
+
+## Native Build, Cache or Binary Identity Failed
+
+**What you see.** A compiler diagnostic, an unreadable source or pin file, an incomplete published directory, an
+unexpected core handshake, or a build-lock timeout. A binary identity mismatch names the built and published SHA-256
+values and the one published directory involved. Existing published directories are retained on every failure.
+
+**Remedy.** Fix the reported source, toolchain or filesystem error and retry the same `agentctl` command. A lock timeout
+means another build still holds that digest; retry after it finishes. An identity mismatch after clearing the build
+cache can result from a rebuild with different bytes. Remove only the single published directory the diagnostic names
+to permit a fresh publish, as [binary identity](../engineering/binary_build.md#binary-identity) describes. No commit,
+review or interactive confirmation is needed to validate the repaired checkout: run `agentctl check`.
 
 ## Session Exists, ARGS Not Applied
 
@@ -232,6 +259,13 @@ finds the existing one, prints the command that attaches to it, such as `tmux at
 exits 0 without attaching; `agentctl attach NAME` does the same.
 
 **What to type.** The printed command, or `agentctl attach NAME`, from a terminal.
+
+## Invalid Adopted-Pane Registry
+
+An invalid or unsafe adopted-pane registry causes a warning and a non-zero exit without replacing its bytes.
+Unknown fields or agents, duplicate pane ids, nonpositive pids and a registry path that is not an owned private
+file are rejected (`tests/e2e/test_adopt.py::test_registry_rejects_invalid_state`). The registry format and private
+state-directory rules are in [files and state](../reference/files_and_state.md#adopted-pane-registry).
 
 ## Related
 

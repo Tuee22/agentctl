@@ -1,0 +1,4 @@
+rule = "docs.binary_unnamed"
+path = "documents/operations/installation.md"
+search = ""
+replace = "\n```console\nagentctl-core list\n```\n"

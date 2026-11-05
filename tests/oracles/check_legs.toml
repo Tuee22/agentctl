@@ -1,0 +1,96 @@
+[[case]]
+id = "legs.python.ruff-check"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-33"
+input = { "subject" = "check-leg", "scope" = "python", "order" = 0 }
+expected = { "name" = "ruff-check", "arguments" = ["<py>", "-m", "ruff", "check", "--config", "<root>/pyproject.toml", "--no-cache", "--no-fix", "<files>"] }
+
+[[case]]
+id = "legs.python.ruff-format"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-33"
+input = { "subject" = "check-leg", "scope" = "python", "order" = 1 }
+expected = { "name" = "ruff-format", "arguments" = ["<py>", "-m", "ruff", "format", "--check", "--config", "<root>/pyproject.toml", "--no-cache", "<files>"] }
+
+[[case]]
+id = "legs.python.ty"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-33"
+input = { "subject" = "check-leg", "scope" = "python", "order" = 2 }
+expected = { "name" = "ty", "arguments" = ["<py>", "-m", "ty", "check", "--python", "<py>", "--error-on-warning", "<files>"] }
+
+[[case]]
+id = "legs.python.pytest"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-33"
+input = { "subject" = "check-leg", "scope" = "python", "order" = 3 }
+expected = { "name" = "pytest", "arguments" = ["<py>", "-m", "pytest", "-c", "<root>/pyproject.toml", "--rootdir=<root>", "-p", "no:cacheprovider", "-p", "pytester", "-p", "agentctl.check.gate_plugin", "tests"] }
+
+[[case]]
+id = "legs.complete-order"
+requirement = "R14"
+quote = "Also fourmolu + hlint"
+provenance = "decision:D-03"
+input = { "subject" = "check-leg-order", "scope" = "complete" }
+expected = ["ruff-check", "ruff-format", "ty", "fourmolu", "hlint", "cabal-build", "cabal-test", "pytest"]
+
+[[case]]
+id = "legs.haskell.fourmolu"
+requirement = "R14"
+quote = "Also fourmolu + hlint"
+provenance = "decision:D-03"
+input = { "subject" = "check-leg", "scope" = "haskell" }
+expected = { "name" = "fourmolu", "arguments" = ["<tools>/fourmolu", "--mode", "check", "<hs-files>"] }
+
+[[case]]
+id = "legs.haskell.hlint"
+requirement = "R14"
+quote = "Also fourmolu + hlint"
+provenance = "decision:D-03"
+input = { "subject" = "check-leg", "scope" = "haskell" }
+expected = { "name" = "hlint", "arguments" = ["<tools>/hlint", "app", "src", "test"] }
+
+[[case]]
+id = "legs.haskell.cabal-build"
+requirement = "R14"
+quote = "Also fourmolu + hlint"
+provenance = "decision:D-03"
+input = { "subject" = "check-leg", "scope" = "haskell" }
+expected = { "name" = "cabal-build", "arguments" = ["<cabal>", "build", "all", "--enable-tests", "-w", "<ghc>", "--builddir=<build>"] }
+
+[[case]]
+id = "legs.haskell.cabal-test"
+requirement = "R14"
+quote = "Also fourmolu + hlint"
+provenance = "decision:D-03"
+input = { "subject" = "check-leg", "scope" = "haskell" }
+expected = { "name" = "cabal-test", "arguments" = ["<cabal>", "test", "all", "--enable-tests", "-w", "<ghc>", "--builddir=<build>", "--test-show-details=direct"] }
+
+[[case]]
+id = "legs.python.pytest.coverage"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-33"
+input = { "subject" = "check-leg", "scope" = "python-covered", "order" = 3 }
+expected = { "name" = "pytest", "arguments" = ["<py>", "-m", "coverage", "run", "--rcfile=<root>/pyproject.toml", "--data-file=<run>/coverage", "--branch", "--source=agentctl", "-m", "pytest", "-c", "<root>/pyproject.toml", "--rootdir=<root>", "-p", "no:cacheprovider", "-p", "pytester", "-p", "agentctl.check.gate_plugin", "tests"], "report_arguments" = ["<py>", "-m", "coverage", "report", "--rcfile=<root>/pyproject.toml", "--data-file=<run>/coverage", "--fail-under=100", "--show-missing"] }
+amends = "legs.python.pytest"
+
+[[case]]
+id = "environment.ty"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-33"
+input = { "subject" = "check-environment", "tool" = "ty", "inherited" = { "PATH" = "<path>", "HOME" = "<home>", "XDG_CONFIG_HOME" = "<config>", "APPDATA" = "<appdata>", "PYTHONPATH" = "hostile", "PYTEST_ADDOPTS" = "-k none", "PYTEST_PLUGINS" = "hostile", "TY_CONFIG_FILE" = "hostile", "VIRTUAL_ENV" = "hostile", "TMUX" = "foreign", "TMUX_PANE" = "foreign" } }
+expected = { "PATH" = "<path>", "HOME" = "<home>", "XDG_CONFIG_HOME" = "<run>/ty-config", "APPDATA" = "<run>/ty-config", "LC_ALL" = "C.UTF-8", "TMPDIR" = "<run>", "TEMP" = "<run>", "TMP" = "<run>", "PYTHONPYCACHEPREFIX" = "<run>/bytecode", "PYTEST_DISABLE_PLUGIN_AUTOLOAD" = "1", "AGENTCTL_CHECK_NONCE" = "<nonce>", "AGENTCTL_CHECK_MANIFEST" = "<run>/pytest-manifest.json" }
+
+[[case]]
+id = "environment.pytest"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-33"
+input = { "subject" = "check-environment", "tool" = "pytest", "inherited" = { "PATH" = "<path>", "HOME" = "<home>", "XDG_CONFIG_HOME" = "<config>", "APPDATA" = "<appdata>", "PYTHONPATH" = "hostile", "PYTEST_ADDOPTS" = "-k none", "PYTEST_PLUGINS" = "hostile", "TY_CONFIG_FILE" = "hostile", "VIRTUAL_ENV" = "hostile", "TMUX" = "foreign", "TMUX_PANE" = "foreign" } }
+expected = { "PATH" = "<path>", "HOME" = "<home>", "XDG_CONFIG_HOME" = "<config>", "APPDATA" = "<appdata>", "LC_ALL" = "C.UTF-8", "TMPDIR" = "<run>", "TEMP" = "<run>", "TMP" = "<run>", "PYTHONPYCACHEPREFIX" = "<run>/bytecode", "PYTEST_DISABLE_PLUGIN_AUTOLOAD" = "1", "AGENTCTL_CHECK_NONCE" = "<nonce>", "AGENTCTL_CHECK_MANIFEST" = "<run>/pytest-manifest.json" }

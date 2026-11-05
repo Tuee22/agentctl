@@ -1,0 +1,44 @@
+[[mutant]]
+id = "M-name-no-collapse"
+operator = "delete"
+target = "src/agentctl/haskell/src/AgentCtl/Session/Name.hs"
+search = ". collapse '-'"
+replace = ""
+killers = ["tests/unit/test_session_names.py::test_session_names_match_oracle"]
+reason = "session names differ from oracle"
+
+[[mutant]]
+id = "M-name-hash-basename"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Session/Name.hs"
+search = "hashInput = identity windows canonical"
+replace = "hashInput = identity windows base"
+killers = ["tests/unit/test_session_names.py::test_session_names_match_oracle"]
+reason = "session names differ from oracle"
+
+[[mutant]]
+id = "M-name-posix-case-fold"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Session/Name.hs"
+search = "identity False = id"
+replace = "identity False = Text.toCaseFold"
+killers = ["tests/unit/test_session_names.py::test_session_names_match_oracle"]
+reason = "session names differ from oracle"
+
+[[mutant]]
+id = "M-name-plain-for-foreign"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Session/Name.hs"
+search = "decide Foreign Absent = CreateHashed"
+replace = "decide Foreign Absent = CreatePlain"
+killers = ["tests/unit/test_session_names.py::test_decision_rows_match_oracle"]
+reason = "session decision differs from oracle"
+
+[[mutant]]
+id = "M-name-keep-underscore-runs"
+operator = "delete"
+target = "src/agentctl/haskell/src/AgentCtl/Session/Name.hs"
+search = ". collapse '_'"
+replace = ""
+killers = ["haskell:agentctl-core-test/Name/always-valid"]
+reason = "derived name is invalid"

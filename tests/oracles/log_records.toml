@@ -1,0 +1,712 @@
+
+[[case]]
+id = "log.schema"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-schema" }
+expected = { "base" = ["time", "run", "target", "agent", "kind"], "observation" = ["class", "fingerprint", "state"], "decision" = ["from", "to", "rule", "actions"], "attempt" = ["recovery_text", "pre_send_class", "pre_send_fingerprint", "outcome"], "result" = ["outcome"], "notify" = ["level", "message"] }
+
+[[case]]
+id = "log.poll.active-needs-capture"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = []
+
+[[case]]
+id = "log.poll.steady-idle"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "step/MONITORING/IdlePrompt/none", "actions" = [] }]
+
+[[case]]
+id = "log.poll.opens-fresh-overload"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "Overloaded", "fingerprint" = "a", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "SUSPECTED_FAILURE", "rule" = "step/MONITORING/Overloaded/opened", "actions" = [] }]
+
+[[case]]
+id = "log.poll.ignores-handled-overload"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "old", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "observation", "class" = "Overloaded", "fingerprint" = "old", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "step/MONITORING/Overloaded/none", "actions" = [] }]
+
+[[case]]
+id = "log.poll.paused.monitoring"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "paused", "actions" = [] }]
+
+[[case]]
+id = "log.poll.unwatched.monitoring"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "unwatched", "actions" = [] }]
+
+[[case]]
+id = "log.poll.paused.suspected_failure"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "SUSPECTED_FAILURE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "decision", "from" = "SUSPECTED_FAILURE", "to" = "MONITORING", "rule" = "paused", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.poll.unwatched.suspected_failure"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "SUSPECTED_FAILURE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "SUSPECTED_FAILURE", "to" = "MONITORING", "rule" = "unwatched", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.poll.paused.confirm_idle"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "CONFIRM_IDLE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "CONFIRM_IDLE", "to" = "MONITORING", "rule" = "paused", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.poll.unwatched.confirm_idle"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "CONFIRM_IDLE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "decision", "from" = "CONFIRM_IDLE", "to" = "MONITORING", "rule" = "unwatched", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.poll.paused.backoff"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "BACKOFF", "to" = "MONITORING", "rule" = "paused", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.poll.unwatched.backoff"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "BACKOFF", "to" = "MONITORING", "rule" = "unwatched", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.poll.paused.recovery_sent"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "RECOVERY_SENT", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "decision", "from" = "RECOVERY_SENT", "to" = "MONITORING", "rule" = "paused", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.poll.unwatched.recovery_sent"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "RECOVERY_SENT", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "RECOVERY_SENT", "to" = "MONITORING", "rule" = "unwatched", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.poll.paused.verify"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "VERIFY", "to" = "MONITORING", "rule" = "paused", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.poll.unwatched.verify"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "decision", "from" = "VERIFY", "to" = "MONITORING", "rule" = "unwatched", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.poll.paused.escalate"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = true, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "ESCALATE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "ESCALATE", "to" = "MONITORING", "rule" = "paused", "actions" = [] }]
+
+[[case]]
+id = "log.poll.unwatched.escalate"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = false, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = false, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "ESCALATE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "ESCALATE", "to" = "MONITORING", "rule" = "unwatched", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.overloaded"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "observation", "class" = "Overloaded", "fingerprint" = "a", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.usagelimit"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "UsageLimit", "fingerprint" = "usage", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "observation", "class" = "UsageLimit", "fingerprint" = "usage", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.autherror"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "AuthError", "fingerprint" = "auth", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "AuthError", "fingerprint" = "auth", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.contextexhausted"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "ContextExhausted", "fingerprint" = "context", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "observation", "class" = "ContextExhausted", "fingerprint" = "context", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.idleprompt"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.working"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "observation", "class" = "Working", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.trustdialog"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "TrustDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "observation", "class" = "TrustDialog", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.bypasswarning"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "BypassWarning", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "observation", "class" = "BypassWarning", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.approvaldialog"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "ApprovalDialog", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "ApprovalDialog", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.partialinput"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "observation", "class" = "PartialInput", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.loginscreen"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "LoginScreen", "fingerprint" = "login", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "LoginScreen", "fingerprint" = "login", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.exited"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "observation", "class" = "Exited", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.start-baseline.unknown"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Unknown", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "observation", "class" = "Unknown", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.resume-between-polls"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 5, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "b", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "observation", "class" = "Overloaded", "fingerprint" = "b", "state" = "BACKOFF" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "BACKOFF", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.poll.rewatch-keeps-handled"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 6, "previous_revision" = 0, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }]
+
+[[case]]
+id = "log.poll.deadline.99-999"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 99.999, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "observation", "class" = "Overloaded", "fingerprint" = "a", "state" = "BACKOFF" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "decision", "from" = "BACKOFF", "to" = "BACKOFF", "rule" = "step/BACKOFF/Overloaded/continued", "actions" = [] }]
+
+[[case]]
+id = "log.poll.deadline.100"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "Overloaded", "fingerprint" = "a", "state" = "BACKOFF" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "BACKOFF", "to" = "RECOVERY_SENT", "rule" = "step/BACKOFF/Overloaded/continued", "actions" = ["send"] }]
+
+[[case]]
+id = "log.poll.deadline.100-001"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100.001, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "observation", "class" = "Overloaded", "fingerprint" = "a", "state" = "BACKOFF" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "BACKOFF", "to" = "RECOVERY_SENT", "rule" = "step/BACKOFF/Overloaded/continued", "actions" = ["send"] }]
+
+[[case]]
+id = "log.poll.confirmation-schedules-one-notice"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "CONFIRM_IDLE", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "observation", "class" = "Overloaded", "fingerprint" = "a", "state" = "CONFIRM_IDLE" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "decision", "from" = "CONFIRM_IDLE", "to" = "BACKOFF", "rule" = "step/CONFIRM_IDLE/Overloaded/continued", "actions" = ["wait", "notify"] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "notify", "level" = "info", "message" = "retry attempt 1 in 30.0 s" }]
+
+[[case]]
+id = "log.poll.verify-fresh-schedules-notice"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "b", "incident_fingerprint" = "a", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "observation", "class" = "Overloaded", "fingerprint" = "b", "state" = "VERIFY" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "VERIFY", "to" = "BACKOFF", "rule" = "step/VERIFY/Overloaded/continued", "actions" = ["wait"] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "notify", "level" = "info", "message" = "retry attempt 2 in 60.0 s" }]
+
+[[case]]
+id = "log.poll.verify-third-attempt-has-no-notice"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "b", "incident_fingerprint" = "a", "handled" = ["a", "old"], "attempt" = 2, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "Overloaded", "fingerprint" = "b", "state" = "VERIFY" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "VERIFY", "to" = "BACKOFF", "rule" = "step/VERIFY/Overloaded/continued", "actions" = ["wait"] }]
+
+[[case]]
+id = "log.poll.terminal.usagelimit"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "UsageLimit", "fingerprint" = "usagelimit", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "observation", "class" = "UsageLimit", "fingerprint" = "usagelimit", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "decision", "from" = "MONITORING", "to" = "ESCALATE", "rule" = "step/MONITORING/UsageLimit/escalated", "actions" = ["notify"] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "notify", "level" = "error", "message" = "requires attention: UsageLimit" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "result", "outcome" = "escalated" }]
+
+[[case]]
+id = "log.poll.terminal.autherror"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "AuthError", "fingerprint" = "autherror", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "AuthError", "fingerprint" = "autherror", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "ESCALATE", "rule" = "step/MONITORING/AuthError/escalated", "actions" = ["notify"] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "notify", "level" = "error", "message" = "requires attention: AuthError" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "escalated" }]
+
+[[case]]
+id = "log.poll.terminal.contextexhausted"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "ContextExhausted", "fingerprint" = "contextexhausted", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "observation", "class" = "ContextExhausted", "fingerprint" = "contextexhausted", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "MONITORING", "to" = "ESCALATE", "rule" = "step/MONITORING/ContextExhausted/escalated", "actions" = ["notify"] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "notify", "level" = "error", "message" = "requires attention: ContextExhausted" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "result", "outcome" = "escalated" }]
+
+[[case]]
+id = "log.poll.terminal.loginscreen"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "LoginScreen", "fingerprint" = "loginscreen", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "observation", "class" = "LoginScreen", "fingerprint" = "loginscreen", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "ESCALATE", "rule" = "step/MONITORING/LoginScreen/escalated", "actions" = ["notify"] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "notify", "level" = "error", "message" = "requires attention: LoginScreen" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "claude", "kind" = "result", "outcome" = "escalated" }]
+
+[[case]]
+id = "log.poll.terminal.exited"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "MONITORING", "screen" = "Exited", "fingerprint" = "", "incident_fingerprint" = "", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "observation", "class" = "Exited", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "MONITORING", "to" = "ESCALATE", "rule" = "step/MONITORING/Exited/escalated", "actions" = ["notify"] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "notify", "level" = "error", "message" = "requires attention: Exited" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "result", "outcome" = "escalated" }]
+
+[[case]]
+id = "log.poll.verify-unchanged-no-ack"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "Overloaded", "fingerprint" = "a", "incident_fingerprint" = "a", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "Overloaded", "fingerprint" = "a", "state" = "VERIFY" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "VERIFY", "to" = "ESCALATE", "rule" = "step/VERIFY/Overloaded/not-acknowledged", "actions" = ["notify"] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "notify", "level" = "error", "message" = "recovery text was not acknowledged" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "not-acknowledged" }]
+
+[[case]]
+id = "log.poll.verify-recovered.working"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "Working", "fingerprint" = "", "incident_fingerprint" = "a", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "changed" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "observation", "class" = "Working", "fingerprint" = "", "state" = "VERIFY" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "decision", "from" = "VERIFY", "to" = "MONITORING", "rule" = "step/VERIFY/Working/recovered", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "result", "outcome" = "recovered" }]
+
+[[case]]
+id = "log.poll.verify-recovered.idleprompt"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "VERIFY", "screen" = "IdlePrompt", "fingerprint" = "", "incident_fingerprint" = "a", "handled" = ["a", "old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "changed" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "VERIFY" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "VERIFY", "to" = "MONITORING", "rule" = "step/VERIFY/IdlePrompt/recovered", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "recovered" }]
+
+[[case]]
+id = "log.poll.blocked-incident-ends"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "poll", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "poll" = { "subject" = "poll-step", "watched" = true, "paused" = false, "revision" = 3, "previous_revision" = 3, "observed" = true, "now" = 100, "initial" = 30, "maximum" = 900, "multiplier" = 2, "jitter" = 0, "state" = "BACKOFF", "screen" = "PartialInput", "fingerprint" = "", "incident_fingerprint" = "a", "handled" = ["old"], "attempt" = 1, "deadline" = 100, "seed" = 1, "text" = "sent" } }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "observation", "class" = "PartialInput", "fingerprint" = "", "state" = "BACKOFF" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "decision", "from" = "BACKOFF", "to" = "MONITORING", "rule" = "step/BACKOFF/PartialInput/ended", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.attempt.claude.sent"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "attempt", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "family" = "Linux", "observation" = { "screen" = "Overloaded", "fingerprint" = "error-a", "text" = "private composer text must not be logged" }, "outcome" = "sent" }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "attempt", "recovery_text" = "Continue the interrupted task from the last completed step.", "pre_send_class" = "Overloaded", "pre_send_fingerprint" = "error-a", "outcome" = "sent" }]
+
+[[case]]
+id = "log.attempt.claude.aborted"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "attempt", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "family" = "Linux", "observation" = { "screen" = "PartialInput", "fingerprint" = "error-a", "text" = "private composer text must not be logged" }, "outcome" = "aborted" }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "attempt", "recovery_text" = "Continue the interrupted task from the last completed step.", "pre_send_class" = "PartialInput", "pre_send_fingerprint" = "error-a", "outcome" = "aborted" }]
+
+[[case]]
+id = "log.attempt.claude.failed"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "attempt", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "family" = "Linux", "observation" = { "screen" = "Overloaded", "fingerprint" = "error-a", "text" = "private composer text must not be logged" }, "outcome" = "failed" }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "attempt", "recovery_text" = "Continue the interrupted task from the last completed step.", "pre_send_class" = "Overloaded", "pre_send_fingerprint" = "error-a", "outcome" = "failed" }]
+
+[[case]]
+id = "log.attempt.codex.sent"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "attempt", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "family" = "Linux", "observation" = { "screen" = "Overloaded", "fingerprint" = "error-a", "text" = "private composer text must not be logged" }, "outcome" = "sent" }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "attempt", "recovery_text" = "Continue the interrupted task from the last saved checkpoint.", "pre_send_class" = "Overloaded", "pre_send_fingerprint" = "error-a", "outcome" = "sent" }]
+
+[[case]]
+id = "log.attempt.codex.aborted"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "attempt", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "family" = "Linux", "observation" = { "screen" = "PartialInput", "fingerprint" = "error-a", "text" = "private composer text must not be logged" }, "outcome" = "aborted" }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "attempt", "recovery_text" = "Continue the interrupted task from the last saved checkpoint.", "pre_send_class" = "PartialInput", "pre_send_fingerprint" = "error-a", "outcome" = "aborted" }]
+
+[[case]]
+id = "log.attempt.codex.failed"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "attempt", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex" }, "family" = "Linux", "observation" = { "screen" = "Overloaded", "fingerprint" = "error-a", "text" = "private composer text must not be logged" }, "outcome" = "failed" }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-codex", "agent" = "codex", "kind" = "attempt", "recovery_text" = "Continue the interrupted task from the last saved checkpoint.", "pre_send_class" = "Overloaded", "pre_send_fingerprint" = "error-a", "outcome" = "failed" }]
+
+[[case]]
+id = "log.result.recovered"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "result", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "outcome" = "recovered" }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "recovered" }]
+
+[[case]]
+id = "log.result.ended"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "result", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "outcome" = "ended" }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "ended" }]
+
+[[case]]
+id = "log.result.not-acknowledged"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "result", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "outcome" = "not-acknowledged" }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "not-acknowledged" }]
+
+[[case]]
+id = "log.result.unresolved"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "result", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "outcome" = "unresolved" }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "unresolved" }]
+
+[[case]]
+id = "log.result.escalated"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "result", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude" }, "outcome" = "escalated" }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "escalated" }]
+
+[[case]]
+id = "log.notify.unknown-disappeared"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "record-function", "event" = "notify", "context" = { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "old-session", "agent" = "unknown" }, "level" = "warning", "message" = "watched target disappeared" }
+expected = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "old-session", "agent" = "unknown", "kind" = "notify", "level" = "warning", "message" = "watched target disappeared" }]
+
+[[case]]
+id = "log.selection.exact-managed"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-selection", "target" = "api-claude", "records" = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-b", "target" = "api-claude-extra", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-b", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "recovered" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "old-session", "agent" = "unknown", "kind" = "notify", "level" = "warning", "message" = "watched target disappeared" }] }
+expected = { "records" = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-b", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "recovered" }], "exit" = 0, "message" = "" }
+
+[[case]]
+id = "log.selection.exact-adopted"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-selection", "target" = "%3", "records" = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-b", "target" = "api-claude-extra", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-b", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "recovered" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "old-session", "agent" = "unknown", "kind" = "notify", "level" = "warning", "message" = "watched target disappeared" }] }
+expected = { "records" = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }], "exit" = 0, "message" = "" }
+
+[[case]]
+id = "log.selection.unknown-disappearance"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-selection", "target" = "old-session", "records" = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-b", "target" = "api-claude-extra", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-b", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "recovered" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "old-session", "agent" = "unknown", "kind" = "notify", "level" = "warning", "message" = "watched target disappeared" }] }
+expected = { "records" = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "old-session", "agent" = "unknown", "kind" = "notify", "level" = "warning", "message" = "watched target disappeared" }], "exit" = 0, "message" = "" }
+
+[[case]]
+id = "log.selection.prefix-refused"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-selection", "target" = "api", "records" = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-b", "target" = "api-claude-extra", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-b", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "recovered" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "old-session", "agent" = "unknown", "kind" = "notify", "level" = "warning", "message" = "watched target disappeared" }] }
+expected = { "records" = [], "exit" = 1, "message" = "agentctl: no supervisor records for api." }
+
+[[case]]
+id = "log.selection.empty"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-selection", "target" = "api-claude", "records" = [] }
+expected = { "records" = [], "exit" = 1, "message" = "agentctl: no supervisor records for api-claude." }
+
+[[case]]
+id = "log.selection.missing"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-selection", "target" = "absent", "records" = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-b", "target" = "api-claude-extra", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "%3", "agent" = "codex", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-b", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "recovered" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "old-session", "agent" = "unknown", "kind" = "notify", "level" = "warning", "message" = "watched target disappeared" }] }
+expected = { "records" = [], "exit" = 1, "message" = "agentctl: no supervisor records for absent." }
+
+[[case]]
+id = "log.decoding.empty"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "", "writer_active" = false }
+expected = { "records" = [], "error" = "" }
+
+[[case]]
+id = "log.decoding.all-kinds"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"observation\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"MONITORING\"}\n{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"decision\",\"from\":\"MONITORING\",\"to\":\"MONITORING\",\"rule\":\"baseline\",\"actions\":[]}\n{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"attempt\",\"recovery_text\":\"Continue the interrupted task from the last completed step.\",\"pre_send_class\":\"Overloaded\",\"pre_send_fingerprint\":\"a\",\"outcome\":\"sent\"}\n{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"result\",\"outcome\":\"recovered\"}\n{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"notify\",\"level\":\"info\",\"message\":\"retry attempt 1 in 30.0 s\"}\n", "writer_active" = false }
+expected = { "records" = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "attempt", "recovery_text" = "Continue the interrupted task from the last completed step.", "pre_send_class" = "Overloaded", "pre_send_fingerprint" = "a", "outcome" = "sent" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "recovered" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "notify", "level" = "info", "message" = "retry attempt 1 in 30.0 s" }], "error" = "" }
+
+[[case]]
+id = "log.decoding.crlf"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"observation\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"MONITORING\"}\r\n{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"decision\",\"from\":\"MONITORING\",\"to\":\"MONITORING\",\"rule\":\"baseline\",\"actions\":[]}\r\n{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"attempt\",\"recovery_text\":\"Continue the interrupted task from the last completed step.\",\"pre_send_class\":\"Overloaded\",\"pre_send_fingerprint\":\"a\",\"outcome\":\"sent\"}\r\n{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"result\",\"outcome\":\"recovered\"}\r\n{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"notify\",\"level\":\"info\",\"message\":\"retry attempt 1 in 30.0 s\"}\r\n", "writer_active" = false }
+expected = { "records" = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "decision", "from" = "MONITORING", "to" = "MONITORING", "rule" = "baseline", "actions" = [] }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "attempt", "recovery_text" = "Continue the interrupted task from the last completed step.", "pre_send_class" = "Overloaded", "pre_send_fingerprint" = "a", "outcome" = "sent" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "result", "outcome" = "recovered" }, { "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "notify", "level" = "info", "message" = "retry attempt 1 in 30.0 s" }], "error" = "" }
+
+[[case]]
+id = "log.decoding.unknown-notify"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"old-session\",\"agent\":\"unknown\",\"kind\":\"notify\",\"level\":\"warning\",\"message\":\"watched target disappeared\"}\n", "writer_active" = false }
+expected = { "records" = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "old-session", "agent" = "unknown", "kind" = "notify", "level" = "warning", "message" = "watched target disappeared" }], "error" = "" }
+
+[[case]]
+id = "log.decoding.inflight-tail"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"observation\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"MONITORING\"}\n{\"time\":", "writer_active" = true }
+expected = { "records" = [{ "time" = "2026-11-04T00:00:00Z", "run" = "run-a", "target" = "api-claude", "agent" = "claude", "kind" = "observation", "class" = "IdlePrompt", "fingerprint" = "", "state" = "MONITORING" }], "error" = "" }
+
+[[case]]
+id = "log.decoding.stopped-tail"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"observation\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"MONITORING\"}\n{\"time\":", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.blank-complete-line"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"observation\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"MONITORING\"}\n\n", "writer_active" = true }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.bad-complete-line"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"observation\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"MONITORING\"}\nbroken\n", "writer_active" = true }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.bad-kind"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"other\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"MONITORING\"}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.extra-field"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"observation\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"MONITORING\",\"extra\":true}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.missing-field"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"observation\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"MONITORING\"}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.bad-time"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"yesterday\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"observation\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"MONITORING\"}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.empty-run"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"observation\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"MONITORING\"}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.bad-screen"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"observation\",\"class\":\"Typo\",\"fingerprint\":\"\",\"state\":\"MONITORING\"}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.bad-state"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"observation\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"Typo\"}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.bad-level"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"notify\",\"level\":\"loud\",\"message\":\"retry attempt 1 in 30.0 s\"}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.bad-attempt"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"attempt\",\"recovery_text\":\"Continue the interrupted task from the last completed step.\",\"pre_send_class\":\"Overloaded\",\"pre_send_fingerprint\":\"a\",\"outcome\":\"retried\"}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.bad-result"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"result\",\"outcome\":\"maybe\"}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.unknown-agent-observation"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"unknown\",\"kind\":\"observation\",\"class\":\"IdlePrompt\",\"fingerprint\":\"\",\"state\":\"MONITORING\"}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.bad-agent"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"another-agent\",\"kind\":\"notify\",\"level\":\"info\",\"message\":\"retry attempt 1 in 30.0 s\"}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.bad-actions"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "{\"time\":\"2026-11-04T00:00:00Z\",\"run\":\"run-a\",\"target\":\"api-claude\",\"agent\":\"claude\",\"kind\":\"decision\",\"from\":\"MONITORING\",\"to\":\"MONITORING\",\"rule\":\"baseline\",\"actions\":[\"restart\"]}\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }
+
+[[case]]
+id = "log.decoding.non-object"
+requirement = "R18.5"
+quote = "Log each observation, decision, attempt, and result"
+provenance = "decision:D-74"
+input = { "subject" = "log-decoding", "text" = "[\"record\"]\n", "writer_active" = false }
+expected = { "records" = [], "error" = "invalid decision log" }

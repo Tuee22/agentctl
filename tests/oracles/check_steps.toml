@@ -1,0 +1,7 @@
+[[case]]
+id = "steps.complete-order"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "decision:D-33"
+input = { "subject" = "check-step-order" }
+expected = ["preconditions", "write-guard-snapshot", "validators", "ruff-check", "ruff-format", "ty", "toolchain-ensure", "fourmolu", "hlint", "cabal-build", "binary-identity", "cabal-test", "pytest", "post-run-verifier", "ratchet", "containment", "write-guard-compare", "lane-summary"]

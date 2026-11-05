@@ -1,0 +1,65 @@
+[[mutant]]
+id = "M-boot-reinstall-present"
+operator = "short-circuit"
+target = "src/agentctl/bootstrap/plan.py"
+search = "if facts.ghc is not None and facts.cabal is not None:"
+replace = "if False:"
+killers = ["tests/unit/test_plan.py::test_plan_oracle", "tests/unit/test_plan.py::test_fully_provisioned_plan_is_empty"]
+reason = "bootstrap plan differs"
+
+[[mutant]]
+id = "M-boot-replace-old-ghcup"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/plan.py"
+search = "return Err(Refusal(\"ghcup-below-floor\", \"ghcup upgrade\"))"
+replace = "return Ok((DownloadGhcup(asset, facts.ghcup_destination),))"
+killers = ["tests/unit/test_plan.py::test_plan_oracle"]
+reason = "bootstrap plan differs"
+
+[[mutant]]
+id = "M-boot-cabal-without-no-set"
+operator = "delete"
+target = "src/agentctl/bootstrap/plan.py"
+search = "(\"install\", \"cabal\", pins.cabal.text, \"--no-set\")"
+replace = "(\"install\", \"cabal\", pins.cabal.text)"
+killers = ["tests/unit/test_plan.py::test_plan_never_sets_default"]
+reason = "cabal install changes the default"
+
+[[mutant]]
+id = "M-boot-ghcup-prefix-ignored"
+operator = "short-circuit"
+target = "src/agentctl/hostfacts.py"
+search = "if explicit and destination.is_file():"
+replace = "if False:"
+killers = ["tests/unit/test_hostfacts.py::test_ghcup_discovery_order"]
+reason = "ghcup prefix was ignored"
+
+[[mutant]]
+id = "M-boot-windows-arm64-allowed"
+operator = "short-circuit"
+target = "src/agentctl/check/preconditions.py"
+search = "if asset_for(pins, facts.family, facts.architecture) is None:"
+replace = "if False:"
+killers = ["tests/unit/test_preconditions.py::test_toolchain_preconditions"]
+reason = "toolchain preconditions differ"
+
+[[mutant]]
+id = "M-pins-digest-swapped"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/pins.toml"
+search = '''sha256 = "9ed5da5449b48043a0d17e767c05d2ef585e25a639bb934329496c6d2fad9cf8"
+
+[[asset]]
+family = "Linux"
+architecture = "aarch64"
+url = "https://downloads.haskell.org/~ghcup/0.2.6.2/aarch64-linux-ghcup-0.2.6.2"
+sha256 = "65a5f05120288ee4f1a81d28825374b6af317456a351a586adfce90c6dc29e3b"'''
+replace = '''sha256 = "65a5f05120288ee4f1a81d28825374b6af317456a351a586adfce90c6dc29e3b"
+
+[[asset]]
+family = "Linux"
+architecture = "aarch64"
+url = "https://downloads.haskell.org/~ghcup/0.2.6.2/aarch64-linux-ghcup-0.2.6.2"
+sha256 = "9ed5da5449b48043a0d17e767c05d2ef585e25a639bb934329496c6d2fad9cf8"'''
+killers = ["tests/unit/test_ghcup.py::test_pins_match_oracle"]
+reason = "package pins differ"

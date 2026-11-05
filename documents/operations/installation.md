@@ -73,12 +73,15 @@ provisions the toolchain and builds the binary before it runs:
 
 1. **Platform.** agentctl reads the OS, the architecture and the package manager, and stops with a warning on a platform
    outside the table above.
-2. **OS prerequisites.** On Linux and macOS it probes what GHC needs: a C compiler and linker, the GMP library
-   (`-lgmp`), curl or wget, CA certificates and make. When one is missing, it shows the packages and the exact command
-   and asks whether to run it. On yes it runs the verified apt or dnf package set through sudo; an unverified Linux
+2. **OS prerequisites.** On Linux it probes the C compiler and linker, GMP (`-lgmp`), curl or wget, CA certificates
+   and make; on macOS it probes the Command Line Tools with `xcode-select -p`. When one is missing at a terminal,
+   it shows the exact commands and asks once. Only `y` or `yes`, ignoring case and surrounding whitespace, consents.
+   On yes it runs the verified apt or dnf package set through sudo; an unverified Linux
    distribution gets the failed probes and manual remedy instead of an automatic install. On macOS it runs
    `xcode-select --install`, whose dialog you complete before running agentctl again. On no it installs nothing and
    stops with the command for you to type.
+   A non-interactive run needs `--assume-yes`, which uses root or `sudo -n` on Linux. Check requires existing macOS
+   Command Line Tools and never opens their installer dialog.
 3. **ghcup.** An existing ghcup at version 0.1.50.2 or later is used as it is, never replaced or upgraded. An older or
    non-answering ghcup produces a warning asking you to repair it; agentctl never replaces it. Only when ghcup is absent,
    agentctl downloads ghcup 0.2.6.2 from `downloads.haskell.org` and checks it against the SHA-256 published beside it;

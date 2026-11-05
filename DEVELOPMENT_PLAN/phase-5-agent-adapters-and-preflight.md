@@ -1,6 +1,6 @@
 # Phase 5 — Agent adapters and preflight
 
-**Status**: Planned
+**Status**: Done
 **Depends on**: [Phase 4 — Multiplexer adapter](phase-4-multiplexer-adapter.md)
 **Host lane**: agent-host
 **Gate**: `agentctl check`
@@ -39,11 +39,12 @@ changes what these tests assert, and no test reads or writes a credential.
 
 | Requirement | Oracle | Observer | Mutants | Tests |
 |---|---|---|---|---|
-| R13 — a logged-out agent yields a warning naming the discrete login command, and agentctl never runs a login or forwards login-shaped ARGS | `tests/oracles/auth_status.toml` | value: agentctl-core-eval classifyAuth, remedy and login-refusal cases; real: logged-out claude and codex with isolated config dirs; observer: fake agent invocation record with nonce, holding the auth-status probe and no login invocation; owed: macos-acceptance | `M-auth-exit2-as-logged-out`, `M-auth-remedy-wrong-command`, `M-auth-pass-setup-token` | `tests/unit/test_auth_status.py::test_classify_auth_matches_oracle`, `tests/unit/test_auth_status.py::test_remedy_names_the_command_to_type`, `tests/unit/test_auth_status.py::test_login_shaped_args_refused`, `tests/integration/test_agent_real.py::test_logged_out_by_construction`, `tests/integration/test_agent_auth_probe.py::test_preflight_never_runs_login` |
-| R12.2 — the agent CLI is resolved and its login checked before any session exists | `tests/oracles/preflight.toml` | value: agentctl-core-eval preflight decision, warning and agent-resolution cases; real: constructed PATH without the agent, compile-fail fixture with its compiling twin; observer: fake agent records no invocation while the multiplexer is missing; owed: windows-psmux-acceptance | `M-preflight-auth-before-mux`, `M-preflight-export-ready-constructor`, `M-preflight-accept-cmd-shim` | `tests/unit/test_preflight.py::test_failure_warnings_match_oracle`, `tests/unit/test_agent_resolution.py::test_resolution_matches_oracle`, `tests/integration/test_preflight.py::test_order_mux_then_agent_then_auth`, `tests/integration/test_preflight.py::test_missing_agent_names_install_hint`, `tests/integration/test_ready_opaque.py::test_ready_constructor_is_not_exported` |
+| R13 — a logged-out agent yields a warning naming the discrete login command, and agentctl never runs a login or forwards login-shaped ARGS | `tests/oracles/auth_status.toml` | value: agentctl-core-eval classifyAuth, remedy and login-refusal cases; real: logged-out claude and codex with isolated config dirs; observer: fake agent invocation record with nonce, holding the auth-status probe and no login invocation; owed: macos-acceptance | `M-auth-exit2-as-logged-out`, `M-auth-remedy-wrong-command`, `M-auth-pass-setup-token`, `M-auth-timeout-as-logged-in`, `M-auth-probe-drops-env` | `tests/unit/test_auth_status.py::test_classify_auth_matches_oracle`, `tests/unit/test_auth_status.py::test_remedy_names_the_command_to_type`, `tests/unit/test_auth_status.py::test_login_shaped_args_refused`, `tests/integration/test_agent_real.py::test_logged_out_by_construction`, `tests/integration/test_agent_auth_probe.py::test_preflight_never_runs_login`, `tests/integration/test_agent_auth_probe.py::test_probe_sees_caller_environment`, `haskell:agentctl-core-test/ProcessReal/status-only-ignores-bytes` |
+| R12.2 — the agent CLI is resolved and its login checked before any session exists | `tests/oracles/preflight.toml` | value: agentctl-core-eval preflight decision, warning and agent-resolution cases; real: constructed PATH without the agent, compile-fail fixture with its compiling twin; observer: fake agent records no invocation while the multiplexer is missing; owed: windows-psmux-acceptance | `M-preflight-auth-before-mux`, `M-preflight-export-ready-constructor`, `M-preflight-accept-cmd-shim`, `M-preflight-skip-auth`, `M-preflight-relative-agent-path`, `M-preflight-allow-logged-out` | `tests/unit/test_preflight.py::test_failure_warnings_match_oracle`, `tests/unit/test_agent_resolution.py::test_resolution_matches_oracle`, `tests/integration/test_preflight.py::test_order_mux_then_agent_then_auth`, `tests/integration/test_preflight.py::test_missing_agent_names_install_hint`, `tests/integration/test_ready_opaque.py::test_ready_constructor_is_not_exported`, `tests/integration/test_preflight.py::test_agents_host_observes_native_tools` |
 | R10 — the claude argv ends with `--dangerously-skip-permissions`, placed before a first bare `--` | `tests/oracles/launch_argv.toml` | value: agentctl-core-eval launchArgv cases; real: claude `--help` canary with a nonce-named negative control | `M-argv-flags-after-dashdash`, `M-argv-misspell-skip-permissions` | `tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle`, `tests/integration/test_agent_real.py::test_help_canaries_list_mandatory_flags` |
 | R11 — the codex argv ends with `--dangerously-bypass-approvals-and-sandbox --no-daemon`, placed before a first bare `--` | `tests/oracles/launch_argv.toml` | value: agentctl-core-eval launchArgv cases and the codex table row; real: codex `--help` canaries with a nonce-named negative control | `M-argv-keep-yolo`, `M-argv-drop-no-daemon` | `tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle`, `tests/unit/test_agent_table.py::test_agent_table_matches_oracle`, `tests/integration/test_agent_real.py::test_help_canaries_list_mandatory_flags` |
 | R9 — ARGS pass through verbatim apart from removed copies of the mandatory flags | `tests/oracles/launch_argv.toml` | value: agentctl-core-eval launchArgv cases and an order-preservation property | `M-argv-dedupe-past-dashdash`, `M-argv-keep-yolo` | `tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle`, `haskell:agentctl-core-test/Argv/user-order-and-single-flags` |
+| R18 — each agent has one literal plain recovery line (contributing) | `tests/oracles/launch_argv.toml` | value: independent agent-table rows and native plain-text controls | `M-argv-recovery-slash-command` | `tests/unit/test_agent_table.py::test_agent_table_matches_oracle`, `haskell:agentctl-core-test/Agent/recovery-text-is-plain` |
 
 ## Not Proven By This Gate
 
@@ -52,14 +53,14 @@ changes what these tests assert, and no test reads or writes a credential.
 - Native `.exe` resolution through a real Windows PATH and PATHEXT, and the refusal of a real npm `.cmd` shim. — owed to [Phase 14 — Windows and psmux acceptance](phase-14-windows-psmux-acceptance.md).
 - Whether `claude auth status` exits 0 for an `ANTHROPIC_API_KEY` the user has not yet approved, or for an `apiKeyHelper` it does not run. — not proven by any phase.
 - Exit-code semantics and mandatory flags at agent versions other than the one the run observes. — not proven by any phase.
-- Tamper resistance is bounded by [§ P](development_plan_standards.md#p-the-ratchet-and-the-users-commit-points): it holds against a HEAD the user has committed. — not proven by any phase.
+- Tamper resistance extends only to data already present in the available HEAD baseline ([§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure)); uncommitted inputs have no historical protection. — not proven by any phase.
 
 ## Sprints
 
-### Sprint 5.1: Agent table and launch argv [Planned]
+### Sprint 5.1: Agent table and launch argv [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Agent.hs`, `src/agentctl/haskell/src/AgentCtl/Agent/Argv.hs`, `src/agentctl/haskell/app/`, `src/agentctl/haskell/test/`, `tests/unit/test_launch_argv.py`, `tests/unit/test_agent_table.py`
+**Status**: Done
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Agent.hs`, `src/agentctl/haskell/src/AgentCtl/Agent/Argv.hs`, `src/agentctl/haskell/app/`, `src/agentctl/haskell/test/`, `tests/unit/test_launch_argv.py`, `tests/unit/test_agent_table.py`, `tests/harness/evaluate.py`, `tests/support.txt`, `tests/mutants/argv.toml`, `tests/oracles/launch_argv.toml`, `src/agentctl/haskell/agentctl-core.cabal`
 **Validation tests**: `tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle`, `tests/unit/test_agent_table.py::test_agent_table_matches_oracle`, `haskell:agentctl-core-test/Argv/user-order-and-single-flags`, `haskell:agentctl-core-test/Agent/recovery-text-is-plain`
 **Mutants**: `M-argv-flags-after-dashdash`, `M-argv-keep-yolo`, `M-argv-dedupe-past-dashdash`, `M-argv-drop-no-daemon`, `M-argv-misspell-skip-permissions`, `M-argv-recovery-slash-command`
 **Closes**: none
@@ -106,13 +107,13 @@ Make each agent a closed table entry and its final argv a pure function of the u
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 5.2: Auth classification, remedies and login refusals [Planned]
+### Sprint 5.2: Auth classification, remedies and login refusals [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Agent/Auth.hs`, `src/agentctl/haskell/src/AgentCtl/Agent/Argv.hs`, `tests/unit/test_auth_status.py`, `tests/integration/test_agent_real.py`, `tests/integration/test_agent_auth_probe.py`
-**Validation tests**: `tests/unit/test_auth_status.py::test_classify_auth_matches_oracle`, `tests/unit/test_auth_status.py::test_remedy_names_the_command_to_type`, `tests/unit/test_auth_status.py::test_login_shaped_args_refused`, `tests/integration/test_agent_real.py::test_logged_out_by_construction`, `tests/integration/test_agent_real.py::test_help_canaries_list_mandatory_flags`, `tests/integration/test_agent_auth_probe.py::test_preflight_never_runs_login`, `tests/integration/test_agent_auth_probe.py::test_probe_sees_caller_environment`
+**Status**: Done
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Agent/Auth.hs`, `src/agentctl/haskell/src/AgentCtl/Agent/Argv.hs`, `tests/unit/test_auth_status.py`, `tests/integration/test_agent_real.py`, `tests/integration/test_agent_auth_probe.py`, `tests/harness/agents.py`, `tests/support.txt`, `tests/oracles/auth_status.toml`, `tests/mutants/auth.toml`, `src/agentctl/haskell/src/AgentCtl/Process.hs`, `src/agentctl/haskell/test/AgentFixture.hs`, `src/agentctl/haskell/test/MuxTests.hs`, `src/agentctl/haskell/test/Main.hs`, `src/agentctl/haskell/app/`, `src/agentctl/haskell/agentctl-core.cabal`
+**Validation tests**: `tests/unit/test_auth_status.py::test_classify_auth_matches_oracle`, `tests/unit/test_auth_status.py::test_remedy_names_the_command_to_type`, `tests/unit/test_auth_status.py::test_login_shaped_args_refused`, `tests/integration/test_agent_real.py::test_logged_out_by_construction`, `tests/integration/test_agent_real.py::test_help_canaries_list_mandatory_flags`, `tests/integration/test_agent_auth_probe.py::test_preflight_never_runs_login`, `tests/integration/test_agent_auth_probe.py::test_probe_sees_caller_environment`, `haskell:agentctl-core-test/ProcessReal/status-only-ignores-bytes`
 **Mutants**: `M-auth-exit2-as-logged-out`, `M-auth-timeout-as-logged-in`, `M-auth-remedy-wrong-command`, `M-auth-pass-setup-token`, `M-auth-probe-drops-env`
 **Closes**: R13
 **Docs to update**: `documents/architecture/launch_contract.md`, `documents/operations/troubleshooting.md`, `documents/engineering/testing.md`
@@ -124,6 +125,7 @@ shape that would make agentctl log in.
 
 #### Deliverables
 
+- `checkedArgv` wraps the pure `launchArgv` kernel and refuses login shapes before a caller performs preflight.
 - `classifyAuth` maps the auth probe's result: exit 0 is logged in, exit 1 is logged out, and any
   other exit, a signal or no exit within the probe timeout is `check failed`. Output is never read:
   claude prints JSON on stdout and codex writes only to stderr, in wording that changes between
@@ -131,14 +133,14 @@ shape that would make agentctl log in.
 - The probe runs the agent's auth-status argv through `AgentCtl.Process`, by the resolved absolute
   path, with the timeout and with the caller's environment, which is the environment the pane
   trampoline gives the agent; the probe and the agent therefore read the same `CLAUDE_CONFIG_DIR`
-  and `CODEX_HOME`.
+  and `CODEX_HOME`. Output streams are drained as bytes without decoding or classification.
 - Logged out renders a warning naming the agent's remedy command for the user to type. `check failed`
   renders a distinct warning naming the probe and its exit status, never a login command, so a usage
   error or a hung probe never tells a logged-in user to log in again.
 - The probe vocabulary holds the auth-status probe and nothing else: no module constructs a login
   command or login keystrokes, which gives `src.no-login-construction` (Sprint 1.4) its first
   product subject.
-- `launchArgv` refuses login-shaped ARGS before preflight: for claude, an element `setup-token`, or
+  `checkedArgv` refuses login-shaped ARGS before preflight: for claude, an element `setup-token`, or
   `auth` followed by `login`, before the first bare `--`, and anywhere an element that is `/login` or
   begins with `/login` and whitespace; for codex, an element `login` before the first bare `--`. With
   no flag table the subcommand's position is unknown, so the shape is refused anywhere before the
@@ -162,16 +164,20 @@ shape that would make agentctl log in.
 6. With the fake agent installed as `claude` and as `codex` and scripted to exit 1, a preflight records exactly one auth-status invocation carrying the run's nonce (the positive control) and no login invocation and no interactive start — `tests/integration/test_agent_auth_probe.py::test_preflight_never_runs_login`; fails when a remedy is executed instead of printed; mutant `M-auth-remedy-wrong-command`.
 7. The fake agent's record of the probe holds the `CLAUDE_CONFIG_DIR` and `CODEX_HOME` keys the caller set — `tests/integration/test_agent_auth_probe.py::test_probe_sees_caller_environment`; fails when the probe drops the caller's environment; mutant `M-auth-probe-drops-env`.
 
+8. Invalid UTF-8 on either output stream preserves actual exits 0, 1 and 2 in the status-only runner, while a timeout
+   and missing executable remain failures — `haskell:agentctl-core-test/ProcessReal/status-only-ignores-bytes`;
+   fails when auth depends on output text; no mutant: native byte and lifecycle controls.
+
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 5.3: Preflight and the opaque Ready [Planned]
+### Sprint 5.3: Preflight and the opaque Ready [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Preflight.hs`, `src/agentctl/haskell/src/AgentCtl/Agent.hs`, `tests/unit/test_preflight.py`, `tests/unit/test_agent_resolution.py`, `tests/integration/test_preflight.py`, `tests/integration/test_ready_opaque.py`, `tests/fixtures/static_negative/ready_constructed.hs.txt`, `tests/fixtures/static_negative/ready_from_preflight.hs.txt`
-**Validation tests**: `tests/unit/test_preflight.py::test_failure_warnings_match_oracle`, `tests/unit/test_agent_resolution.py::test_resolution_matches_oracle`, `tests/integration/test_preflight.py::test_order_mux_then_agent_then_auth`, `tests/integration/test_preflight.py::test_missing_agent_names_install_hint`, `tests/integration/test_ready_opaque.py::test_ready_constructor_is_not_exported`
-**Mutants**: `M-preflight-auth-before-mux`, `M-preflight-skip-auth`, `M-preflight-export-ready-constructor`, `M-preflight-accept-cmd-shim`, `M-preflight-relative-agent-path`
+**Status**: Done
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Preflight.hs`, `src/agentctl/haskell/src/AgentCtl/Agent.hs`, `tests/unit/test_preflight.py`, `tests/unit/test_agent_resolution.py`, `tests/integration/test_preflight.py`, `tests/integration/test_ready_opaque.py`, `tests/fixtures/static_negative/ready_constructed.hs.txt`, `tests/fixtures/static_negative/ready_from_preflight.hs.txt`, `tests/harness/host.py`, `tests/harness/agents.py`, `src/agentctl/haskell/test/AgentFixture.hs`, `src/agentctl/haskell/app/Eval.hs`, `src/agentctl/haskell/agentctl-core.cabal`, `tests/oracles/preflight.toml`, `tests/mutants/preflight.toml`, `tests/conftest.py`
+**Validation tests**: `tests/unit/test_preflight.py::test_failure_warnings_match_oracle`, `tests/unit/test_agent_resolution.py::test_resolution_matches_oracle`, `tests/integration/test_preflight.py::test_order_mux_then_agent_then_auth`, `tests/integration/test_preflight.py::test_missing_agent_names_install_hint`, `tests/integration/test_ready_opaque.py::test_ready_constructor_is_not_exported`, `tests/integration/test_preflight.py::test_agents_host_observes_native_tools`
+**Mutants**: `M-preflight-auth-before-mux`, `M-preflight-skip-auth`, `M-preflight-export-ready-constructor`, `M-preflight-accept-cmd-shim`, `M-preflight-relative-agent-path`, `M-preflight-allow-logged-out`
 **Closes**: R12.2
 **Docs to update**: `documents/architecture/launch_contract.md`, `documents/operations/troubleshooting.md`, `documents/engineering/code_standards.md`
 
@@ -183,7 +189,7 @@ Make a passing preflight the only source of the right to launch.
 
 - `AgentCtl.Preflight` checks the multiplexer (the resolution and floor of Sprint 4.1), then the
   agent, then auth (Sprint 5.2), and stops at the first failure; the decision is a pure function of
-  the three observations, and the effectful shell runs each probe only after the previous one passed.
+  the three observations, and a pure closed program orders those requests, and its small I/O interpreter runs each only after the previous one passed.
 - Success is `Ready`, which carries the resolved multiplexer, the agent's absolute path and the auth
   result. Its constructor is not exported, and `AgentCtl.Launch` accepts only a `Ready`.
 - Agent resolution is a pure function of the PATH entries, PATHEXT and directory listings, and yields
@@ -197,25 +203,29 @@ Make a passing preflight the only source of the right to launch.
 - Preflight creates nothing: no session, no spec file and no state, so a failure leaves nothing to
   clean up.
 - A two-sided compile-fail fixture keeps `Ready` opaque: `ready_constructed.hs.txt` constructs
-  `Ready` as an expression outside `AgentCtl.Preflight` and must fail with GHC diagnostic code
+  the private `VerifiedReady` constructor as an expression outside `AgentCtl.Preflight` and must fail with GHC diagnostic code
   `GHC-88464` (data constructor not in scope), and its twin `ready_from_preflight.hs.txt` obtains `Ready` from `preflight` and must
   compile. Both are copied to a temp dir and compiled with the pinned GHC against the built library.
 
 #### Validation
 
-1. Each failure class renders exactly its oracle warning lines and exit status, and a passing decision yields `Ready` — `tests/unit/test_preflight.py::test_failure_warnings_match_oracle`; fails when a logged-out agent reads as ready; mutant `M-preflight-skip-auth`.
+1. Each failure class renders exactly its oracle warning lines and exit status, and a passing decision yields `Ready` — `tests/unit/test_preflight.py::test_failure_warnings_match_oracle`; fails when a logged-out agent reads as ready; mutant `M-preflight-allow-logged-out`.
 2. Resolution equals the `tests/oracles/preflight.toml` rows: the first executable PATH match as an absolute path, PATHEXT order with case-insensitive extensions, `.exe` accepted, `.cmd` and `.bat` refused with the remedy — `tests/unit/test_agent_resolution.py::test_resolution_matches_oracle`; fails when a `.cmd` shim is accepted or a bare name is returned; mutants `M-preflight-accept-cmd-shim`, `M-preflight-relative-agent-path`.
 3. Under a constructed PATH holding no tmux, the fake agent records no invocation; with tmux added to the same PATH, it records exactly one auth-status invocation with the run's nonce (the positive control) — `tests/integration/test_preflight.py::test_order_mux_then_agent_then_auth`; fails when auth is probed before the multiplexer check; mutants `M-preflight-auth-before-mux`, `M-preflight-skip-auth`.
-4. Under a constructed PATH holding tmux but no agent, preflight prints the agent-missing warning with the install hint for the host's OS and exits with the oracle status — `tests/integration/test_preflight.py::test_missing_agent_names_install_hint`; fails when the resolved path is relative and so passes a later check against the wrong file; mutant `M-preflight-relative-agent-path`.
+4. Under a constructed PATH holding tmux but no agent, preflight prints the agent-missing warning with the install hint for the host's OS and exits with the oracle status — `tests/integration/test_preflight.py::test_missing_agent_names_install_hint`; fails when absence is ignored or the wrong OS remedy is printed; no mutant: a native missing/found control pair.
 5. The constructing expression fixture fails with `GHC-88464` and its twin compiles — `tests/integration/test_ready_opaque.py::test_ready_constructor_is_not_exported`; fails when `AgentCtl.Preflight` exports the constructor, and the twin catches a fixture that fails for an unrelated reason; mutant `M-preflight-export-ready-constructor`.
+
+6. The independent agent-host observation records both native versions with the run's nonce and refuses an empty
+   PATH — `tests/integration/test_preflight.py::test_agents_host_observes_native_tools`; fails when an absent CLI
+   qualifies the lane; no mutant: actual versions and filesystem absence are two-sided controls.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
 ## Remaining Work
 
-The whole phase: Sprints 5.1–5.3.
+None.
 
 ## Documentation Requirements
 

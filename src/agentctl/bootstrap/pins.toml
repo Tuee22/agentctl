@@ -1,0 +1,38 @@
+[versions]
+ghc = "9.12.4"
+cabal = "3.16.1.0"
+ghcup = "0.2.6.2"
+ghcup_floor = "0.1.50.2"
+fourmolu = "0.19.0.1"
+hlint = "3.10"
+ghc_lib_parser = "9.12.3.20251228"
+
+[[asset]]
+family = "Linux"
+architecture = "x86_64"
+url = "https://downloads.haskell.org/~ghcup/0.2.6.2/x86_64-linux-ghcup-0.2.6.2"
+sha256 = "9ed5da5449b48043a0d17e767c05d2ef585e25a639bb934329496c6d2fad9cf8"
+
+[[asset]]
+family = "Linux"
+architecture = "aarch64"
+url = "https://downloads.haskell.org/~ghcup/0.2.6.2/aarch64-linux-ghcup-0.2.6.2"
+sha256 = "65a5f05120288ee4f1a81d28825374b6af317456a351a586adfce90c6dc29e3b"
+
+[[asset]]
+family = "Darwin"
+architecture = "x86_64"
+url = "https://downloads.haskell.org/~ghcup/0.2.6.2/x86_64-apple-darwin-ghcup-0.2.6.2"
+sha256 = "e713b9f213d7da01fa4791f39e04e0892b5c5f082d5a38712281f529bab88e56"
+
+[[asset]]
+family = "Darwin"
+architecture = "arm64"
+url = "https://downloads.haskell.org/~ghcup/0.2.6.2/aarch64-apple-darwin-ghcup-0.2.6.2"
+sha256 = "4e521e008fe0813db6db4b91cfeebd0c44c80c68afb458ea32a1c94cf5c7cc1d"
+
+[[asset]]
+family = "Windows"
+architecture = "x86_64"
+url = "https://downloads.haskell.org/~ghcup/0.2.6.2/x86_64-mingw64-ghcup-0.2.6.2.exe"
+sha256 = "94da902a2853b1de1df509d04da900a05258480759efdb4f654e66956b6f30db"

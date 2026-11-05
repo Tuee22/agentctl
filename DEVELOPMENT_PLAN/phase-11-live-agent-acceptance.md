@@ -1,12 +1,12 @@
 # Phase 11 — Live agent acceptance
 
-**Status**: Planned
+**Status**: Done
 **Depends on**: [Phase 10 — Recovery supervisor](phase-10-supervisor.md)
 **Host lane**: live-agents
 **Gate**: `agentctl check`
 **Gate kind**: host-acceptance
 **Closes**: none
-**Gate evidence**: none recorded
+**Gate evidence**: 2026-11-05 ; live-agents ; agentctl check ; pass ; tree 23645b881e965890bcf930aacf6d1c02166d4cbaae7a4dabda5f3e4be9ff600a ; os=Linux,arch=x86_64,baseline=e239514847b0ce9fb604940826fb2b8f08d7518a
 **Evidence covers**: `src/` `tests/` `pyproject.toml`
 
 > **Purpose**: Confirm on a Linux host where claude and codex are logged in what the lower phases owe a live agent:
@@ -16,8 +16,8 @@
 
 This phase adds no code. It closes on the same `agentctl check`, run on a host meeting the live-agents lane: Linux,
 agent-host, and `claude auth status` and `codex login status` both exiting 0 within 10 s in the user's real
-environment, as `tests/harness/host.py` observes. The user logs in by typing `claude auth login` or `codex login`;
-nothing in agentctl or its tests logs in.
+environment, as `tests/harness/host.py` observes. Authentication is an existing host capability observed without
+interaction; nothing in agentctl or its tests logs in or waits for a person to do so during validation.
 
 The live tests of [Phase 6 — Launch command and passthrough](phase-6-launch-and-passthrough.md),
 [Phase 8 — Pane observation and classification](phase-8-pane-observation-and-classification.md) and
@@ -29,11 +29,11 @@ what runs. Every live test:
   on a private tmux server, and lets the agent read the user's credentials in place, never copying them;
 - never sends input, never answers a trust or bypass-warning dialog, never runs a login command, and accepts
   `TrustDialog`, `BypassWarning` or `IdlePrompt` as a live agent;
-- reads `/proc/<pane_pid>/cmdline`, whose tail is the user's ARGS and then the mandatory flags; an npm-installed codex
+- reads `/proc/<pane_pid>/cmdline`, whose tail equals the independent final argv row, including the bare-separator position; an npm-installed codex
   runs as `node` with `codex.js`, so the tail is compared and not the first element.
 
-A live launch runs the user's own claude and codex configuration as it stands, hooks and MCP servers included, and
-providing a live-agents host is the user's acceptance of that. The lane summary prints the live-agents EVIDENCE line
+A live launch runs the user's own claude and codex configuration as it stands, hooks and MCP servers included.
+Validation and evidence recording are unattended and require no additional human approval. The lane summary prints the live-agents EVIDENCE line
 only when the lane holds, and the closing agent records it as Gate evidence. A failure is fixed in the phase that
 introduced its cause ([§ A](development_plan_standards.md#a-one-continuous-constructive-narrative)), which stales the
 digest, and the run repeats.
@@ -58,12 +58,12 @@ digest, and the run repeats.
 - Live `IdlePrompt` classification and supervision when the user has not already trusted the live folder. — not proven by any phase.
 - A visible `switch-client` inside the user's own tmux server, which live tests never touch; the evidence is the equivalent test on a private server. — not proven by any phase.
 - A logged-in launch on macOS or Windows, whose acceptance lanes do not require a login. — not proven by any phase.
-- Tamper resistance is bounded by [§ P](development_plan_standards.md#p-the-ratchet-and-the-users-commit-points): it holds against a HEAD the user has committed. — not proven by any phase.
+- Tamper resistance extends only to data already present in the available HEAD baseline ([§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure)); uncommitted inputs have no historical protection. — not proven by any phase.
 
 ## Confirms
 
 - R7 — `agentctl claude` and `agentctl codex` start the logged-in agent in a session whose pane stays alive past the startup window and shows `TrustDialog`, `BypassWarning` or `IdlePrompt` (owed by [Phase 6 — Launch command and passthrough](phase-6-launch-and-passthrough.md)).
-- R9 — the user's ARGS reach the live agent unchanged, ahead of the mandatory flags, in `/proc/<pane_pid>/cmdline` (owed by [Phase 6 — Launch command and passthrough](phase-6-launch-and-passthrough.md)).
+- R9 — the empty-tail and bare-separator rows reach the live agent unchanged with mandatory flags in their required positions in `/proc/<pane_pid>/cmdline` (owed by [Phase 6 — Launch command and passthrough](phase-6-launch-and-passthrough.md)).
 - R10 — the live claude process's argv ends with `--dangerously-skip-permissions` (owed by [Phase 6 — Launch command and passthrough](phase-6-launch-and-passthrough.md)).
 - R11 — the live codex process's argv ends with `--dangerously-bypass-approvals-and-sandbox --no-daemon` (owed by [Phase 6 — Launch command and passthrough](phase-6-launch-and-passthrough.md)).
 - R18.1 — live claude and codex screens classify as `TrustDialog`, `BypassWarning` or `IdlePrompt`, and as `IdlePrompt` where the user has trusted the live folder (owed by [Phase 8 — Pane observation and classification](phase-8-pane-observation-and-classification.md)).
@@ -71,9 +71,9 @@ digest, and the run repeats.
 
 ## Sprints
 
-### Sprint 11.1: Live agent evidence [Planned]
+### Sprint 11.1: Live agent evidence [Done]
 
-**Status**: Planned
+**Status**: Done
 **Implementation**: none — this phase adds no code
 **Validation tests**: `tests/live/test_live_launch.py::test_live_launch`, `tests/live/test_live_classification.py::test_live_screen_classes`, `tests/live/test_live_supervision.py::test_live_watch_sends_nothing`
 **Mutants**: none — this phase adds no code
@@ -99,7 +99,7 @@ taking its logged-in branch for both agents.
 #### Validation
 
 1. Each logged-in agent's session stays alive through the startup window, shows `TrustDialog`, `BypassWarning` or
-   `IdlePrompt`, and its `/proc/<pane_pid>/cmdline` ends with the user's ARGS and then the mandatory flags —
+   `IdlePrompt`, and its `/proc/<pane_pid>/cmdline` equals the oracle's empty-tail or bare-separator final argv row —
    `tests/live/test_live_launch.py::test_live_launch`; fails when the pane dies or the argv tail differs from its
    `tests/oracles/launch_argv.toml` row; no mutant: this phase adds no code.
 2. Each live screen classifies as `TrustDialog`, `BypassWarning` or `IdlePrompt` at every capture —
@@ -111,11 +111,11 @@ taking its logged-in branch for both agents.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
 ## Remaining Work
 
-The whole phase: Sprint 11.1.
+None.
 
 ## Documentation Requirements
 

@@ -1,0 +1,278 @@
+[[mutant]]
+id = "M-legs-drop-pytest"
+operator = "delete"
+target = "src/agentctl/check/legs.py"
+search = "Leg(\n            \"pytest\",\n            (\n                python,\n                \"-m\",\n                \"coverage\",\n                \"run\",\n                f\"--rcfile={config}\",\n                f\"--data-file={run_dir / 'coverage'}\",\n                \"--branch\",\n                \"--source=agentctl\",\n                \"-m\",\n                \"pytest\",\n                \"-c\",\n                config,\n                f\"--rootdir={root}\",\n                \"-p\",\n                \"no:cacheprovider\",\n                \"-p\",\n                \"pytester\",\n                \"-p\",\n                \"agentctl.check.gate_plugin\",\n                \"tests\",\n            ),\n            coverage_commands(python, root, run_dir),\n        ),"
+replace = ""
+killers = ["tests/unit/test_check_legs.py::test_leg_table_matches_oracle"]
+reason = "leg table differs from oracle"
+
+[[mutant]]
+id = "M-legs-drop-ty"
+operator = "delete"
+target = "src/agentctl/check/legs.py"
+search = "Leg(\n            \"ty\",\n            (\n                python,\n                \"-m\",\n                \"ty\",\n                \"check\",\n                \"--python\",\n                python,\n                \"--error-on-warning\",\n                *files,\n            ),\n        ),"
+replace = ""
+killers = ["tests/unit/test_check_legs.py::test_leg_table_matches_oracle"]
+reason = "leg table differs from oracle"
+
+[[mutant]]
+id = "M-legs-ignore-exit"
+operator = "widen"
+target = "src/agentctl/check/legs.py"
+search = "def verdict(expected: tuple[str, ...], outcomes: tuple[tuple[str, int], ...]) -> bool:\n    \"\"\"Require every leg exactly once in order, with a successful status.\"\"\"\n    return tuple(name for name, _code in outcomes) == expected and all(\n        code == 0 for _name, code in outcomes\n    )"
+replace = "def verdict(expected: tuple[str, ...], outcomes: tuple[tuple[str, int], ...]) -> bool:\n    \"\"\"Require every leg exactly once in order, with a successful status.\"\"\"\n    return tuple(name for name, _code in outcomes) == expected"
+killers = ["tests/unit/test_check_legs.py::test_failing_leg_fails_check"]
+reason = "a failed leg was accepted"
+
+[[mutant]]
+id = "M-legs-empty-target"
+operator = "widen"
+target = "src/agentctl/check/legs.py"
+search = "return Ok(files) if files else Err(\"empty Python target set\")"
+replace = "return Ok(files)"
+killers = ["tests/unit/test_check_legs.py::test_empty_target_set_fails"]
+reason = "empty target set was accepted"
+
+[[mutant]]
+id = "M-legs-ty-rule-warn"
+operator = "replace-literal"
+target = "pyproject.toml"
+search = "[tool.ty.rules]\nall = \"error\""
+replace = "[tool.ty.rules]\nall = \"warn\""
+killers = ["tests/integration/test_static_legs.py::test_ty_fires_on_fixture"]
+reason = "ty did not report an error"
+
+[[mutant]]
+id = "M-legs-ty-user-config-leak"
+operator = "widen"
+target = "src/agentctl/check/steps.py"
+search = "if tool == \"ty\""
+replace = "if tool == \"unused-tool\""
+killers = ["tests/integration/test_static_legs.py::test_ty_ignores_user_config"]
+reason = "user config weakened ty"
+
+[[mutant]]
+id = "M-plugin-allow-skip"
+operator = "widen"
+target = "src/agentctl/check/gate_plugin.py"
+search = "def pytest_runtest_makereport(\n    item: pytest.Item, call: pytest.CallInfo[None]\n) -> Generator[None, pytest.TestReport, pytest.TestReport]:\n    \"\"\"Observe skipped, expected-failure and unsuccessful test phases.\"\"\"\n    del call\n    report = yield\n    if report.skipped or hasattr(report, \"wasxfail\"):\n        _record(item.config, f\"forbidden outcome: {item.nodeid}\")\n    if report.failed:\n        _record(item.config, f\"failed: {item.nodeid}\")\n    if report.when == \"call\" and report.passed:\n        state = item.config.stash[STATE]\n        item.config.stash[STATE] = replace(state, passed=state.passed | {item.nodeid})\n    return report"
+replace = "def pytest_runtest_makereport(\n    item: pytest.Item, call: pytest.CallInfo[None]\n) -> Generator[None, pytest.TestReport, pytest.TestReport]:\n    \"\"\"Observe skipped, expected-failure and unsuccessful test phases.\"\"\"\n    del call\n    report = yield\n    if hasattr(report, \"wasxfail\"):\n        _record(item.config, f\"forbidden outcome: {item.nodeid}\")\n    if report.failed:\n        _record(item.config, f\"failed: {item.nodeid}\")\n    if report.when == \"call\" and (report.passed or report.skipped):\n        state = item.config.stash[STATE]\n        item.config.stash[STATE] = replace(state, passed=state.passed | {item.nodeid})\n    return report"
+killers = ["tests/governance/test_gate_plugin.py::test_skip_fails_session"]
+reason = "skip outcome was accepted"
+
+[[mutant]]
+id = "M-plugin-allow-xfail"
+operator = "widen"
+target = "src/agentctl/check/gate_plugin.py"
+search = "def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:\n    \"\"\"Write the observed manifest and fail every incomplete session.\"\"\"\n    del exitstatus\n    state = session.config.stash[STATE]\n    manifest = os.environ.get(\"AGENTCTL_CHECK_MANIFEST\")\n    if manifest is not None:\n        Path(manifest).write_text(\n            json.dumps(\n                {\n                    \"nonce\": state.nonce,\n                    \"collected\": sorted(state.collected),\n                    \"executed\": sorted(state.executed),\n                    \"passed\": sorted(state.passed),\n                    \"forbidden\": state.forbidden,\n                    \"classes\": dict(state.classes),\n                }\n            ),\n            encoding=\"utf-8\",\n        )\n    if (\n        state.forbidden\n        or not state.collected\n        or state.collected != state.executed\n        or state.collected != state.passed\n    ):\n        session.exitstatus = pytest.ExitCode.TESTS_FAILED\n        reporter = session.config.pluginmanager.get_plugin(\"terminalreporter\")\n        if isinstance(reporter, pytest.TerminalReporter):\n            reporter.write_line(\n                \"gate: incomplete or forbidden session: \" + \"; \".join(state.forbidden)\n            )"
+replace = "def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:\n    \"\"\"Write the observed manifest and fail every incomplete session.\"\"\"\n    del exitstatus\n    state = session.config.stash[STATE]\n    manifest = os.environ.get(\"AGENTCTL_CHECK_MANIFEST\")\n    if manifest is not None:\n        Path(manifest).write_text(\n            json.dumps(\n                {\n                    \"nonce\": state.nonce,\n                    \"collected\": sorted(state.collected),\n                    \"executed\": sorted(state.executed),\n                    \"passed\": sorted(state.passed),\n                    \"forbidden\": state.forbidden,\n                    \"classes\": dict(state.classes),\n                }\n            ),\n            encoding=\"utf-8\",\n        )\n    if (\n        not state.collected\n        or state.collected != state.executed\n    ):\n        session.exitstatus = pytest.ExitCode.TESTS_FAILED\n        reporter = session.config.pluginmanager.get_plugin(\"terminalreporter\")\n        if isinstance(reporter, pytest.TerminalReporter):\n            reporter.write_line(\n                \"gate: incomplete or forbidden session: \" + \"; \".join(state.forbidden)\n            )"
+killers = ["tests/governance/test_gate_plugin.py::test_xfail_fails_session"]
+reason = "xfail outcome was accepted"
+
+[[mutant]]
+id = "M-plugin-allow-selector"
+operator = "widen"
+target = "src/agentctl/check/gate_plugin.py"
+search = "if nonce and any("
+replace = "if False and any("
+killers = ["tests/governance/test_gate_plugin.py::test_selector_under_check_fails"]
+reason = "selector was accepted"
+
+[[mutant]]
+id = "M-plugin-orphan-blind"
+operator = "short-circuit"
+target = "src/agentctl/check/gate_plugin.py"
+search = "def orphan_modules(\n    root: Path,\n    collected: frozenset[str],\n    cited: frozenset[str],\n    support: frozenset[str],\n) -> tuple[str, ...]:\n    \"\"\"Join filesystem modules to collection, sprint citations and support.\"\"\"\n    modules = frozenset(node.split(\"::\", 1)[0] for node in collected)\n    files = frozenset(\n        path.relative_to(root).as_posix() for path in (root / \"tests\").rglob(\"*.py\")\n    )\n    hidden_tests = frozenset(\n        path\n        for path in files\n        if (Path(path).name.startswith(\"test_\") or Path(path).name.endswith(\"_test.py\"))\n        and path in support\n    )\n    return tuple(sorted((files - modules - support) | (modules - cited) | hidden_tests))"
+replace = "def orphan_modules(\n    root: Path,\n    collected: frozenset[str],\n    cited: frozenset[str],\n    support: frozenset[str],\n) -> tuple[str, ...]:\n    \"\"\"Deliberate short circuit.\"\"\"\n    return ()"
+killers = ["tests/governance/test_gate_plugin.py::test_orphan_module_fails"]
+reason = "tests/test_example.py"
+
+[[mutant]]
+id = "M-plugin-manifest-collected-only"
+operator = "replace-literal"
+target = "src/agentctl/check/gate_plugin.py"
+search = "\"executed\": sorted(state.executed),"
+replace = "\"executed\": sorted(state.collected),"
+killers = ["tests/governance/test_gate_plugin.py::test_manifest_matches_execution"]
+reason = "manifest invented execution"
+
+[[mutant]]
+id = "M-docval-skip-anchor"
+operator = "widen"
+target = "src/agentctl/check/validator/docs.py"
+search = "if fragment:"
+replace = "if fragment and False:"
+killers = ["tests/governance/test_doc_validator.py::test_docs_links"]
+reason = "docs.links negative was accepted"
+
+[[mutant]]
+id = "M-docval-binary-name-blind"
+operator = "short-circuit"
+target = "src/agentctl/check/validator/docs.py"
+search = "def _invalid_binary_unnamed(text: str, *, user_page: bool) -> bool:\n    \"\"\"Detect violations of docs.binary-unnamed.\"\"\"\n    bad = user_page and \"agentctl-core\" in text\n    return bool(bad)"
+replace = "def _invalid_binary_unnamed(text: str, *, user_page: bool) -> bool:\n    \"\"\"Deliberate short circuit.\"\"\"\n    return False"
+killers = ["tests/governance/test_doc_validator.py::test_docs_binary_unnamed"]
+reason = "docs.binary-unnamed negative was accepted"
+
+[[mutant]]
+id = "M-docval-taxonomy-open"
+operator = "widen"
+target = "src/agentctl/check/validator/docs.py"
+search = "{\"architecture\", \"engineering\", \"operations\", \"reference\"}"
+replace = "{\"architecture\", \"engineering\", \"operations\", \"reference\", \"guides\"}"
+killers = ["tests/governance/test_doc_validator.py::test_docs_taxonomy"]
+reason = "docs.taxonomy negative was accepted"
+
+[[mutant]]
+id = "M-docval-root-pointer-extra-rule"
+operator = "widen"
+target = "src/agentctl/check/validator/docs.py"
+search = "def _root_entry(root: Path) -> bool:\n    \"\"\"Require the root index links and a single imported agent policy.\"\"\"\n    if not all((root / name).is_file() for name in ROOT_FILES):\n        return False\n    readme = (root / \"README.md\").read_text(encoding=\"utf-8\")\n    destinations = {target for _label, target in LINK.findall(readme)}\n    if not {\"DEVELOPMENT_PLAN/README.md\", \"documents/README.md\"} <= destinations:\n        return False\n    for name in ROOT_FILES:\n        text = (root / name).read_text(encoding=\"utf-8\")\n        status = \"Authoritative source\" if name == \"AGENTS.md\" else \"Reference only\"\n        if f\"**Status**: {status}\\n\" not in text:\n            return False\n    claude = (root / \"CLAUDE.md\").read_text(encoding=\"utf-8\")\n    remainder = re.split(\n        r\"^> \\*\\*Purpose\\*\\*: [^\\n]+\\n\", claude, maxsplit=1, flags=re.MULTILINE\n    )\n    return (\n        len(remainder) == METADATA_BODY_PARTS\n        and re.fullmatch(\n            r\"\\s*[^\\n]*\\[AGENTS\\.md\\]\\(AGENTS\\.md\\)[^\\n]*\\n\\n@AGENTS\\.md\\s*\",\n            remainder[1],\n        )\n        is not None\n    )"
+replace = "def _root_entry(root: Path) -> bool:\n    \"\"\"Require the root index links and a single imported agent policy.\"\"\"\n    if not all((root / name).is_file() for name in ROOT_FILES):\n        return False\n    readme = (root / \"README.md\").read_text(encoding=\"utf-8\")\n    destinations = {target for _label, target in LINK.findall(readme)}\n    if not {\"DEVELOPMENT_PLAN/README.md\", \"documents/README.md\"} <= destinations:\n        return False\n    for name in ROOT_FILES:\n        text = (root / name).read_text(encoding=\"utf-8\")\n        status = \"Authoritative source\" if name == \"AGENTS.md\" else \"Reference only\"\n        if f\"**Status**: {status}\\n\" not in text:\n            return False\n    claude = (root / \"CLAUDE.md\").read_text(encoding=\"utf-8\")\n    remainder = re.split(\n        r\"^> \\*\\*Purpose\\*\\*: [^\\n]+\\n\", claude, maxsplit=1, flags=re.MULTILINE\n    )\n    return (\n        len(remainder) == METADATA_BODY_PARTS\n        and re.match(\n            r\"\\s*[^\\n]*\\[AGENTS\\.md\\]\\(AGENTS\\.md\\)[^\\n]*\\n\\n@AGENTS\\.md\\s*\",\n            remainder[1],\n        )\n        is not None\n    )"
+killers = ["tests/governance/test_doc_validator.py::test_docs_root_entry"]
+reason = "docs.root-entry negative was accepted"
+
+[[mutant]]
+id = "M-docval-root-index-blind"
+operator = "widen"
+target = "src/agentctl/check/validator/docs.py"
+search = "def _root_entry(root: Path) -> bool:\n    \"\"\"Require the root index links and a single imported agent policy.\"\"\"\n    if not all((root / name).is_file() for name in ROOT_FILES):\n        return False\n    readme = (root / \"README.md\").read_text(encoding=\"utf-8\")\n    destinations = {target for _label, target in LINK.findall(readme)}\n    if not {\"DEVELOPMENT_PLAN/README.md\", \"documents/README.md\"} <= destinations:\n        return False\n    for name in ROOT_FILES:\n        text = (root / name).read_text(encoding=\"utf-8\")\n        status = \"Authoritative source\" if name == \"AGENTS.md\" else \"Reference only\"\n        if f\"**Status**: {status}\\n\" not in text:\n            return False\n    claude = (root / \"CLAUDE.md\").read_text(encoding=\"utf-8\")\n    remainder = re.split(\n        r\"^> \\*\\*Purpose\\*\\*: [^\\n]+\\n\", claude, maxsplit=1, flags=re.MULTILINE\n    )\n    return (\n        len(remainder) == METADATA_BODY_PARTS\n        and re.fullmatch(\n            r\"\\s*[^\\n]*\\[AGENTS\\.md\\]\\(AGENTS\\.md\\)[^\\n]*\\n\\n@AGENTS\\.md\\s*\",\n            remainder[1],\n        )\n        is not None\n    )"
+replace = "def _root_entry(root: Path) -> bool:\n    \"\"\"Require the root index links and a single imported agent policy.\"\"\"\n    if not all((root / name).is_file() for name in ROOT_FILES):\n        return False\n    readme = (root / \"README.md\").read_text(encoding=\"utf-8\")\n    destinations = {target for _label, target in LINK.findall(readme)}\n    if False:\n        return False\n    for name in ROOT_FILES:\n        text = (root / name).read_text(encoding=\"utf-8\")\n        status = \"Authoritative source\" if name == \"AGENTS.md\" else \"Reference only\"\n        if f\"**Status**: {status}\\n\" not in text:\n            return False\n    claude = (root / \"CLAUDE.md\").read_text(encoding=\"utf-8\")\n    remainder = re.split(\n        r\"^> \\*\\*Purpose\\*\\*: [^\\n]+\\n\", claude, maxsplit=1, flags=re.MULTILINE\n    )\n    return (\n        len(remainder) == METADATA_BODY_PARTS\n        and re.fullmatch(\n            r\"\\s*[^\\n]*\\[AGENTS\\.md\\]\\(AGENTS\\.md\\)[^\\n]*\\n\\n@AGENTS\\.md\\s*\",\n            remainder[1],\n        )\n        is not None\n    )"
+killers = ["tests/governance/test_doc_validator.py::test_docs_root_entry"]
+reason = "missing root index link was accepted"
+
+[[mutant]]
+id = "M-planval-forward-dependency"
+operator = "widen"
+target = "src/agentctl/check/validator/plan.py"
+search = "number >= phase.number"
+replace = "False"
+killers = ["tests/governance/test_plan_validator.py::test_plan_dependency_direction"]
+reason = "plan.dependency-direction negative was accepted"
+
+[[mutant]]
+id = "M-planval-closure-at-least-once"
+operator = "widen"
+target = "src/agentctl/check/validator/plan.py"
+search = "closures != Counter({row[0]: 1 for row in requirements})"
+replace = "set(closures) != {row[0] for row in requirements}"
+killers = ["tests/governance/test_plan_validator.py::test_plan_requirements_table"]
+reason = "duplicate requirement closure was accepted"
+
+[[mutant]]
+id = "M-planval-status-table-blind"
+operator = "widen"
+target = "src/agentctl/check/validator/plan.py"
+search = "or actual != expected"
+replace = "or False"
+killers = ["tests/governance/test_plan_validator.py::test_plan_status_harmony"]
+reason = "plan.status-harmony negative was accepted"
+
+[[mutant]]
+id = "M-planval-open-header"
+operator = "widen"
+target = "src/agentctl/check/validator/plan.py"
+search = "fields == expected"
+replace = "True"
+killers = ["tests/governance/test_plan_validator.py::test_plan_header"]
+reason = "plan.header negative was accepted"
+
+[[mutant]]
+id = "M-oracle-quote-unchecked"
+operator = "widen"
+target = "tests/harness/oracle.py"
+search = "def _anchors(\n    identifier: str, requirement: str, quote: str, source: str, homes: Homes\n) -> Problem | None:\n    \"\"\"Resolve a row's stable identity and independent source references.\"\"\"\n    if not re.fullmatch(r\"[a-z][a-z0-9_.-]+\", identifier):\n        return Problem(\"row id must be stable lower-case text\")\n    if (\n        requirement not in dict(homes.requirements)\n        or not quote\n        or quote not in dict(homes.requirements)[requirement]\n    ):\n        return Problem(\"quote must match its requirement\")\n    if not provenance_resolves(source, homes):\n        return Problem(\"provenance does not resolve\")\n    return None"
+replace = "def _anchors(\n    identifier: str, requirement: str, quote: str, source: str, homes: Homes\n) -> Problem | None:\n    \"\"\"Resolve a row's stable identity and independent source references.\"\"\"\n    if not re.fullmatch(r\"[a-z][a-z0-9_.-]+\", identifier):\n        return Problem(\"row id must be stable lower-case text\")\n    if (\n        False\n    ):\n        return Problem(\"quote must match its requirement\")\n    if not provenance_resolves(source, homes):\n        return Problem(\"provenance does not resolve\")\n    return None"
+killers = ["tests/governance/test_oracles.py::test_quote_must_match_requirement"]
+reason = "quote must match its requirement"
+
+[[mutant]]
+id = "M-oracle-duplicate-allowed"
+operator = "widen"
+target = "tests/harness/oracle.py"
+search = "if row.identifier in previous:"
+replace = "if False:"
+killers = ["tests/governance/test_oracles.py::test_duplicate_row_id_rejected"]
+reason = "duplicate row id"
+
+[[mutant]]
+id = "M-oracle-subject-import-allowed"
+operator = "short-circuit"
+target = "tests/harness/oracle.py"
+search = "def imports_subject(source: str) -> bool:\n    \"\"\"Detect direct, aliased, relative and dynamic subject imports.\"\"\"\n    for node in ast.walk(ast.parse(source)):\n        if isinstance(node, ast.Import) and any(\n            alias.name.split(\".\")[0] == \"agentctl\" for alias in node.names\n        ):\n            return True\n        if isinstance(node, ast.ImportFrom) and (\n            node.level or (node.module or \"\").split(\".\")[0] == \"agentctl\"\n        ):\n            return True\n        if isinstance(node, ast.Call) and (\n            (isinstance(node.func, ast.Name) and node.func.id == \"__import__\")\n            or (\n                isinstance(node.func, ast.Attribute)\n                and node.func.attr == \"import_module\"\n            )\n        ):\n            return True\n    return False"
+replace = "def imports_subject(source: str) -> bool:\n    \"\"\"Deliberate short circuit.\"\"\"\n    return False"
+killers = ["tests/governance/test_oracles.py::test_loader_imports_no_subject"]
+reason = "subject import was accepted"
+
+[[mutant]]
+id = "M-oracle-provenance-unresolved"
+operator = "widen"
+target = "tests/harness/oracle.py"
+search = "if not provenance_resolves(source, homes):"
+replace = "if False:"
+killers = ["tests/governance/test_oracles.py::test_provenance_resolves"]
+reason = "provenance does not resolve"
+
+[[mutant]]
+id = "M-oracle-empty-accepted"
+operator = "widen"
+target = "tests/harness/oracle.py"
+search = "if not isinstance(cases, list) or not cases:"
+replace = "if not isinstance(cases, list):"
+killers = ["tests/governance/test_oracles.py::test_empty_oracle_rejected"]
+reason = "empty oracle"
+
+[[mutant]]
+id = "M-oracle-amendment-cycle-allowed"
+operator = "widen"
+target = "tests/harness/oracle.py"
+search = "return Problem(\"amendment must name a prior row; cycles are forbidden\")"
+replace = "return None"
+killers = ["tests/governance/test_oracles.py::test_amendment_chain_resolves"]
+reason = "invalid amendment chain was accepted"
+
+[[mutant]]
+id = "M-mutant-any-failure-counts"
+operator = "widen"
+target = "src/agentctl/check/mutants.py"
+search = "if reason not in detail:"
+replace = "if False:"
+killers = ["tests/governance/test_mutants.py::test_wrong_reason_rejected"]
+reason = "wrong failure reason was accepted"
+
+[[mutant]]
+id = "M-mutant-survivor-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/mutants.py"
+search = "def killed(output: Output, reason: str) -> Result[None, MutationError]:\n    \"\"\"Count only test failure with the named reason, never unrelated breakage.\"\"\"\n    if output.code != 1:\n        return Err(MutationError(\"mutant\", \"survivor or non-test failure\"))\n    combined = output.stdout + output.stderr\n    if any(\n        token in combined\n        for token in (\n            \"ImportError\",\n            \"ModuleNotFoundError\",\n            \"SyntaxError\",\n            \"INTERNALERROR\",\n        )\n    ):\n        return Err(MutationError(\"mutant\", \"unrelated interpreter or import failure\"))\n    detail = \"\\n\".join(line for line in combined.splitlines() if line.startswith(\"E \"))\n    if reason not in detail:\n        return Err(MutationError(\"mutant\", \"wrong failure reason\"))\n    return Ok(None)"
+replace = "def killed(output: Output, reason: str) -> Result[None, MutationError]:\n    \"\"\"Count only test failure with the named reason, never unrelated breakage.\"\"\"\n    if output.code == 0:\n        return Ok(None)\n    if output.code != 1:\n        return Err(MutationError(\"mutant\", \"survivor or non-test failure\"))\n    combined = output.stdout + output.stderr\n    if any(\n        token in combined\n        for token in (\n            \"ImportError\",\n            \"ModuleNotFoundError\",\n            \"SyntaxError\",\n            \"INTERNALERROR\",\n        )\n    ):\n        return Err(MutationError(\"mutant\", \"unrelated interpreter or import failure\"))\n    detail = \"\\n\".join(line for line in combined.splitlines() if line.startswith(\"E \"))\n    if reason not in detail:\n        return Err(MutationError(\"mutant\", \"wrong failure reason\"))\n    return Ok(None)"
+killers = ["tests/governance/test_mutants.py::test_survivor_rejected"]
+reason = "survivor was accepted"
+
+[[mutant]]
+id = "M-mutant-multiple-match-accepted"
+operator = "widen"
+target = "src/agentctl/check/mutants.py"
+search = "original.count(search) != 1"
+replace = "original.count(search) == 0"
+killers = ["tests/governance/test_mutants.py::test_exact_once_required"]
+reason = "multiple or missing patch occurrence was accepted"
+
+[[mutant]]
+id = "M-mutant-unknown-operator-accepted"
+operator = "widen"
+target = "src/agentctl/check/mutants.py"
+search = "return Err(MutationError(\"schema\", \"unknown operator\"))"
+replace = "return Ok(Operator.DELETE)"
+killers = ["tests/governance/test_mutants.py::test_operator_set_closed"]
+reason = "unknown operator was accepted"
+
+[[mutant]]
+id = "M-mutant-baseline-unchecked"
+operator = "widen"
+target = "src/agentctl/check/mutants.py"
+search = "if output.code != 0 or reason in output.stdout + output.stderr:"
+replace = "if False:"
+killers = ["tests/governance/test_mutants.py::test_baseline_must_pass"]
+reason = "failing baseline was accepted"

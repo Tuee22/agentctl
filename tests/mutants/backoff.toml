@@ -1,0 +1,53 @@
+[[mutant]]
+id = "M-backoff-uncapped"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Backoff.hs"
+search = "cap settings = min (maximumDelay settings)"
+replace = "cap _settings = id"
+killers = ["tests/unit/test_backoff.py::test_delays_and_escalations_match_oracle", "haskell:agentctl-core-test/Backoff/grows-to-cap"]
+reason = "backoff delay or escalation differs from oracle"
+
+[[mutant]]
+id = "M-backoff-no-jitter"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Backoff.hs"
+search = "    offset = jitterFraction settings * (2 * unit - 1)"
+replace = "    offset = jitterFraction settings * (unit - unit)"
+killers = ["haskell:agentctl-core-test/Backoff/seed-determines-delays"]
+reason = "backoff seed did not change the delay sequence"
+
+[[mutant]]
+id = "M-backoff-jitter-unbounded"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Backoff.hs"
+search = "    offset = jitterFraction settings * (2 * unit - 1)"
+replace = "    offset = jitterFraction settings * (4 * unit - 2)"
+killers = ["haskell:agentctl-core-test/Backoff/within-bounds"]
+reason = "backoff jitter escaped its allowed band"
+
+[[mutant]]
+id = "M-backoff-notify-never-escalates"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Backoff.hs"
+search = "    level = if base >= maximumDelay settings then Warning else Info"
+replace = "    level = if base > maximumDelay settings then Warning else Info"
+killers = ["tests/unit/test_backoff.py::test_delays_and_escalations_match_oracle"]
+reason = "backoff delay or escalation differs from oracle"
+
+[[mutant]]
+id = "M-backoff-attempt-not-advanced"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs"
+search = "            Just fingerprint -> schedule (stateAttempt state + 1) fingerprint False"
+replace = "            Just fingerprint -> schedule (stateAttempt state) fingerprint False"
+killers = ["tests/unit/test_recovery_transitions.py::test_backoff_deadlines_match_oracle"]
+reason = "backoff deadline differs from oracle attempt"
+
+[[mutant]]
+id = "M-backoff-nonfinite-jitter-accepted"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Recovery/Backoff.hs"
+search = "[initial, growth, maximumWait, jitter]"
+replace = "[initial, growth, maximumWait, 0]"
+killers = ["haskell:agentctl-core-test/Backoff/within-bounds"]
+reason = "invalid backoff policy was accepted"

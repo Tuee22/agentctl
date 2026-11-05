@@ -1,0 +1,10 @@
+# Copyright (c) 2026 agentctl contributors.
+"""A raw symlink reader used to co-design the narrow PTH115 exception."""
+
+import os
+from pathlib import Path
+
+
+def raw_link(path: Path) -> str:
+    """Preserve the literal link text rather than normalising its path."""
+    return os.readlink(path)

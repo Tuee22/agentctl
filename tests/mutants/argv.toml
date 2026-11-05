@@ -1,0 +1,53 @@
+[[mutant]]
+id = "M-argv-flags-after-dashdash"
+operator = "reorder"
+target = "src/agentctl/haskell/src/AgentCtl/Agent/Argv.hs"
+search = "retained ++ mandatoryFlags entry ++ positional"
+replace = "retained ++ positional ++ mandatoryFlags entry"
+killers = ["tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle"]
+reason = "launch argv differs from oracle"
+
+[[mutant]]
+id = "M-argv-keep-yolo"
+operator = "delete"
+target = "src/agentctl/haskell/src/AgentCtl/Agent.hs"
+search = "      [\"--yolo\"]"
+replace = "      []"
+killers = ["tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle"]
+reason = "launch argv differs from oracle"
+
+[[mutant]]
+id = "M-argv-dedupe-past-dashdash"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Agent/Argv.hs"
+search = "retained ++ mandatoryFlags entry ++ positional"
+replace = "retained ++ mandatoryFlags entry ++ filter (`notElem` removable) positional"
+killers = ["tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle"]
+reason = "launch argv differs from oracle"
+
+[[mutant]]
+id = "M-argv-drop-no-daemon"
+operator = "delete"
+target = "src/agentctl/haskell/src/AgentCtl/Agent.hs"
+search = "[\"--dangerously-bypass-approvals-and-sandbox\", \"--no-daemon\"]"
+replace = "[\"--dangerously-bypass-approvals-and-sandbox\"]"
+killers = ["tests/unit/test_agent_table.py::test_agent_table_matches_oracle"]
+reason = "agent table differs from oracle"
+
+[[mutant]]
+id = "M-argv-misspell-skip-permissions"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Agent.hs"
+search = "[\"--dangerously-skip-permissions\"]"
+replace = "[\"--dangerously-skip-permission\"]"
+killers = ["tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle"]
+reason = "launch argv differs from oracle"
+
+[[mutant]]
+id = "M-argv-recovery-slash-command"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Agent.hs"
+search = "\"Continue the interrupted task from the last completed step.\""
+replace = "\"/Continue the interrupted task from the last completed step.\""
+killers = ["tests/unit/test_agent_table.py::test_agent_table_matches_oracle"]
+reason = "agent table differs from oracle"

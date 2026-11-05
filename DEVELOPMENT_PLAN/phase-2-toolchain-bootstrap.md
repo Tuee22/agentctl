@@ -1,6 +1,6 @@
 # Phase 2 — Toolchain bootstrap
 
-**Status**: Planned
+**Status**: Done
 **Depends on**: [Phase 1 — Gate-integrity apparatus](phase-1-gate-integrity-apparatus.md)
 **Host lane**: any-host
 **Gate**: `agentctl check`
@@ -34,10 +34,14 @@ frozen value, `src/agentctl/bootstrap/plan.py` maps it to the ordered actions th
 
 | Requirement | Oracle | Observer | Mutants | Tests |
 |---|---|---|---|---|
-| R15 — GHC's OS prerequisites are probed, installed only with consent, and a non-interactive run never prompts | `tests/oracles/prerequisites.toml`, `tests/oracles/bootstrap_plan.toml` | value: the package sets and the consent outcomes per host facts; observer: the spawn audit records the vetoed package-manager argv after consent and none after a decline, beside the probe's own spawn, with a fresh nonce; owed: clean-container-acceptance; owed: macos-acceptance | `M-prereq-skip-consent`, `M-prereq-sudo-may-prompt`, `M-prereq-gmp-dropped` | `tests/unit/test_prereqs.py::test_package_sets_match_oracle`, `tests/integration/test_prereqs_consent.py::test_declined_spawns_nothing`, `tests/integration/test_prereqs_consent.py::test_non_tty_refuses_without_assume_yes` |
-| R3 — an existing ghcup at or above the floor is reused, otherwise the pinned binary is downloaded and verified, and no rc file changes | `tests/oracles/pins.toml`, `tests/oracles/bootstrap_plan.toml` | value: the floor policy and each triple's pinned URL and digest; real: test-owned bytes through the real urllib into a test-owned prefix, and an existing ghcup kept byte for byte; observer: the spawn audit records only the reused ghcup's version check, with a fresh nonce; owed: clean-container-acceptance; owed: macos-acceptance; owed: windows-psmux-acceptance | `M-ghcup-skip-verify`, `M-ghcup-overwrite-existing`, `M-pins-digest-swapped` | `tests/integration/test_ghcup.py::test_sha_mismatch_refused_no_file`, `tests/integration/test_ghcup.py::test_present_ghcup_untouched`, `tests/unit/test_ghcup.py::test_pins_match_oracle` |
-| R4 — GHC and cabal are installed at their pins through ghcup and the user's default selection never changes | `tests/oracles/pins.toml`, `tests/oracles/bootstrap_plan.toml` | value: no planned action carries `--set` and the cabal install carries `--no-set`; observer: the spawn audit records the vetoed install argv with a fresh nonce; real: the resolved ghc answers `--numeric-version` with its pin when the test runs it, and the default links are unchanged across `toolchain-ensure` | `M-boot-cabal-without-no-set`, `M-boot-spawn-adds-set`, `M-boot-links-unchecked` | `tests/unit/test_plan.py::test_plan_never_sets_default`, `tests/integration/test_toolchain.py::test_argv_never_sets`, `tests/integration/test_toolchain.py::test_default_links_unchanged_by_step`, `tests/integration/test_toolchain_real.py::test_resolved_ghc_reports_pin` |
-| R1 — the build chain needs only pipx and its Python (contributing) | `tests/oracles/bootstrap_plan.toml` | value: the plan for a host with only python3 and pipx provisions the prerequisites, ghcup, GHC and cabal and never tmux, psmux, claude or codex, and the recipe's Stage A starts from exactly that host; owed: clean-container-acceptance | `M-boot-reinstall-present`, `M-boot-recipe-stage-a-root` | `tests/unit/test_plan.py::test_plan_oracle`, `tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle` |
+| R20 — toolchain-ensure runs after ty and a failed prerequisite step fails check (contributing) | `tests/oracles/check_steps.toml` | value: the introduced pipeline preserves its Python legs, places provisioning after ty, and reports a supplied pin failure as a failed run | `M-boot-step-not-run` | `tests/unit/test_toolchain_gate.py::test_pipeline_retains_python_legs_and_inserts_provisioning`, `tests/unit/test_toolchain_gate.py::test_readiness_failures_and_gate_step` |
+| R15 — GHC's OS prerequisites are probed, installed only with consent, and a non-interactive run never prompts | `tests/oracles/prerequisites.toml`, `tests/oracles/bootstrap_plan.toml` | value: package sets, consent and non-interactive readiness per host facts; real: the native probe agrees with an independent GMP link or Xcode probe and rejects an unusable constructed compiler; observer: each approved argv is attempted individually and vetoed with a fresh nonce, a batch stops at its first veto, declines attempt none beside the recorded probe, and the global flag reaches the check child; owed: clean-container-acceptance; owed: macos-acceptance | `M-prereq-skip-consent`, `M-prereq-sudo-may-prompt`, `M-prereq-gmp-dropped`, `M-prereq-prompt-without-tty`, `M-prereq-probe-ignores-link`, `M-prereq-flag-dropped` | `tests/unit/test_prereqs.py::test_package_sets_match_oracle`, `tests/unit/test_preconditions.py::test_prerequisite_precondition`, `tests/integration/test_prereqs_real.py::test_probe_matches_independent_observer`, `tests/integration/test_prereqs_consent.py::test_declined_spawns_nothing`, `tests/integration/test_prereqs_consent.py::test_accepted_runs_exact_argv`, `tests/integration/test_prereqs_consent.py::test_non_tty_refuses_without_assume_yes`, `tests/integration/test_prereqs_consent.py::test_global_assume_yes_reaches_check` |
+| R3 — ghcup discovery, the reuse floor and each platform's pinned asset are exact | `tests/oracles/pins.toml`, `tests/oracles/bootstrap_plan.toml` | value: environment, PATH and default discovery order, complete refusals below the floor, and literal versions, URLs and SHA-256 values | `M-boot-replace-old-ghcup`, `M-boot-ghcup-prefix-ignored`, `M-pins-digest-swapped` | `tests/unit/test_plan.py::test_plan_oracle`, `tests/unit/test_hostfacts.py::test_ghcup_discovery_order`, `tests/unit/test_ghcup.py::test_pins_match_oracle` |
+| R3 — the pinned binary is downloaded and verified only when ghcup is absent, and no rc file changes | `tests/oracles/pins.toml`, `tests/oracles/bootstrap_plan.toml` | real: test-owned bytes through the real urllib into a test-owned prefix, truncated and corrupted responses leave no installation, and all owned profile bytes are preserved; observer: an existing ghcup remains byte-identical and the spawn audit records only its version check, with a fresh nonce; owed: clean-container-acceptance; owed: macos-acceptance; owed: windows-psmux-acceptance | `M-ghcup-skip-verify`, `M-ghcup-overwrite-existing`, `M-ghcup-nonatomic-write`, `M-ghcup-edits-rc` | `tests/integration/test_ghcup.py::test_sha_mismatch_refused_no_file`, `tests/integration/test_ghcup.py::test_present_ghcup_untouched`, `tests/integration/test_ghcup.py::test_truncated_download_leaves_nothing`, `tests/integration/test_ghcup.py::test_no_rc_file_written` |
+| R4 — planned installs preserve default selections and only supported platforms pass readiness | `tests/oracles/pins.toml`, `tests/oracles/bootstrap_plan.toml`, `tests/oracles/toolchain_preconditions.toml` | value: no action carries `--set`, cabal install carries `--no-set`, and capacity, reachability and bindist boundaries match their rows | `M-boot-cabal-without-no-set`, `M-boot-windows-arm64-allowed` | `tests/unit/test_plan.py::test_plan_never_sets_default`, `tests/unit/test_preconditions.py::test_toolchain_preconditions` |
+| R4 — applied installs use the pins without changing the user's default selection | `tests/oracles/pins.toml`, `tests/oracles/bootstrap_plan.toml` | observer: the spawn audit records the vetoed install argv with a fresh nonce; real: the resolved ghc answers `--numeric-version` with its pin when the test runs it, and the default links are unchanged across `toolchain-ensure` | `M-boot-spawn-adds-set`, `M-boot-links-unchecked`, `M-boot-ghc-from-path`, `M-boot-ghcup-on-warm-run` | `tests/integration/test_toolchain.py::test_argv_never_sets`, `tests/integration/test_toolchain.py::test_default_links_unchanged_by_step`, `tests/integration/test_toolchain_real.py::test_resolved_ghc_reports_pin`, `tests/integration/test_toolchain.py::test_whereis_paths_used_verbatim`, `tests/integration/test_toolchain.py::test_warm_run_spawns_only_version_checks` |
+| R1 — provisioning plans converge without reinstalling answering build-chain pins (contributing) | `tests/oracles/bootstrap_plan.toml` | value: exact ordered actions for missing build-chain components and an empty plan after the oracle's successful after-facts | `M-boot-reinstall-present` | `tests/unit/test_plan.py::test_plan_oracle`, `tests/unit/test_plan.py::test_fully_provisioned_plan_is_empty` |
+| R1 — the clean recipe starts with only pipx and its Python and provisions the build chain (contributing) | `tests/oracles/bootstrap_plan.toml` | value: the bare-host plan provisions prerequisites, ghcup, GHC and cabal without runtime tools, and Stage A starts from exactly that host; owed: clean-container-acceptance | `M-boot-recipe-stage-a-root` | `tests/unit/test_plan.py::test_plan_oracle`, `tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle` |
 
 ## Not Proven By This Gate
 
@@ -50,18 +54,18 @@ frozen value, `src/agentctl/bootstrap/plan.py` maps it to the ordered actions th
 - Installs through dnf or pacman, and the refusal on a real Arch Linux host; only the vetoed argv and the plan's values cover them. — not proven by any phase.
 - A consent prompt answered at a real terminal, and a sudo that asks for a password. — not proven by any phase.
 - Who built the ghcup bytes: the pin proves they equal what downloads.haskell.org published, not their authorship, and GPG verification is rejected. — not proven by any phase.
-- Tamper resistance is bounded by [§ P](development_plan_standards.md#p-the-ratchet-and-the-users-commit-points): it holds against a HEAD the user has committed. — not proven by any phase.
+- Tamper resistance extends only to data already present in the available HEAD baseline ([§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure)); uncommitted inputs have no historical protection. — not proven by any phase.
 
 ## Sprints
 
-### Sprint 2.1: Host facts and the pure provisioning plan [Planned]
+### Sprint 2.1: Host facts and the pure provisioning plan [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/hostfacts.py`, `src/agentctl/bootstrap/plan.py`, `src/agentctl/bootstrap/pins.toml`, `src/agentctl/check/preconditions.py`, `tests/oracles/bootstrap_plan.toml`, `tests/oracles/pins.toml`, `tests/mutants/bootstrap_plan.toml`
-**Validation tests**: `tests/unit/test_plan.py::test_plan_oracle`, `tests/unit/test_plan.py::test_fully_provisioned_plan_is_empty`, `tests/unit/test_plan.py::test_plan_never_sets_default`, `tests/unit/test_ghcup.py::test_pins_match_oracle`, `tests/unit/test_hostfacts.py::test_ghcup_discovery_order`, `tests/unit/test_preconditions.py::test_toolchain_preconditions`
+**Status**: Done
+**Implementation**: `src/agentctl/hostfacts.py`, `src/agentctl/bootstrap/plan.py`, `src/agentctl/bootstrap/pins.py`, `src/agentctl/bootstrap/pins.toml`, `src/agentctl/check/preconditions.py`, `tests/oracles/bootstrap_plan.toml`, `tests/oracles/pins.toml`, `tests/oracles/toolchain_preconditions.toml`, `tests/mutants/bootstrap_plan.toml`
+**Validation tests**: `tests/unit/test_plan.py::test_plan_oracle`, `tests/unit/test_plan.py::test_fully_provisioned_plan_is_empty`, `tests/unit/test_plan.py::test_plan_never_sets_default`, `tests/unit/test_ghcup.py::test_pins_match_oracle`, `tests/unit/test_ghcup.py::test_pin_parser_rejects_malformed_data`, `tests/unit/test_hostfacts.py::test_ghcup_discovery_order`, `tests/unit/test_hostfacts.py::test_gather_warm_host_stops_after_recorded_versions`, `tests/unit/test_hostfacts.py::test_gather_cold_and_partial_hosts`, `tests/unit/test_hostfacts.py::test_gather_refuses_invalid_inputs`, `tests/unit/test_hostfacts.py::test_record_boundary`, `tests/unit/test_hostfacts.py::test_distribution_boundary`, `tests/unit/test_hostfacts.py::test_privilege_and_version_values`, `tests/unit/test_hostfacts.py::test_architecture_spellings`, `tests/unit/test_preconditions.py::test_toolchain_preconditions`, `tests/integration/test_hostfacts.py::test_native_context_and_numeric_failure`
 **Mutants**: `M-boot-reinstall-present`, `M-boot-replace-old-ghcup`, `M-boot-cabal-without-no-set`, `M-pins-digest-swapped`, `M-boot-ghcup-prefix-ignored`, `M-boot-windows-arm64-allowed`
 **Closes**: none
-**Docs to update**: `documents/engineering/toolchain_bootstrap.md`, `documents/engineering/quality_gate.md`, `documents/reference/external_tool_facts.md`
+**Docs to update**: `documents/engineering/toolchain_bootstrap.md`, `documents/engineering/quality_gate.md`, `documents/reference/external_tool_facts.md`, `documents/reference/files_and_state.md`, `documents/engineering/code_standards.md`
 
 #### Objective
 
@@ -108,16 +112,16 @@ host states and empty once applied.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 2.2: OS prerequisites with consent [Planned]
+### Sprint 2.2: OS prerequisites with consent [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/bootstrap/prereqs.py`, `src/agentctl/hostfacts.py`, `src/agentctl/bootstrap/plan.py`, `src/agentctl/cli.py`, `src/agentctl/check/preconditions.py`, `tests/oracles/prerequisites.toml`, `tests/oracles/bootstrap_plan.toml`, `tests/mutants/prerequisites.toml`
-**Validation tests**: `tests/unit/test_prereqs.py::test_package_sets_match_oracle`, `tests/integration/test_prereqs_consent.py::test_declined_spawns_nothing`, `tests/integration/test_prereqs_consent.py::test_accepted_runs_exact_argv`, `tests/integration/test_prereqs_consent.py::test_non_tty_refuses_without_assume_yes`, `tests/integration/test_prereqs_real.py::test_probe_matches_independent_observer`, `tests/unit/test_preconditions.py::test_prerequisite_precondition`
-**Mutants**: `M-prereq-skip-consent`, `M-prereq-sudo-may-prompt`, `M-prereq-prompt-without-tty`, `M-prereq-gmp-dropped`, `M-prereq-probe-ignores-link`
+**Status**: Done
+**Implementation**: `src/agentctl/bootstrap/prereqs.py`, `src/agentctl/hostfacts.py`, `src/agentctl/bootstrap/plan.py`, `src/agentctl/cli.py`, `src/agentctl/check/prerequisites.py`, `src/agentctl/check/steps.py`, `tests/oracles/prerequisites.toml`, `tests/oracles/bootstrap_plan.toml`, `tests/mutants/prerequisites.toml`, `tests/fixtures/bootstrap/prereq_actor.py.txt`
+**Validation tests**: `tests/unit/test_prereqs.py::test_package_sets_match_oracle`, `tests/unit/test_prereqs.py::test_consent_policy_matches_oracle`, `tests/unit/test_prereqs.py::test_probe_values_and_private_link_artifacts`, `tests/unit/test_prereqs.py::test_probe_failures_are_not_ready`, `tests/unit/test_prereqs.py::test_apply_sequence_and_first_failure`, `tests/unit/test_prereqs.py::test_post_probe_failure_does_not_reinstall`, `tests/unit/test_prereqs.py::test_xcode_pending_does_not_probe`, `tests/unit/test_prereqs.py::test_observation_completes_cold_facts_and_preserves_warm_pins`, `tests/integration/test_prereqs_consent.py::test_declined_spawns_nothing`, `tests/integration/test_prereqs_consent.py::test_accepted_runs_exact_argv`, `tests/integration/test_prereqs_consent.py::test_non_tty_refuses_without_assume_yes`, `tests/integration/test_prereqs_consent.py::test_root_and_xcode_actions_are_vetoed`, `tests/integration/test_prereqs_consent.py::test_global_assume_yes_reaches_check`, `tests/integration/test_prereqs_real.py::test_probe_matches_independent_observer`, `tests/unit/test_preconditions.py::test_prerequisite_precondition`, `tests/unit/test_preconditions.py::test_prerequisite_inspection_consent_and_privilege`, `tests/unit/test_preconditions.py::test_prerequisite_inspection_platforms_and_errors`, `tests/unit/test_identity.py::test_check_preserves_ghcup_environment`
+**Mutants**: `M-prereq-skip-consent`, `M-prereq-sudo-may-prompt`, `M-prereq-prompt-without-tty`, `M-prereq-gmp-dropped`, `M-prereq-probe-ignores-link`, `M-prereq-flag-dropped`
 **Closes**: R15
-**Docs to update**: `documents/engineering/toolchain_bootstrap.md`, `documents/engineering/quality_gate.md`, `documents/operations/installation.md`, `documents/operations/troubleshooting.md`, `documents/reference/cli_reference.md`
+**Docs to update**: `documents/engineering/toolchain_bootstrap.md`, `documents/engineering/quality_gate.md`, `documents/engineering/testing.md`, `documents/operations/installation.md`, `documents/operations/troubleshooting.md`, `documents/reference/cli_reference.md`, `documents/reference/files_and_state.md`
 
 #### Objective
 
@@ -138,7 +142,8 @@ Probe GHC's OS prerequisites, install a missing set only with consent, and never
   sudo; a non-interactive run without it, check included, is a refusal that spawns nothing, prints the commands for the
   user to type and exits non-zero.
 - On macOS, consent runs `xcode-select --install`, then agentctl exits non-zero, asking the user to finish the dialog.
-- Precondition P9: the prerequisites are present, or `--assume-yes` was given as root or with passwordless sudo.
+- Precondition P9: the prerequisites are present, or a verified Linux set is installable after `--assume-yes` as root
+  or with passwordless sudo. A missing macOS Command Line Tools dialog is never started by check.
 - Under the suite the spawn audit vetoes and records every sudo, package-manager and `xcode-select --install` spawn,
   and records the probe's compiler spawn without vetoing it.
 
@@ -149,9 +154,9 @@ Probe GHC's OS prerequisites, install a missing set only with consent, and never
 2. A declined prompt records no package-manager spawn beside the recorded probe spawn that shows the audit was live —
    `tests/integration/test_prereqs_consent.py::test_declined_spawns_nothing`; fails when a decline still runs apt;
    mutant `M-prereq-skip-consent`.
-3. An accepted prompt records exactly the row's sudo and apt-get argv, in order, with the observer's nonce —
-   `tests/integration/test_prereqs_consent.py::test_accepted_runs_exact_argv`; fails when the argv differs; mutant
-   `M-prereq-gmp-dropped`.
+3. Each approved command attempted individually records the row's exact sudo and apt-get argv with the observer's
+   nonce, while a batch stops at its first veto — `tests/integration/test_prereqs_consent.py::test_accepted_runs_exact_argv`;
+   fails when an argv differs or a batch continues after failure; mutant `M-prereq-gmp-dropped`.
 4. Without a terminal or `--assume-yes` the run refuses, spawns nothing and names the commands, while the same run with
    `--assume-yes` records `sudo -n` — `tests/integration/test_prereqs_consent.py::test_non_tty_refuses_without_assume_yes`;
    fails when the run prompts or the flag yields a sudo that may prompt; mutants `M-prereq-prompt-without-tty`,
@@ -161,16 +166,19 @@ Probe GHC's OS prerequisites, install a missing set only with consent, and never
    only checks that `cc` resolves; mutant `M-prereq-probe-ignores-link`.
 6. P9 passes and fails on constructed facts — `tests/unit/test_preconditions.py::test_prerequisite_precondition`; fails
    when missing prerequisites pass without `--assume-yes`; mutant `M-prereq-skip-consent`.
+7. The actual click group transports each global flag value to its owned check child —
+   `tests/integration/test_prereqs_consent.py::test_global_assume_yes_reaches_check`; fails when consent is discarded;
+   mutant `M-prereq-flag-dropped`.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 2.3: ghcup reuse or pinned download [Planned]
+### Sprint 2.3: ghcup reuse or pinned download [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/bootstrap/ghcup.py`, `tests/mutants/ghcup.toml`
-**Validation tests**: `tests/integration/test_ghcup.py::test_present_ghcup_untouched`, `tests/integration/test_ghcup.py::test_sha_mismatch_refused_no_file`, `tests/integration/test_ghcup.py::test_truncated_download_leaves_nothing`, `tests/integration/test_ghcup.py::test_no_rc_file_written`
+**Status**: Done
+**Implementation**: `src/agentctl/bootstrap/ghcup.py`, `tests/mutants/ghcup.toml`, `tests/harness/http.py`, `tests/fixtures/bootstrap/ghcup_actor.py.txt`
+**Validation tests**: `tests/integration/test_ghcup.py::test_present_ghcup_untouched`, `tests/integration/test_ghcup.py::test_sha_mismatch_refused_no_file`, `tests/integration/test_ghcup.py::test_truncated_download_leaves_nothing`, `tests/integration/test_ghcup.py::test_no_rc_file_written`, `tests/integration/test_ghcup.py::test_download_errors_are_typed`
 **Mutants**: `M-ghcup-overwrite-existing`, `M-ghcup-skip-verify`, `M-ghcup-nonatomic-write`, `M-ghcup-edits-rc`
 **Closes**: R3
 **Docs to update**: `documents/engineering/toolchain_bootstrap.md`, `documents/operations/troubleshooting.md`, `documents/reference/external_tool_facts.md`
@@ -213,16 +221,16 @@ owns.
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
-### Sprint 2.4: Pinned GHC and cabal, and the clean-lane recipe [Planned]
+### Sprint 2.4: Pinned GHC and cabal, and the clean-lane recipe [Done]
 
-**Status**: Planned
-**Implementation**: `src/agentctl/bootstrap/toolchain.py`, `src/agentctl/check/steps.py`, `tests/harness/host.py`, `tests/lanes/clean-host.Dockerfile`, `tests/oracles/bootstrap_plan.toml`, `tests/mutants/toolchain.toml`
-**Validation tests**: `tests/integration/test_toolchain.py::test_argv_never_sets`, `tests/integration/test_toolchain.py::test_whereis_paths_used_verbatim`, `tests/integration/test_toolchain.py::test_default_links_unchanged_by_step`, `tests/integration/test_toolchain.py::test_warm_run_spawns_only_version_checks`, `tests/integration/test_toolchain_real.py::test_resolved_ghc_reports_pin`, `tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle`, `tests/e2e/test_fresh_bootstrap.py::test_ghcup_digest_matches_pin`, `tests/e2e/test_fresh_bootstrap.py::test_no_default_links`, `tests/e2e/test_fresh_bootstrap.py::test_whereis_paths_report_pins`
-**Mutants**: `M-boot-spawn-adds-set`, `M-boot-ghc-from-path`, `M-boot-links-unchecked`, `M-boot-ghcup-on-warm-run`, `M-boot-recipe-stage-a-root`
+**Status**: Done
+**Implementation**: `src/agentctl/bootstrap/toolchain.py`, `src/agentctl/check/steps.py`, `tests/harness/host.py`, `tests/lanes/clean-host.Dockerfile`, `tests/oracles/bootstrap_plan.toml`, `tests/mutants/toolchain.toml`, `src/agentctl/check/toolchain.py`, `tests/harness/bootstrap.py`, `tests/harness/bootstrap_origin.py`, `tests/fixtures/bootstrap/toolchain_actor.py.txt`, `tests/oracles/toolchain_storage.toml`
+**Validation tests**: `tests/integration/test_toolchain.py::test_argv_never_sets`, `tests/integration/test_toolchain.py::test_whereis_paths_used_verbatim`, `tests/integration/test_toolchain.py::test_default_links_unchanged_by_step`, `tests/integration/test_toolchain.py::test_warm_run_spawns_only_version_checks`, `tests/integration/test_toolchain_real.py::test_resolved_ghc_reports_pin`, `tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle`, `tests/e2e/test_fresh_bootstrap.py::test_ghcup_digest_matches_pin`, `tests/e2e/test_fresh_bootstrap.py::test_no_default_links`, `tests/e2e/test_fresh_bootstrap.py::test_whereis_paths_report_pins`, `tests/unit/test_toolchain.py::test_apply_sequence_and_verified_record`, `tests/unit/test_toolchain.py::test_apply_refuses_partial_or_failed_resolution`, `tests/unit/test_toolchain.py::test_download_action_and_failure`, `tests/unit/test_toolchain.py::test_command_outputs_and_environment`, `tests/unit/test_toolchain.py::test_record_atomicity_and_storage_failure`, `tests/unit/test_toolchain.py::test_ensure_warm_and_cold_failures`, `tests/unit/test_toolchain_gate.py::test_storage_budget_values`, `tests/unit/test_toolchain_gate.py::test_native_readiness_and_warm_network_absence`, `tests/unit/test_toolchain_gate.py::test_readiness_failures_and_gate_step`, `tests/unit/test_toolchain_gate.py::test_pipeline_retains_python_legs_and_inserts_provisioning`, `tests/unit/test_toolchain_gate.py::test_reachability_opens_and_closes_owned_endpoints`, `tests/integration/test_toolchain.py::test_default_observation_failures`, `tests/integration/test_bootstrap_origin.py::test_absence_record_precedes_first_file`, `tests/integration/test_bootstrap_origin.py::test_existing_tool_and_mismatched_witness`
+**Mutants**: `M-boot-spawn-adds-set`, `M-boot-ghc-from-path`, `M-boot-links-unchecked`, `M-boot-ghcup-on-warm-run`, `M-boot-recipe-stage-a-root`, `M-boot-step-not-run`
 **Closes**: R4
-**Docs to update**: `documents/engineering/toolchain_bootstrap.md`, `documents/engineering/quality_gate.md`, `documents/engineering/testing.md`, `documents/reference/files_and_state.md`
+**Docs to update**: `documents/engineering/toolchain_bootstrap.md`, `documents/engineering/quality_gate.md`, `documents/engineering/testing.md`, `documents/reference/files_and_state.md`, `documents/architecture/python_haskell_boundary.md`
 
 #### Objective
 
@@ -238,13 +246,14 @@ code as check's `toolchain-ensure` step, and write the recipe of the clean-conta
   recorded paths verbatim, never `ghc` or `cabal` from PATH, and a warm run repeats only those two checks.
 - The `toolchain-ensure` step runs this code path between the `ty` and `fourmolu` legs, reads ghcup's unversioned
   `ghc` and `cabal` entries before and after, comparing link targets or bytes, and fails on any change.
-- `tests/harness/host.py` observes toolchain provenance: agentctl-installed when the pre-bootstrap record that only the
-  recipe writes is present, the user's otherwise.
+- `tests/harness/host.py` observes toolchain provenance: agentctl-installed when the pre-bootstrap record that the
+  independent host harness writes before first provisioning is present, the user's otherwise.
 - `tests/lanes/clean-host.Dockerfile` runs as a non-root user with NOPASSWD sudo. Stage A: `ubuntu:24.04` with
   `python3`, `pipx` and `sudo` only, the copied tree and the pre-bootstrap record, a `pipx install` of the copy
   without `--editable`, and `agentctl --assume-yes list`, required to end with the multiplexer-missing warning and
   status. Stage B adds tmux, git and the native agents, then `pipx install --force --editable '.[dev]'` and a plain
-  `agentctl check`; the expected stages are rows of `tests/oracles/bootstrap_plan.toml`.
+  `agentctl check`; the closing agent launches Stage B with `docker run --init` so orphaned native children are
+  reaped by the container's init process. The expected stages are rows of `tests/oracles/bootstrap_plan.toml`.
 - `tests/e2e/test_fresh_bootstrap.py` reads filesystem facts, never a journal agentctl wrote: for an agentctl-installed
   toolchain, ghcup's SHA-256, no unversioned `ghc` or `cabal`, and `whereis` paths that report the pins; for the user's,
   a ghcup at or above the floor and no second ghcup written.
@@ -279,11 +288,11 @@ code as check's `toolchain-ensure` step, and write the recipe of the clean-conta
 
 #### Remaining Work
 
-The whole sprint.
+None.
 
 ## Remaining Work
 
-The whole phase: Sprints 2.1–2.4.
+None.
 
 ## Documentation Requirements
 

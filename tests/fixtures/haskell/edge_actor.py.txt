@@ -1,0 +1,61 @@
+# Copyright (c) 2026 agentctl contributors.
+"""Private spawn observer exercising genuine Cabal initialization and vetoes."""
+
+import json
+import os
+import sys
+from dataclasses import replace
+from pathlib import Path
+
+from agentctl.bootstrap import build
+from agentctl.check import haskell, haskell_mutants
+from agentctl.check.audit import event_arguments
+from agentctl.hostfacts import current
+from agentctl.process import run
+from agentctl.result import Err, Ok
+
+mode, folder, project, outputs, cache, ghc, cabal, nonce = sys.argv[1:]
+folder = Path(folder)
+folder.mkdir(parents=True)
+host = current(Path(cache))
+home = folder / "home"
+home.mkdir()
+environment = dict(host.environment)
+environment.update({"HOME": str(home), "USERPROFILE": str(home), **{
+    f"XDG_{kind}_HOME": str(folder / kind.lower()) for kind in ("CACHE", "CONFIG", "DATA", "STATE")
+}})
+host = replace(host, home=home, environment=tuple(environment.items()))
+context = build.BuildContext(Path(project), Path(outputs), host, build.Toolchain(ghc, cabal))
+events = []
+def observe(event, arguments):
+    if event != "subprocess.Popen":
+        return
+    parsed = event_arguments(event, arguments)
+    assert isinstance(parsed, Ok), parsed
+    argv = parsed.value.argv
+    name = Path(argv[0]).stem
+    blocked = (
+        mode == "index-init" and "update" in argv[1:]
+        or mode == "suite-list" and "list-bin" in argv[1:]
+        or mode == "suite-execute" and "test" in argv[1:]
+        or mode == "mutant-execute" and name == "agentctl-core-test" and "--list-tests" not in argv[1:]
+    )
+    events.append({"nonce": nonce, "argv": list(argv), "blocked": blocked})
+    if blocked:
+        raise OSError("owned native boundary veto")
+sys.addaudithook(observe)
+control = run([sys.executable, "-c", "print('observer control')"], cwd=folder, env=environment)
+assert isinstance(control, Ok) and control.value.code == 0
+if mode == "index-init":
+    context = replace(context, host=replace(host, cache=folder / "cache"))
+    result = build.ensure_index(context)
+    config = context.cabal_directory / "config"
+    assert "url: https://hackage.haskell.org/" in config.read_text(encoding="utf-8")
+    assert not (context.cabal_directory / "agentctl-index-state").exists()
+elif mode == "mutant-execute":
+    result = haskell_mutants.selected_case(context, "haskell:agentctl-core-test/Handshake/protocol-fields", folder / "tasty.xml")
+else:
+    result = haskell.run_suites(context, folder / "reports", nonce)
+assert isinstance(result, Err), result
+assert "owned native boundary veto" in result.error.message
+print(json.dumps({"nonce": nonce, "events": events, "refused": True}))

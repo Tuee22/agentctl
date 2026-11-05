@@ -1,0 +1,44 @@
+[[mutant]]
+id = "M-auth-exit2-as-logged-out"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Agent/Auth.hs"
+search = "classifyAuth (Exited _) = CheckFailed"
+replace = "classifyAuth (Exited _) = LoggedOut"
+killers = ["tests/unit/test_auth_status.py::test_classify_auth_matches_oracle"]
+reason = "auth classification differs from oracle"
+
+[[mutant]]
+id = "M-auth-timeout-as-logged-in"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Agent/Auth.hs"
+search = "classifyAuth ProbeTimeout = CheckFailed"
+replace = "classifyAuth ProbeTimeout = LoggedIn"
+killers = ["tests/unit/test_auth_status.py::test_classify_auth_matches_oracle"]
+reason = "auth classification differs from oracle"
+
+[[mutant]]
+id = "M-auth-remedy-wrong-command"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Agent.hs"
+search = "      \"claude auth login\"\n"
+replace = "      \"claude login\"\n"
+killers = ["tests/unit/test_auth_status.py::test_remedy_names_the_command_to_type"]
+reason = "auth remedy differs from oracle"
+
+[[mutant]]
+id = "M-auth-pass-setup-token"
+operator = "delete"
+target = "src/agentctl/haskell/src/AgentCtl/Agent/Argv.hs"
+search = "\"setup-token\" `elem` options || "
+replace = ""
+killers = ["tests/unit/test_auth_status.py::test_login_shaped_args_refused"]
+reason = "login refusal differs from oracle"
+
+[[mutant]]
+id = "M-auth-probe-drops-env"
+operator = "delete"
+target = "src/agentctl/haskell/src/AgentCtl/Agent/Auth.hs"
+search = "probeInvocation entry executable = Process.Invocation executable (authArguments entry)"
+replace = "probeInvocation entry executable directory _ deadline = Process.Invocation executable (authArguments entry) directory [] deadline"
+killers = ["tests/integration/test_agent_auth_probe.py::test_probe_sees_caller_environment"]
+reason = "auth probe dropped caller environment"

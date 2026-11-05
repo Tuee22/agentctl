@@ -1,0 +1,623 @@
+[[case]]
+id = "preflight.order.0"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-15"
+input = { "subject" = "preflight-order", "mux" = "missing", "agent" = "present", "auth" = "logged-in" }
+expected = { "checks" = ["mux"], "outcome" = "MuxMissing", "exit" = 3 }
+
+[[case]]
+id = "preflight.order.1"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-15"
+input = { "subject" = "preflight-order", "mux" = "old", "agent" = "present", "auth" = "logged-in" }
+expected = { "checks" = ["mux"], "outcome" = "MuxOld", "exit" = 4 }
+
+[[case]]
+id = "preflight.order.2"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-15"
+input = { "subject" = "preflight-order", "mux" = "ready", "agent" = "missing", "auth" = "logged-in" }
+expected = { "checks" = ["mux", "agent"], "outcome" = "AgentMissing", "exit" = 5 }
+
+[[case]]
+id = "preflight.order.3"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-15"
+input = { "subject" = "preflight-order", "mux" = "ready", "agent" = "shim", "auth" = "logged-in" }
+expected = { "checks" = ["mux", "agent"], "outcome" = "NativeRequired", "exit" = 6 }
+
+[[case]]
+id = "preflight.order.4"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-15"
+input = { "subject" = "preflight-order", "mux" = "ready", "agent" = "present", "auth" = "logged-out" }
+expected = { "checks" = ["mux", "agent", "auth"], "outcome" = "LoggedOut", "exit" = 7 }
+
+[[case]]
+id = "preflight.order.5"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-15"
+input = { "subject" = "preflight-order", "mux" = "ready", "agent" = "present", "auth" = "failed" }
+expected = { "checks" = ["mux", "agent", "auth"], "outcome" = "AuthFailed", "exit" = 8 }
+
+[[case]]
+id = "preflight.order.6"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-15"
+input = { "subject" = "preflight-order", "mux" = "ready", "agent" = "present", "auth" = "logged-in" }
+expected = { "checks" = ["mux", "agent", "auth"], "outcome" = "Ready", "exit" = 0 }
+
+[[case]]
+id = "preflight.warning.claude.loggedout"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "request:R12"
+input = { "subject" = "preflight-warning", "agent" = "claude", "error" = "LoggedOut", "exit" = 2 }
+expected = { "exit" = 7, "lines" = ["agentctl: claude is not logged in, so no session was started.", "agentctl: log in yourself by typing: claude auth login"] }
+
+[[case]]
+id = "preflight.warning.codex.authfailed"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "request:R12"
+input = { "subject" = "preflight-warning", "agent" = "codex", "error" = "AuthFailed", "exit" = 2 }
+expected = { "exit" = 8, "lines" = ["agentctl: could not tell whether codex is logged in: `codex login status` exited 2.", "agentctl: run it yourself to see why; no session was started."] }
+
+[[case]]
+id = "agent.resolve.posix-first"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Linux", "agent" = "claude", "cwd" = "/work", "pathext" = [], "listings" = [{ "directory" = "/early", "files" = [{ "name" = "claude", "executable" = true }] }, { "directory" = "/later", "files" = [{ "name" = "claude", "executable" = true }] }] }
+expected = { "path" = "/early/claude" }
+
+[[case]]
+id = "agent.resolve.posix-executable"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Linux", "agent" = "codex", "cwd" = "/work", "pathext" = [], "listings" = [{ "directory" = "/early", "files" = [{ "name" = "codex", "executable" = false }] }, { "directory" = "/later", "files" = [{ "name" = "codex", "executable" = true }] }] }
+expected = { "path" = "/later/codex" }
+
+[[case]]
+id = "agent.resolve.posix-relative"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Linux", "agent" = "codex", "cwd" = "/work/app", "pathext" = [], "listings" = [{ "directory" = "bin", "files" = [{ "name" = "codex", "executable" = true }] }] }
+expected = { "path" = "/work/app/bin/codex" }
+
+[[case]]
+id = "agent.resolve.posix-empty-entry"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Linux", "agent" = "claude", "cwd" = "/work", "pathext" = [], "listings" = [{ "directory" = "", "files" = [{ "name" = "claude", "executable" = true }] }] }
+expected = { "path" = "/work/claude" }
+
+[[case]]
+id = "agent.resolve.darwin-executable"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Darwin", "agent" = "claude", "cwd" = "/work", "pathext" = [], "listings" = [{ "directory" = "/early", "files" = [{ "name" = "claude", "executable" = false }] }, { "directory" = "/later", "files" = [{ "name" = "claude", "executable" = true }] }] }
+expected = { "path" = "/later/claude" }
+
+[[case]]
+id = "agent.resolve.windows-case"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Windows", "agent" = "codex", "cwd" = "C:\\work", "pathext" = [".EXE", ".CMD"], "listings" = [{ "directory" = "C:\\Tools", "files" = [{ "name" = "cOdEx.ExE", "executable" = true }] }] }
+expected = { "path" = "C:\\Tools\\cOdEx.ExE" }
+
+[[case]]
+id = "agent.resolve.windows-extension-order"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Windows", "agent" = "codex", "cwd" = "C:\\work", "pathext" = [".CMD", ".EXE"], "listings" = [{ "directory" = "C:\\tools", "files" = [{ "name" = "codex.exe", "executable" = true }, { "name" = "codex.cmd", "executable" = true }] }] }
+expected = { "error" = "NativeRequired", "path" = "C:\\tools\\codex.cmd" }
+
+[[case]]
+id = "agent.resolve.windows-path-order"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Windows", "agent" = "codex", "cwd" = "C:\\work", "pathext" = [".EXE", ".CMD"], "listings" = [{ "directory" = "C:\\early", "files" = [{ "name" = "codex.cmd", "executable" = true }] }, { "directory" = "C:\\later", "files" = [{ "name" = "codex.exe", "executable" = true }] }] }
+expected = { "error" = "NativeRequired", "path" = "C:\\early\\codex.cmd" }
+
+[[case]]
+id = "agent.resolve.windows-bat"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Windows", "agent" = "claude", "cwd" = "C:\\work", "pathext" = [".EXE", ".BAT"], "listings" = [{ "directory" = "C:\\tools", "files" = [{ "name" = "claude.BAT", "executable" = true }] }] }
+expected = { "error" = "NativeRequired", "path" = "C:\\tools\\claude.BAT" }
+
+[[case]]
+id = "agent.resolve.windows-relative"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Windows", "agent" = "claude", "cwd" = "D:\\workspace", "pathext" = [".EXE"], "listings" = [{ "directory" = "bin", "files" = [{ "name" = "CLAUDE.EXE", "executable" = true }] }] }
+expected = { "path" = "D:\\workspace\\bin\\CLAUDE.EXE" }
+
+[[case]]
+id = "agent.resolve.windows-default-pathext"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Windows", "agent" = "codex", "cwd" = "C:\\work", "pathext" = [], "listings" = [{ "directory" = "C:\\tools", "files" = [{ "name" = "codex.exe", "executable" = true }] }] }
+expected = { "path" = "C:\\tools\\codex.exe" }
+
+[[case]]
+id = "agent.resolve.windows-unexecutable"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Windows", "agent" = "codex", "cwd" = "C:\\work", "pathext" = [".EXE"], "listings" = [{ "directory" = "C:\\tools", "files" = [{ "name" = "codex.exe", "executable" = false }] }] }
+expected = { "error" = "AgentMissing" }
+
+[[case]]
+id = "agent.resolve.posix-case"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Linux", "agent" = "claude", "cwd" = "/work", "pathext" = [], "listings" = [{ "directory" = "/tools", "files" = [{ "name" = "CLAUDE", "executable" = true }] }] }
+expected = { "error" = "AgentMissing" }
+
+[[case]]
+id = "agent.resolve.missing"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Linux", "agent" = "claude", "cwd" = "/work", "pathext" = [], "listings" = [] }
+expected = { "error" = "AgentMissing" }
+
+[[case]]
+id = "agent.resolve.relative-cwd"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Linux", "agent" = "claude", "cwd" = "relative", "pathext" = [], "listings" = [{ "directory" = "bin", "files" = [{ "name" = "claude", "executable" = true }] }] }
+expected = { "error" = "InvalidDirectory" }
+
+[[case]]
+id = "agent.resolve.windows-drive-relative-cwd"
+requirement = "R12.2"
+quote = "that claude / codex is available, and that the session is logged in"
+provenance = "decision:D-60"
+input = { "subject" = "agent-resolution", "family" = "Windows", "agent" = "claude", "cwd" = "C:relative", "pathext" = [".EXE"], "listings" = [] }
+expected = { "error" = "InvalidDirectory" }
+
+[[case]]
+id = "preflight.warning.linux.claude.missing"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Linux", "agent" = "claude", "error" = "AgentMissing" }
+expected = { "exit" = 5, "lines" = ["agentctl: claude was not found on PATH.", "agentctl: install it with: curl -fsSL https://claude.ai/install.sh | bash"] }
+
+[[case]]
+id = "preflight.warning.linux.codex.missing"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Linux", "agent" = "codex", "error" = "AgentMissing" }
+expected = { "exit" = 5, "lines" = ["agentctl: codex was not found on PATH.", "agentctl: install it with: curl -fsSL https://chatgpt.com/codex/install.sh | sh"] }
+
+[[case]]
+id = "preflight.warning.linux.mux-missing"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Linux", "agent" = "claude", "error" = "MuxMissing" }
+expected = { "exit" = 3, "lines" = ["agentctl: tmux 3.2 or later is required, and none was found on PATH.", "agentctl: install it with: sudo apt install tmux"] }
+
+[[case]]
+id = "preflight.warning.linux.mux-old"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Linux", "agent" = "claude", "error" = "MuxOld", "path" = "/usr/bin/tmux", "version" = "tmux 3.1c" }
+expected = { "exit" = 4, "lines" = ["agentctl: tmux 3.1c at /usr/bin/tmux is older than 3.2, the oldest version agentctl supports.", "agentctl: install it with: sudo apt install tmux"] }
+
+[[case]]
+id = "preflight.warning.darwin.claude.missing"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Darwin", "agent" = "claude", "error" = "AgentMissing" }
+expected = { "exit" = 5, "lines" = ["agentctl: claude was not found on PATH.", "agentctl: install it with: curl -fsSL https://claude.ai/install.sh | bash"] }
+
+[[case]]
+id = "preflight.warning.darwin.codex.missing"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Darwin", "agent" = "codex", "error" = "AgentMissing" }
+expected = { "exit" = 5, "lines" = ["agentctl: codex was not found on PATH.", "agentctl: install it with: curl -fsSL https://chatgpt.com/codex/install.sh | sh"] }
+
+[[case]]
+id = "preflight.warning.darwin.mux-missing"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Darwin", "agent" = "claude", "error" = "MuxMissing" }
+expected = { "exit" = 3, "lines" = ["agentctl: tmux 3.2 or later is required, and none was found on PATH.", "agentctl: install it with: brew install tmux"] }
+
+[[case]]
+id = "preflight.warning.darwin.mux-old"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Darwin", "agent" = "claude", "error" = "MuxOld", "path" = "/usr/bin/tmux", "version" = "tmux 3.1c" }
+expected = { "exit" = 4, "lines" = ["agentctl: tmux 3.1c at /usr/bin/tmux is older than 3.2, the oldest version agentctl supports.", "agentctl: install it with: brew install tmux"] }
+
+[[case]]
+id = "preflight.warning.windows.claude.missing"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Windows", "agent" = "claude", "error" = "AgentMissing" }
+expected = { "exit" = 5, "lines" = ["agentctl: claude was not found on PATH.", "agentctl: install it with: winget install Anthropic.ClaudeCode"] }
+
+[[case]]
+id = "preflight.warning.windows.codex.missing"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Windows", "agent" = "codex", "error" = "AgentMissing" }
+expected = { "exit" = 5, "lines" = ["agentctl: codex was not found on PATH.", "agentctl: install it with: powershell -ExecutionPolicy ByPass -c \"irm https://chatgpt.com/codex/install.ps1 | iex\""] }
+
+[[case]]
+id = "preflight.warning.windows.mux-missing"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Windows", "agent" = "claude", "error" = "MuxMissing" }
+expected = { "exit" = 3, "lines" = ["agentctl: psmux 3.4.0 or later is required, and none was found on PATH.", "agentctl: install it with: winget install psmux"] }
+
+[[case]]
+id = "preflight.warning.windows.mux-old"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Windows", "agent" = "claude", "error" = "MuxOld", "path" = "C:\\tools\\psmux.exe", "version" = "psmux 3.3.8" }
+expected = { "exit" = 4, "lines" = ["agentctl: psmux 3.3.8 at C:\\tools\\psmux.exe is older than 3.4.0, the oldest version agentctl supports.", "agentctl: install it with: winget install psmux"] }
+
+[[case]]
+id = "preflight.warning.windows.shim"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Windows", "agent" = "codex", "error" = "NativeRequired", "path" = "C:\\tools\\codex.cmd" }
+expected = { "exit" = 6, "lines" = ["agentctl: codex resolves only to C:\\tools\\codex.cmd; agentctl starts only a native codex.exe.", "agentctl: install it with: powershell -ExecutionPolicy ByPass -c \"irm https://chatgpt.com/codex/install.ps1 | iex\""] }
+
+[[case]]
+id = "preflight.warning.linux.malformed"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Linux", "agent" = "claude", "error" = "MuxMalformed", "version" = "unknown output" }
+expected = { exit = 4, lines = ["agentctl: unrecognised tmux version at /usr/bin/tmux: \"unknown output\"", "agentctl: install it with: sudo apt install tmux"] }
+
+[[case]]
+id = "preflight.warning.linux.mux-probe-failed"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Linux", "agent" = "claude", "error" = "MuxProbeFailed" }
+expected = { exit = 3, lines = ["agentctl: could not check the multiplexer version.", "agentctl: install it with: sudo apt install tmux"] }
+
+[[case]]
+id = "preflight.warning.linux.mux-probe-exit"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Linux", "agent" = "claude", "error" = "MuxProbeExit", "path" = "/tools/tmux", "exit" = 9 }
+expected = { exit = 3, lines = ["agentctl: the multiplexer version check at /tools/tmux exited 9.", "agentctl: install it with: sudo apt install tmux"] }
+
+[[case]]
+id = "preflight.warning.linux.mux-discovery"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Linux", "agent" = "claude", "error" = "MuxDiscoveryFailed" }
+expected = { exit = 3, lines = ["agentctl: could not inspect PATH for the multiplexer.", "agentctl: install it with: sudo apt install tmux"] }
+
+[[case]]
+id = "preflight.warning.linux.agent-discovery"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Linux", "agent" = "claude", "error" = "AgentDiscoveryFailed" }
+expected = { exit = 5, lines = ["agentctl: could not inspect PATH for claude.", "agentctl: install it with: curl -fsSL https://claude.ai/install.sh | bash"] }
+
+[[case]]
+id = "preflight.warning.linux.invalid-directory"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-60"
+input = { "subject" = "preflight-warning", "family" = "Linux", "agent" = "claude", "error" = "InvalidDirectory", "path" = "relative" }
+expected = { exit = 5, lines = ["agentctl: the agent search requires an absolute working directory.", "agentctl: install it with: curl -fsSL https://claude.ai/install.sh | bash"] }
+
+[[case]]
+id = "launch.plan.refused-2"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "refused", status = 2, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 2 }
+
+[[case]]
+id = "launch.plan.preflight-2"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "preflight-failed", status = 2, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 2 }
+
+[[case]]
+id = "launch.plan.refused-3"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "refused", status = 3, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 3 }
+
+[[case]]
+id = "launch.plan.preflight-3"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "preflight-failed", status = 3, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 3 }
+
+[[case]]
+id = "launch.plan.refused-4"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "refused", status = 4, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 4 }
+
+[[case]]
+id = "launch.plan.preflight-4"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "preflight-failed", status = 4, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 4 }
+
+[[case]]
+id = "launch.plan.refused-5"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "refused", status = 5, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 5 }
+
+[[case]]
+id = "launch.plan.preflight-5"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "preflight-failed", status = 5, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 5 }
+
+[[case]]
+id = "launch.plan.refused-6"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "refused", status = 6, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 6 }
+
+[[case]]
+id = "launch.plan.preflight-6"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "preflight-failed", status = 6, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 6 }
+
+[[case]]
+id = "launch.plan.refused-7"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "refused", status = 7, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 7 }
+
+[[case]]
+id = "launch.plan.preflight-7"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "preflight-failed", status = 7, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 7 }
+
+[[case]]
+id = "launch.plan.refused-8"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "refused", status = 8, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 8 }
+
+[[case]]
+id = "launch.plan.preflight-8"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-15"
+input = { subject = "launch-plan", state = "preflight-failed", status = 8, tty = false, inside = false, args = false }
+expected = { actions = ["warn-failure"], exit = 8 }
+
+[[case]]
+id = "launch.plan.exit-0"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-11"
+input = { subject = "launch-plan", state = "exited", status = 0, tty = false, inside = false, args = false }
+expected = { actions = ["capture", "kill", "warn-exit"], exit = 0 }
+
+[[case]]
+id = "launch.plan.exit-3"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-11"
+input = { subject = "launch-plan", state = "exited", status = 3, tty = false, inside = false, args = false }
+expected = { actions = ["capture", "kill", "warn-exit"], exit = 3 }
+
+[[case]]
+id = "launch.plan.fresh"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "fresh", status = 0, tty = false, inside = false, args = false }
+expected = { actions = ["preflight", "create"], exit = 0 }
+
+[[case]]
+id = "launch.plan.dead-leftover"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "dead-leftover", status = 0, tty = false, inside = false, args = false }
+expected = { actions = ["kill", "preflight", "create"], exit = 0 }
+
+[[case]]
+id = "launch.plan.reattach-0-0-0"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "reattach", status = 0, tty = false, inside = false, args = false }
+expected = { actions = ["print-attach"], exit = 0 }
+
+[[case]]
+id = "launch.plan.alive-0-0-0"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "alive", status = 0, tty = false, inside = false, args = false }
+expected = { actions = ["release", "print-attach"], exit = 0 }
+
+[[case]]
+id = "launch.plan.reattach-0-0-1"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "reattach", status = 0, tty = false, inside = false, args = true }
+expected = { actions = ["notice", "print-attach"], exit = 0 }
+
+[[case]]
+id = "launch.plan.alive-0-0-1"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "alive", status = 0, tty = false, inside = false, args = true }
+expected = { actions = ["release", "print-attach"], exit = 0 }
+
+[[case]]
+id = "launch.plan.reattach-0-1-0"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "reattach", status = 0, tty = false, inside = true, args = false }
+expected = { actions = ["print-attach"], exit = 0 }
+
+[[case]]
+id = "launch.plan.alive-0-1-0"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "alive", status = 0, tty = false, inside = true, args = false }
+expected = { actions = ["release", "print-attach"], exit = 0 }
+
+[[case]]
+id = "launch.plan.reattach-0-1-1"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "reattach", status = 0, tty = false, inside = true, args = true }
+expected = { actions = ["notice", "print-attach"], exit = 0 }
+
+[[case]]
+id = "launch.plan.alive-0-1-1"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "alive", status = 0, tty = false, inside = true, args = true }
+expected = { actions = ["release", "print-attach"], exit = 0 }
+
+[[case]]
+id = "launch.plan.reattach-1-0-0"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "reattach", status = 0, tty = true, inside = false, args = false }
+expected = { actions = ["attach"], exit = 0 }
+
+[[case]]
+id = "launch.plan.alive-1-0-0"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "alive", status = 0, tty = true, inside = false, args = false }
+expected = { actions = ["release", "attach"], exit = 0 }
+
+[[case]]
+id = "launch.plan.reattach-1-0-1"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "reattach", status = 0, tty = true, inside = false, args = true }
+expected = { actions = ["notice", "attach"], exit = 0 }
+
+[[case]]
+id = "launch.plan.alive-1-0-1"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "alive", status = 0, tty = true, inside = false, args = true }
+expected = { actions = ["release", "attach"], exit = 0 }
+
+[[case]]
+id = "launch.plan.reattach-1-1-0"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "reattach", status = 0, tty = true, inside = true, args = false }
+expected = { actions = ["switch"], exit = 0 }
+
+[[case]]
+id = "launch.plan.alive-1-1-0"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "alive", status = 0, tty = true, inside = true, args = false }
+expected = { actions = ["release", "switch"], exit = 0 }
+
+[[case]]
+id = "launch.plan.reattach-1-1-1"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "reattach", status = 0, tty = true, inside = true, args = true }
+expected = { actions = ["notice", "switch"], exit = 0 }
+
+[[case]]
+id = "launch.plan.alive-1-1-1"
+requirement = "R12"
+quote = "if any of these are not the case tmux should be closed and a warning message printed"
+provenance = "decision:D-13"
+input = { subject = "launch-plan", state = "alive", status = 0, tty = true, inside = true, args = true }
+expected = { actions = ["release", "switch"], exit = 0 }

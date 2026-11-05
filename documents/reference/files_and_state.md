@@ -34,11 +34,14 @@ of `agentctl check` adds a run directory under the system temporary directory, d
 
 ```text
 <cache>/
+  toolchain-paths.toml     the absolute GHC and cabal paths from resolution, preserved as returned
   build/<digest>/          the build tree for one digest of the bundled Haskell sources and pins
+    build.lock             native advisory lock shared by build and binary identity
   cabal/                   the private CABAL_DIR: configuration, package index and store
   tools/<pin-digest>/      the pinned fourmolu and hlint, used only by agentctl check
 <data>/
   bin/<digest>/            the core binary built for that digest; never overwritten
+  locks/<digest>.publish.lock  native advisory lock serialising publication
 <state>/
   launch/                  mode 0700: launch specs, each mode 0600 and gone once its pane starts
   adopted.json             the adopted-pane registry
@@ -47,13 +50,40 @@ of `agentctl check` adds a run directory under the system temporary directory, d
   locks/
     check.lock             held by agentctl check
     supervisor.lock        held by agentctl supervisor run
+    watch.lock             serialises watch intent updates and pre-send checks
   live-acceptance/         the fixed folder live tests start the real agents in
 ```
+
+The style pin digest length-prefixes each name and version, in the order `ghc`, `fourmolu`, `hlint` and
+`ghc_lib_parser`, then hashes those fields with SHA-256. A compiler, tool or parser constraint change selects a new
+directory. Builds use the private Cabal store and `cache/build/style-<pin-digest>`; both executable files are
+verified in a private staging directory before the directory is published. An existing directory is verified and
+reused, and a damaged one fails without being overwritten
+(`tests/unit/test_style_tools.py::test_style_identity_and_install_arguments`,
+`tests/integration/test_style_cache.py::test_tools_publish_together_and_keep_existing`,
+`tests/integration/test_style_cache.py::test_incomplete_or_wrong_version_tools_refused`).
 
 A change to the bundled sources or the pins gives a new digest and so a new path, which is why an old binary never runs
 for new sources and nothing is replaced in place. [Haskell package, quality legs and digest-keyed build](../../DEVELOPMENT_PLAN/phase-3-haskell-package-and-build.md)
 builds `cache` and `data`, as [the binary build](../engineering/binary_build.md) describes; the build of one digest runs
-under a lock inside its own build tree.
+under a lock inside its own build tree. Publication has a separate lock under `data/locks/`; temporary staging
+directories under `data/bin/` are removed, while published digest directories remain immutable
+(`tests/integration/test_build_cache.py::test_waiter_uses_published_winner`,
+`tests/integration/test_binary_boundaries.py::test_publication_failures_never_replace_existing`).
+
+The toolchain path record has exactly the string fields `ghc` and `cabal`. Each path is absolute and its spelling
+is preserved. Warm runs check both executables with `--numeric-version`; a malformed record reports its cache
+remedy, and a path that no longer answers at its pin requires resolution again
+([toolchain bootstrap](../engineering/toolchain_bootstrap.md)).
+Both paths are verified before a mode-0600 temporary record is atomically published. A failed install or resolution
+keeps the prior file intact (`tests/unit/test_toolchain.py::test_record_atomicity_and_storage_failure`).
+Compiler probes use a private temporary directory and remove their C source and link output afterward. Ordinary
+commands use the cache; check gives P9 a workspace inside its own run directory.
+
+The independent host harness owns `state/pre-bootstrap.json`, an initial absence witness containing the host,
+configured ghcup path and nonce. The provisioning code never writes it. It is created automatically only when the
+observed tools are absent and is never rewritten. A different host or prefix fails its validation; it cannot certify
+a pristine host by itself (`tests/integration/test_bootstrap_origin.py::test_existing_tool_and_mismatched_witness`).
 
 ## Launch Specs
 
@@ -63,6 +93,11 @@ options are set. The session's pane runs the core binary's
 `pane-exec` command, the pane trampoline, with the spec's path as its only argument. The trampoline waits for the spec to appear, reads it,
 deletes it, and then becomes the agent through `execve` (Linux, macOS) or starts the agent as a child process (Windows).
 
+Each reservation is an unpredictable private directory named `<session>.launch-<random>` under `launch/`, holding
+`spec.json` and its matching `status.json`. A successful launch leaves spec deletion to the trampoline. Later
+launches remove completed status directories for that session; POSIX also removes its empty reservation directories.
+Only those exact owned artifacts are removed, and a directory with other files is left alone.
+
 The spec is the one place the launching shell's environment is written, and it is on no command line: the pane's command
 line carries only the spec's path. The directory is mode 0700 and each spec mode 0600 on Linux and macOS; on Windows they
 take the access rules of the per-user directory they sit in. A launch that fails before its pane starts deletes its spec.
@@ -71,7 +106,8 @@ take the access rules of the per-user directory they sit in. A launch that fails
 {
   "argv": ["/home/me/.local/bin/claude", "--add-dir", "../lib", "--dangerously-skip-permissions"],
   "cwd": "/home/me/src/api",
-  "env": {"HOME": "/home/me", "PATH": "/home/me/.local/bin:/usr/bin:/bin"}
+  "env": {"HOME": "/home/me", "PATH": "/home/me/.local/bin:/usr/bin:/bin"},
+  "status": "/home/me/.local/state/agentctl/launch/unique.status.json"
 }
 ```
 
@@ -80,9 +116,20 @@ take the access rules of the per-user directory they sit in. A launch that fails
 | `argv` | The agent's absolute path, then its arguments: your ARGS with the mandatory flags in place |
 | `cwd` | The canonical folder the session was launched from |
 | `env` | The complete environment of the `agentctl` command that launched it |
+| `status` | The absolute status-file path reserved beside this spec; Windows publishes the agent's exit status here |
 
 On Windows the trampoline also writes the agent's exit status to a status file beside the spec, which instant-exit
 capture reads, because psmux reports the status of every dead pane as 0.
+The status file is a JSON integer published by renaming a private temporary file. Its path must share the spec's
+canonical parent and must not alias the spec. Malformed specs and invalid program values are refused before the
+source is removed.
+
+The native snapshot reads at most 32 MiB from the opened spec and refuses a larger file. Linux and macOS inspect
+the opened parent directory and file, reject final symbolic links and retain owner and mode facts from those
+descriptors. Windows inspects real owner SIDs and DACLs, rejects reparse points, and treats access limited to the
+current user, LocalSystem and builtin Administrators as private. A null DACL, other effective allow entries or an
+unsupported ACE form is refused. The common policy applies the equivalent private-file and directory permissions;
+Windows ownership is never inferred from emulated POSIX ids.
 
 ## Adopted-Pane Registry
 
@@ -90,6 +137,8 @@ capture reads, because psmux reports the status of every dead pane as 0.
 `<state>/adopted.json`, the panes `agentctl adopt` registered. Managed sessions are not in it: each one's identity lives
 in its own session options, `@agentctl_agent`, `@agentctl_folder` and `@agentctl_owner`, so the multiplexer server is
 the only record of them and none outlives its session.
+The `@agentctl_status` option carries the private trampoline status-file path for reporting a retained dead psmux
+pane's exit status; it does not add a managed-session registry.
 
 ```json
 {"panes": [{"socket": "/tmp/tmux-1000/default", "pane": "%3", "pid": 48213, "agent": "codex"}]}
@@ -103,6 +152,15 @@ the only record of them and none outlives its session.
 | `agent` | `claude` or `codex`, as `--agent` gave it |
 
 The field name does not require a filesystem socket on Windows; the adapter owns the endpoint's representation.
+For psmux it is a JSON-array string containing `psmux`, its reported namespace and its stable session id. The registry
+has exactly one `panes` array; entries have exactly the fields above, positive pids, valid pane ids and known agents.
+Duplicate pane ids and malformed or unsafe files are refused without rewriting their bytes. Publication writes a
+0600 temporary file beside the target and renames it into place. Native preparation verifies the application state
+root's ownership and ordinary directory kind, refuses a final link and makes that root private before publication.
+It preserves existing child files and their permissions; the [native state controls](../engineering/code_standards.md#haskell)
+describe that boundary. Registry refusal and publication are exercised by
+`tests/e2e/test_adopt.py::test_registry_rejects_invalid_state` and
+`tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership`.
 Every use compares the recorded endpoint with the addressed server and requires the pane id to exist there with its
 recorded pid. An absent server, socket mismatch, missing pane or different pid makes the entry stale: agentctl reports
 it as stale and never captures from or sends to it. A server restart that reuses the socket, pane id and pid is not
@@ -114,13 +172,18 @@ detected. `agentctl stop` on an adopted pane removes its entry and leaves the pa
 observes, keyed by name:
 
 ```json
-{"watched": {"api-claude": {"paused": false}, "%3": {"paused": true}}}
+{"revision": 2, "watched": {"api-claude": {"paused": false, "revision": 1}, "%3": {"paused": true, "revision": 2}}}
 ```
 
 `agentctl watch` adds an entry, `pause` and `resume-watch` set and clear `paused`, and `unwatch` removes the entry; none
-of them touches the session. The supervisor reads the file on every poll, so a change takes effect while it runs.
+of them touches the session. The supervisor reads the file on every poll, so a change takes effect while it runs. Effective changes advance the registry revision and the affected entry's revision; repeats preserve both. A pause and resume between polls therefore still establish a new baseline, while another target's change does not reset this one.
 A paused entry produces no pane capture or machine step and drops its open incident. The first capture after watch,
 resume or supervisor start establishes a baseline whose existing errors count as handled.
+
+Watch and resume require a current managed session or validated adopted pane. Pause and unwatch can disable an
+existing stale entry. An absent unwatch is a repeat notice, and repeated commands leave the file byte-identical.
+The registry uses the same owned private snapshot and atomic replacement boundary as the adopted-pane registry
+(`tests/e2e/test_watch_commands.py::test_watch_refuses_foreign_target`).
 
 ## Decision Log
 
@@ -132,7 +195,7 @@ object per line, from the one supervisor that holds the supervisor lock. Every r
 | `time` | When it happened, in UTC, as ISO 8601 |
 | `run` | The supervisor run's fresh identifier, shared by that run's records |
 | `target` | The session or pane name, as `agentctl list` prints it |
-| `agent` | `claude` or `codex` |
+| `agent` | `claude` or `codex`; `unknown` only for a disappearance notification when startup cannot resolve an old watch entry |
 | `kind` | `observation`, `decision`, `attempt`, `result` or `notify` |
 
 | Kind | Records |
@@ -145,18 +208,39 @@ object per line, from the one supervisor that holds the supervisor lock. Every r
 
 The rows of `tests/oracles/log_records.toml` fix each kind's required fields. Decisions are flushed before their effects;
 attempts record the guard or send outcome as soon as it is known, and results are flushed at incident closure.
+Decision states describe the proposed pure step; an aborted or failed attempt does not commit a recovery-sent
+state. Observations contain the class, fingerprint and state, never captured text. The reader tolerates only an
+unterminated in-flight suffix while the supervisor holds its lock; after release that suffix is corruption.
+The writer validates existing history before it can append. Native appends check the opened file's ownership,
+private permissions, regular-file kind and single link, without following a final link. They preserve existing
+bytes and flush before returning. Log snapshots allow the writer's append handle and read the initial-length
+prefix; they do not inherit the launch-spec reader's 32 MiB limit. The launch-spec reader retains that bound and
+its stronger exclusion and growth checks.
 `agentctl logs NAME` prints NAME's records. Deleting the file while no supervisor runs loses the history and nothing else.
 
 ## Locks
 
-Each lock is a file under `<state>/locks/` on which its holder keeps an operating-system file lock for as long as it
-runs, so the lock is released when the holder exits, even after a crash. The file holds the holder's process id as text,
-which a command that finds the lock taken prints in its warning.
+Each holder keeps an operating-system advisory file lock until scope exit or process exit. The check and supervisor
+locks live under `<state>/locks/` and hold the holder's process id as text for refusal diagnostics. Build and publication
+locks live beside their owned caches, contain no pid, and wait for at most 30 minutes on contention. Other kernel errors
+fail immediately (`tests/integration/test_binary_boundaries.py::test_native_lock_contention_timeout_and_exception_release`,
+`tests/integration/test_binary_boundaries.py::test_native_lock_spawn_hash_and_publication_race_controls`).
 
 | Lock | Held by | Effect | Owning phase |
 |---|---|---|---|
 | `check.lock` | `agentctl check` | One check runs at a time per user; a second exits non-zero (precondition P5) | [Governance, documentation standards and the check skeleton](../../DEVELOPMENT_PLAN/phase-0-governance-and-check-skeleton.md) |
 | `supervisor.lock` | `agentctl supervisor run` | One supervisor runs at a time per user; a second exits non-zero | [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) |
+| `watch.lock` | watch commands and supervisor pre-send checks | Reloads and updates watch intent in one critical section, waiting at most five seconds | [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) |
+| `<cache>/build/<digest>/build.lock` | native build and binary identity | Serialises work on one digest and rechecks the publish after waiting | [Haskell package, quality legs and digest-keyed build](../../DEVELOPMENT_PLAN/phase-3-haskell-package-and-build.md) |
+| `<data>/locks/<digest>.publish.lock` | binary publication | Serialises publication without changing existing digest directories | [Haskell package, quality legs and digest-keyed build](../../DEVELOPMENT_PLAN/phase-3-haskell-package-and-build.md) |
+
+Supervisor and watch locks use POSIX `flock` or Windows `LockFileEx`, not the presence of a PID file. They refuse
+linked, foreign, non-regular or non-private entries. These lock files are retained after release and updated in
+place while the handle owns the lock; replacing or unlinking their inode would break exclusion. A leading newline
+reserves byte zero for the Windows byte-range lock, followed by the decimal PID and a newline, so another handle
+can read the PID without reading the locked byte. A contender racing initial PID publication may report an unknown
+holder, but cannot acquire the held lock. Watch updates hold `watch.lock` across reload, transition and atomic
+publication of `watch.json`; concurrent commands preserve every change.
 
 ## Live-Test Folder
 
@@ -175,14 +259,17 @@ the checkout:
 - the bytecode of check and every child it starts, through `PYTHONPYCACHEPREFIX`, so nothing is compiled into the tree;
 - the sockets of private tmux servers, through `TMUX_TMPDIR`, or psmux's registry, through `PSMUX_DATA_DIR`, on Windows;
 - the empty configuration home the Python tools run with, so no user-level configuration reaches them;
-- the run's nonce, and the node ids the test session collected and executed.
+- the run's nonce, the node ids the test session collected and executed, and nonce-bound observer records under `observers/`;
+- `bootstrap-host.json`, the independent binary digest and default-selection entries observed before provisioning;
+- `mux-host/mux-host.json`, the independent multiplexer path, version, qualification and current nonce; its probe
+  uses an owned home and, on Windows, an owned psmux registry with warm servers disabled;
+- the source, ref and installed-distribution snapshots that the integrity finalizers compare.
 
 The directory stays short enough that a private tmux socket path inside it is at most 100 bytes (precondition P6); when
 the system temporary directory is too deep, set `TMPDIR` to a shorter one. Nothing in it is read by a later run, so no
 test outcome or mutant kill outlives the run that produced it. A run that is killed leaves its directory behind, and
 deleting it is safe once no check is running. [Governance, documentation standards and the check skeleton](../../DEVELOPMENT_PLAN/phase-0-governance-and-check-skeleton.md)
-creates it, and [Gate-integrity apparatus](../../DEVELOPMENT_PLAN/phase-1-gate-integrity-apparatus.md) adds the bytecode
-prefix.
+creates it and redirects child bytecode into it; [Gate-integrity apparatus](../../DEVELOPMENT_PLAN/phase-1-gate-integrity-apparatus.md) compares the guarded tree and interpreter around the run.
 
 ## Related
 

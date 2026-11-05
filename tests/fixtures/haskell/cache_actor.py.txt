@@ -1,0 +1,48 @@
+# Copyright (c) 2026 agentctl contributors.
+"""A warm binary observer whose unexpected provisioning candidates are harmless."""
+
+import json
+import sys
+from dataclasses import replace
+from pathlib import Path
+
+from agentctl.bootstrap import binary, build, toolchain
+from agentctl.check.audit import event_arguments
+from agentctl.hostfacts import current
+from agentctl.result import Ok
+
+project, pins, cache, data, home, ghc, harmless, nonce, marker = sys.argv[1:]
+host = current(Path(cache))
+environment = dict(host.environment)
+environment.update({
+    "PATH": "", "HOME": home, "USERPROFILE": home,
+    "GHCUP_INSTALL_BASE_PREFIX": home,
+    **{f"XDG_{kind}_HOME": str(Path(home) / kind.lower())
+       for kind in ("CACHE", "CONFIG", "DATA", "STATE")},
+})
+host = replace(host, home=Path(home), environment=tuple(environment.items()),
+               interactive=False, assume_yes=False)
+tools = toolchain.Toolchain(ghc, harmless)
+assert isinstance(toolchain.record(tools, host.cache), Ok)
+events = []
+
+def observe(event, arguments):
+    if marker and event in {"fcntl.flock", "msvcrt.locking"}:
+        Path(marker).touch()
+    if event != "subprocess.Popen":
+        return
+    parsed = event_arguments(event, arguments)
+    assert isinstance(parsed, Ok)
+    argv = parsed.value.argv
+    blocked = Path(argv[0]).stem != "agentctl-core"
+    events.append({"nonce": nonce, "argv": list(argv), "blocked": blocked})
+    if blocked:
+        raise OSError("owned cache spawn veto")
+
+sys.addaudithook(observe)
+result = binary.ensure(binary.Request(Path(project), Path(pins), host, Path(data)),
+                       lock_timeout=10)
+assert isinstance(result, Ok), "digest hit rebuilt or probed the toolchain"
+context = build.BuildContext(Path(project), Path(cache) / "unused", host, tools)
+assert binary.verify_handshake(context, result.value) == Ok(None)
+print(json.dumps({"nonce": nonce, "binary": str(result.value), "events": events}))
