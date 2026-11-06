@@ -345,12 +345,23 @@ registered pids are gone. It then removes its stale socket and completed registr
 socket still fails containment (`tests/integration/test_mux_real.py::test_containment_sees_leftover_server`).
 
 The Windows harness uses its own PSMUX_DATA_DIR with PSMUX_NO_WARM=1 and registers each native per-session server.
+The Darwin harness supplies a uid-bound `__CF_USER_TEXT_ENCODING` in its private caller environment to keep
+CoreFoundation's text-encoding setup inside the constructed environment. The complete environment-key assertion
+continues to require exactly the spec's keys plus the pane's TERM, TMUX and TMUX_PANE
+(`tests/integration/test_mux_real.py::test_private_server_roundtrip`).
 The test-only native fixture invokes the production typed interpreter, with independent raw clients observing the
 server. The compiled fake agent records literal argv, cwd, environment keys, its actual session and pid, and the
 fresh nonce; it reports no environment values. A second disposable server is the foreign-endpoint control, so the
 scope-guard mutant cannot touch a user's server
 (`tests/integration/test_tmux_harness.py::test_kill_server_refuses_foreign_socket`,
 `tests/integration/test_fake_agent.py::test_record_carries_nonce`).
+
+The compiled mux relay is copied to a new owned file and renamed over the disposable native client. This supports
+read-only native executable copies while preserving the real backend separately
+(`tests/e2e/test_launch.py::test_hostile_folder_name_runs_nothing`). Installer-veto fixtures copy executable bytes and
+permission bits without carrying protected system flags (`tests/integration/test_toolchain.py::test_argv_never_sets`).
+The private run directory is canonicalized before deriving binary and socket paths, so an aliased temporary root
+retains the same exact executable-argument assertion (`tests/e2e/test_passthrough_argv.py::test_through_stack_rows`).
 
 
 ## Auth probes and installed-agent controls
@@ -509,6 +520,10 @@ and unwatch. Foreign and missing watch refusals preserve exact state bytes besid
 `tests/e2e/test_watch_commands.py::test_list_and_status_show_watch_state`,
 `tests/e2e/test_watch_commands.py::test_unwatch_never_touches_session`,
 `tests/e2e/test_watch_commands.py::test_watch_refuses_foreign_target`).
+
+The native log-schema scenario observes `RECOVERY_SENT` before awaiting each receiver's attempt record. Each
+native state advance and effect retains its own bounded wait; the complete field, kind and outcome comparisons
+still apply to every record (`tests/e2e/test_supervisor_log.py::test_records_match_schema`).
 
 ## Related
 

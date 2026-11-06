@@ -205,6 +205,9 @@ facts, and native controls exercise private files, missing files and the snapsho
 `haskell:agentctl-core-test/SpecReal/missing-spec-is-refused`,
 `haskell:agentctl-core-test/SpecReal/oversized-spec-is-refused`).
 
+Darwin filesystem sources and their native state fixture enable `_DARWIN_C_SOURCE` before system headers alongside
+`_POSIX_C_SOURCE`, exposing the SDK's no-follow open flags and advisory file locks under the strict C compilation mode.
+
 The supervisor and watch lock files are retained and written in place while their native handle holds exclusion.
 Their inode must not be replaced by the temporary-file publication used for ordinary data files. Native stop
 handlers only set a flag; cleanup and multiplexer effects stay in the foreground loop. Scoped adapters release

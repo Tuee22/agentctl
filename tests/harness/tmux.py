@@ -405,6 +405,7 @@ def private_mux(
     context: build.BuildContext, family: str, run_directory: Path, nonce: str
 ) -> Generator[PrivateMux]:
     """Create a short endpoint and private homes beneath the owning run."""
+    run_directory = run_directory.resolve()
     scope = run_directory / "mux" / secrets.token_hex(4)
     scope.mkdir(parents=True, mode=0o700)
     home = scope / "home"
@@ -422,6 +423,8 @@ def private_mux(
         "PSMUX_NO_WARM": "1",
         "SERVER_ONLY": "server-literal",
     }
+    if family == "Darwin":
+        environment["__CF_USER_TEXT_ENCODING"] = f"0x{scope.stat().st_uid:X}:0:0"
     for kind in ("CACHE", "CONFIG", "DATA", "STATE"):
         path = scope / kind.lower()
         path.mkdir(mode=0o700)

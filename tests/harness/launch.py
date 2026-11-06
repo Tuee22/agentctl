@@ -227,7 +227,9 @@ def observe_mux(case: LaunchCase) -> MuxObserver:
     shutil.copy2(case.mux.executable, real)
     fake = build.binary(case.mux.context, "exe:agentctl-fake-agent")
     assert isinstance(fake, Ok), fake
-    shutil.copy2(fake.value, binaries / name)
+    pending = directory / ("observer-" + name)
+    shutil.copy2(fake.value, pending)
+    pending.replace(binaries / name)
     environment = {
         **case.environment,
         "AGENTCTL_FAKE_MUX_EXECUTABLE": str(real),

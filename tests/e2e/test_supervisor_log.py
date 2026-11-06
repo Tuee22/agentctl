@@ -148,6 +148,7 @@ def test_records_match_schema(root: Path, mux_server: PrivateMux) -> None:
         control_trigger.touch()
         for control in controls:
             wait_backoff(running, control.target)
+            wait_transition(running, control.target, "RECOVERY_SENT")
             wait_records(running, control.target, "attempt")
         require_receivers(root, controls)
         for control in controls:

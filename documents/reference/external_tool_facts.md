@@ -285,6 +285,16 @@ belongs to the Windows acceptance lane; Linux compilation does not prove a Win32
 | Noncanonical termios input with VMIN 1 and VTIME 0 returns available bytes; clearing ICRNL prevents carriage-return translation. Input modes can be saved and restored with tcgetattr/tcsetattr without changing output modes. | POSIX terminal API; Linux man-pages | 2026-11-04 | `https://man7.org/linux/man-pages/man3/termios.3.html`; `https://man7.org/linux/man-pages/man0/termios.h.0p.html` |
 | Synchronous WriteFile accepts an OVERLAPPED offset with both halves set to MAXDWORD to append at EOF. FlushFileBuffers requires GENERIC_WRITE access, so the writer requests it and uses the explicit append offset. | Win32 file API | 2026-11-04 | `https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-writefile`; `https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers` |
 
+## Darwin Fixture and HTTP Response Interfaces
+
+| Fact | Version | Verified | Source |
+|---|---|---|---|
+| Defining `_POSIX_C_SOURCE` hides Darwin's `O_NOFOLLOW` and `flock` declarations unless `_DARWIN_C_SOURCE` is also defined before system headers. | macOS SDK 26.5 | 2026-11-05 | `xcrun --sdk macosx --show-sdk-version`; the installed SDK's `usr/include/sys/fcntl.h` guards around `O_NOFOLLOW` and `flock` |
+| CoreFoundation uses `__CF_USER_TEXT_ENCODING` with the real uid in `0x%X:0:0` format. Supplying it explicitly avoids CoreFoundation consulting the user's home for text encoding. | macOS 26.6.2 | 2026-11-05 | `https://github.com/apple-oss-distributions/webdavfs/blob/main/WebDAVPlugin/WebDAV_Mount.c` (`CFENVFORMATSTRING`, `AttemptMount`); native private-server environment observation |
+| The verification host's Homebrew tmux executable has mode 0555. Replacing a test-owned copy through its writable parent does not require opening the existing executable for writing. | tmux 3.6a | 2026-11-05 | `tmux -V`; `ls -lO /opt/homebrew/Cellar/tmux/3.6a/bin/tmux`; `tests/e2e/test_launch.py::test_hostile_folder_name_runs_nothing` |
+| `shutil.copy2` copies file flags through `copystat`; `shutil.copy` copies contents and permission bits without copying flags. The system `false` executable carries a protected flag which an ordinary test copy cannot set. | Python 3.14.3; macOS 26.6.2 | 2026-11-05 | `https://docs.python.org/3.14/library/shutil.html`; `ls -lO /usr/bin/false`; `tests/integration/test_toolchain.py::test_argv_never_sets` |
+| `HTTPError` is both an exception and a file-like HTTP response; its `close()` releases the underlying body resource. | Python 3.14.3 | 2026-11-05 | `https://docs.python.org/3.14/library/urllib.error.html`; `tests/integration/test_ghcup.py::test_download_errors_are_typed` |
+
 ## Related
 
 - [rationale.md](../../DEVELOPMENT_PLAN/rationale.md#decisions) — the `tool:` decisions these rows support.

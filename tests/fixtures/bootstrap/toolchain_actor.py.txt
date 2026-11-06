@@ -33,7 +33,7 @@ if mode in {"ghc", "cabal"}:
     candidate = ghcup_destination(context.family, environment, home)
     candidate.parent.mkdir(parents=True)
     harmless = Path(os.environ["SYSTEMROOT"]) / "System32/where.exe" if context.family == "Windows" else Path(shutil.which("false"))
-    shutil.copy2(harmless, candidate)
+    shutil.copy(harmless, candidate)
     def version_probe(path: str, _context: HostContext) -> Version | None:
         return pins.value.ghcup_floor if path == str(candidate.resolve()) else pins.value.ghc if path == ghc else None
     def prerequisites(_context: HostContext):

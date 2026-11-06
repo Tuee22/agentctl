@@ -68,6 +68,15 @@ def bootstrap_before(directory: Path, nonce: str) -> None:
     capture(directory, nonce, platform.system(), os.environ, Path.home())
 
 
+def observe_xcode(family: str, directory: Path, environment: Mapping[str, str]) -> bool:
+    """Qualify Darwin only when the native Command Line Tools probe succeeds."""
+    executable = shutil.which("xcode-select", path=environment.get("PATH", ""))
+    if family != "Darwin" or executable is None:
+        return False
+    result = run([executable, "-p"], cwd=directory, env=environment, timeout=10)
+    return isinstance(result, Ok) and result.value.code == 0
+
+
 def clean_recipe() -> bool:
     """Recognise Docker's marker and the recipe's independent Stage A observation."""
     initial = (
@@ -234,6 +243,7 @@ def observe(root: Path, nonce: str, destination: Path) -> HostFacts:
             platform.system(), destination.parent, nonce, os.environ
         ),
         clean=clean_recipe(),
+        xcode=observe_xcode(platform.system(), destination.parent, os.environ),
     )
     destination.write_text(
         json.dumps({"nonce": nonce, "facts": asdict(facts)}), encoding="utf-8"

@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from http.client import HTTPException, HTTPResponse
 from pathlib import Path
 from typing import BinaryIO
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import build_opener
 
@@ -42,11 +42,15 @@ def transfer(response: HTTPResponse, stream: BinaryIO) -> tuple[str, int]:
 @contextmanager
 def connection(url: str) -> Generator[HTTPResponse]:
     """Narrow urllib's response at the I/O boundary and always close it."""
-    with build_opener().open(url, timeout=30) as response:
-        if not isinstance(response, HTTPResponse):
-            message = "ghcup download requires an HTTP response"
-            raise TypeError(message)
-        yield response
+    try:
+        with build_opener().open(url, timeout=30) as response:
+            if not isinstance(response, HTTPResponse):
+                message = "ghcup download requires an HTTP response"
+                raise TypeError(message)
+            yield response
+    except HTTPError as exc:
+        exc.close()
+        raise
 
 
 def fetch(asset: Asset, staged: Path) -> Result[None, GhcupError]:

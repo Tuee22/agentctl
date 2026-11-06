@@ -11,19 +11,27 @@ from pathlib import Path
 import pytest
 
 from agentctl.bootstrap.prereqs import invoke, probe
+from agentctl.check.lanes import HostFacts
 from agentctl.hostfacts import HostContext, Prerequisite, current
 from agentctl.process import Output, SpawnError, run
 from agentctl.result import Ok, Result
+from tests.harness.host import observe_xcode
 
 pytestmark = pytest.mark.evidence("real")
 
 
-def test_probe_matches_independent_observer(tmp_path: Path) -> None:
+def test_probe_matches_independent_observer(
+    tmp_path: Path, record_host: HostFacts
+) -> None:
     """Compare native probes and always reject an unusable constructed compiler."""
     context = replace(current(tmp_path / "subject-cache"), cwd=tmp_path)
     measured = probe(context)
     assert isinstance(measured, Ok)
     family = platform.system()
+    assert not observe_xcode("Darwin", tmp_path, {"PATH": ""})
+    assert record_host.xcode == (family == "Darwin"), (
+        "host observation lost the native Command Line Tools qualification"
+    )
     if family == "Linux":
         compiler = shutil.which("cc")
         assert compiler is not None

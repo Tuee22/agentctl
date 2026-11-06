@@ -224,11 +224,11 @@ None.
 ### Sprint 10.3: Decision log and logs [Done]
 
 **Status**: Done
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Supervisor/Log.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Log/File.hs`, `src/agentctl/haskell/src/AgentCtl/Native.hs`, `src/agentctl/haskell/src/AgentCtl/native_fs.c`, `src/agentctl/haskell/test/SupervisorTests.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor.hs`, `src/agentctl/haskell/src/AgentCtl/Protocol.hs`, `src/agentctl/haskell/app/`, `src/agentctl/cli.py`, `tests/oracles/log_records.toml`, `tests/mutants/supervisor.toml`
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Supervisor/Log.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor/Log/File.hs`, `src/agentctl/haskell/src/AgentCtl/Native.hs`, `src/agentctl/haskell/src/AgentCtl/native_fs.c`, `src/agentctl/haskell/test/SupervisorTests.hs`, `src/agentctl/haskell/src/AgentCtl/Supervisor.hs`, `src/agentctl/haskell/src/AgentCtl/Protocol.hs`, `src/agentctl/haskell/app/`, `src/agentctl/cli.py`, `tests/e2e/test_supervisor_log.py`, `tests/oracles/log_records.toml`, `tests/mutants/supervisor.toml`
 **Validation tests**: `tests/unit/test_supervisor_values.py::test_poll_records_oracle`, `tests/unit/test_supervisor_values.py::test_logs_selection_oracle`, `tests/e2e/test_supervisor_log.py::test_records_match_schema`, `tests/e2e/test_supervisor_scenarios.py::test_failed_send_closes_unresolved`, `tests/e2e/test_supervisor_log.py::test_every_poll_logged`, `tests/e2e/test_supervisor_log.py::test_logs_selects_exact_target`, `tests/unit/test_supervisor_values.py::test_log_decoding_oracle`, `haskell:agentctl-core-test/SupervisorReal/log-owned-append-and-read`, `haskell:agentctl-core-test/SupervisorReal/log-refuses-directory`, `haskell:agentctl-core-test/SupervisorReal/log-refuses-public-parent`, `haskell:agentctl-core-test/SupervisorReal/log-writer-and-reader-share-history`, `haskell:agentctl-core-test/SupervisorReal/log-tail-requires-active-writer`
 **Mutants**: `M-super-log-skips-repeat`, `M-super-log-drops-result`, `M-super-logs-prefix-match`, `M-super-log-ignores-truncated-tail`, `M-super-log-accepts-extra-fields`
 **Closes**: R18.5
-**Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/reference/cli_reference.md`, `documents/reference/files_and_state.md`, `documents/reference/external_tool_facts.md`
+**Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/engineering/testing.md`, `documents/reference/cli_reference.md`, `documents/reference/files_and_state.md`, `documents/reference/external_tool_facts.md`
 
 #### Objective
 
@@ -251,7 +251,8 @@ foreground recovery interpreter consumes it without another log path.
   after a send; `ended` for closure without recovery evidence, pause and unwatch included; `not-acknowledged`
   for an unchanged verification screen; `unresolved` for command failure; `escalated` for a terminal failure).
 - `tests/oracles/log_records.toml` holds each kind's required fields and the record rows of each poll outcome, with
-  provenance `request:R18.5`.
+  provenance `request:R18.5`. The native schema scenario observes the `RECOVERY_SENT` decision before awaiting its
+  attempt record, retaining a separate bounded wait for each native advance and effect.
 - `agentctl logs NAME|%ID`, in the handshake command list and the passthrough table, prints exactly that target's
   records in order through a pure selection, and exits non-zero with the oracle message when there are none.
 

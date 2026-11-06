@@ -208,7 +208,8 @@ The native ABI is infrastructure for this boundary, spanning its small Haskell a
   parent and then the file relative to its descriptor, refusing symbolic links. Windows checks real owner SIDs and
   DACLs, refusing reparse points; it never substitutes emulated POSIX ownership for Windows security.
 - Haskell has no CPP and the Cabal components are unconditional. Native C sources compile with warnings as errors;
-  the native platform selects its actual system APIs within the C ABI.
+  the native platform selects its actual system APIs within the C ABI. Darwin filesystem sources enable the SDK's
+  Darwin declarations alongside POSIX declarations, preserving no-follow opens and native file locks.
 - Source guards cover C and headers, limit native exec to its adapter and its Haskell owner, and reject native
   shell/spawn APIs, warning suppressions and test-control branches.
 - The evaluator gains spec-codec and spec-acceptance subjects. Native tests observe private snapshots and missing
@@ -325,10 +326,11 @@ records what reached the agent.
   (`.exe` on Windows); it writes one record of its argv, working directory, environment keys (never values), the
   multiplexer session it runs in, its pid and the nonce into a directory the test names, then exits at once with a
   configured status or stays running.
-- `tests/harness/tmux.py` makes `TMUX_TMPDIR` a short 0700 directory under the run dir, unsets `TMUX` and `TMUX_PANE`,
+- `tests/harness/tmux.py` makes `TMUX_TMPDIR` a short 0700 directory under the canonical run dir, unsets `TMUX` and `TMUX_PANE`,
   owns the private foreground server with `-D -f /dev/null`, and runs `kill-server` only after asserting that the socket
   lies under the run dir; for psmux it sets an absolute `PSMUX_DATA_DIR` under the run dir and `PSMUX_NO_WARM=1`, and
-  never ends psmux processes by image name.
+  never ends psmux processes by image name. Darwin's private caller environment supplies the uid-bound
+  `__CF_USER_TEXT_ENCODING` setting, and the exact spec-plus-pane environment-key comparison stays intact.
 - The real tests render each action through `agentctl-core-eval` and run it through the harness against the private
   server through the test-only native command fixture, invoking the production interpreter. Independent raw
   clients observe the server, with the trampoline as the pane command and the fake agent as the agent; the test writes each spec itself,

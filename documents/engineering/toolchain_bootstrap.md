@@ -171,6 +171,8 @@ appears while bytes are being received. Failed requests, malformed lengths, unsu
 errors are typed failures; temporary artifacts are removed on all those paths
 (`tests/integration/test_ghcup.py::test_download_errors_are_typed`,
 `tests/integration/test_ghcup.py::test_truncated_download_leaves_nothing`).
+The HTTP connection adapter closes error responses before propagating their exception into the typed download
+failure, releasing the error body's resource (`tests/integration/test_ghcup.py::test_download_errors_are_typed`).
 
 **Never.** agentctl edits no shell rc or profile file, so the installed ghcup is not on PATH and is always
 invoked by absolute path (`tests/integration/test_ghcup.py::test_no_rc_file_written`). It never runs

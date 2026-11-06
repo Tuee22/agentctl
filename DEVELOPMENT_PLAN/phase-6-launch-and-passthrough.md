@@ -130,7 +130,8 @@ warn on the caller's terminal and exit non-zero.
   process's stderr, never into a pane, with the non-zero status from `tests/oracles/preflight.toml`.
 - `tests/integration/test_agent_argv_real.py` runs the trampoline directly on a private server with
   the final argv for logged-out claude and codex, so the real agents' argv acceptance is checked
-  without a login.
+  without a login. The compiled mux relay is published by rename over the test-owned native client copy,
+  including a read-only native executable, while retaining the real backend separately.
 - `tests/live/test_live_launch.py` runs in the fixed live folder under the real `state` dir with
   `DISABLE_AUTOUPDATER=1` on a private server and branches on each agent's login state: logged in,
   the pane is alive after the startup window and, on Linux, `/proc/<pane_pid>/cmdline` ends with the

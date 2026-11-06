@@ -117,7 +117,7 @@ None.
 ### Sprint 2.2: OS prerequisites with consent [Done]
 
 **Status**: Done
-**Implementation**: `src/agentctl/bootstrap/prereqs.py`, `src/agentctl/hostfacts.py`, `src/agentctl/bootstrap/plan.py`, `src/agentctl/cli.py`, `src/agentctl/check/prerequisites.py`, `src/agentctl/check/steps.py`, `tests/oracles/prerequisites.toml`, `tests/oracles/bootstrap_plan.toml`, `tests/mutants/prerequisites.toml`, `tests/fixtures/bootstrap/prereq_actor.py.txt`
+**Implementation**: `src/agentctl/bootstrap/prereqs.py`, `src/agentctl/hostfacts.py`, `src/agentctl/bootstrap/plan.py`, `src/agentctl/cli.py`, `src/agentctl/check/prerequisites.py`, `src/agentctl/check/steps.py`, `tests/harness/host.py`, `tests/integration/test_prereqs_real.py`, `tests/oracles/prerequisites.toml`, `tests/oracles/bootstrap_plan.toml`, `tests/mutants/prerequisites.toml`, `tests/fixtures/bootstrap/prereq_actor.py.txt`
 **Validation tests**: `tests/unit/test_prereqs.py::test_package_sets_match_oracle`, `tests/unit/test_prereqs.py::test_consent_policy_matches_oracle`, `tests/unit/test_prereqs.py::test_probe_values_and_private_link_artifacts`, `tests/unit/test_prereqs.py::test_probe_failures_are_not_ready`, `tests/unit/test_prereqs.py::test_apply_sequence_and_first_failure`, `tests/unit/test_prereqs.py::test_post_probe_failure_does_not_reinstall`, `tests/unit/test_prereqs.py::test_xcode_pending_does_not_probe`, `tests/unit/test_prereqs.py::test_observation_completes_cold_facts_and_preserves_warm_pins`, `tests/integration/test_prereqs_consent.py::test_declined_spawns_nothing`, `tests/integration/test_prereqs_consent.py::test_accepted_runs_exact_argv`, `tests/integration/test_prereqs_consent.py::test_non_tty_refuses_without_assume_yes`, `tests/integration/test_prereqs_consent.py::test_root_and_xcode_actions_are_vetoed`, `tests/integration/test_prereqs_consent.py::test_global_assume_yes_reaches_check`, `tests/integration/test_prereqs_real.py::test_probe_matches_independent_observer`, `tests/unit/test_preconditions.py::test_prerequisite_precondition`, `tests/unit/test_preconditions.py::test_prerequisite_inspection_consent_and_privilege`, `tests/unit/test_preconditions.py::test_prerequisite_inspection_platforms_and_errors`, `tests/unit/test_identity.py::test_check_preserves_ghcup_environment`
 **Mutants**: `M-prereq-skip-consent`, `M-prereq-sudo-may-prompt`, `M-prereq-prompt-without-tty`, `M-prereq-gmp-dropped`, `M-prereq-probe-ignores-link`, `M-prereq-flag-dropped`
 **Closes**: R15
@@ -132,6 +132,7 @@ Probe GHC's OS prerequisites, install a missing set only with consent, and never
 - Linux probes: `cc` links a one-line C program against `-lgmp` in a temp dir, curl or wget resolves, the CA store that
   Python's `ssl` default verify paths name exists, and make resolves; macOS probes `xcode-select -p`; Windows has no
   probe. libffi is not probed, since GHC 9.12.4 bundles it (D-21). Host facts gain the results and `--assume-yes`.
+  The nonce-bound host harness independently records the successful Darwin probe as the macos lane's Xcode qualification.
 - `tests/oracles/prerequisites.toml` holds each host's set and argv (apt on Ubuntu 23 or later and Debian 13 or later,
   dnf on Fedora) from ghcup's requirement lists less libffi; apt runs `apt-get update`, then `apt-get install -y`. A
   host with no verified row, Arch Linux included, gets a refusal naming the failed probes.
@@ -161,9 +162,10 @@ Probe GHC's OS prerequisites, install a missing set only with consent, and never
    `--assume-yes` records `sudo -n` — `tests/integration/test_prereqs_consent.py::test_non_tty_refuses_without_assume_yes`;
    fails when the run prompts or the flag yields a sudo that may prompt; mutants `M-prereq-prompt-without-tty`,
    `M-prereq-sudo-may-prompt`.
-5. The probe agrees with the test's own link against `-lgmp`, and reports the compiler missing under a constructed PATH
-   without one — `tests/integration/test_prereqs_real.py::test_probe_matches_independent_observer`; fails when the probe
-   only checks that `cc` resolves; mutant `M-prereq-probe-ignores-link`.
+5. The probe agrees with the test's own link against `-lgmp` or Darwin `xcode-select -p`, the host harness records
+   the Darwin qualification, and constructed PATHs without the tools are unmet —
+   `tests/integration/test_prereqs_real.py::test_probe_matches_independent_observer`; fails when the probe only
+   checks that `cc` resolves or the native Xcode qualification is lost; mutant `M-prereq-probe-ignores-link`.
 6. P9 passes and fails on constructed facts — `tests/unit/test_preconditions.py::test_prerequisite_precondition`; fails
    when missing prerequisites pass without `--assume-yes`; mutant `M-prereq-skip-consent`.
 7. The actual click group transports each global flag value to its owned check child —
@@ -199,6 +201,7 @@ owns.
   `$GHCUP_INSTALL_BASE_PREFIX/.ghcup/bin/ghcup` or `C:\ghcup\bin\ghcup.exe`; a mismatch or a truncated body deletes the
   temporary file and leaves nothing at the final path.
 - The download takes the pin record as a value, so a test points it at its own server with no test-only branch.
+  Its connection adapter closes error responses before propagating their typed download failure.
 - Every ghcup spawn sets `GHCUP_SKIP_UPDATE_CHECK`; nothing edits an rc or profile file or runs the bootstrap script.
 - Tests run ghcup in a test-owned `GHCUP_INSTALL_BASE_PREFIX` with `HOME` redirected, since every ghcup command but
   `--help` and `--version` rewrites its log, against a local HTTP server that logs every request.
@@ -248,6 +251,8 @@ code as check's `toolchain-ensure` step, and write the recipe of the clean-conta
   `ghc` and `cabal` entries before and after, comparing link targets or bytes, and fails on any change.
 - `tests/harness/host.py` observes toolchain provenance: agentctl-installed when the pre-bootstrap record that the
   independent host harness writes before first provisioning is present, the user's otherwise.
+  Installer-veto fixtures copy only executable bytes and permission bits from their harmless system command,
+  leaving protected filesystem flags behind.
 - `tests/lanes/clean-host.Dockerfile` runs as a non-root user with NOPASSWD sudo. Stage A: `ubuntu:24.04` with
   `python3`, `pipx` and `sudo` only, the copied tree and the pre-bootstrap record, a `pipx install` of the copy
   without `--editable`, and `agentctl --assume-yes list`, required to end with the multiplexer-missing warning and
