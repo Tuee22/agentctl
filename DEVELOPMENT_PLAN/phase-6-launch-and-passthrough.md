@@ -136,7 +136,7 @@ warn on the caller's terminal and exit non-zero.
   copies of the controlled agents. Its caller PATH names that directory and the real backend resides separately;
   already running servers retain their original executable path.
 - `tests/live/test_live_launch.py` runs in the fixed live folder under the real `state` dir with
-  `DISABLE_AUTOUPDATER=1` on a private server and branches on each agent's login state: logged in,
+  `DISABLE_AUTOUPDATER=1` and the per-invocation codex ARGS `-c check_for_update_on_startup=false` on a private server and branches on each agent's login state: logged in,
   the pane is alive after the startup window and, on Linux, `/proc/<pane_pid>/cmdline` ends with the
   ARGS row and the mandatory flags; logged out, the refusal and its remedy. It sends no input.
 

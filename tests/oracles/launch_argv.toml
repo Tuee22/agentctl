@@ -357,3 +357,19 @@ quote = "any additional command parameters are passed through to either codex or
 provenance = "request:R9"
 input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["--", "--", ""] }
 expected = ["/tools/codex", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon", "--", "--", ""]
+
+[[case]]
+id = "through.codex.live-empty"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "tool:0.166.0:check_for_update_on_startup"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["-c", "check_for_update_on_startup=false"] }
+expected = ["/tools/codex", "-c", "check_for_update_on_startup=false", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon"]
+
+[[case]]
+id = "through.codex.live-separator"
+requirement = "R9"
+quote = "any additional command parameters are passed through to either codex or claude"
+provenance = "tool:0.166.0:check_for_update_on_startup"
+input = { subject = "launch-argv", agent = "codex", executable = "/tools/codex", args = ["-c", "check_for_update_on_startup=false", "--"] }
+expected = ["/tools/codex", "-c", "check_for_update_on_startup=false", "--dangerously-bypass-approvals-and-sandbox", "--no-daemon", "--"]

@@ -169,7 +169,7 @@ host allows it, without sending them anything.
   column; an adopted pane uses the agent recorded at adoption.
 - The column is computed from a capture taken by that `status` run, never from an earlier one.
 - `tests/live/test_live_classification.py` runs in the fixed live folder under the real `state` dir
-  with `DISABLE_AUTOUPDATER=1` on a private server and branches on each agent's login state: logged
+  with `DISABLE_AUTOUPDATER=1` and the per-invocation codex ARGS `-c check_for_update_on_startup=false` on a private server and branches on each agent's login state: logged
   in, each capture classifies as `TrustDialog`, `BypassWarning` or `IdlePrompt`, and as `IdlePrompt`
   only where the user has already trusted the folder; logged out, the launch is refused with its
   remedy. It never sends input or answers a dialog.

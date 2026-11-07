@@ -9,7 +9,13 @@ from agentctl.process import run
 from agentctl.result import Ok
 from tests.e2e.test_adopt import pane_facts
 from tests.harness.agents import native_agent
-from tests.harness.live import assert_live_class, caller, refusal, running
+from tests.harness.live import (
+    assert_live_class,
+    caller,
+    live_arguments,
+    refusal,
+    running,
+)
 from tests.harness.sessions import rows
 from tests.harness.supervisor import (
     log_records,
@@ -38,7 +44,7 @@ def test_live_watch_sends_nothing(root: Path, mux_server: PrivateMux) -> None:
             timeout=10,
         )
         assert isinstance(status, Ok), status
-        output = case.invoke()
+        output = case.invoke(live_arguments(agent))
         if status.value.code != 0:
             refusal(root, case, status.value.code, output)
             continue

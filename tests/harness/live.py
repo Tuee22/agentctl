@@ -24,6 +24,15 @@ PANE_FIELDS = 2
 VISUAL_FIELDS = 4
 
 
+def live_arguments(agent: str, arguments: tuple[str, ...] = ()) -> tuple[str, ...]:
+    """Disable Codex startup updates for this invocation without editing settings."""
+    return (
+        ("-c", "check_for_update_on_startup=false", *arguments)
+        if agent == "codex"
+        else arguments
+    )
+
+
 def caller(mux: PrivateMux, agent: str) -> LaunchCase:
     """Keep user agent settings in place and give all multiplexer state to this test."""
     scope = mux.scope / agent
@@ -102,11 +111,12 @@ def running(
         rows = tomllib.loads(
             (root / "tests/oracles/launch_argv.toml").read_text(encoding="utf-8")
         )["case"]
-        identifier = (
-            "argv." + case.agent + ".0"
-            if not arguments
-            else "through." + case.agent + ".separator"
-        )
+        identifier = {
+            ("claude", False): "argv.claude.0",
+            ("claude", True): "through.claude.separator",
+            ("codex", False): "through.codex.live-empty",
+            ("codex", True): "through.codex.live-separator",
+        }[case.agent, bool(arguments)]
         expected = next(row["expected"][1:] for row in rows if row["id"] == identifier)
         actual = (Path("/proc") / str(pid) / "cmdline").read_bytes().split(b"\0")
         assert actual[-len(expected) - 1 : -1] == [
@@ -206,7 +216,7 @@ def exercise_live(root: Path, mux: PrivateMux, arguments: tuple[str, ...] = ()) 
             timeout=10,
         )
         assert isinstance(status, Ok), status
-        output = case.invoke(arguments)
+        output = case.invoke(live_arguments(agent, arguments))
         if status.value.code == 0:
             running(root, case, output, arguments)
             assert_live_class(case)

@@ -134,7 +134,9 @@ Record the EVIDENCE line of a passing `agentctl check` on a Mac that meets the m
 
 #### Remaining Work
 
-Run the complete gate on a macOS host and record evidence for the current covered tree.
+Run the complete gate on a native macOS host and record evidence for the current covered tree.
+This Linux x86_64 host does not meet the `macos` lane; Darwin, Command Line Tools, tmux and the
+agent CLIs are required on the acceptance host.
 
 ## Remaining Work
 

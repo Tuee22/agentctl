@@ -330,7 +330,7 @@ then watch live sessions and send nothing.
   record was live.
 - Every logged decision equals the `tests/oracles/recovery_transitions.toml` row for its logged state and observation.
 - `tests/live/test_live_supervision.py` runs in the fixed live folder under the real `state` dir with
-  `DISABLE_AUTOUPDATER=1`, on a private tmux server, branching per agent on login state; it never sends input or
+  `DISABLE_AUTOUPDATER=1` and the per-invocation codex ARGS `-c check_for_update_on_startup=false`, on a private tmux server, branching per agent on login state; it never sends input or
   answers a dialog, and no record in `tests/mutants/supervisor.toml` names it as a killer.
 
 #### Validation

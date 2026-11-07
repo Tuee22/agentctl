@@ -103,12 +103,14 @@ home and XDG directories, and psmux also receives owned registry storage with wa
   so on a host without tmux a test that needs tmux is a failure, never a degraded pass.
 - **The fixed live folder.** Live tests, which branch on the user's real login state, start the real agent only
   in one fixed folder, `live-acceptance/` under the real `state` directory
-  ([files and state](../reference/files_and_state.md)), on a private tmux server, with `DISABLE_AUTOUPDATER=1`.
+  ([files and state](../reference/files_and_state.md)), on a private tmux server, with `DISABLE_AUTOUPDATER=1`
+  for claude and per-invocation codex ARGS `-c check_for_update_on_startup=false`.
   They reuse the user's credentials in place and never copy them, send no input, and accept `TrustDialog`,
   `BypassWarning` or `IdlePrompt` as a live agent; on Linux they read `/proc/<pane_pid>/cmdline`, which must end
   with the oracle's final argv tail (an npm-installed codex runs as `node` with `codex.js`). A logged-out agent makes them
-  assert the refusal and its remedy instead. Empty-tail and bare-separator live cases preserve the ordinary
-  flags-at-end check and also prove a nonempty raw tail without supplying any prompt or pane input. The host observer runs the read-only status probes with updating
+  assert the refusal and its remedy instead. The codex launch uses the independent `through.codex.live-empty`
+  and `through.codex.live-separator` argv rows, including the update override. Empty-tail and bare-separator
+  live cases preserve the ordinary flags-at-end check and also prove a nonempty raw tail without supplying any prompt or pane input. The host observer runs the read-only status probes with updating
   disabled and saves only their statuses and the run nonce, never their identity or credential output. The
   live-agents lane requires both successful probes; the launch test probes each agent freshly and fully asserts
   its selected branch (`tests/live/test_live_launch.py::test_live_launch`).
