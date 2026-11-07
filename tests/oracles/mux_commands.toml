@@ -1256,3 +1256,421 @@ quote = "Distinguish transient overload from usage limits, authentication errors
 provenance = "decision:D-66"
 input = { subject = "mux-render", family = "Windows", action = "capture-visual", pane = "%3" }
 expected = { executable = "psmux.exe", argv = ["capture-pane", "-p", "-e", "-t", "%3", "-S", "0"] }
+
+[[case]]
+id = "mux.version.psmux.native-banner"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-81"
+input = { subject = "mux-version", family = "Windows", raw = "tmux 3.4.0\r\npsmux 3.4.0 (20aa1d7 2026-10-13)\r\n" }
+expected = true
+
+[[case]]
+id = "mux.version.psmux.native-banner-old"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-81"
+input = { subject = "mux-version", family = "Windows", raw = "tmux 3.3.8\npsmux 3.3.8 (66cf613 2026-08-18)\n" }
+expected = false
+
+[[case]]
+id = "mux.version.psmux.native-banner-mismatch"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-81"
+input = { subject = "mux-version", family = "Windows", raw = "tmux 3.3.8\npsmux 3.4.0 (20aa1d7 2026-10-13)\n" }
+expected = false
+
+[[case]]
+id = "mux.version.psmux.native-banner-extra"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-81"
+input = { subject = "mux-version", family = "Windows", raw = "tmux 3.4.0\npsmux 3.4.0 (20aa1d7 2026-10-13)\nextra\n" }
+expected = false
+
+[[case]]
+id = "mux.render.linux.remain-on-scoped"
+amends = "mux.render.linux.remain-on"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-82"
+input = { subject = "mux-render", family = "Linux", action = "remain-on-exit", session = "api-claude", pane = "%12", enabled = true }
+expected = { executable = "tmux", argv = ["set-option", "-p", "-t", "%12", "remain-on-exit", "on"] }
+
+[[case]]
+id = "mux.render.windows.remain-on-scoped"
+amends = "mux.render.windows.remain-on"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-82"
+input = { subject = "mux-render", family = "Windows", action = "remain-on-exit", session = "api-claude", pane = "%12", enabled = true }
+expected = { executable = "psmux.exe", argv = ["set-option", "-p", "-t", "=api-claude:%12", "remain-on-exit", "on"] }
+
+[[case]]
+id = "mux.render.linux.remain-unset-scoped"
+amends = "mux.render.linux.remain-unset"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-82"
+input = { subject = "mux-render", family = "Linux", action = "remain-on-exit", session = "api-claude", pane = "%12", enabled = false }
+expected = { executable = "tmux", argv = ["set-option", "-p", "-u", "-t", "%12", "remain-on-exit"] }
+
+[[case]]
+id = "mux.render.windows.remain-unset-scoped"
+amends = "mux.render.windows.remain-unset"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-82"
+input = { subject = "mux-render", family = "Windows", action = "remain-on-exit", session = "api-claude", pane = "%12", enabled = false }
+expected = { executable = "psmux.exe", argv = ["set-option", "-p", "-u", "-t", "=api-claude:%12", "remain-on-exit"] }
+
+[[case]]
+id = "mux.jobs.psmux.create"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-83"
+input = { subject = "mux-process-tree", family = "Windows", action = "create", session = "api-claude", binary = "C:/owned/program.exe", spec = "C:/owned/spec.json" }
+expected = false
+
+[[case]]
+id = "mux.jobs.tmux.create"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-83"
+input = { subject = "mux-process-tree", family = "Linux", action = "create", session = "api-claude", binary = "/owned/program", spec = "/owned/spec.json" }
+expected = true
+
+[[case]]
+id = "mux.jobs.psmux.capture"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-83"
+input = { subject = "mux-process-tree", family = "Windows", action = "capture", pane = "%12", lines = 100 }
+expected = true
+
+[[case]]
+id = "mux.jobs.psmux.has-session"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-83"
+input = { subject = "mux-process-tree", family = "Windows", action = "has-session", session = "api-claude" }
+expected = true
+
+[[case]]
+id = "mux.render.windows.show-options.session-target"
+amends = "mux.render.windows.show-options"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-84"
+input = { subject = "mux-render", family = "Windows", action = "show-options", session = "ab" }
+expected = { executable = "psmux.exe", argv = ["show-options", "-t", "=ab:"] }
+
+[[case]]
+id = "mux.render.windows.owner.session-target"
+amends = "mux.render.windows.owner"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-84"
+input = { subject = "mux-render", family = "Windows", action = "set-identity", session = "ab", key = "owner", value = "agentctl" }
+expected = { executable = "psmux.exe", argv = ["set-option", "-t", "=ab:", "@agentctl_owner", "agentctl"] }
+
+[[case]]
+id = "mux.render.windows.agent.session-target"
+amends = "mux.render.windows.agent"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-84"
+input = { subject = "mux-render", family = "Windows", action = "set-identity", session = "ab", key = "agent", value = "codex" }
+expected = { executable = "psmux.exe", argv = ["set-option", "-t", "=ab:", "@agentctl_agent", "codex"] }
+
+[[case]]
+id = "mux.render.windows.folder.session-target"
+amends = "mux.render.windows.folder"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-84"
+input = { subject = "mux-render", family = "Windows", action = "set-identity", session = "ab", key = "folder", value = "L2hvbWUvbWUvcHJvamVjdA" }
+expected = { executable = "psmux.exe", argv = ["set-option", "-t", "=ab:", "@agentctl_folder", "L2hvbWUvbWUvcHJvamVjdA"] }
+
+[[case]]
+id = "mux.render.windows.pane.session-target"
+amends = "mux.render.windows.pane"
+requirement = "R12.1"
+quote = "haskell is responsible for ensuring tmux/psmux are available"
+provenance = "decision:D-84"
+input = { subject = "mux-render", family = "Windows", action = "set-identity", session = "ab", key = "pane", value = "%12" }
+expected = { executable = "psmux.exe", argv = ["set-option", "-t", "=ab:", "@agentctl_pane", "%12"] }
+
+[[case]]
+id = "mux.status-file.windows.session-target"
+amends = "mux.status-file.windows"
+requirement = "R16"
+quote = "then session management (list/attach/stop)"
+provenance = "decision:D-84"
+input = { subject = "mux-render", family = "Windows", action = "set-identity", session = "api-claude", key = "status-file", value = "Qzovc3RhdGUvc3RhdHVzLmpzb24" }
+expected = { executable = "psmux.exe", argv = ["set-option", "-t", "=api-claude:", "@agentctl_status", "Qzovc3RhdGUvc3RhdHVzLmpzb24"] }
+
+[[case]]
+id = "mux.pane.target.windows"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-target", family = "Windows", session = "api-claude", pane = "%12" }
+expected = { target = "=api-claude:%12", native = "%12", session = "api-claude" }
+
+[[case]]
+id = "mux.pane.target.linux"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-target", family = "Linux", session = "api-claude", pane = "%12" }
+expected = { target = "%12", native = "%12", session = "" }
+
+[[case]]
+id = "mux.pane.target.darwin"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-target", family = "Darwin", session = "api-claude", pane = "%12" }
+expected = { target = "%12", native = "%12", session = "" }
+
+[[case]]
+id = "mux.pane.target.change-session"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-target", family = "Windows", session = "api-codex", pane = "=api-claude:%12" }
+expected = { target = "=api-codex:%12", native = "%12", session = "api-codex" }
+
+[[case]]
+id = "mux.pane.valid.bare"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-valid", pane = "%12" }
+expected = true
+
+[[case]]
+id = "mux.pane.valid.qualified"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-valid", pane = "=api-claude:%12" }
+expected = true
+
+[[case]]
+id = "mux.pane.valid.qualified-short"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-valid", pane = "api-claude:%12" }
+expected = true
+
+[[case]]
+id = "mux.pane.valid.unicode-session"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-valid", pane = "=caf\u00e9:%12" }
+expected = true
+
+[[case]]
+id = "mux.pane.valid.empty"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-valid", pane = "" }
+expected = false
+
+[[case]]
+id = "mux.pane.valid.missing-id"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-valid", pane = "=api-claude:%" }
+expected = false
+
+[[case]]
+id = "mux.pane.valid.missing-session"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-valid", pane = "=%12" }
+expected = false
+
+[[case]]
+id = "mux.pane.valid.empty-session"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-valid", pane = "=:%12" }
+expected = false
+
+[[case]]
+id = "mux.pane.valid.control"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-valid", pane = "=api\nclaude:%12" }
+expected = false
+
+[[case]]
+id = "mux.pane.valid.extra-colon"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-valid", pane = "=api:claude:%12" }
+expected = false
+
+[[case]]
+id = "mux.pane.valid.non-ascii-id"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-valid", pane = "=api-claude:%\u0661" }
+expected = false
+
+[[case]]
+id = "mux.pane.valid.non-digit"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-valid", pane = "=api-claude:%12x" }
+expected = false
+
+[[case]]
+id = "mux.pane.selection.absent"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-selection", panes = [] }
+expected = { target = "" }
+
+[[case]]
+id = "mux.pane.selection.unique"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-selection", panes = ["=left:%1"] }
+expected = { target = "=left:%1" }
+
+[[case]]
+id = "mux.pane.selection.ambiguous"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-selection", panes = ["=left:%1", "=right:%1"] }
+expected = { error = "ambiguous pane id; use SESSION:%id" }
+
+[[case]]
+id = "mux.render.scoped.capture"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-render", family = "Windows", action = "capture", pane = "=api-codex:%1", lines = 100 }
+expected = { executable = "psmux.exe", argv = ["capture-pane", "-p", "-J", "-t", "=api-codex:%1", "-S", "-100"] }
+
+[[case]]
+id = "mux.render.scoped.visual"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-render", family = "Windows", action = "capture-visual", pane = "=api-codex:%1" }
+expected = { executable = "psmux.exe", argv = ["capture-pane", "-p", "-e", "-t", "=api-codex:%1", "-S", "0"] }
+
+[[case]]
+id = "mux.render.scoped.inspect"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-render", family = "Windows", action = "inspect-pane", pane = "=api-codex:%1", format = "#{pane_pid}" }
+expected = { executable = "psmux.exe", argv = ["display-message", "-p", "-t", "=api-codex:%1", "#{pane_pid}"] }
+
+[[case]]
+id = "mux.render.scoped.literal"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-render", family = "Windows", action = "send-literal", pane = "=api-codex:%1", text = "resume literal" }
+expected = { executable = "psmux.exe", argv = ["send-keys", "-l", "-t", "=api-codex:%1", "--", "resume literal"] }
+
+[[case]]
+id = "mux.render.scoped.enter"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-render", family = "Windows", action = "send-enter", pane = "=api-codex:%1" }
+expected = { executable = "psmux.exe", argv = ["send-keys", "-t", "=api-codex:%1", "Enter"] }
+
+[[case]]
+id = "mux.pane.target.windows.pane-component"
+amends = "mux.pane.target.windows"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-target", family = "Windows", session = "api-claude", pane = "%12" }
+expected = { target = "=api-claude:.%12", native = "%12", session = "api-claude" }
+
+[[case]]
+id = "mux.pane.target.change-session.pane-component"
+amends = "mux.pane.target.change-session"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-target", family = "Windows", session = "api-codex", pane = "=api-claude:%12" }
+expected = { target = "=api-codex:.%12", native = "%12", session = "api-codex" }
+
+[[case]]
+id = "mux.pane.selection.unique.pane-component"
+amends = "mux.pane.selection.unique"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-pane-selection", panes = ["=left:%1"] }
+expected = { target = "=left:.%1" }
+
+[[case]]
+id = "mux.render.scoped.capture.pane-component"
+amends = "mux.render.scoped.capture"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-render", family = "Windows", action = "capture", pane = "=api-codex:%1", lines = 100 }
+expected = { executable = "psmux.exe", argv = ["capture-pane", "-p", "-J", "-t", "=api-codex:.%1", "-S", "-100"] }
+
+[[case]]
+id = "mux.render.scoped.visual.pane-component"
+amends = "mux.render.scoped.visual"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-render", family = "Windows", action = "capture-visual", pane = "=api-codex:%1" }
+expected = { executable = "psmux.exe", argv = ["capture-pane", "-p", "-e", "-t", "=api-codex:.%1", "-S", "0"] }
+
+[[case]]
+id = "mux.render.scoped.inspect.pane-component"
+amends = "mux.render.scoped.inspect"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-render", family = "Windows", action = "inspect-pane", pane = "=api-codex:%1", format = "#{pane_pid}" }
+expected = { executable = "psmux.exe", argv = ["display-message", "-p", "-t", "=api-codex:.%1", "#{pane_pid}"] }
+
+[[case]]
+id = "mux.render.scoped.literal.pane-component"
+amends = "mux.render.scoped.literal"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-render", family = "Windows", action = "send-literal", pane = "=api-codex:%1", text = "resume literal" }
+expected = { executable = "psmux.exe", argv = ["send-keys", "-l", "-t", "=api-codex:.%1", "--", "resume literal"] }
+
+[[case]]
+id = "mux.render.scoped.enter.pane-component"
+amends = "mux.render.scoped.enter"
+requirement = "R7"
+quote = "codex and claude are both commands"
+provenance = "decision:D-85"
+input = { subject = "mux-render", family = "Windows", action = "send-enter", pane = "=api-codex:%1" }
+expected = { executable = "psmux.exe", argv = ["send-keys", "-t", "=api-codex:.%1", "Enter"] }

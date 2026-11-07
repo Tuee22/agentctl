@@ -94,7 +94,8 @@ def test_scripted_agent_records_every_byte(
     receipts = events(case.records_directory / "received.jsonl", case.nonce)
     assert timestamp(receipts[0]) >= timestamp(frames[1])
     assert timestamp(frames[3]) - timestamp(frames[2]) >= FRAME_DELAY_NANOSECONDS
-    retained = mux_server.raw("set-option", "-p", "-t", pane, "remain-on-exit", "on")
+    target = mux_server.pane_option_target(f"api-{agent}", pane)
+    retained = mux_server.raw("set-option", "-p", "-t", target, "remain-on-exit", "on")
     assert retained.code == 0, retained
     (case.records_directory / "stop").touch()
     deadline = time.monotonic() + 10

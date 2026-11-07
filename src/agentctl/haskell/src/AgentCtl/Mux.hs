@@ -67,7 +67,7 @@ remedy Linux distribution
   | otherwise = "Install tmux 3.2 or later with your OS package manager"
 
 checkVersion :: Kind -> Text -> Either VersionError Version
-checkVersion kind raw = case parseVersion kind (Text.words raw) of
+checkVersion kind raw = case reportedVersion kind raw of
   Nothing -> Left (MalformedVersion raw)
   Just version
     | version >= floorVersion kind -> Right version
@@ -76,6 +76,16 @@ checkVersion kind raw = case parseVersion kind (Text.words raw) of
 floorVersion :: Kind -> Version
 floorVersion Tmux = (3, 2, 0)
 floorVersion Psmux = (3, 4, 0)
+
+reportedVersion :: Kind -> Text -> Maybe Version
+reportedVersion Psmux raw = case Text.lines (Text.strip raw) of
+  [line] -> parseVersion Psmux (Text.words line)
+  [banner, line] -> case (Text.words banner, Text.words line) of
+    (["tmux", compatibility], details@("psmux" : release : _))
+      | compatibility == release -> parseVersion Psmux details
+    _ -> Nothing
+  _ -> Nothing
+reportedVersion Tmux raw = parseVersion Tmux (Text.words raw)
 
 parseVersion :: Kind -> [Text] -> Maybe Version
 parseVersion Tmux ["tmux", release] = case Text.splitOn "." release of

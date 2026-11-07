@@ -100,6 +100,31 @@ def test_render_oracle(root: Path, haskell_build: build.BuildContext) -> None:
     )
 
 
+def test_process_tree_policy_oracle(
+    root: Path, haskell_build: build.BuildContext
+) -> None:
+    """A persistent psmux server outlives its creating client's process job."""
+    _compare(
+        root,
+        haskell_build,
+        "mux-process-tree",
+        "mux_commands.toml",
+        "multiplexer process ownership differs from oracle",
+    )
+
+
+def test_pane_target_oracle(root: Path, haskell_build: build.BuildContext) -> None:
+    """Native pane scope, grammar and ambiguous selection use independent rows."""
+    for subject in ("mux-pane-target", "mux-pane-valid", "mux-pane-selection"):
+        _compare(
+            root,
+            haskell_build,
+            subject,
+            "mux_commands.toml",
+            "pane target differs from oracle",
+        )
+
+
 def test_dead_status_rule_oracle(root: Path, haskell_build: build.BuildContext) -> None:
     """Native pane status and signals differ from psmux's status file."""
     _compare(

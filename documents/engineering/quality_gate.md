@@ -32,10 +32,10 @@ shorter deadlines. These are execution resource bounds; test collection, asserti
 mutation-kill criteria are mandatory throughout the run.
 
 **The environment.** Inherited host inputs use a closed allowlist kept in `src/agentctl/check/steps.py`: `PATH`, `HOME`, `USER`, a `C.UTF-8` locale, agentctl's
-XDG directory variables, `GHCUP_INSTALL_BASE_PREFIX` and `GHCUP_USE_XDG_DIRS`, the agents' configuration and credential variables that the live lane observes,
+XDG directory variables, `GHCUP_INSTALL_BASE_PREFIX` and `GHCUP_USE_XDG_DIRS`, the agents' configuration and credential variables that the live lane observes, including the published `CODEX_SQLITE_HOME` runtime location,
 and on Windows `SYSTEMROOT`, `USERPROFILE`, `APPDATA`, `LOCALAPPDATA`, `PATHEXT` and `COMSPEC`. Everything else, including `PYTHONPATH`, `PYTEST_ADDOPTS`,
 `PYTEST_PLUGINS`, `TY_CONFIG_FILE`, `VIRTUAL_ENV`, `TMUX` and `TMUX_PANE`, is absent. The runner then supplies controlled run-specific values: `TMPDIR`, `TEMP`,
-`TMP` and `PYTHONPYCACHEPREFIX` under the run directory, and the explicit variables each leg owns, including `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, the isolated ty
+`TMP` and `PYTHONPYCACHEPREFIX` under the run directory, explicit `PYTHONUTF8=1` and `PYTHONIOENCODING=utf-8`, and the explicit variables each leg owns, including `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, the isolated ty
 configuration home and private `CABAL_DIR`. The leg-plan oracle records these additions, so scrubbing cannot discard them or preserve hostile inherited values
 (`tests/unit/test_check_legs.py::test_leg_table_matches_oracle`).
 
@@ -182,6 +182,10 @@ interpreter without site packages reports missing dependencies instead of failin
 | P9 | GHC's OS prerequisites are present, or on Linux a verified set is installable without a prompt: consent from `--assume-yes`, privilege as root or through `sudo -n true`; macOS needs existing Command Line Tools | the printed package-manager command, or `agentctl --assume-yes check` with passwordless sudo; macOS GUI setup stays outside check |
 | P10 | the platform is Linux x86_64 or aarch64, macOS x86_64 or arm64, or Windows x86_64 | none: no GHC bindist exists for any other |
 
+P5 reserves the Windows lock byte at offset 4096, outside the PID text. A competing handle can read the owner
+while its lock attempt is refused; scope exit releases the lock
+(`tests/integration/test_runtime_boundaries.py::test_single_run_lock_releases`).
+
 P6 predicts `<run>/mux/<eight hex characters>/tmux-<uid>/default` from the canonical run directory and its native owner.
 It counts UTF-8 bytes, including multibyte names, before any private server can start. Linux and macOS use this
 common 100-byte bound; Windows has no Unix socket endpoint. An unreadable run directory fails with its filesystem
@@ -214,7 +218,7 @@ trap of hostbootstrap (`tests/unit/test_identity.py::test_non_editable_refused`,
 
 ## Tool Configuration
 
-The Python dev extra pins coverage and the hatchling backend used by packaging controls alongside the versions in P2. The static negative controls use the same installed tools and project configuration, with fixture targets copied outside the checkout. Only the ty leg receives the empty configuration home and APPDATA override; the other legs retain the allowed user configuration locations (`tests/integration/test_static_legs.py::test_ty_ignores_user_config`, `tests/unit/test_check_legs.py::test_leg_table_matches_oracle`).
+The Python dev extra pins coverage and the hatchling backend used by packaging controls alongside the versions in P2. The static negative controls use the same installed tools and a byte-for-byte copy of the project configuration beside fixture targets outside the checkout. The hostile ty override uses a project-local glob, and its unisolated control must downgrade the same file. Only the ty leg receives the empty configuration home and APPDATA override; the other legs retain the allowed user configuration locations (`tests/integration/test_static_legs.py::test_ty_ignores_user_config`, `tests/unit/test_check_legs.py::test_leg_table_matches_oracle`).
 
 The configuration lives in `pyproject.toml`, co-designed by running the pinned tools on the package skeleton and then frozen: `config.pinned` holds the live
 ruff, ty, pytest and coverage tables equal to `tests/oracles/lint_config.toml`, and `ratchet.append-only` lets configuration only tighten against HEAD.

@@ -1,12 +1,12 @@
 # Phase 13 — macOS acceptance
 
-**Status**: Done
+**Status**: Active
 **Depends on**: [Phase 10 — Recovery supervisor](phase-10-supervisor.md)
 **Host lane**: macos
 **Gate**: `agentctl check`
 **Gate kind**: host-acceptance
 **Closes**: none
-**Gate evidence**: 2026-11-05 ; macos ; agentctl check ; pass ; tree ab7b56b948ad3702d59bea67ea3f6be4d9c94721bc5ab169507cdfdaf0f0b30e ; os=Darwin,arch=arm64,baseline=e7022baea09ae021d7f3780078d07dade9ea8556
+**Gate evidence**: none recorded
 **Evidence covers**: `src/` `tests/` `pyproject.toml`
 
 > **Purpose**: Confirm on a Mac with the Xcode Command Line Tools and Homebrew tmux what the lower phases owe macOS:
@@ -76,9 +76,9 @@ repeats.
 
 ## Sprints
 
-### Sprint 13.1: macOS run and evidence [Done]
+### Sprint 13.1: macOS run and evidence [Active]
 
-**Status**: Done
+**Status**: Active
 **Implementation**: none — this phase adds no code
 **Validation tests**: `tests/unit/test_ghcup.py::test_pins_match_oracle`, `tests/unit/test_plan.py::test_plan_oracle`, `tests/e2e/test_fresh_bootstrap.py::test_ghcup_digest_matches_pin`, `tests/integration/test_prereqs_real.py::test_probe_matches_independent_observer`, `tests/integration/test_agent_real.py::test_logged_out_by_construction`, `tests/unit/test_handoff.py::test_handoff_mode_by_os_family`, `tests/integration/test_passthrough.py::test_warm_passthrough_spawns_only_the_binary`, `tests/e2e/test_launch.py::test_creates_named_session_with_flags_last`, `tests/integration/test_mux_real.py::test_private_server_roundtrip`, `haskell:agentctl-core-test/SpecReal/snapshot-is-owned-and-private`, `haskell:agentctl-core-test/SpecReal/missing-spec-is-refused`, `haskell:agentctl-core-test/SpecReal/oversized-spec-is-refused`, `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`
 **Mutants**: none — this phase adds no code
@@ -134,11 +134,11 @@ Record the EVIDENCE line of a passing `agentctl check` on a Mac that meets the m
 
 #### Remaining Work
 
-None.
+Run the complete gate on a macOS host and record evidence for the current covered tree.
 
 ## Remaining Work
 
-None.
+Sprint 13.1 requires a macOS host and passing gate evidence for the current covered tree.
 
 ## Documentation Requirements
 

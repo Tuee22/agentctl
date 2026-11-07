@@ -109,7 +109,7 @@ def _identity(
             MutationError("schema", "id, exact search and named reason required")
         )
     path = Path(target)
-    if path.is_absolute() or ".." in path.parts or not path.parts or "\\" in target:
+    if path.anchor or ".." in path.parts or not path.parts or "\\" in target:
         return Err(MutationError("schema", "target escapes scratch tree"))
     if any(
         not re.fullmatch(

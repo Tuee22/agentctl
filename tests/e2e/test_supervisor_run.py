@@ -91,8 +91,8 @@ def test_second_instance_refused(root: Path, mux_server: PrivateMux) -> None:
         count = len(wait_records(first, target.target, "observation"))
         second = target.case.command("supervisor", ("run",))
         assert second.code != 0, second
-        assert f"by pid {first.child.pid}" in second.stderr
-        assert first.child.handle.poll() is None
+        assert f"by pid {first.pid}" in second.stderr
+        assert first.alive()
         wait_records(first, target.target, "observation", count + 1)
         output = first.finish()
         if mux_server.family != "Windows":
@@ -100,7 +100,7 @@ def test_second_instance_refused(root: Path, mux_server: PrivateMux) -> None:
     with supervisor(target.case) as third:
         seen = wait_observation(third, target.target, "IdlePrompt")
         assert {record["run"] for record in seen}.isdisjoint(first_runs)
-        assert third.child.handle.poll() is None
+        assert third.alive()
 
 
 @pytest.mark.evidence("observer")

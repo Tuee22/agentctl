@@ -3,6 +3,7 @@
 
 import base64
 import hashlib
+import shlex
 import shutil
 from pathlib import Path
 
@@ -14,7 +15,7 @@ from tests.harness.oracle import Store, assert_oracle, freeze, read_homes
 from tests.harness.oracle import load as load_oracle
 from tests.harness.passthrough import warm
 from tests.harness.terminal import attached_seed, await_client, await_exit, terminal
-from tests.harness.tmux import PrivateMux
+from tests.harness.tmux import PrivateMux, pane_identifier
 
 FORWARDED = ("x;", "#{pane_id}", "$(id)", "", "one\ntwo", "λ日")
 FLAGS = {
@@ -75,16 +76,21 @@ def test_creates_named_session_with_flags_last(mux_server: PrivateMux) -> None:
             "launch lost caller environment"
         )
         assert "SERVER_ONLY" not in keys
-        target = "=" + name + ("" if mux_server.family == "Windows" else ":")
+        target = "=" + name + ":"
         options = mux_server.raw("show-options", "-t", target)
         encoded = (
             base64.urlsafe_b64encode(str(case.folder.resolve()).encode())
             .decode()
             .rstrip("=")
         )
-        assert "@agentctl_owner agentctl" in options.stdout
-        assert "@agentctl_agent " + agent in options.stdout
-        assert "@agentctl_folder " + encoded in options.stdout
+        identity = [
+            shlex.split(line)
+            for line in options.stdout.splitlines()
+            if line.startswith("@")
+        ]
+        assert ["@agentctl_owner", "agentctl"] in identity
+        assert ["@agentctl_agent", agent] in identity
+        assert ["@agentctl_folder", encoded] in identity
         assert not list(Path(case.environment["AGENTCTL_STATE_DIR"]).rglob("spec.json"))
 
 
@@ -207,6 +213,7 @@ def test_dead_leftover_pane_is_replaced(mux_server: PrivateMux) -> None:
     case = prepare(mux_server, "claude")
     old = mux_server.actor("api-claude", disposition="3")
     assert mux_server.exit_status(old) == EXIT_STATUS
+    previous = old.record()["pid"]
     encoded = (
         base64.urlsafe_b64encode(str(case.folder.resolve()).encode())
         .decode()
@@ -216,7 +223,7 @@ def test_dead_leftover_pane_is_replaced(mux_server: PrivateMux) -> None:
         ("owner", "agentctl"),
         ("agent", "claude"),
         ("folder", encoded),
-        ("pane", old.pane),
+        ("pane", pane_identifier(old.pane)),
     ):
         result = mux_server.command(
             "set-identity", session=old.session, key=key, value=value
@@ -228,7 +235,7 @@ def test_dead_leftover_pane_is_replaced(mux_server: PrivateMux) -> None:
     assert len(launches) == 1, "dead pane was reattached"
     pane = launches[0]["pane"]
     assert isinstance(pane, str)
-    assert pane != old.pane, "dead pane was reattached"
+    assert launches[0]["pid"] != previous, "dead process was reattached"
     live = mux_server.raw("display-message", "-p", "-t", pane, "#{pane_dead}")
     assert live.code == 0, live.stderr
     assert live.stdout.strip() == "0"

@@ -53,6 +53,11 @@ because the server restarted and reused the id, is **stale**: `list` and `status
 captures from or sends to it, and `stop` forgets it. A restart that reuses both the id and the pid for another
 process on the same socket is not detected, because the socket, pane id and pid are all revalidation compares.
 
+Windows pane targets include the session, for example `=foreign:.%1`, because different psmux servers can each
+contain `%1`. The table and adopted registry retain this complete target. Adoption also accepts `foreign:%1` as
+input and normalises it; a bare `%1` resolves only when one eligible session contains it. Ambiguity refuses without
+changing the registry (`tests/e2e/test_adopt.py::test_stale_entry_after_server_restart`).
+
 `#{pane_current_command}` is a hint, never proof of what runs in a pane: `list` shows it beside an adopted pane,
 and `adopt` takes the agent from `--agent` rather than guessing it from the process name.
 

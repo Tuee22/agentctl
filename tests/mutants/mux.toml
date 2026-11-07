@@ -8,6 +8,33 @@ killers = ["tests/unit/test_mux_values.py::test_version_floor_oracle"]
 reason = "multiplexer version differs from oracle"
 
 [[mutant]]
+id = "M-mux-version-banner-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Mux.hs"
+search = "| compatibility == release -> parseVersion Psmux details"
+replace = "| not (Text.null compatibility && Text.null release) -> parseVersion Psmux details"
+killers = ["tests/unit/test_mux_values.py::test_version_floor_oracle"]
+reason = "multiplexer version differs from oracle"
+
+[[mutant]]
+id = "M-mux-create-job-retained"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Mux/Command.hs"
+search = "ownsProcessTree Psmux Create {} = False"
+replace = "ownsProcessTree Psmux Create {} = True"
+killers = ["tests/unit/test_mux_values.py::test_process_tree_policy_oracle"]
+reason = "multiplexer process ownership differs from oracle"
+
+[[mutant]]
+id = "M-mux-remain-session-unqualified"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Mux/Psmux.hs"
+search = "target name pane = \"=\" ++ Text.unpack (sessionNameText name) ++ \":\" ++ Text.unpack (paneId pane)"
+replace = "target name pane = Text.unpack (Text.take 0 (sessionNameText name) <> paneId pane)"
+killers = ["tests/unit/test_mux_values.py::test_render_oracle"]
+reason = "multiplexer command differs from oracle"
+
+[[mutant]]
 id = "M-mux-letter-suffix-refused"
 operator = "replace-literal"
 target = "src/agentctl/haskell/src/AgentCtl/Mux.hs"
@@ -222,3 +249,21 @@ search = "needsReap Tmux dead status = dead && isNothing status"
 replace = "needsReap Tmux dead status = dead && not (isNothing status)"
 killers = ["tests/unit/test_mux_values.py::test_reap_policy_oracle"]
 reason = "multiplexer reap policy differs from oracle"
+
+[[mutant]]
+id = "M-mux-pane-target-unscoped"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Mux/Command.hs"
+search = 'inSession Psmux name pane = Pane ("=" <> sessionNameText name <> ":." <> paneId pane)'
+replace = 'inSession Psmux name pane = Pane (Text.take 0 (sessionNameText name) <> paneId pane)'
+killers = ["tests/unit/test_mux_values.py::test_pane_target_oracle"]
+reason = "pane target differs from oracle"
+
+[[mutant]]
+id = "M-mux-pane-ambiguity-accepted"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Mux/Command.hs"
+search = 'selectPane _ = Left "ambiguous pane id; use SESSION:%id"'
+replace = 'selectPane (pane : _) = Right (Just pane)'
+killers = ["tests/unit/test_mux_values.py::test_pane_target_oracle"]
+reason = "pane target differs from oracle"

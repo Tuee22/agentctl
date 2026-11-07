@@ -130,14 +130,23 @@ def multiplexer(
         if isinstance(result, Ok) and result.value.code == 0:
             version = result.value.stdout.strip()
             pattern = (
-                r"psmux (\d+)\.(\d+)\.(\d+)(?: \([^()\r\n]*\))?"
+                r"(?:tmux (?P<compatibility>\d+\.\d+\.\d+)\r?\n)?"
+                r"psmux (?P<release>\d+\.\d+\.\d+)(?: \([^()\r\n]*\))?"
                 if family == "Windows"
                 else r"tmux (\d+)\.(\d+)[a-z]?"
             )
             match = re.fullmatch(pattern, version)
             if match is not None:
-                observed = tuple(int(part) for part in match.groups())
-                accepted = observed >= ((3, 4, 0) if family == "Windows" else (3, 2))
+                if family == "Windows":
+                    release = match.group("release")
+                    observed = tuple(int(part) for part in release.split("."))
+                    accepted = match.group("compatibility") in {
+                        None,
+                        release,
+                    } and observed >= (3, 4, 0)
+                else:
+                    observed = tuple(int(part) for part in match.groups())
+                    accepted = observed >= (3, 2)
     (directory / "mux-host.json").write_text(
         json.dumps(
             {

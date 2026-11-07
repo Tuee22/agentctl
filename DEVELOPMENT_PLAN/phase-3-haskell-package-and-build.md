@@ -81,6 +81,7 @@ the binary its handshake and the eval executable its first cases.
 - `agentctl-core.cabal` declares the library, `agentctl-core`, `agentctl-core-eval` and the tasty suite
   `agentctl-core-test`, each importing the common warnings stanza of the code standards, with no `flag`, `if` or
   `buildable` field; `cabal.project` pins the Hackage `index-state`.
+- Native build controls use short, session-owned cache roots under the gate run directory, keeping GHC package database paths within Windows tool limits. Each request gets a separate cache; only the immutable dependency store is shared, and teardown removes the roots. Private Windows homes include real AppData directories; a constructed absent-tool PATH uses an existing owned directory when exercising native Cabal.
 - `build.py` holds the one build invocation: the recorded absolute cabal and ghc, `CABAL_DIR` set to `cache/cabal` so
   the user's cabal configuration changes no flag, repository or store, a build directory outside the tree, and tests
   enabled. `cabal update` runs only when the private index does not reach the pinned `index-state`, which is recorded.
@@ -96,6 +97,8 @@ the binary its handshake and the eval executable its first cases.
   which `tests/harness/oracle.py::assert_oracle` compares; each later phase adds its kernels as subjects.
 - The mutant runner builds a Haskell mutant's scratch copy in one fixed `-O0` build directory under the run dir and runs
   its pure-kernel or bounded private-effect killers against that build, never a live-agent test.
+  Native test build contexts create their private home and Windows application-data folders before invoking the
+  toolchain, preserving user-profile isolation while satisfying the native folder APIs.
 - The wheel and sdist carry every checkout file under `src/agentctl/haskell/` and no `dist-newstyle/`, with no
   hatchling force-include.
 

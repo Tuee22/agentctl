@@ -3,6 +3,10 @@ module AgentCtl.Mux.Command
   ( Command (..),
     Pane,
     paneText,
+    paneId,
+    paneSession,
+    inSession,
+    selectPane,
     makePane,
     Option (..),
     optionName,
@@ -13,15 +17,16 @@ module AgentCtl.Mux.Command
     parseCommand,
     deadStatus,
     needsReap,
+    ownsProcessTree,
   )
 where
 
 import AgentCtl.Mux.Types (Kind (..))
-import AgentCtl.Session.Name (SessionName, makeSessionName)
+import AgentCtl.Session.Name (SessionName, makeSessionName, sessionNameText)
 import Data.Aeson (Value, withObject, (.:))
 import Data.Aeson.Types (Parser)
-import Data.Char (isAlphaNum, isAscii, isDigit)
-import Data.Maybe (isNothing)
+import Data.Char (isAlphaNum, isAscii, isControl, isDigit)
+import Data.Maybe (fromMaybe, isNothing)
 import Data.Text (Text)
 import qualified Data.Text as Text
 
@@ -30,10 +35,40 @@ newtype Pane = Pane Text deriving (Eq, Show)
 paneText :: Pane -> Text
 paneText (Pane value) = value
 
-makePane :: Text -> Maybe Pane
-makePane value = case Text.uncons value of
-  Just ('%', rest) | not (Text.null rest) && Text.all (\character -> isAscii character && isDigit character) rest -> Just (Pane value)
+paneId :: Pane -> Text
+paneId (Pane value) =
+  let raw = snd (Text.breakOnEnd ":" value)
+   in fromMaybe raw (Text.stripPrefix "." raw)
+
+paneSession :: Pane -> Maybe Text
+paneSession (Pane value) = case Text.breakOn ":" value of
+  (name, suffix) | not (Text.null suffix) -> Just (Text.drop 1 name)
   _ -> Nothing
+
+inSession :: Kind -> SessionName -> Pane -> Pane
+inSession Psmux name pane = Pane ("=" <> sessionNameText name <> ":." <> paneId pane)
+inSession Tmux _ pane = pane
+
+selectPane :: [Pane] -> Either Text (Maybe Pane)
+selectPane [] = Right Nothing
+selectPane [pane] = Right (Just pane)
+selectPane _ = Left "ambiguous pane id; use SESSION:%id"
+
+makePane :: Text -> Maybe Pane
+makePane value = case Text.breakOn ":" value of
+  (prefix, suffix)
+    | not (Text.null suffix) ->
+        let name = fromMaybe prefix (Text.stripPrefix "=" prefix)
+            raw = Text.drop 1 suffix
+            identifier = fromMaybe raw (Text.stripPrefix "." raw)
+         in if not (Text.null name) && Text.all (\character -> character /= ':' && not (isControl character)) name && bare identifier
+              then Just (Pane ("=" <> name <> ":." <> identifier))
+              else Nothing
+  _ -> if bare value then Just (Pane value) else Nothing
+  where
+    bare raw = case Text.uncons raw of
+      Just ('%', rest) -> not (Text.null rest) && Text.all (\character -> isAscii character && isDigit character) rest
+      _ -> False
 
 data Option = Owner | Agent | Folder | AgentPane | StatusFile deriving (Eq, Show)
 
@@ -63,7 +98,7 @@ data Command
   | PaneState Pane
   | InspectPane Pane Text
   | SetIdentity SessionName Option OptionValue
-  | RemainOnExit Pane Bool
+  | RemainOnExit SessionName Pane Bool
   | Capture Pane Int
   | CaptureVisual Pane
   | SendLiteral Pane Text
@@ -96,7 +131,7 @@ parseCommand = withObject "multiplexer action" $ \fields -> do
       key <- fields .: "key" >>= parseOption
       value <- fields .: "value" >>= maybe (fail "invalid identity option value") pure . makeOptionValue
       SetIdentity <$> session <*> pure key <*> pure value
-    "remain-on-exit" -> RemainOnExit <$> pane <*> fields .: "enabled"
+    "remain-on-exit" -> RemainOnExit <$> session <*> pane <*> fields .: "enabled"
     "capture" -> do
       count <- fields .: "lines"
       if count > 0 then Capture <$> pane <*> pure count else fail "invalid capture length"
@@ -133,3 +168,7 @@ nonnegative _ = Nothing
 needsReap :: Kind -> Bool -> Maybe Int -> Bool
 needsReap Tmux dead status = dead && isNothing status
 needsReap Psmux _ _ = False
+
+ownsProcessTree :: Kind -> Command -> Bool
+ownsProcessTree Psmux Create {} = False
+ownsProcessTree _ _ = True

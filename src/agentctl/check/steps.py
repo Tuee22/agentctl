@@ -60,6 +60,7 @@ ENVIRONMENT = frozenset(
         "ANTHROPIC_API_KEY",
         "ANTHROPIC_AUTH_TOKEN",
         "CODEX_HOME",
+        "CODEX_SQLITE_HOME",
         "OPENAI_API_KEY",
         "CODEX_API_KEY",
         "CODEX_ACCESS_TOKEN",
@@ -90,21 +91,23 @@ def environment(
     return {
         **{key: value for key, value in inherited.items() if key in ENVIRONMENT},
         "LC_ALL": "C.UTF-8",
-        "TMPDIR": str(run_dir),
-        "TEMP": str(run_dir),
-        "TMP": str(run_dir),
-        "PYTHONPYCACHEPREFIX": str(run_dir / "bytecode"),
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8",
+        "TMPDIR": run_dir.as_posix(),
+        "TEMP": run_dir.as_posix(),
+        "TMP": run_dir.as_posix(),
+        "PYTHONPYCACHEPREFIX": (run_dir / "bytecode").as_posix(),
         **(
             {
-                "XDG_CONFIG_HOME": str(run_dir / "ty-config"),
-                "APPDATA": str(run_dir / "ty-config"),
+                "XDG_CONFIG_HOME": (run_dir / "ty-config").as_posix(),
+                "APPDATA": (run_dir / "ty-config").as_posix(),
             }
             if tool == "ty"
             else {}
         ),
         "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
         "AGENTCTL_CHECK_NONCE": nonce,
-        "AGENTCTL_CHECK_MANIFEST": str(run_dir / "pytest-manifest.json"),
+        "AGENTCTL_CHECK_MANIFEST": (run_dir / "pytest-manifest.json").as_posix(),
     }
 
 

@@ -16,7 +16,7 @@ from agentctl.check.legs import Leg
 from agentctl.check.preconditions import inspect, single_run
 from agentctl.check.steps import check, execute, run_leg, run_tools
 from agentctl.paths import directories
-from agentctl.process import alive, run, start, stop
+from agentctl.process import alive, finish, run, start, stop
 from agentctl.result import Err, Ok
 
 pytestmark = pytest.mark.evidence("real")
@@ -56,14 +56,25 @@ def test_process_errors_and_teardown(tmp_path: Path) -> None:
     while child.value.handle.poll() is None and time.monotonic() < deadline:
         time.sleep(0.01)
     assert child.value.handle.poll() == 0
-    result = stop(child.value)
+    result = finish(child.value, timeout=10)
     assert isinstance(result, Ok)
     assert result.value.stdout == "finished\n"
+    assert isinstance(stop(child.value), Ok)
     assert alive(family, child.value.pid) == Ok(value=False)
+    pending = start(
+        [sys.executable, "-c", "import time; time.sleep(60)"],
+        cwd=tmp_path,
+        env=os.environ,
+    )
+    assert isinstance(pending, Ok), pending
+    try:
+        assert isinstance(finish(pending.value, timeout=0.01), Err)
+    finally:
+        assert isinstance(stop(pending.value), Ok)
 
 
 def test_owned_child_escalation(tmp_path: Path) -> None:
-    """A POSIX child ignoring terminate is killed and reaped within the bound."""
+    """An owned child ignoring graceful signals is forcibly killed and reaped."""
     ready = tmp_path / "ready"
     script = (
         "import os, signal, sys, time\nfrom pathlib import Path\n"

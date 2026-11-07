@@ -58,6 +58,7 @@ static int access_facts(HANDLE handle, int directory, unsigned int *facts) {
   int error = ERROR_PROC_NOT_FOUND;
   HANDLE token = NULL;
   TOKEN_USER *user = NULL;
+  TOKEN_OWNER *default_owner = NULL;
   PSECURITY_DESCRIPTOR descriptor = NULL;
   if (!security.raw || !open_token.raw || !token_info.raw || !equal_sid.raw || !get_ace.raw || !well_known.raw) goto finish;
   BY_HANDLE_FILE_INFORMATION info;
@@ -71,16 +72,23 @@ static int access_facts(HANDLE handle, int directory, unsigned int *facts) {
   user = malloc(needed);
   if (!user) { error = ERROR_NOT_ENOUGH_MEMORY; goto finish; }
   if (!token_info.call(token, TokenUser, user, needed, &needed)) { error = (int)GetLastError(); goto finish; }
+  needed = 0;
+  token_info.call(token, TokenOwner, NULL, 0, &needed);
+  if (!needed) { error = (int)GetLastError(); goto finish; }
+  default_owner = malloc(needed);
+  if (!default_owner) { error = ERROR_NOT_ENOUGH_MEMORY; goto finish; }
+  if (!token_info.call(token, TokenOwner, default_owner, needed, &needed)) { error = (int)GetLastError(); goto finish; }
   PSID owner = NULL;
   PACL acl = NULL;
   error = (int)security.call(handle, SE_FILE_OBJECT, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION,
                             &owner, NULL, &acl, NULL, &descriptor);
   if (error) goto finish;
-  facts[1] = owner && equal_sid.call(owner, user->User.Sid);
-  union { SID alignment; unsigned char bytes[SECURITY_MAX_SID_SIZE]; } system_sid, admin_sid;
-  DWORD system_size = sizeof(system_sid.bytes), admin_size = sizeof(admin_sid.bytes);
+  facts[1] = owner && (equal_sid.call(owner, user->User.Sid) || equal_sid.call(owner, default_owner->Owner));
+  union { SID alignment; unsigned char bytes[SECURITY_MAX_SID_SIZE]; } system_sid, admin_sid, owner_rights_sid;
+  DWORD system_size = sizeof(system_sid.bytes), admin_size = sizeof(admin_sid.bytes), owner_rights_size = sizeof(owner_rights_sid.bytes);
   if (!well_known.call(WinLocalSystemSid, NULL, system_sid.bytes, &system_size)
-      || !well_known.call(WinBuiltinAdministratorsSid, NULL, admin_sid.bytes, &admin_size)) {
+      || !well_known.call(WinBuiltinAdministratorsSid, NULL, admin_sid.bytes, &admin_size)
+      || !well_known.call(WinCreatorOwnerRightsSid, NULL, owner_rights_sid.bytes, &owner_rights_size)) {
     error = (int)GetLastError(); goto finish;
   }
   int private_acl = acl != NULL;
@@ -94,11 +102,13 @@ static int access_facts(HANDLE handle, int directory, unsigned int *facts) {
     ACCESS_ALLOWED_ACE *ace = (ACCESS_ALLOWED_ACE *)header;
     PSID sid = (PSID)&ace->SidStart;
     if (ace->Mask && !equal_sid.call(sid, user->User.Sid)
-        && !equal_sid.call(sid, system_sid.bytes) && !equal_sid.call(sid, admin_sid.bytes)) private_acl = 0;
+        && !equal_sid.call(sid, system_sid.bytes) && !equal_sid.call(sid, admin_sid.bytes)
+        && !equal_sid.call(sid, owner_rights_sid.bytes)) private_acl = 0;
   }
   facts[2] = private_acl ? (directory ? 0700U : 0600U) : 0777U;
 finish:
   if (descriptor) LocalFree(descriptor);
+  free(default_owner);
   free(user);
   if (token) CloseHandle(token);
   FreeLibrary(library);
@@ -147,8 +157,8 @@ int agentctl_state_directory(const char *path) {
   if (!facts[0] || !facts[1]) { error = ERROR_ACCESS_DENIED; goto finish; }
   if (facts[2] == 0700U) goto finish;
   CloseHandle(handle);
-  /* An exclusive root handle prevents ACL propagation to existing children. */
-  handle = CreateFileW(name, READ_CONTROL | WRITE_DAC | FILE_READ_ATTRIBUTES,
+  /* MAXIMUM_ALLOWED prevents SetSecurityInfo from propagating to existing children. */
+  handle = CreateFileW(name, MAXIMUM_ALLOWED,
                        0, NULL, OPEN_EXISTING,
                        FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, NULL);
   if (handle == INVALID_HANDLE_VALUE) { error = (int)GetLastError(); goto finish; }

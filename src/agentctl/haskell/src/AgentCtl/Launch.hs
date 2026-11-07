@@ -262,7 +262,7 @@ reuse runtime = do
   panes <- forM (Text.lines (Process.stdoutText output)) $ \line -> case Text.words line of
     [identifier, dead] | dead == "0" || dead == "1" -> do
       pane <- maybe (throwE (InvalidResponse "invalid session pane id")) pure (Command.makePane identifier)
-      pure (pane, dead == "1")
+      pure (Command.inSession (Mux.muxKind (multiplexer runtime)) (session runtime) pane, dead == "1")
     _ -> throwE (InvalidResponse "invalid session pane state")
   when (null panes) (throwE (InvalidResponse "session contains no panes"))
   case [pane | (pane, False) <- panes] of
@@ -294,7 +294,7 @@ execute runtime observed = go Nothing (actions plan)
         go ready remaining
       ReleasePane -> do
         pane <- requirePane runtime
-        _ <- checkedCommand runtime (Command.RemainOnExit pane False)
+        _ <- checkedCommand runtime (Command.RemainOnExit (session runtime) pane False)
         go ready remaining
       NoticeIgnored -> do
         io (Text.hPutStrLn stderr ("agentctl: " <> Name.sessionNameText (session runtime) <> " is already running; the arguments given were not applied."))
@@ -387,10 +387,11 @@ fresh runtime verified = do
     Left failure -> cleanScope owned False >> throwE failure
     Right value -> pure value
   let initialise = do
-        pane <- maybe (throwE (InvalidResponse "create did not return one pane id")) pure (Command.makePane (Text.strip (Process.stdoutText output)))
+        nativePane <- maybe (throwE (InvalidResponse "create did not return one pane id")) pure (Command.makePane (Text.strip (Process.stdoutText output)))
+        let pane = Command.inSession (Mux.muxKind (multiplexer runtime)) (session runtime) nativePane
         let running = runtime {agentPane = Just pane, statusFile = Just (scopeStatus owned)}
-            identities = [(Command.Owner, "agentctl"), (Command.Agent, Agent.agentText (requestAgent (request runtime))), (Command.Folder, Identity.encodeText (Text.pack (canonicalFolder runtime))), (Command.AgentPane, Command.paneText pane), (Command.StatusFile, Identity.encodeText (Text.pack (scopeStatus owned)))]
-        _ <- checkedCommand running (Command.RemainOnExit pane True)
+            identities = [(Command.Owner, "agentctl"), (Command.Agent, Agent.agentText (requestAgent (request runtime))), (Command.Folder, Identity.encodeText (Text.pack (canonicalFolder runtime))), (Command.AgentPane, Command.paneId pane), (Command.StatusFile, Identity.encodeText (Text.pack (scopeStatus owned)))]
+        _ <- checkedCommand running (Command.RemainOnExit (session runtime) pane True)
         forM_ identities $ \(key, value) -> do
           valid <- maybe (throwE (InvalidResponse "invalid session identity value")) pure (Command.makeOptionValue value)
           _ <- checkedCommand running (Command.SetIdentity (session runtime) key valid)

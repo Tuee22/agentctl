@@ -149,7 +149,7 @@ finally:
     sys.stdout = original
     try:
         broken.close()
-    except BrokenPipeError:
+    except OSError:
         pass
 assert isinstance(result, Err), result
 assert 'Cannot flush terminal output' in result.error.message

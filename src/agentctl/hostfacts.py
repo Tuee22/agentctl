@@ -4,7 +4,6 @@
 import os
 import platform
 import shlex
-import shutil
 import sys
 import tomllib
 from collections.abc import Callable, Mapping
@@ -172,11 +171,19 @@ def discover_ghcup(family: Family, env: Mapping[str, str], home: Path) -> Path |
     )
     if explicit and destination.is_file():
         return destination.resolve()
-    found = shutil.which(
-        "ghcup.exe" if family == "Windows" else "ghcup", path=env.get("PATH", "")
+    name = "ghcup.exe" if family == "Windows" else "ghcup"
+    found = next(
+        (
+            candidate
+            for directory in env.get("PATH", "").split(os.pathsep)
+            if directory
+            for candidate in (Path(directory) / name,)
+            if candidate.is_file() and os.access(candidate, os.X_OK)
+        ),
+        None,
     )
     if found is not None:
-        return Path(found).resolve()
+        return found.resolve()
     default = ghcup_destination(family, {}, home)
     return default.resolve() if default.is_file() else None
 

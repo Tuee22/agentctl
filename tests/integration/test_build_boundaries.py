@@ -17,6 +17,10 @@ pytestmark = pytest.mark.evidence("real")
 def _owned(directory: Path) -> build.BuildContext:
     """Construct an empty, test-owned index context with the genuine toolchain."""
     host = context(directory)
+    # Cabal reads PATH through the Windows API, where an empty value is absent.
+    environment = dict(host.environment)
+    environment["PATH"] = str(directory)
+    host = replace(host, environment=tuple(environment.items()))
     project = directory / "project"
     project.mkdir()
     (project / "cabal.project").write_text(

@@ -21,6 +21,7 @@ def _probe(
 ) -> Output:
     """Run the real leg with exactly one copied fixture outside the checkout."""
     source = root / "tests/fixtures/static_negative" / fixture
+    (temporary / "pyproject.toml").write_bytes((root / "pyproject.toml").read_bytes())
     target = temporary / "subject.py"
     (temporary / "__init__.py").write_text("", encoding="utf-8")
     target.write_text(
@@ -37,7 +38,7 @@ def _probe(
     )
     result = run(
         list(leg.argv),
-        cwd=root,
+        cwd=temporary,
         env=environment(os.environ, temporary, "static-control", tool=tool),
     )
     assert isinstance(result, Ok)
@@ -74,7 +75,7 @@ def test_ty_ignores_user_config(
     """Isolate the user configuration home even when it disables all rules."""
     user = tmp_path / "user"
     (user / "ty").mkdir(parents=True)
-    include = json.dumps(str(tmp_path / "subject.py"))
+    include = json.dumps("**/subject.py")
     (user / "ty/ty.toml").write_text(
         '[rules]\nall = "ignore"\n'
         f"[[overrides]]\ninclude = [{include}]\n"
@@ -98,7 +99,7 @@ def test_ty_ignores_user_config(
             "--error-on-warning",
             str(tmp_path / "subject.py"),
         ],
-        cwd=root,
+        cwd=tmp_path,
         env=environment(os.environ, tmp_path, "hostile-configuration-control"),
     )
     assert isinstance(leaked, Ok)

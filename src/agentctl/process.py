@@ -47,7 +47,7 @@ class SpawnError:
 class Child:
     """An owned background process whose handle remains with its creator."""
 
-    handle: subprocess.Popen[str]
+    handle: subprocess.Popen[bytes]
 
     @property
     def pid(self) -> int:
@@ -72,12 +72,12 @@ def run(
             timeout=timeout,
             check=False,
             capture_output=True,
-            encoding="utf-8",
-            input=input_text,
+            text=False,
+            input=None if input_text is None else input_text.encode("utf-8"),
         )
+        return Ok(_decoded(child.returncode, child.stdout, child.stderr))
     except (OSError, subprocess.TimeoutExpired, UnicodeError) as exc:
         return Err(SpawnError(str(exc)))
-    return Ok(Output(child.returncode, child.stdout, child.stderr))
 
 
 def start(
@@ -91,7 +91,7 @@ def start(
             env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            encoding="utf-8",
+            text=False,
         )
     except OSError as exc:
         return Err(SpawnError(str(exc)))
@@ -99,19 +99,19 @@ def start(
 
 
 def stop(child: Child) -> Result[Output, SpawnError]:
-    """Terminate an owned child and reap it, bounding both waits."""
+    """Kill a running owned child and reap it, bounding both waits.
+
+    Force termination prevents uncooperative observers from retaining private
+    processes and streams. Completed children retain their status and output.
+    """
     try:
         if child.handle.poll() is None:
-            child.handle.terminate()
-        try:
-            stdout, stderr = child.handle.communicate(timeout=5)
-        except subprocess.TimeoutExpired:
             child.handle.kill()
-            stdout, stderr = child.handle.communicate(timeout=5)
+        stdout, stderr = child.handle.communicate(timeout=5)
         code = child.handle.wait(timeout=5)
+        return Ok(_decoded(code, stdout, stderr))
     except (OSError, subprocess.TimeoutExpired, UnicodeError) as exc:
         return Err(SpawnError(str(exc)))
-    return Ok(Output(code, stdout, stderr))
 
 
 def alive(family: Family, pid: int) -> Result[bool, SpawnError]:
@@ -192,3 +192,20 @@ def foreground(
                     continue
     except OSError as exc:
         return Err(SpawnError(str(exc)))
+
+
+def finish(child: Child, *, timeout: float = 600) -> Result[Output, SpawnError]:
+    """Wait for an owned child and decode drained bytes without terminating it."""
+    try:
+        stdout, stderr = child.handle.communicate(timeout=timeout)
+        code = child.handle.wait(timeout=timeout)
+        return Ok(_decoded(code, stdout, stderr))
+    except (OSError, subprocess.TimeoutExpired, UnicodeError) as exc:
+        return Err(SpawnError(str(exc)))
+
+
+def _decoded(code: int, stdout: bytes, stderr: bytes) -> Output:
+    """Decode after pipe draining so invalid bytes fail on the caller's thread."""
+    output = stdout.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    errors = stderr.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    return Output(code, output, errors)

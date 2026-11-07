@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from agentctl.bootstrap import build
-from agentctl.process import stop
+from agentctl.process import finish, stop
 from agentctl.result import Ok
 from tests.harness.nonce import fresh
 from tests.harness.tmux import object_value, validate_record
@@ -39,7 +39,9 @@ def test_record_carries_nonce(
     )
     assert isinstance(child, Ok), child
     try:
-        stdout, stderr = child.value.handle.communicate(timeout=10)
+        completed = finish(child.value, timeout=10)
+        assert isinstance(completed, Ok), completed
+        stdout, stderr = completed.value.stdout, completed.value.stderr
         assert child.value.handle.returncode == EXIT_STATUS, stderr
         assert stdout == "ready:" + nonce + "\n"
         assert not stderr

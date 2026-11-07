@@ -35,7 +35,7 @@ through `agentctl-core-eval`.
 | Class | A test produces it by | It claims no more than |
 |---|---|---|
 | `value` | passing a pure subject, or `agentctl-core-eval` for a Haskell kernel, to `tests/harness/oracle.py::assert_oracle` with an oracle file ([oracles](#oracles)) | that the subject computes the specified function on those rows |
-| `real` | running the real tool in a scope it owns ([isolation](#isolation)): a private tmux server, psmux under `PSMUX_DATA_DIR`, logged-out claude and codex, `--help` canaries, the pinned ghcup, GHC and cabal, or pytester | that tool's behaviour at the version this run observed, which the lane summary's detail records |
+| `real` | running the real tool in a scope it owns ([isolation](#isolation)): a private tmux server, psmux under `PSMUX_DATA_DIR`, logged-out claude and codex, `--help` canaries, the pinned ghcup, GHC and cabal, or pytester | that tool's behaviour at the version this run observed, which its nonce-bound tool observation records |
 | `observer` | reading the record of `agentctl-fake-agent` or of the spawn audit ([observers](#observers-and-nonces)) | what the subject sent, and what it did not send while the observer was demonstrably live |
 
 A `--help` canary is paired with a negative control that shows the same probe can say no: codex exits 2 on a made-up flag before printing help, while claude's
@@ -58,6 +58,10 @@ A `--help` canary is paired with a negative control that shows the same probe ca
 The collection plugin reads `tests/support.txt` for explicit support modules and joins collected modules to sprint citations. A support entry cannot hide a file matching pytest's test-module naming convention (`tests/governance/test_gate_plugin.py::test_orphan_module_fails`). Negative validator trees use the fixture edit instructions under `tests/fixtures/docs_negative/`; `tests/harness/trees.py` applies each instruction to a fresh copy of the governed tree, leaving the checkout unchanged.
 
 Real tools run only in scopes the test owns, each set up by one harness module, so production code needs no switch.
+Native cache controls allocate short, separate cache roots inside a session-owned temporary directory under the gate run. This bounds Windows GHC package-database paths without changing host long-path policy. Private native homes include existing roaming and local AppData directories.
+
+The pane process witness uses the base Python executable on Windows: a virtual-environment redirector introduces
+an additional process, which cannot establish the direct parent-child relationship the witness checks.
 
 The host harness independently probes the native multiplexer with `-V` and records its path, raw version and current
 nonce under `mux-host/` in the run directory. It applies the recorded floors independently of the Haskell kernel.
@@ -68,10 +72,13 @@ home and XDG directories, and psmux also receives owned registry storage with wa
 - **tmux.** `tests/harness/tmux.py` makes `TMUX_TMPDIR` a short 0700 directory under the run directory, unsets
   `TMUX` and `TMUX_PANE`, and starts the private server itself with `-f /dev/null`, so no user configuration is
   read. The subject then reaches that server as its normal default server. The harness runs `kill-server` only
-  after asserting that the socket path lies under the run directory, and precondition P6 keeps that path within
+  after asserting that the socket path lies under the run directory; its uid comes from that directory's native
+  metadata, and precondition P6 keeps that path within
   100 bytes.
 - **psmux.** Every psmux process gets an absolute, test-owned `PSMUX_DATA_DIR` and `PSMUX_NO_WARM=1`; teardown
-  never ends psmux processes by image name.
+  never ends psmux processes by image name. Independent pane-option controls qualify the pane id with its session
+  to route to the selected server. Replacement checks observe process identity and a live new pane because pane
+  ids can be reused after a per-session server restarts.
 - **Agents logged out by construction.** `CLAUDE_CONFIG_DIR` and `CODEX_HOME` are empty temp dirs, and
   `CODEX_HOME/config.toml` sets `cli_auth_credentials_store = "file"`, so a keyring credential cannot answer.
   The credential variables both CLIs read are removed: `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`,
@@ -115,6 +122,11 @@ An observer stands at a boundary the subject crosses and records what crossed it
   it through the same lookup a real agent gets. It writes one record of its argv, working directory, environment
   keys (never values), the multiplexer session it runs in and the nonce, then exits at once or stays running as
   the case requires. Its pid goes into the record, so `containment` can require it dead.
+  Atomic record filenames include the nonce, pid and native monotonic stamp. Recycled process ids therefore keep
+  separate invocation records, preserving the complete mux-client trace used by pause and capture checks.
+  Pane records retain the raw `pane_id` and the complete native target in `pane`; Windows combines the independently
+  observed session and pane id. Both echo and scripted modes poll Windows input readiness before reading, yielding
+  while no characters are available so stop-file completion needs no extra terminal input.
   Scripted mode plays fixture frames advanced by a private trigger file, a received-byte threshold or a bounded
   delay. It disables canonical input, echo and control-key processing only in its test-owned terminal, restoring
   the prior native mode on normal scope exit. It preserves input bytes, including a literal sent before Enter.
@@ -122,12 +134,16 @@ An observer stands at a boundary the subject crosses and records what crossed it
   carry the fresh nonce, pid, pane, session and native monotonic timestamp, and flush each record before advancing.
   The receiving controls check the partial literal, the separate carriage return, every target identity and all
   three advance kinds (`tests/e2e/test_scripted_fake.py::test_scripted_agent_records_every_byte`).
+- **Controlled Unicode output.** Windows emitters use the wide-console API for terminal text and UTF-8 for pipes. Private raw input selects the UTF-8 console input code page and restores it with the saved input mode. The native capture must still equal the independent fixture exactly.
 - **Native supervisor stop.** POSIX tests signal only their owned child. Windows tests use a test-only console
   fixture in a second private multiplexer pane; its native helper checks that the supervisor-lock PID belongs to
   that console before sending Ctrl+C or the child's process-group Ctrl+Break. Tests require exit before cleanup,
   bind prior captures to every nonce-bearing managed and adopted target, preserve their pane identities and run a
   fresh controller to prove lock release (`tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`).
   All requests and observations are automatic; Linux compilation does not confirm Windows console handling.
+  Ordinary Windows scenario cleanup also uses Ctrl+Break and waits for exit before the mux scope closes. The
+  fixture records the child status and buffered stdout/stderr with its nonce and PID; timing options remain public
+  supervisor arguments. Terminal attachment observers query the intended session explicitly.
 - **Guarded delivery.** The compiled fake multiplexer relay can hold the selected guard after a real flushed send
   proposal, while the test changes a pane and independently observes its native rendering. It distinguishes a
   deferred proposal following an abort from the next actual send offer. Each hold has a nonce-bound generation and
@@ -141,6 +157,8 @@ An observer stands at a boundary the subject crosses and records what crossed it
   would run without running it, and without monkeypatching the subject. Harmless spawns, such as the prerequisite
   probe's compiler, are recorded and allowed, which is what makes them positive controls.
   The immutable hook opts into Python tracing with `__cantrace__`, so coverage observes the hook body too.
+  Native Windows exec/spawn controls use CRT-quoted API vectors. Assertions retain both the exact observed vector
+  and the independent sentinel written by the executed child.
 - **Prerequisite consent.** Disposable click actors use an owned PATH containing no installers. A recorded link
   attempt establishes that the observer is live; declines attempt no package commands. Each approved command is
   attempted separately under the veto, and an ordinary batch stops at its first veto
@@ -380,6 +398,8 @@ CLI leaves it unmet. Help canaries require the mandatory flags and a fresh unkno
 
 The installed-agent argv control starts the real trampoline on the private backend, enables remain-on-exit,
 and atomically publishes a private spec. It observes the fixed two-second startup window from publication.
+Each accepted, bare-separator and rejected argv case has a separate home, agent configuration and runtime
+directory, and its own logged-out status probe, so overlapping panes share no agent database.
 The actual launch selector supplies argv; independent agent-table rows supply the expected mandatory flags.
 Logged-out interactive panes remain alive, while the Claude auth-status and Codex exec controls reject their
 appended flags inside that same window. Linux reads the process argv tail directly; all hosts observe actual
@@ -398,6 +418,11 @@ The instant-exit control keeps the same deadline and required status, and waits 
 as a dead pane (`tests/integration/test_mux_real.py::test_instant_exit_status`).
 
 ## Launch callers and child accounting
+
+Native build contexts create the private home and its Windows roaming and local application-data directories
+before invoking Cabal. The corresponding environment paths stay inside that test's scope.
+The Windows server registry reader accepts native PID/creation-time pairs and refuses malformed identities
+before registration (`tests/integration/test_tmux_harness.py::test_psmux_pid_record_shapes`).
 
 `tests/harness/launch.py` invokes the real core through the application-owned build boundary, with private home,
 agent configuration, XDG and multiplexer directories. The fake agent records its auth probe separately from its

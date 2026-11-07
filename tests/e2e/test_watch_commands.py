@@ -8,7 +8,7 @@ import pytest
 
 from tests.harness.launch import LaunchCase, prepare
 from tests.harness.sessions import rows
-from tests.harness.tmux import PrivateMux, object_value
+from tests.harness.tmux import PrivateMux, object_value, pane_identifier
 
 pytestmark = pytest.mark.evidence("real")
 PANE_FACTS = 3
@@ -52,7 +52,7 @@ def pane_pid(mux: PrivateMux, pane: str) -> int:
     assert output.code == 0, output
     fields = output.stdout.strip().split("|")
     assert len(fields) == PANE_FACTS
-    assert fields[0] == pane
+    assert fields[0] == pane_identifier(pane)
     assert fields[2] == "0"
     return int(fields[1])
 

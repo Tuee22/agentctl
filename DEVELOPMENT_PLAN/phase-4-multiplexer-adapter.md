@@ -22,7 +22,7 @@
 - **One vocabulary, one runner.** `AgentCtl.Mux.Command` is a closed set of actions with no `kill-server`, respawn or
   shell-string value, rendered by the pure `AgentCtl.Mux.Tmux` and `AgentCtl.Mux.Psmux`; `AgentCtl.Process`, the only
   importer of `System.Process`, runs every spawn and exec in the binary. Sessions are targeted as `=NAME` from a
-  `SessionName` and panes by `%id`.
+  `SessionName` and panes by opaque native targets, retaining the session component for psmux.
 - **The trampoline.** The pane command is always `agentctl-core pane-exec <spec>`, so argv, folder and environment
   travel in a 0600 spec file and no user text, and no secret, reaches tmux or psmux parsing.
 - **Sessions on the user's normal server.** Production passes no `-L` or `-S`; tests reach a private server through
@@ -35,7 +35,9 @@
 
 | Requirement | Oracle | Observer | Mutants | Tests |
 |---|---|---|---|---|
-| R12.1 — the binary checks that tmux 3.2 or later (Linux, macOS) or psmux 3.4.0 or later (Windows) is available | `tests/oracles/mux_commands.toml` | value: version, floor, resolution-candidate and remedy cases through agentctl-core-eval; real: constructed missing and present paths, the native host's version, and an independent nonce-bound lane observation; owed: macos-acceptance | `M-mux-floor-3-1`, `M-mux-letter-suffix-refused`, `M-mux-tmux-alias-on-windows`, `M-mux-remedy-wrong-os` | `tests/unit/test_mux_values.py::test_version_floor_oracle`, `tests/unit/test_mux_values.py::test_resolution_candidates_oracle`, `tests/unit/test_mux_values.py::test_remedy_oracle`, `haskell:agentctl-core-test/MuxReal/absent-multiplexer-unavailable`, `haskell:agentctl-core-test/MuxReal/host-multiplexer-meets-floor`, `tests/integration/test_mux_resolution.py::test_host_probe_and_constructed_absence` |
+| R7 — psmux servers outlive creating clients and pane targets retain their session (contributing) | `tests/oracles/mux_commands.toml` | value: process-tree ownership and session-qualified pane targeting and ambiguity refusal; real: a private server remains alive after its create client exits and holds a live control beside an exited pane; observer: nonce-bound agent records distinguish selected pane processes, captures and input; owed: windows-psmux-acceptance | `M-mux-create-job-retained`, `M-mux-remain-session-unqualified`, `M-mux-pane-target-unscoped`, `M-mux-pane-ambiguity-accepted` | `tests/unit/test_mux_values.py::test_process_tree_policy_oracle`, `tests/unit/test_mux_values.py::test_render_oracle`, `tests/unit/test_mux_values.py::test_pane_target_oracle`, `tests/integration/test_mux_real.py::test_pane_targets_distinguish_servers`, `tests/integration/test_mux_real.py::test_private_server_roundtrip`, `tests/integration/test_mux_real.py::test_instant_exit_status` |
+| R20 — private psmux PID records admit only positive native identities (contributing) | none — independently written valid and malformed private registry files | real: bare PID and PID/creation-time records parse, and malformed identities cannot register | none — direct native file controls | `tests/integration/test_tmux_harness.py::test_psmux_pid_record_shapes` |
+| R12.1 — the binary checks that tmux 3.2 or later (Linux, macOS) or psmux 3.4.0 or later (Windows) is available | `tests/oracles/mux_commands.toml` | value: version, floor, resolution-candidate and remedy cases through agentctl-core-eval; real: constructed missing and present paths, the native host's version, and an independent nonce-bound lane observation; owed: macos-acceptance | `M-mux-floor-3-1`, `M-mux-version-banner-unchecked`, `M-mux-letter-suffix-refused`, `M-mux-tmux-alias-on-windows`, `M-mux-remedy-wrong-os` | `tests/unit/test_mux_values.py::test_version_floor_oracle`, `tests/unit/test_mux_values.py::test_resolution_candidates_oracle`, `tests/unit/test_mux_values.py::test_remedy_oracle`, `haskell:agentctl-core-test/MuxReal/absent-multiplexer-unavailable`, `haskell:agentctl-core-test/MuxReal/host-multiplexer-meets-floor`, `tests/integration/test_mux_resolution.py::test_host_probe_and_constructed_absence` |
 | R8 — a multiplexer name can only be constructed from safe ASCII (contributing) | `tests/oracles/session_names.toml` | value: independent constructor acceptance cases through the native evaluator; real: a checked-name caller compiles while an external constructor caller fails at its named diagnostic | `M-mux-name-allows-double-underscore`, `M-mux-name-constructor-exported` | `tests/unit/test_mux_values.py::test_session_name_oracle`, `tests/integration/test_mux_resolution.py::test_session_name_constructor_is_private` |
 | R20 — bounded command effects use explicit argv, environment, UTF-8 and a finite deadline (contributing) | none — native child output, status and timeout markers are observed directly | real: the native test executable receives literal argv and environment, emits Unicode and invalid bytes, exits nonzero and reaches a controlled timeout | none — these native effects have direct two-sided controls | `haskell:agentctl-core-test/ProcessReal/utf8-argv-environment-and-status`, `haskell:agentctl-core-test/ProcessReal/line-endings-preserved`, `haskell:agentctl-core-test/ProcessReal/missing-and-relative-executables`, `haskell:agentctl-core-test/ProcessReal/invalid-utf8-is-refused`, `haskell:agentctl-core-test/ProcessReal/timeout-cleans-up`, `haskell:agentctl-core-test/ProcessReal/timeout-after-streams-close` |
 | R20 — private Unix socket paths fit the common byte bound (contributing) | none — the 100-byte boundary and its Unicode twin are explicit independent values | value: 100 bytes pass and 101 bytes fail | `M-mux-socket-length-unchecked` | `tests/unit/test_preconditions.py::test_socket_path_length` |
@@ -63,7 +65,7 @@
 **Status**: Done
 **Implementation**: `src/agentctl/haskell/src/AgentCtl/Mux.hs`, `src/agentctl/haskell/src/AgentCtl/Process.hs`, `src/agentctl/haskell/src/AgentCtl/Session/Name.hs`, `src/agentctl/haskell/app/`, `src/agentctl/haskell/test/`, `src/agentctl/haskell/agentctl-core.cabal`, `src/agentctl/check/preconditions.py`, `src/agentctl/check/steps.py`, `src/agentctl/check/haskell.py`, `tests/harness/host.py`, `tests/oracles/mux_commands.toml`, `tests/oracles/session_names.toml`, `tests/mutants/mux.toml`, `tests/unit/test_mux_values.py`, `tests/integration/test_mux_resolution.py`, `tests/unit/test_haskell_gate.py`, `tests/unit/test_preconditions.py`, `tests/integration/test_guard.py`
 **Validation tests**: `tests/unit/test_mux_values.py::test_version_floor_oracle`, `tests/unit/test_mux_values.py::test_resolution_candidates_oracle`, `tests/unit/test_mux_values.py::test_remedy_oracle`, `tests/unit/test_mux_values.py::test_session_name_oracle`, `haskell:agentctl-core-test/MuxReal/absent-multiplexer-unavailable`, `haskell:agentctl-core-test/MuxReal/host-multiplexer-meets-floor`, `tests/unit/test_preconditions.py::test_socket_path_length`, `tests/integration/test_mux_resolution.py::test_socket_directory_inspection`, `tests/integration/test_mux_resolution.py::test_host_probe_and_constructed_absence`, `tests/integration/test_mux_resolution.py::test_session_name_constructor_is_private`, `haskell:agentctl-core-test/ProcessReal/utf8-argv-environment-and-status`, `haskell:agentctl-core-test/ProcessReal/line-endings-preserved`, `haskell:agentctl-core-test/ProcessReal/missing-and-relative-executables`, `haskell:agentctl-core-test/ProcessReal/invalid-utf8-is-refused`, `haskell:agentctl-core-test/ProcessReal/timeout-cleans-up`, `haskell:agentctl-core-test/ProcessReal/timeout-after-streams-close`, `tests/unit/test_haskell_gate.py::test_xml_requires_actual_nonempty_cases`, `tests/unit/test_haskell_gate.py::test_native_evidence_must_be_fresh_and_complete`
-**Mutants**: `M-mux-floor-3-1`, `M-mux-letter-suffix-refused`, `M-mux-tmux-alias-on-windows`, `M-mux-remedy-wrong-os`, `M-mux-name-allows-double-underscore`, `M-mux-socket-length-unchecked`, `M-mux-name-constructor-exported`
+**Mutants**: `M-mux-floor-3-1`, `M-mux-version-banner-unchecked`, `M-mux-letter-suffix-refused`, `M-mux-tmux-alias-on-windows`, `M-mux-remedy-wrong-os`, `M-mux-name-allows-double-underscore`, `M-mux-socket-length-unchecked`, `M-mux-name-constructor-exported`
 **Closes**: R12.1
 **Docs to update**: `documents/architecture/multiplexer_adapter.md`, `documents/engineering/quality_gate.md`, `documents/engineering/code_standards.md`, `documents/engineering/testing.md`, `documents/operations/troubleshooting.md`, `documents/reference/external_tool_facts.md`, `documents/reference/files_and_state.md`
 
@@ -79,7 +81,8 @@ smart constructor can produce.
   deadline delivery; `src.one-process-module` now sees its Haskell subject.
 - `AgentCtl.Mux` looks up `tmux` on PATH on Linux and macOS and `psmux.exe` through PATH and PATHEXT on Windows, never
   `tmux.exe` or `pmux.exe`, then runs `-V` through the runner and parses `tmux <version>`, such as `3.4` or `3.2a`, or
-  `psmux <major>.<minor>.<patch> (<commit> <date>)`; an unrecognised string is refused and quoted.
+  `psmux <major>.<minor>.<patch> (<commit> <date>)`, optionally following a matching tmux compatibility banner;
+  an inconsistent banner, extra output or an unrecognised string is refused and quoted.
 - The floors are tmux 3.2 and psmux 3.4.0. A missing or too-old multiplexer is a typed failure with the host's remedy:
   the tmux package of the host's package manager on Linux, `brew install tmux` on macOS, `winget install psmux` on
   Windows.
@@ -96,7 +99,7 @@ smart constructor can produce.
 
 1. `tmux 3.1c` and `psmux 3.3.8` are refused, `tmux 3.2`, `tmux 3.2a`, `tmux 3.4` and `psmux 3.4.0` accepted, and an
    unknown string refused — `tests/unit/test_mux_values.py::test_version_floor_oracle`; fails when 3.1c passes or 3.2a
-   fails; mutants `M-mux-floor-3-1`, `M-mux-letter-suffix-refused`.
+   fails; mutants `M-mux-floor-3-1`, `M-mux-version-banner-unchecked`, `M-mux-letter-suffix-refused`.
 2. Each OS family's candidates are `tmux`, or `psmux.exe` through PATHEXT and never an alias —
    `tests/unit/test_mux_values.py::test_resolution_candidates_oracle`; fails when Windows accepts `tmux.exe`; mutant
    `M-mux-tmux-alias-on-windows`.
@@ -144,8 +147,8 @@ None.
 
 **Status**: Done
 **Implementation**: `src/agentctl/haskell/src/AgentCtl/Mux/Command.hs`, `src/agentctl/haskell/src/AgentCtl/Mux/Tmux.hs`, `src/agentctl/haskell/src/AgentCtl/Mux/Psmux.hs`, `src/agentctl/haskell/app/Eval.hs`, `src/agentctl/haskell/agentctl-core.cabal`, `tests/unit/test_mux_values.py`, `tests/oracles/mux_commands.toml`, `tests/mutants/mux.toml`
-**Validation tests**: `tests/unit/test_mux_values.py::test_render_oracle`, `tests/unit/test_mux_values.py::test_dead_status_rule_oracle`
-**Mutants**: `M-mux-bare-target`, `M-mux-shell-joined-command`, `M-mux-render-psmux-alias`, `M-mux-remain-on-exit-off`, `M-mux-psmux-status-from-pane`
+**Validation tests**: `tests/unit/test_mux_values.py::test_render_oracle`, `tests/unit/test_mux_values.py::test_dead_status_rule_oracle`, `tests/unit/test_mux_values.py::test_process_tree_policy_oracle`, `tests/unit/test_mux_values.py::test_pane_target_oracle`
+**Mutants**: `M-mux-bare-target`, `M-mux-shell-joined-command`, `M-mux-render-psmux-alias`, `M-mux-remain-on-exit-off`, `M-mux-psmux-status-from-pane`, `M-mux-create-job-retained`, `M-mux-remain-session-unqualified`, `M-mux-pane-target-unscoped`, `M-mux-pane-ambiguity-accepted`
 **Closes**: none
 **Docs to update**: `documents/architecture/multiplexer_adapter.md`
 
@@ -159,8 +162,12 @@ Express the adapter's closed action vocabulary and dead-status policy as pure va
   options, pane-scoped remain-on-exit on and unset, capture, literal text, Enter, attach, switch and kill-session.
 - No value exists for kill-server, kill-pane, respawn, run-shell, if-shell, pipe-pane, source-file, a global option
   or a shell string. A rendering contains one action, never a separator chain.
-- Session targets render from an opaque `SessionName` as `=NAME`; opaque pane ids contain `%` and ASCII digits.
-  Identity keys are closed and opaque values contain only the safe ASCII alphabet of D-58.
+- Session targets render from an opaque `SessionName` as `=NAME`, with `=NAME:` selecting session options;
+  opaque pane targets retain the native `%` plus ASCII digits and, for psmux, the exact session component
+  `=NAME:.%id`. A bare psmux id selects only a unique candidate; ambiguity refuses. Pane-option targets use
+  the native option grammar `=NAME:%id`. Identity keys are closed and opaque
+  values contain only the safe ASCII alphabet of D-58. Process-tree ownership keeps psmux creation outside the
+  client's terminating job and retains bounded tree ownership for other commands.
 - Creation renders the published binary, `pane-exec` and the generated spec path as separate arguments. No user
   argv, environment or working-directory option reaches multiplexer parsing. Psmux renders `psmux.exe`.
 - Tmux dead status uses a positive signal as 128 plus that signal, otherwise its nonnegative exit status. Psmux
@@ -172,13 +179,19 @@ Express the adapter's closed action vocabulary and dead-status policy as pure va
 1. Every action renders exactly to its tmux and psmux rows, including paths with spaces and native Windows paths —
    `tests/unit/test_mux_values.py::test_render_oracle`; fails when a target is bare, the trampoline is shell-joined,
    an alias is selected or remain-on-exit is off; mutants `M-mux-bare-target`, `M-mux-shell-joined-command`,
-   `M-mux-render-psmux-alias`, `M-mux-remain-on-exit-off`.
+   `M-mux-render-psmux-alias`, `M-mux-remain-on-exit-off`, `M-mux-remain-session-unqualified`.
 2. Forbidden actions, malformed targets, unsafe identity values and nonpositive capture lengths are refused beside
    every valid action — `tests/unit/test_mux_values.py::test_render_oracle`; fails when invalid input decodes as an
    action; no mutant: independent negative rows.
 3. Exit codes, signals and unavailable statuses follow each multiplexer source rule —
    `tests/unit/test_mux_values.py::test_dead_status_rule_oracle`; fails when psmux trusts pane status; mutant
    `M-mux-psmux-status-from-pane`.
+4. Psmux creation leaves its persistent server outside the client's job, while bounded commands retain tree
+   ownership — `tests/unit/test_mux_values.py::test_process_tree_policy_oracle`; fails when the create client owns
+   its server's terminating job; mutant `M-mux-create-job-retained`.
+5. Scoped pane targets retain their session and native id, reject invalid syntax and refuse multiple candidates
+   beside unique and absent controls — `tests/unit/test_mux_values.py::test_pane_target_oracle`; fails when scope is
+   dropped or ambiguity selects a pane; mutants `M-mux-pane-target-unscoped`, `M-mux-pane-ambiguity-accepted`.
 
 #### Remaining Work
 
@@ -206,7 +219,8 @@ The native ABI is infrastructure for this boundary, spanning its small Haskell a
   wider than 0600 and directory permissions no wider than 0700. Independent cases cover modes, owners and kinds.
 - A small C ABI reads native metadata and snapshots the opened regular file, with a bounded size. POSIX opens the
   parent and then the file relative to its descriptor, refusing symbolic links. Windows checks real owner SIDs and
-  DACLs, refusing reparse points; it never substitutes emulated POSIX ownership for Windows security.
+  DACLs, refusing reparse points; ownership matches the current token's user or default owner SID, including an
+  elevated token's builtin Administrators owner. It never substitutes emulated POSIX ownership for Windows security.
 - Haskell has no CPP and the Cabal components are unconditional. Native C sources compile with warnings as errors;
   the native platform selects its actual system APIs within the C ABI. Darwin filesystem sources enable the SDK's
   Darwin declarations alongside POSIX declarations, preserving no-follow opens and native file locks.
@@ -259,12 +273,14 @@ The infrastructure spans the shared type module, process bindings, native execut
 #### Deliverables
 
 - `AgentCtl.Process` interprets typed commands through the resolved multiplexer, explicit environment and a
-  deadline; psmux creation polls has-session with a bounded deadline.
+  deadline; psmux creation polls has-session with a bounded deadline. Its null input uses the explicit Win32
+  device namespace on Windows, so file-path canonicalisation cannot reinterpret it as a local file.
 - `pane-exec` is the one core command accepted without Python's handoff. It waits up to 30 s for a spec, refuses
   unsafe access or malformed content, deletes an accepted spec after reading and keeps the pane's TERM, TMUX and
   TMUX_PANE values.
 - The trampoline changes to the spec folder and calls execve through AgentCtl.Process on POSIX. Windows runs an
-  inherited-stream child, atomically writes its exit status to the status path and exits with it. Trampoline
+  inherited-stream child with handle inheritance enabled, atomically writes its exit status to the status path
+  and exits with it. POSIX closes unrelated descriptors; Windows preserves redirected standard handles. Trampoline
   failures print in the pane and exit nonzero.
 - No user text passes through shell assembly or multiplexer parsing, and environment values appear on no command
   line. The native execution ABI performs the real OS operation and exposes no test switch.
@@ -310,7 +326,7 @@ None.
 
 **Status**: Done
 **Implementation**: `src/agentctl/haskell/agentctl-core.cabal`, `src/agentctl/haskell/app/`, `tests/harness/tmux.py`, `tests/mutants/mux.toml`, `tests/integration/test_mux_real.py`, `tests/integration/test_tmux_harness.py`, `tests/integration/test_fake_agent.py`, `src/agentctl/haskell/test/MuxFixture.hs`, `src/agentctl/haskell/test/Main.hs`, `src/agentctl/haskell/src/AgentCtl/Native.hs`, `src/agentctl/haskell/src/AgentCtl/native_process.c`, `tests/conftest.py`, `tests/support.txt`
-**Validation tests**: `tests/unit/test_mux_values.py::test_reap_policy_oracle`, `tests/integration/test_mux_real.py::test_private_server_roundtrip`, `tests/integration/test_mux_real.py::test_instant_exit_status`, `tests/integration/test_mux_real.py::test_exact_target_spares_prefix_sibling`, `tests/integration/test_mux_real.py::test_containment_sees_leftover_server`, `tests/integration/test_tmux_harness.py::test_kill_server_refuses_foreign_socket`, `tests/integration/test_fake_agent.py::test_record_carries_nonce`, `tests/integration/test_mux_real.py::test_closed_terminal_does_not_publish_exit_status`
+**Validation tests**: `tests/unit/test_mux_values.py::test_reap_policy_oracle`, `tests/integration/test_mux_real.py::test_private_server_roundtrip`, `tests/integration/test_mux_real.py::test_instant_exit_status`, `tests/integration/test_mux_real.py::test_exact_target_spares_prefix_sibling`, `tests/integration/test_mux_real.py::test_containment_sees_leftover_server`, `tests/integration/test_tmux_harness.py::test_kill_server_refuses_foreign_socket`, `tests/integration/test_fake_agent.py::test_record_carries_nonce`, `tests/integration/test_mux_real.py::test_closed_terminal_does_not_publish_exit_status`, `tests/integration/test_tmux_harness.py::test_psmux_pid_record_shapes`, `tests/integration/test_mux_real.py::test_pane_targets_distinguish_servers`
 **Mutants**: `M-mux-reap-policy-inverted`, `M-mux-harness-kills-foreign-socket`, `M-mux-fake-record-drops-nonce`, `M-mux-bare-target-at-boundary`, `M-mux-dead-before-status`
 **Closes**: none
 **Docs to update**: `documents/engineering/testing.md`, `documents/architecture/multiplexer_adapter.md`
@@ -322,14 +338,19 @@ records what reached the agent.
 
 #### Deliverables
 
+- The controlled emitter writes Unicode directly with the native wide-console API on Windows and retains UTF-8 for pipes. Its visible frames preserve their fixture text without depending on the console code page.
 - `agentctl-fake-agent`, a cabal executable outside suite routing, is copied into a temp bin as `claude` or `codex`
   (`.exe` on Windows); it writes one record of its argv, working directory, environment keys (never values), the
   multiplexer session it runs in, its pid and the nonce into a directory the test names, then exits at once with a
-  configured status or stays running.
+  configured status or stays running. Atomic filenames include nonce, pid and monotonic stamp so recycled pids
+  preserve separate invocation records. Its record retains the native pane id and the complete scoped pane target;
+  input polling permits cancellation without additional terminal input. The client relay preserves backend-server
+  lifetime through the foreground-client process boundary.
 - `tests/harness/tmux.py` makes `TMUX_TMPDIR` a short 0700 directory under the canonical run dir, unsets `TMUX` and `TMUX_PANE`,
   owns the private foreground server with `-D -f /dev/null`, and runs `kill-server` only after asserting that the socket
   lies under the run dir; for psmux it sets an absolute `PSMUX_DATA_DIR` under the run dir and `PSMUX_NO_WARM=1`, and
-  never ends psmux processes by image name. Darwin's private caller environment supplies the uid-bound
+  never ends psmux processes by image name. Unix endpoint names use the owned run directory's native uid.
+  Darwin's private caller environment supplies the uid-bound
   `__CF_USER_TEXT_ENCODING` setting, and the exact spec-plus-pane environment-key comparison stays intact.
 - The real tests render each action through `agentctl-core-eval` and run it through the harness against the private
   server through the test-only native command fixture, invoking the production interpreter. Independent raw
@@ -356,7 +377,9 @@ records what reached the agent.
    its status is lost; no new mutant: the remain-on-exit rendering mutant has its declared Sprint 4.2 killer.
 3. `kill-session -t =ab` ends `ab` and leaves `ab-c` running, against the control that `ab` existed —
    `tests/integration/test_mux_real.py::test_exact_target_spares_prefix_sibling`; after ab ends, subject queries
-   and another kill for ab must fail while ab-c stays alive; fails when the target loses its `=`;
+   and another kill for ab must fail while ab-c stays alive. A compiled relay independently records all three
+   native client argv vectors and requires the exact `=ab` target, including on backends whose bare targets already
+   match exactly; fails when the target loses its `=`;
    mutant `M-mux-bare-target-at-boundary`.
 4. The containment step fails while a private server under the run dir is alive or a session carrying the nonce exists
    on the server it scans, and passes once the harness has killed them —
@@ -377,6 +400,14 @@ records what reached the agent.
 8. The reap policy requests only a dead tmux pane whose status is missing, while alive panes, known statuses and
    psmux never request it — `tests/unit/test_mux_values.py::test_reap_policy_oracle`; fails when the missing-status
    predicate is inverted; mutant `M-mux-reap-policy-inverted`.
+
+7. Native PID records accept a positive bare PID or PID/creation-time pair and reject malformed files ?
+   `tests/integration/test_tmux_harness.py::test_psmux_pid_record_shapes`; fails when an invalid identity registers;
+   no mutant: real private files provide positive and negative controls.
+
+8. Separate native servers retain distinct process identity, captures and received input —
+   `tests/integration/test_mux_real.py::test_pane_targets_distinguish_servers`; fails when a pane target reaches the
+   other server; no mutant: native cross-server controls.
 
 #### Remaining Work
 

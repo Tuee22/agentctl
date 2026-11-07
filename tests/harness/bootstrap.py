@@ -101,6 +101,10 @@ def context(directory: Path) -> HostContext:
     directory.mkdir(parents=True, exist_ok=True)
     home = directory / "home"
     home.mkdir()
+    roaming = home / "AppData/Roaming"
+    local = home / "AppData/Local"
+    roaming.mkdir(parents=True)
+    local.mkdir(parents=True)
     value = current(directory / "cache")
     env = {
         key: item
@@ -113,7 +117,8 @@ def context(directory: Path) -> HostContext:
             "USERPROFILE": str(home),
             "GHCUP_INSTALL_BASE_PREFIX": str(home),
             "PATH": "",
-            "LOCALAPPDATA": str(directory / "local-appdata"),
+            "APPDATA": str(roaming),
+            "LOCALAPPDATA": str(local),
             **{
                 f"XDG_{kind}_HOME": str(directory / kind.lower())
                 for kind in ("CACHE", "CONFIG", "DATA", "STATE")

@@ -81,7 +81,8 @@ def _records() -> tuple[Mutant, ...]:
 def test_corpus(record: Mutant, mutant_tree: Path) -> None:
     """Require every declared defect to die only for its recorded reason."""
     result = exercise(mutant_tree, record)
-    assert result == Ok(None), result
+    detail = result.error.message if isinstance(result, Err) else str(result)
+    assert result == Ok(None), detail
 
 
 def test_wrong_reason_rejected(tmp_path: Path) -> None:

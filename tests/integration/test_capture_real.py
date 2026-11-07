@@ -2,6 +2,7 @@
 """Capture actual terminal wraps and UTF-8 through the production observer."""
 
 import json
+import re
 import time
 from collections.abc import Mapping
 from pathlib import Path
@@ -144,7 +145,7 @@ def test_capture_keeps_prompt_visuals(mux_server: PrivateMux) -> None:
         deadline = time.monotonic() + WAIT_SECONDS
         raw = mux_server.raw("capture-pane", "-p", "-e", "-S", "0", "-t", actor.pane)
         while (
-            ("\x1b[2m" in raw.stdout) != bool(prefix)
+            bool(re.search(r"\x1b\[(?:0;)?2m", raw.stdout)) != bool(prefix)
             or normalized(
                 mux_server.raw("capture-pane", "-p", "-J", "-t", actor.pane).stdout
             )
@@ -155,7 +156,7 @@ def test_capture_keeps_prompt_visuals(mux_server: PrivateMux) -> None:
                 "capture-pane", "-p", "-e", "-S", "0", "-t", actor.pane
             )
         assert raw.code == 0
-        assert ("\x1b[2m" in raw.stdout) == bool(prefix)
+        assert bool(re.search(r"\x1b\[(?:0;)?2m", raw.stdout)) == bool(prefix)
         observed = capture(mux_server, actor.pane)
         assert observed["text"] == text
         visual = observed["visual"]

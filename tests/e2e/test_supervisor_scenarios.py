@@ -160,8 +160,9 @@ def test_terminal_classes_escalate_without_send(
     for target in (*targets, *controls):
         assert case.command("watch", (target.target,)).code == 0
         if category == "Exited" and target in targets:
+            pane_target = mux_server.pane_option_target(target.target, target.pane)
             retained = mux_server.raw(
-                "set-option", "-p", "-t", target.pane, "remain-on-exit", "on"
+                "set-option", "-p", "-t", pane_target, "remain-on-exit", "on"
             )
             assert retained.code == 0, retained
     with supervisor(case) as running:
@@ -453,8 +454,9 @@ def test_forbidden_actions_never_taken(root: Path, mux_server: PrivateMux) -> No
     assert crashing.invoke().code == 0
     crash = rows(crashing.command("status", ("api-claude",)))["api-claude"]
     original_crash = pane_facts(mux_server, crash["PANE"])
+    pane_target = mux_server.pane_option_target(crash["SESSION"], crash["PANE"])
     retained = mux_server.raw(
-        "set-option", "-p", "-t", crash["PANE"], "remain-on-exit", "on"
+        "set-option", "-p", "-t", pane_target, "remain-on-exit", "on"
     )
     assert retained.code == 0, retained
     trigger = mux_server.scope / "forbidden-screens"

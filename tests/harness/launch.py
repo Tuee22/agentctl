@@ -10,11 +10,11 @@ from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from agentctl.bootstrap import build
-from agentctl.process import Output, stop
+from agentctl.process import Output, finish, stop
 from agentctl.result import Ok
 from tests.harness.agents import isolated_environment
 from tests.harness.nonce import fresh
-from tests.harness.tmux import PrivateMux, object_value, validate_record
+from tests.harness.tmux import PrivateMux, object_value, server_pid, validate_record
 
 STARTUP_SECONDS = 2
 
@@ -97,7 +97,9 @@ def native_pane(
         time.sleep(0.01)
         ready = mux.raw("has-session", "-t", "=" + session)
     assert ready.code == 0, ready.stderr
-    held = mux.raw("set-option", "-p", "-t", pane, "remain-on-exit", "on")
+    target = mux.pane_option_target(session, pane)
+    pane = mux.pane_target(session, pane)
+    held = mux.raw("set-option", "-p", "-t", target, "remain-on-exit", "on")
     assert held.code == 0, held.stderr
     identity = mux.raw("display-message", "-p", "-t", pane, "#{pane_pid}")
     assert identity.code == 0, identity.stderr
@@ -105,7 +107,7 @@ def native_pane(
     mux.register_observer(pid)
     if mux.family == "Windows":
         for path in mux.endpoint.glob("*.pid"):
-            mux.register_observer(int(path.read_text(encoding="utf-8")))
+            mux.register_observer(server_pid(path))
     pending = owned / "pending.json"
     descriptor = os.open(pending, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
@@ -146,7 +148,7 @@ class LaunchCase:
             observed.append(record)
         if self.mux.family == "Windows":
             for path in self.mux.endpoint.glob("*.pid"):
-                self.mux.register_observer(int(path.read_text(encoding="utf-8")))
+                self.mux.register_observer(server_pid(path))
         return observed
 
     def invoke(
@@ -179,10 +181,9 @@ class LaunchCase:
         )
         assert isinstance(child, Ok), child
         try:
-            stdout, stderr = child.value.handle.communicate(timeout=30)
-            code = child.value.handle.returncode
-            assert code is not None
-            return Output(code, stdout, stderr)
+            completed = finish(child.value, timeout=30)
+            assert isinstance(completed, Ok), completed
+            return completed.value
         finally:
             assert isinstance(stop(child.value), Ok)
             self.records()
@@ -223,15 +224,21 @@ def observe_mux(case: LaunchCase) -> MuxObserver:
     backend = binaries.parent / "backend"
     backend.mkdir(mode=0o700)
     name = "psmux.exe" if case.mux.family == "Windows" else "tmux"
+    relay_bin = binaries.parent / "relay-bin"
+    relay_bin.mkdir(mode=0o700)
+    for path in binaries.iterdir():
+        if path.name != name:
+            shutil.copy2(path, relay_bin / path.name)
     real = backend / name
     shutil.copy2(case.mux.executable, real)
     fake = build.binary(case.mux.context, "exe:agentctl-fake-agent")
     assert isinstance(fake, Ok), fake
     pending = directory / ("observer-" + name)
     shutil.copy2(fake.value, pending)
-    pending.replace(binaries / name)
+    pending.replace(relay_bin / name)
     environment = {
         **case.environment,
+        "PATH": str(relay_bin),
         "AGENTCTL_FAKE_MUX_EXECUTABLE": str(real),
         "AGENTCTL_FAKE_MUX_RECORD_DIR": str(directory),
     }

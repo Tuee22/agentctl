@@ -1,12 +1,12 @@
 # Phase 12 — Clean-host bootstrap acceptance
 
-**Status**: Active
+**Status**: Done
 **Depends on**: [Phase 10 — Recovery supervisor](phase-10-supervisor.md)
 **Host lane**: clean-container
 **Gate**: `agentctl check`
 **Gate kind**: host-acceptance
 **Closes**: R1
-**Gate evidence**: none recorded
+**Gate evidence**: 2026-11-07 ; clean-container ; agentctl check ; pass ; tree f0f39410a9e956d23bb3157ceb6e8929e9a779e2c3b5a19b2f1744e18fe963b5 ; os=Linux,arch=x86_64,baseline=e1eb3199772803cc1559796be46958a8f5f34e0f
 **Evidence covers**: `src/` `tests/` `pyproject.toml`
 
 > **Purpose**: Close R1 by running the two-stage clean-host recipe: from pipx alone agentctl provisions its build
@@ -68,9 +68,9 @@ runtime prerequisites that the binary checked and named install commands for.
 
 ## Sprints
 
-### Sprint 12.1: Two-stage clean-host run and evidence [Active]
+### Sprint 12.1: Two-stage clean-host run and evidence [Done]
 
-**Status**: Active
+**Status**: Done
 **Implementation**: none — this phase adds no code
 **Validation tests**: `tests/unit/test_plan.py::test_plan_oracle`, `tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle`, `tests/e2e/test_fresh_bootstrap.py::test_ghcup_digest_matches_pin`, `tests/e2e/test_fresh_bootstrap.py::test_no_default_links`, `tests/e2e/test_fresh_bootstrap.py::test_whereis_paths_report_pins`, `tests/integration/test_prereqs_real.py::test_probe_matches_independent_observer`
 **Mutants**: none — this phase adds no code
@@ -119,11 +119,11 @@ Run both stages of the clean-host recipe and record the EVIDENCE line of Stage B
 
 #### Remaining Work
 
-Build both stages of the clean-host recipe and record Stage B's passing gate evidence for the current covered tree.
+None.
 
 ## Remaining Work
 
-Sprint 12.1 requires both stages of the clean-host recipe and current clean-container evidence.
+None.
 
 ## Documentation Requirements
 

@@ -23,7 +23,9 @@ Global options go before the command; after the command, every token belongs to 
 ## Names
 
 `NAME` below is a name exactly as `agentctl list` prints it: a managed session's name, such as `api-claude`, or an
-adopted pane's id, such as `%3`. A managed session is named `<folder>-<agent>` after the folder it was launched from,
+adopted pane's id, such as `%3` on tmux or `=foreign:.%1` on psmux. Windows pane ids include the session because
+different servers can contain the same numeric id. A bare Windows id resolves only when unambiguous; `foreign:%1`
+also names a pane explicitly. A managed session is named `<folder>-<agent>` after the folder it was launched from,
 and a different folder with the same name gets `<folder>-<8 hex digits>-<agent>`
 ([session names](../architecture/launch_contract.md#session-names)). Every command works on one multiplexer server:
 the one `$TMUX` names when it is set, otherwise your default server.

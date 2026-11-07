@@ -111,7 +111,8 @@ Require each deliberate defect to change a passing baseline into the specific fa
 - A record holds id, operator, relative target, search and replacement text, killer node ids and reason substring.
   An ordinary pytest node may select one ASCII-named parameter case; live nodes, corpus recursion and malformed
   selectors remain invalid. Every selected killer must pass its baseline and fail by name under the defect;
-  a missing parameter case is a baseline failure with its node and child output.
+  a missing parameter case is a baseline failure with its node and child output. Corpus assertions render the
+  complete child diagnostic for baseline and defective failures.
   Operators are exactly `delete`, `negate`, `replace-literal`, `reorder`, `widen` and `short-circuit`; an unknown
   operator, missing killer or target escaping the scratch copy fails before execution.
 - The runner copies the checkout into a run-owned scratch tree, requires the search text to match exactly once,
@@ -211,6 +212,8 @@ Observe process effects without replacing the subject and prove that source, lin
   Python spawn, exec, system and posix-spawn events with exact argv and a fresh nonce; forbidden package-manager,
   sudo, `xcode-select --install` and ghcup install events raise before execution. Harmless probes are allowed and
   recorded as controls. Exec probes run in disposable child interpreters so their event records survive exec.
+  Native Windows exec/spawn probes quote their API argument vectors with CRT rules, and require both those exact
+  observed vectors and the child's independently written sentinel.
 - `tests/harness/nonce.py` prefixes a fresh observer nonce with the check run's nonce; a stale or wrong record is
   rejected. No subject consumes a test-switch environment variable, and tests never monkeypatch the subject.
 - `src.one-process-module` examines imports and process-call forms: Python spawns only in `process.py`, and Haskell
@@ -279,7 +282,8 @@ Make status consequences and evidence rows depend on the current run's tests, mu
   and ratchet baseline only after the earlier steps and finalizers have succeeded.
 - `plan.evidence-rows` validates row shape and lane and recomputes the digest over sorted relative paths, entry kinds
   and length-prefixed bytes of every file under `src/`, `tests/` and `pyproject.toml`, ignored and untracked inputs
-  included. Symlinks contribute link text and resolved bytes; unreadable or escaping inputs fail. Recording a row
+  included. Symlinks contribute link text and resolved bytes; unreadable or escaping inputs fail. The native POSIX
+  special-file control uses a runtime-checked FIFO interface that remains type-checkable on Windows. Recording a row
   cannot stale itself because the plan is outside Evidence covers. A covered
   change reopens a Done acceptance phase and clears its evidence in the same change.
 - Only a full passing run prints the EVIDENCE row for each met lane, with the literal gate `agentctl check`, the

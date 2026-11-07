@@ -9,15 +9,15 @@ import qualified AgentCtl.Process as Process
 import Control.Applicative ((<|>))
 import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async (withAsync)
-import Control.Monad (forever, unless, when)
+import Control.Monad (unless, when)
 import Data.Aeson (encode, object, (.=))
+import qualified Data.ByteString as Raw
 import qualified Data.ByteString.Lazy as Bytes
 import Data.Char (isAlphaNum, isAscii)
 import Data.List (sort)
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
-import qualified Data.Text.IO as Text
 import Foreign.C.Types (CInt (..))
 import GHC.Clock (getMonotonicTimeNSec)
 import qualified ScriptedAgent
@@ -60,7 +60,7 @@ relayMux executable arguments = do
   case response of
     Just text | arguments == ["list-sessions", "-F", "#{pid}"] -> putStr text
     _ -> do
-      result <- Process.foreground (Process.Program executable arguments cwd environment)
+      result <- Process.foregroundClient (Process.Program executable arguments cwd environment)
       status <- either (die . show) pure result
       when (status == 0) (releaseCapture executable arguments cwd environment)
       exitWith (if status == 0 then ExitSuccess else ExitFailure status)
@@ -103,9 +103,9 @@ agent arguments = do
   hSetEncoding stdin utf8
   hSetNewlineMode stdout noNewlineTranslation
   hSetBuffering stdout LineBuffering
-  unless (disposition `elem` ["fixture", "scripted"]) (Text.putStrLn (Text.pack ("ready:" ++ nonce)))
+  unless (disposition `elem` ["fixture", "scripted"]) (ScriptedAgent.writeOutput (Text.pack ("ready:" ++ nonce ++ "\n")))
   case disposition of
-    "stay" -> withAsync echo (\_ -> waitStop (directory </> "stop")) >> exitSuccess
+    "stay" -> ScriptedAgent.withInput (withAsync echo (\_ -> waitStop (directory </> "stop"))) >> exitSuccess
     "wait-exit-3" -> waitStop (directory </> "stop") >> exitWith (ExitFailure 3)
     "fixture" -> playFixture directory arguments
     "scripted" -> ScriptedAgent.run directory nonce session arguments
@@ -141,8 +141,7 @@ drawFixture :: FilePath -> IO ()
 drawFixture path = do
   bytes <- Bytes.readFile path
   text <- either (die . show) pure (Text.decodeUtf8' (Bytes.toStrict bytes))
-  Text.putStr "\ESC[2J\ESC[3J\ESC[H"
-  Text.putStr text
+  ScriptedAgent.writeOutput ("\ESC[2J\ESC[3J\ESC[H" <> text)
   hFlush stdout
 
 writeRecord :: FilePath -> String -> [String] -> [(String, String)] -> Maybe Text.Text -> IO ()
@@ -150,6 +149,7 @@ writeRecord directory nonce arguments environment session = do
   unless (isAbsolute directory) (die "fake record directory must be absolute")
   cwd <- getCurrentDirectory
   pid <- processId
+  stamp <- getMonotonicTimeNSec
   let record =
         object
           [ "nonce" .= nonce,
@@ -157,14 +157,15 @@ writeRecord directory nonce arguments environment session = do
             "cwd" .= cwd,
             "env_keys" .= sort (map fst environment),
             "session" .= session,
-            "pane" .= lookup "TMUX_PANE" environment,
+            "pane" .= ScriptedAgent.paneIdentity session (lookup "TMUX_PANE" environment),
+            "pane_id" .= lookup "TMUX_PANE" environment,
             "pid" .= pid
           ]
   withTempFile directory "record-" $ \temporary handle -> do
     hSetBinaryMode handle True
     Bytes.hPut handle (encode record)
     hClose handle
-    renameFile temporary (directory </> (nonce ++ "." ++ show pid ++ ".json"))
+    renameFile temporary (directory </> (nonce ++ "." ++ show pid ++ "." ++ show stamp ++ ".json"))
 
 foreign import ccall unsafe "agentctl_fake_ignore_hangup"
   ignoreHangup :: IO CInt
@@ -186,7 +187,20 @@ findNonce (_ : remaining) = findNonce remaining
 findNonce [] = Nothing
 
 echo :: IO ()
-echo = forever (Text.getLine >>= Text.putStrLn . ("echo:" <>))
+echo = receive Raw.empty
+  where
+    receive buffered = do
+      chunk <- ScriptedAgent.readInput
+      case chunk of
+        Nothing -> threadDelay 10000 >> receive buffered
+        Just bytes -> unless (Raw.null bytes) (linesOf (buffered <> bytes))
+    linesOf buffered = case Raw.break (\byte -> byte == 13 || byte == 10) buffered of
+      (line, remaining)
+        | Raw.null remaining -> receive line
+        | otherwise -> do
+            text <- either (die . show) pure (Text.decodeUtf8' line)
+            ScriptedAgent.writeOutput ("echo:" <> text <> "\n")
+            linesOf (Raw.drop 1 remaining)
 
 waitStop :: FilePath -> IO ()
 waitStop path = do

@@ -215,10 +215,11 @@ class and, for `LoginScreen` and `AuthError`, the command the user types, such a
    This is the same plain-text normalisation used for observations; ANSI escape bytes inside plain capture text
    remain content. Equality also requires an overload and a present fingerprint, so an identical blocked screen
    cannot authorize a send.
-3. The text goes as `send-keys -l -t %<id> -- <text>`, then a separate `send-keys -t %<id> Enter`: `-l` types the
+3. The text goes as `send-keys -l -t <pane> -- <text>`, then a separate `send-keys -t <pane> Enter`: `-l` types the
    text as characters, never reading a word such as `Enter` or `C-c` as a key name, and the separate Enter
    submits it as one keystroke rather than as a newline inside the text.
-4. The target is the agent pane's id, never a session name, and an adopted pane is revalidated against its recorded
+4. The target selects the agent pane within its native server, including the exact session component on psmux;
+   an adopted pane is revalidated against its recorded
    server socket, id and pid just before; a stale entry is never sent to.
 
 ## Watch Commands and supervisor run

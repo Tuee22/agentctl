@@ -53,7 +53,7 @@ import Data.Aeson.Types (Parser)
 import qualified Data.ByteString.Lazy as Bytes
 import Data.List (find)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (fromMaybe, isNothing, mapMaybe)
+import Data.Maybe (fromMaybe, isJust, isNothing, mapMaybe)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
@@ -292,7 +292,8 @@ run supplied operation = do
       Adopt pane agent -> withWatchLock runtime $ do
         currentRegistry <- loadRegistry runtime
         current <- observePane runtime pane
-        let existing = any ((== pane) . Adopt.entryPane) currentRegistry
+        let selectedPane = maybe pane Adopt.observationPane current
+            existing = any ((== selectedPane) . Adopt.entryPane) currentRegistry
         case Adopt.decision agent current existing of
           Adopt.Register entry -> saveRegistry runtime (currentRegistry ++ [entry])
           Adopt.RefuseMissing -> throwE (RefusedAdoption "the pane does not exist")
@@ -434,7 +435,28 @@ jsonString :: Text -> Text
 jsonString = Text.decodeUtf8 . Bytes.toStrict . encode
 
 observePane :: Runtime -> Command.Pane -> Effect (Maybe Adopt.Observation)
-observePane runtime@(Runtime _ mux _) wanted = do
+observePane runtime wanted = do
+  selected <- resolvePane runtime wanted
+  maybe (pure Nothing) (observeResolvedPane runtime) selected
+
+resolvePane :: Runtime -> Command.Pane -> Effect (Maybe Command.Pane)
+resolvePane runtime@(Runtime _ mux _) wanted
+  | Mux.muxKind mux /= Mux.Psmux || isJust (Command.paneSession wanted) = pure (Just wanted)
+  | otherwise = do
+      output <- rawCommand runtime (Command.ListSessions "#{session_name}")
+      case Process.exitCode output of
+        1 -> pure Nothing
+        0 -> do
+          matches <- fmap concat $ forM (Text.lines (Process.stdoutText output)) $ \rawName -> case Name.makeSessionName rawName of
+            Left _ -> pure []
+            Right name -> do
+              panes <- checkedCommand runtime (Command.ListPanes name "#{pane_id}")
+              pure [Command.inSession Mux.Psmux name wanted | Command.paneId wanted `elem` Text.lines (Process.stdoutText panes)]
+          either (throwE . InvalidResponse) pure (Command.selectPane matches)
+        _ -> throwE (CommandFailure (Process.stderrText output))
+
+observeResolvedPane :: Runtime -> Command.Pane -> Effect (Maybe Adopt.Observation)
+observeResolvedPane runtime@(Runtime _ mux _) wanted = do
   output <- rawCommand runtime (Command.InspectPane wanted "#{pane_id}\t#{pane_pid}\t#{pane_dead}\t#{?#{==:#{@agentctl_owner},agentctl},1,0}\t#{session_attached}\t#{pane_dead_status}\t#{pane_dead_signal}\t#{session_id}\t#{socket_path}")
   case Process.exitCode output of
     1 -> pure Nothing
@@ -442,7 +464,7 @@ observePane runtime@(Runtime _ mux _) wanted = do
       identifier : rawPid : dead : owned : rawAttached : rawStatus : rawSignal : session : namespaceParts
         | not (null namespaceParts) && dead `elem` ["0", "1"] && owned `elem` ["0", "1"] -> do
             pane <- maybe (throwE (InvalidResponse "invalid adopted pane id")) pure (Command.makePane identifier)
-            when (pane /= wanted) (throwE (InvalidResponse "pane query returned another target"))
+            when (Command.paneId pane /= Command.paneId wanted) (throwE (InvalidResponse "pane query returned another target"))
             pid <- case readMaybe (Text.unpack rawPid) of
               Just value | value > 0 -> pure value
               _ -> throwE (InvalidResponse "invalid adopted pane pid")
@@ -455,7 +477,7 @@ observePane runtime@(Runtime _ mux _) wanted = do
             sessionName <- trimLine . Process.stdoutText <$> checkedCommand runtime (Command.InspectPane wanted "#{session_name}")
             command <- trimLine . Process.stdoutText <$> checkedCommand runtime (Command.InspectPane wanted "#{pane_current_command}")
             let status = if dead == "1" then Command.deadStatus (Mux.muxKind mux) (readMaybe (Text.unpack rawStatus)) signal Nothing else Nothing
-            pure (Just (Adopt.Observation (Adopt.endpointIdentity (Mux.muxKind mux) namespace session) pane pid sessionName command (dead == "1") (owned == "1") attached status))
+            pure (Just (Adopt.Observation (Adopt.endpointIdentity (Mux.muxKind mux) namespace session) wanted pid sessionName command (dead == "1") (owned == "1") attached status))
       _ -> throwE (InvalidResponse "invalid adopted pane observation")
     _ -> throwE (CommandFailure (Process.stderrText output))
 
@@ -504,7 +526,7 @@ loadReports runtime@(Runtime _ mux _) = do
 data ReadMode = IdentityOnly | WithStatus deriving (Eq, Show)
 
 readReports :: Runtime -> ReadMode -> Effect [Report]
-readReports runtime mode = do
+readReports runtime@(Runtime _ mux _) mode = do
   output <- rawCommand runtime (Command.ListSessions "#{session_name}\t#{session_attached}")
   case Process.exitCode output of
     1 -> pure []
@@ -517,9 +539,9 @@ readReports runtime mode = do
           let owner = Map.lookup "@agentctl_owner" options
               agent = Map.lookup "@agentctl_agent" options >>= Agent.agentFromText
               folder = Map.lookup "@agentctl_folder" options >>= Identity.decodeText
-              pane = Map.lookup "@agentctl_pane" options >>= Command.makePane
+              pane = Command.inSession (Mux.muxKind mux) name <$> (Map.lookup "@agentctl_pane" options >>= Command.makePane)
               status = Map.lookup "@agentctl_status" options >>= Identity.decodeText
-          panes <- checkedCommand runtime (Command.ListPanes name "#{pane_id}\t#{pane_pid}\t#{pane_dead}\t#{pane_dead_status}\t#{pane_dead_signal}") >>= mapM (readPane runtime mode pane status) . Text.lines . Process.stdoutText
+          panes <- checkedCommand runtime (Command.ListPanes name "#{pane_id}\t#{pane_pid}\t#{pane_dead}\t#{pane_dead_status}\t#{pane_dead_signal}") >>= mapM (readPane runtime name mode pane status) . Text.lines . Process.stdoutText
           pure [Report name owner agent folder pane attached panes]
       _ -> throwE (InvalidResponse "invalid session list")
     _ -> throwE (CommandFailure (Process.stderrText output))
@@ -529,10 +551,11 @@ nonnegative value = case readMaybe (Text.unpack value) of
   Just number | number >= 0 -> pure number
   _ -> throwE (InvalidResponse "invalid nonnegative integer")
 
-readPane :: Runtime -> ReadMode -> Maybe Command.Pane -> Maybe Text -> Text -> Effect PaneReport
-readPane (Runtime _ mux _) mode agentPane statusPath line = case Text.splitOn "\t" line of
+readPane :: Runtime -> Name.SessionName -> ReadMode -> Maybe Command.Pane -> Maybe Text -> Text -> Effect PaneReport
+readPane (Runtime _ mux _) name mode agentPane statusPath line = case Text.splitOn "\t" line of
   [identifier, rawPid, dead, rawStatus, rawSignal] | dead == "0" || dead == "1" -> do
-    pane <- maybe (throwE (InvalidResponse "invalid pane id")) pure (Command.makePane identifier)
+    nativePane <- maybe (throwE (InvalidResponse "invalid pane id")) pure (Command.makePane identifier)
+    let pane = Command.inSession (Mux.muxKind mux) name nativePane
     pid <- case readMaybe (Text.unpack rawPid) of
       Just value | value > 0 -> pure value
       _ -> throwE (InvalidResponse "invalid pane pid")

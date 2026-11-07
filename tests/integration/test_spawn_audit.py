@@ -4,6 +4,7 @@
 import json
 import os
 import platform
+import subprocess
 import sys
 from pathlib import Path
 
@@ -69,7 +70,7 @@ def test_all_spawn_events_recorded(root: Path, tmp_path: Path) -> None:
             assert matching[0].argv == ("echo " + nonce,)
             assert matching[0].raw == "echo " + nonce
         else:
-            assert matching[0].argv == (
+            expected = (
                 sys.executable,
                 "-c",
                 (
@@ -78,6 +79,9 @@ def test_all_spawn_events_recorded(root: Path, tmp_path: Path) -> None:
                 ),
                 str(sentinel),
             )
+            if platform.system() == "Windows" and mode in {"exec", "native"}:
+                expected = tuple(subprocess.list2cmdline([word]) for word in expected)
+            assert matching[0].argv == expected
             assert sentinel.read_text(encoding="utf-8") == "executed"
 
 

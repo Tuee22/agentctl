@@ -2,7 +2,7 @@
 """Pure leg construction and complete-run verdicts."""
 
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePath, PurePosixPath
 
 from agentctl.bootstrap.style import StyleTools
 from agentctl.result import Err, Ok, Result
@@ -28,15 +28,15 @@ def targets(root: Path) -> Result[tuple[str, ...], str]:
 
 
 def coverage_commands(
-    python: str, root: Path, run_dir: Path
+    python: str, root: PurePath, run_dir: PurePath
 ) -> tuple[tuple[str, ...], ...]:
     """Combine only run-owned data and enforce the full branch-coverage floor."""
     common = (
-        f"--rcfile={root / 'pyproject.toml'}",
-        f"--data-file={run_dir / 'coverage'}",
+        f"--rcfile={(root / 'pyproject.toml').as_posix()}",
+        f"--data-file={(run_dir / 'coverage').as_posix()}",
     )
     return (
-        (python, "-m", "coverage", "combine", *common, str(run_dir)),
+        (python, "-m", "coverage", "combine", *common, run_dir.as_posix()),
         (
             python,
             "-m",
@@ -50,9 +50,11 @@ def coverage_commands(
 
 
 def python_legs(
-    python: str, root: Path, files: tuple[str, ...], run_dir: Path
+    python: str, root: PurePath, files: tuple[str, ...], run_dir: PurePath
 ) -> tuple[Leg, ...]:
     """Build exactly the Python legs introduced by the package skeleton."""
+    root = PurePosixPath(root.as_posix())
+    run_dir = PurePosixPath(run_dir.as_posix())
     config = str(root / "pyproject.toml")
     return (
         Leg(
@@ -127,7 +129,7 @@ def python_legs(
 
 def cabal_legs(cabal: str, ghc: str, directory: Path) -> tuple[Leg, ...]:
     """Describe the exact Cabal legs independently of when tools are provisioned."""
-    common = ("all", "--enable-tests", "-w", ghc, f"--builddir={directory}")
+    common = ("all", "--enable-tests", "-w", ghc, f"--builddir={directory.as_posix()}")
     return (
         Leg("cabal-build", (cabal, "build", *common)),
         Leg("cabal-test", (cabal, "test", *common, "--test-show-details=direct")),
@@ -137,8 +139,8 @@ def cabal_legs(cabal: str, ghc: str, directory: Path) -> tuple[Leg, ...]:
 def style_legs(tools: StyleTools, files: tuple[str, ...]) -> tuple[Leg, ...]:
     """Check every discovered source using the absolute pinned tool executables."""
     return (
-        Leg("fourmolu", (str(tools.fourmolu), "--mode", "check", *files)),
-        Leg("hlint", (str(tools.hlint), "app", "src", "test")),
+        Leg("fourmolu", (tools.fourmolu.as_posix(), "--mode", "check", *files)),
+        Leg("hlint", (tools.hlint.as_posix(), "app", "src", "test")),
     )
 
 

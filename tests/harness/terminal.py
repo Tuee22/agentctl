@@ -49,9 +49,10 @@ main(sys.argv[2:])
 """
 
 
-def clients(mux: PrivateMux) -> tuple[tuple[int, str], ...]:
+def clients(mux: PrivateMux, session: str | None = None) -> tuple[tuple[int, str], ...]:
     """Read genuine attached client identities and sessions from this owned server."""
-    output = mux.raw("list-clients", "-F", "#{client_pid}|#{session_name}")
+    target = ("-t", "=" + session) if session is not None else ()
+    output = mux.raw("list-clients", *target, "-F", "#{client_pid}|#{session_name}")
     assert output.code == 0, output.stderr
     rows = []
     for line in output.stdout.splitlines():
@@ -75,12 +76,12 @@ def await_client(
         time.sleep(0.01)
         present = mux.raw("has-session", "-t", "=" + session)
     assert present.code == 0, reason + ": no target session: " + driver.capture()
-    observed = clients(mux)
+    observed = clients(mux, session)
     while (
         len(observed) != 1 or observed[0][1] != session
     ) and time.monotonic() < deadline:
         time.sleep(0.01)
-        observed = clients(mux)
+        observed = clients(mux, session)
     assert len(observed) == 1, (
         reason + ": did not attach exactly one client: " + driver.capture()
     )

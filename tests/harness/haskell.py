@@ -3,8 +3,10 @@
 
 import os
 import shutil
+from collections.abc import Iterator
 from dataclasses import replace
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import pytest
 
@@ -15,6 +17,17 @@ from agentctl.result import Ok
 from tests.harness.bootstrap import native_tools
 
 
+@pytest.fixture(scope="session", autouse=True)
+def native_workspace() -> Iterator[None]:
+    """Keep digest build paths within native tool limits in run-owned storage."""
+    with (
+        TemporaryDirectory(prefix="b-") as temporary,
+        pytest.MonkeyPatch.context() as patch,
+    ):
+        patch.setenv("AGENTCTL_TEST_NATIVE_ROOT", temporary)
+        yield
+
+
 def native_context(project: Path, directory: Path) -> build.BuildContext:
     """Share only agentctl's dependency cache and never touch the user's Cabal home."""
     paths = directories(
@@ -23,11 +36,17 @@ def native_context(project: Path, directory: Path) -> build.BuildContext:
     host = current(paths.cache)
     home = directory / "home"
     home.mkdir(parents=True, exist_ok=True)
+    roaming = home / "AppData/Roaming"
+    local = home / "AppData/Local"
+    roaming.mkdir(parents=True, exist_ok=True)
+    local.mkdir(parents=True, exist_ok=True)
     env = dict(host.environment)
     env.update(
         {
             "HOME": str(home),
             "USERPROFILE": str(home),
+            "APPDATA": str(roaming),
+            "LOCALAPPDATA": str(local),
             **{
                 f"XDG_{kind}_HOME": str(directory / kind.lower())
                 for kind in ("CACHE", "CONFIG", "DATA", "STATE")

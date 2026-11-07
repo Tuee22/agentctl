@@ -94,3 +94,29 @@ quote = "the check command should run ruff, ty (strict) and the entire test suit
 provenance = "decision:D-33"
 input = { "subject" = "check-environment", "tool" = "pytest", "inherited" = { "PATH" = "<path>", "HOME" = "<home>", "XDG_CONFIG_HOME" = "<config>", "APPDATA" = "<appdata>", "PYTHONPATH" = "hostile", "PYTEST_ADDOPTS" = "-k none", "PYTEST_PLUGINS" = "hostile", "TY_CONFIG_FILE" = "hostile", "VIRTUAL_ENV" = "hostile", "TMUX" = "foreign", "TMUX_PANE" = "foreign" } }
 expected = { "PATH" = "<path>", "HOME" = "<home>", "XDG_CONFIG_HOME" = "<config>", "APPDATA" = "<appdata>", "LC_ALL" = "C.UTF-8", "TMPDIR" = "<run>", "TEMP" = "<run>", "TMP" = "<run>", "PYTHONPYCACHEPREFIX" = "<run>/bytecode", "PYTEST_DISABLE_PLUGIN_AUTOLOAD" = "1", "AGENTCTL_CHECK_NONCE" = "<nonce>", "AGENTCTL_CHECK_MANIFEST" = "<run>/pytest-manifest.json" }
+
+[[case]]
+id = "environment.ty.utf8"
+amends = "environment.ty"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-87"
+input = { "subject" = "check-environment", "tool" = "ty", "inherited" = { "PATH" = "<path>", "HOME" = "<home>", "XDG_CONFIG_HOME" = "<config>", "APPDATA" = "<appdata>", "PYTHONPATH" = "hostile", "PYTEST_ADDOPTS" = "-k none", "PYTEST_PLUGINS" = "hostile", "TY_CONFIG_FILE" = "hostile", "VIRTUAL_ENV" = "hostile", "TMUX" = "foreign", "TMUX_PANE" = "foreign" } }
+expected = { "PATH" = "<path>", "HOME" = "<home>", "XDG_CONFIG_HOME" = "<run>/ty-config", "APPDATA" = "<run>/ty-config", "LC_ALL" = "C.UTF-8", "TMPDIR" = "<run>", "TEMP" = "<run>", "TMP" = "<run>", "PYTHONPYCACHEPREFIX" = "<run>/bytecode", "PYTEST_DISABLE_PLUGIN_AUTOLOAD" = "1", "AGENTCTL_CHECK_NONCE" = "<nonce>", "AGENTCTL_CHECK_MANIFEST" = "<run>/pytest-manifest.json", "PYTHONUTF8" = "1", "PYTHONIOENCODING" = "utf-8" }
+
+[[case]]
+id = "environment.pytest.utf8"
+amends = "environment.pytest"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-87"
+input = { "subject" = "check-environment", "tool" = "pytest", "inherited" = { "PATH" = "<path>", "HOME" = "<home>", "XDG_CONFIG_HOME" = "<config>", "APPDATA" = "<appdata>", "PYTHONPATH" = "hostile", "PYTEST_ADDOPTS" = "-k none", "PYTEST_PLUGINS" = "hostile", "TY_CONFIG_FILE" = "hostile", "VIRTUAL_ENV" = "hostile", "TMUX" = "foreign", "TMUX_PANE" = "foreign" } }
+expected = { "PATH" = "<path>", "HOME" = "<home>", "XDG_CONFIG_HOME" = "<config>", "APPDATA" = "<appdata>", "LC_ALL" = "C.UTF-8", "TMPDIR" = "<run>", "TEMP" = "<run>", "TMP" = "<run>", "PYTHONPYCACHEPREFIX" = "<run>/bytecode", "PYTEST_DISABLE_PLUGIN_AUTOLOAD" = "1", "AGENTCTL_CHECK_NONCE" = "<nonce>", "AGENTCTL_CHECK_MANIFEST" = "<run>/pytest-manifest.json", "PYTHONUTF8" = "1", "PYTHONIOENCODING" = "utf-8" }
+
+[[case]]
+id = "environment.codex-native-state"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-88"
+input = { "subject" = "check-environment", "tool" = "pytest", "inherited" = { "PATH" = "<path>", "HOME" = "<home>", "XDG_CONFIG_HOME" = "<config>", "APPDATA" = "<appdata>", "PYTHONPATH" = "hostile", "PYTEST_ADDOPTS" = "-k none", "PYTEST_PLUGINS" = "hostile", "TY_CONFIG_FILE" = "hostile", "VIRTUAL_ENV" = "hostile", "TMUX" = "foreign", "TMUX_PANE" = "foreign", "CODEX_SQLITE_HOME" = "<codex-state>", "CODEX_UNRECOGNIZED_INPUT" = "hostile" } }
+expected = { "PATH" = "<path>", "HOME" = "<home>", "XDG_CONFIG_HOME" = "<config>", "APPDATA" = "<appdata>", "LC_ALL" = "C.UTF-8", "TMPDIR" = "<run>", "TEMP" = "<run>", "TMP" = "<run>", "PYTHONPYCACHEPREFIX" = "<run>/bytecode", "PYTEST_DISABLE_PLUGIN_AUTOLOAD" = "1", "AGENTCTL_CHECK_NONCE" = "<nonce>", "AGENTCTL_CHECK_MANIFEST" = "<run>/pytest-manifest.json", "PYTHONUTF8" = "1", "PYTHONIOENCODING" = "utf-8", "CODEX_SQLITE_HOME" = "<codex-state>" }

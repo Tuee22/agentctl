@@ -1,7 +1,7 @@
 -- Copyright (c) 2026 agentctl contributors.
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module ScriptedAgent (run) where
+module ScriptedAgent (run, withInput, readInput, paneIdentity, writeOutput) where
 
 import AgentCtl.Native (processId)
 import Control.Concurrent (threadDelay)
@@ -19,7 +19,8 @@ import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
 import qualified Data.Text.IO as Text
 import Data.Time (getCurrentTime)
-import Foreign.C.Types (CInt (..))
+import Foreign.C.String (CString)
+import Foreign.C.Types (CInt (..), CSize (..))
 import GHC.Clock (getMonotonicTimeNSec)
 import System.Directory (doesFileExist, renameFile)
 import System.Environment (lookupEnv)
@@ -27,6 +28,7 @@ import System.Exit (die)
 import System.FilePath (isAbsolute, (</>))
 import System.IO (BufferMode (NoBuffering), Handle, IOMode (AppendMode), hClose, hFlush, hSetBinaryMode, hSetBuffering, stdin, stdout, withBinaryFile)
 import System.IO.Temp (withTempFile)
+import qualified System.Info as System
 
 data Advance = Input Integer | File FilePath | Delay Double | Stay
 
@@ -72,17 +74,28 @@ foreign import ccall unsafe "agentctl_fake_raw_begin"
 foreign import ccall unsafe "agentctl_fake_raw_end"
   rawEnd :: IO CInt
 
+foreign import ccall unsafe "agentctl_fake_input_ready"
+  inputReady :: IO CInt
+
+foreign import ccall safe "agentctl_fake_console_write"
+  consoleWrite :: CString -> CSize -> IO CInt
+
+writeOutput :: Text.Text -> IO ()
+writeOutput text = Bytes.useAsCStringLen (Text.encodeUtf8 text) $ \(bytes, size) -> do
+  code <- consoleWrite bytes (fromIntegral size)
+  if code == -1
+    then Text.putStr text
+    else when (code /= 0) (die ("fake console output failed: " ++ show code))
+
 run :: FilePath -> String -> Maybe Text.Text -> [String] -> IO ()
 run directory nonce session arguments = case arguments of
   "--agentctl-script" : path : _ -> do
     script <- Bytes.readFile path >>= either (die . ("invalid fake script: " ++)) pure . eitherDecodeStrict'
     pid <- processId
     pane <- lookupEnv "TMUX_PANE"
-    let identity = Identity nonce pid session pane
+    let identity = Identity nonce pid session (paneIdentity session pane)
     mapM_ (initialise directory) ["received.jsonl", "frames.jsonl"]
-    hSetBinaryMode stdin True
-    hSetBuffering stdin NoBuffering
-    bracket_ (raw rawBegin) (raw rawEnd) $
+    withInput $
       withBinaryFile (directory </> "received.jsonl") AppendMode $ \received ->
         withBinaryFile (directory </> "frames.jsonl") AppendMode $ \frames -> do
           count <- newMVar 0
@@ -90,6 +103,17 @@ run directory nonce session arguments = case arguments of
             link worker
             play directory identity frames count script
   _ -> die "scripted fake agent needs --agentctl-script PATH"
+
+paneIdentity :: Maybe Text.Text -> Maybe String -> Maybe String
+paneIdentity session pane
+  | System.os == "mingw32" = (\name identifier -> "=" ++ Text.unpack name ++ ":." ++ identifier) <$> session <*> pane
+  | otherwise = pane
+
+withInput :: IO value -> IO value
+withInput action = do
+  hSetBinaryMode stdin True
+  hSetBuffering stdin NoBuffering
+  bracket_ (raw rawBegin) (raw rawEnd) action
   where
     raw operation = do
       code <- operation
@@ -108,15 +132,26 @@ writeEvent (Identity nonce pid session pane) handle fields = do
   Lazy.hPut handle (encode record <> "\n")
   hFlush handle
 
+readInput :: IO (Maybe Bytes.ByteString)
+readInput = do
+  ready <- inputReady
+  case ready of
+    0 -> pure Nothing
+    1 -> Just <$> Bytes.hGetSome stdin 4096
+    _ -> die "fake input readiness failed"
+
 receive :: Identity -> Handle -> MVar Integer -> IO ()
 receive identity handle count = do
-  bytes <- Bytes.hGetSome stdin 4096
-  unless (Bytes.null bytes) $ do
-    modifyMVar_ count $ \previous -> do
-      let next = previous + toInteger (Bytes.length bytes)
-      writeEvent identity handle ["bytes" .= Bytes.unpack bytes, "total" .= next]
-      pure next
-    receive identity handle count
+  chunk <- readInput
+  case chunk of
+    Nothing -> threadDelay 10000 >> receive identity handle count
+    Just bytes ->
+      unless (Bytes.null bytes) $ do
+        modifyMVar_ count $ \previous -> do
+          let next = previous + toInteger (Bytes.length bytes)
+          writeEvent identity handle ["bytes" .= Bytes.unpack bytes, "total" .= next]
+          pure next
+        receive identity handle count
 
 play :: FilePath -> Identity -> Handle -> MVar Integer -> Script -> IO ()
 play directory identity handle count (Script frames) = advance 0 frames
@@ -127,7 +162,7 @@ play directory identity handle count (Script frames) = advance 0 frames
       previous <- readMVar count
       bytes <- Bytes.readFile path
       text <- either (die . show) pure (Text.decodeUtf8' bytes)
-      Text.putStr ("\ESC[2J\ESC[3J\ESC[H" <> text)
+      writeOutput ("\ESC[2J\ESC[3J\ESC[H" <> text)
       hFlush stdout
       writeEvent identity handle ["index" .= index, "screen" .= path]
       began <- getMonotonicTimeNSec

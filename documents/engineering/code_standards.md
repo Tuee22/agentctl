@@ -88,7 +88,11 @@ gate-closure condition. Tests follow the same rules as the package, and ruff and
 (`direct_url.json`, `agentctl-core-eval` output), process output, `/etc/os-release`, environment variables or
 downloaded bytes, is parsed into a domain value where it arrives or turned there into a typed error, so core logic
 never handles an unparsed `str`, `bytes` or `dict`. Process output is decoded as UTF-8 explicitly, never through
-the locale. TOML and JSON use only the standard library's `tomllib` and `json`; host discovery uses the standard
+the locale. Python subprocess pipes drain bytes before the caller decodes them and applies universal-newline
+handling, so an invalid byte becomes a typed error rather than an exception in a Windows reader thread
+(`tests/integration/test_runtime_boundaries.py::test_process_errors_and_teardown`,
+`tests/integration/test_runtime_boundaries.py::test_owned_child_decoding_failure`).
+TOML and JSON use only the standard library's `tomllib` and `json`; host discovery uses the standard
 library's `shlex` for the shell-quoted `ID` and `VERSION_ID` fields of `os-release`.
 
 **Tests.** `unittest.mock` is banned, and `monkeypatch` serves only `setenv`, `delenv` and `chdir`; effects are
@@ -176,6 +180,7 @@ Its input handle is an explicitly opened null device. This supplies no input and
 valid when the caller has already closed stdin, as the command fixture does before invoking the runner
 (`tests/integration/test_mux_real.py::test_private_server_roundtrip`,
 `haskell:agentctl-core-test/ProcessReal/closed-parent-input`).
+Windows uses the explicit `\\.\NUL` device path; other hosts use `/dev/null`.
 Relative executables, invalid deadlines and spawn errors are typed failures. Text commands also refuse invalid
 UTF-8. The status-only operation shares the same process lifecycle and drains raw bytes without decoding them;
 auth classification consumes only its actual exit code
@@ -232,6 +237,12 @@ from the pane and takes other variables from the spec (`haskell:agentctl-core-te
 `AgentCtl.Process` also owns inherited-stream foreground programs and the native exec binding. Foreground agents
 and terminal clients run for their process lifetime; bounded command queries retain explicit deadlines. The POSIX
 trampoline replaces itself with the program, while Windows waits for its child and atomically publishes status.
+Foreground execution keeps Windows handle inheritance enabled: the pinned process library's `close_fds` setting
+disables inheritance of redirected standard handles as well. POSIX foreground execution closes other descriptors.
+Foreground clients retain only client lifetime ownership, so forwarding a multiplexer invocation preserves its
+server. The Windows trampoline waits for its direct program child and publishes that child's status; detached
+sessions created by a program inside that pane do not extend the trampoline's wait. Bounded queries retain
+process-tree ownership.
 Program validation refuses relative paths, embedded NULs and invalid environment names before the spec is consumed
 (`tests/integration/test_pane_exec.py::test_spec_deleted_and_status_propagated`,
 `tests/integration/test_pane_exec.py::test_malformed_spec_preserved`).
@@ -245,7 +256,8 @@ output pipe (`tests/integration/test_handoff.py::test_child_wait_survives_parent
 The filesystem edge distinguishes strict privacy validation from application state preparation. The strict
 `ensurePrivateDirectory` operation continues to refuse overpermissive existing directories. State preparation
 first verifies an owned ordinary directory without following a final link, then tightens that root to private
-access. POSIX uses its opened descriptor; Windows uses a protected owner-only DACL and an exclusive root handle,
+access. POSIX uses its opened descriptor; Windows uses a protected owner-only DACL and an exclusive root handle
+opened with `MAXIMUM_ALLOWED`,
 preventing inheritance changes to existing children. The native control starts with deliberately broad directory
 access, proves strict refusal and private preparation, and compares an existing child's bytes and file permissions
 before and after (`haskell:agentctl-core-test/SpecReal/state-directory-preparation`).

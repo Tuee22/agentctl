@@ -89,20 +89,25 @@ def test_leg_table_matches_oracle(root: Path, tmp_path: Path) -> None:
     env = environment(inherited, tmp_path, "fresh", tool="ty")
     assert env["PATH"] == "/bin"
     assert env["AGENTCTL_CHECK_NONCE"] == "fresh"
-    assert env["XDG_CONFIG_HOME"] == str(tmp_path / "ty-config")
-    assert env["APPDATA"] == str(tmp_path / "ty-config")
+    assert env["XDG_CONFIG_HOME"] == (tmp_path / "ty-config").as_posix()
+    assert env["APPDATA"] == (tmp_path / "ty-config").as_posix()
     assert not set(inherited).difference({"PATH", "HOME"}).intersection(env)
     user = {"XDG_CONFIG_HOME": "/user/config", "APPDATA": "/user/appdata"}
     regular = environment(user, tmp_path, "fresh", tool="pytest")
     assert regular["XDG_CONFIG_HOME"] == "/user/config"
     assert regular["APPDATA"] == "/user/appdata"
     for row in oracle["case"]:
-        if row["input"].get("subject") == "check-environment":
+        if (
+            row["input"].get("subject") == "check-environment"
+            and row["id"] not in amended
+        ):
             tool: object = row["input"]["tool"]
             assert isinstance(tool, str)
             inputs = _strings(row["input"]["inherited"])
             expected_env = {
-                key: value.replace("<run>", str(tmp_path)).replace("<nonce>", "fresh")
+                key: value.replace("<run>", tmp_path.as_posix()).replace(
+                    "<nonce>", "fresh"
+                )
                 for key, value in _strings(row["expected"]).items()
             }
             assert environment(inputs, tmp_path, "fresh", tool=tool) == expected_env

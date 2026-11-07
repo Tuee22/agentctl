@@ -37,7 +37,7 @@ import qualified Data.Aeson.KeyMap as Keys
 import Data.Aeson.Types (Parser, parseEither)
 import qualified Data.ByteString.Lazy.Char8 as Bytes
 import Data.Either (isRight)
-import Data.Maybe (isJust)
+import Data.Maybe (fromMaybe, isJust)
 import qualified Data.Text as Text
 
 evaluate :: Value -> Parser Value
@@ -182,6 +182,22 @@ evaluate = withObject "case" $ \fields -> do
       command <- Command.parseCommand (toJSON fields)
       let rendered = if family == Mux.Windows then Psmux.render command else Tmux.render command
       pure (object ["executable" .= Command.executable rendered, "argv" .= Command.arguments rendered])
+    "mux-process-tree" -> do
+      family <- fields .: "family" >>= parseFamily
+      command <- Command.parseCommand (toJSON fields)
+      pure (toJSON (Command.ownsProcessTree (if family == Mux.Windows then Mux.Psmux else Mux.Tmux) command))
+    "mux-pane-target" -> do
+      family <- fields .: "family" >>= parseFamily
+      name <- fields .: "session" >>= either (fail . show) pure . Name.makeSessionName
+      pane <- fields .: "pane" >>= maybe (fail "invalid pane id") pure . Command.makePane
+      let selected = Command.inSession (if family == Mux.Windows then Mux.Psmux else Mux.Tmux) name pane
+      pure (object ["target" .= Command.paneText selected, "native" .= Command.paneId selected, "session" .= fromMaybe "" (Command.paneSession selected)])
+    "mux-pane-valid" -> toJSON . isJust . Command.makePane <$> fields .: "pane"
+    "mux-pane-selection" -> do
+      panes <- fields .: "panes" >>= mapM (maybe (fail "invalid pane id") pure . Command.makePane)
+      pure $ case Command.selectPane panes of
+        Left message -> object ["error" .= message]
+        Right selected -> object ["target" .= maybe "" Command.paneText selected]
     "mux-invocation" -> do
       family <- fields .: "family" >>= parseFamily
       command <- Command.parseCommand (toJSON fields)

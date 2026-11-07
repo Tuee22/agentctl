@@ -46,6 +46,21 @@ def _arguments(
     return tuple(str(argument) for argument in decoded)
 
 
+def _program(
+    mux: PrivateMux, agent: str, scope: Path, arguments: tuple[str, ...]
+) -> PaneProgram:
+    """Give each parser case its own logged-out configuration and runtime state."""
+    environment = isolated_environment(scope, os.environ)
+    folder = scope / "project"
+    folder.mkdir()
+    executable = native_agent(agent, mux.family, environment)
+    auth = probe(mux.context, AuthProbe(agent, executable, folder), environment)
+    assert auth["state"] == "LoggedOut", "isolated agent used credentials"
+    return PaneProgram(
+        _arguments(mux, agent, executable, arguments), folder, environment
+    )
+
+
 def test_final_argv_accepted_logged_out(root: Path, mux_server: PrivateMux) -> None:
     """Within two seconds valid panes remain alive and invalid subcommands exit."""
     rows = tomllib.loads(
@@ -56,20 +71,10 @@ def test_final_argv_accepted_logged_out(root: Path, mux_server: PrivateMux) -> N
         ("codex", ("exec",)),
     ):
         scope = mux_server.scope / ("installed-" + agent)
-        environment = isolated_environment(scope, os.environ)
-        folder = scope / "project"
-        folder.mkdir()
-        executable = native_agent(agent, mux_server.family, environment)
-        auth = probe(
-            mux_server.context, AuthProbe(agent, executable, folder), environment
-        )
-        assert auth["state"] == "LoggedOut", "isolated agent used credentials"
         positive = native_pane(
             mux_server,
             agent + "-accepted",
-            PaneProgram(
-                _arguments(mux_server, agent, executable, ()), folder, environment
-            ),
+            _program(mux_server, agent, scope / "accepted", ()),
         )
         dead = positive.observe_startup()
         assert not dead, ARGV_REASON + ": " + positive.capture()
@@ -86,9 +91,7 @@ def test_final_argv_accepted_logged_out(root: Path, mux_server: PrivateMux) -> N
         separator = native_pane(
             mux_server,
             agent + "-separator",
-            PaneProgram(
-                _arguments(mux_server, agent, executable, ("--",)), folder, environment
-            ),
+            _program(mux_server, agent, scope / "separator", ("--",)),
         )
         separator_dead = separator.observe_startup()
         assert not separator_dead, (
@@ -97,11 +100,7 @@ def test_final_argv_accepted_logged_out(root: Path, mux_server: PrivateMux) -> N
         negative = native_pane(
             mux_server,
             agent + "-rejected",
-            PaneProgram(
-                _arguments(mux_server, agent, executable, rejected_arguments),
-                folder,
-                environment,
-            ),
+            _program(mux_server, agent, scope / "rejected", rejected_arguments),
         )
         assert negative.observe_startup(), (
             "real agent rejected argv after the startup window: " + negative.capture()

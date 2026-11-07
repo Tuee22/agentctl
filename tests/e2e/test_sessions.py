@@ -75,10 +75,9 @@ def test_status_reports_dead_pane(mux_server: PrivateMux) -> None:
     assert case.invoke().code == 0
     before = rows(case.command("status", ("api-claude",)))["api-claude"]
     assert before["STATE"] == "alive"
+    target = mux_server.pane_option_target(before["SESSION"], before["PANE"])
     assert (
-        mux_server.raw(
-            "set-option", "-p", "-t", before["PANE"], "remain-on-exit", "on"
-        ).code
+        mux_server.raw("set-option", "-p", "-t", target, "remain-on-exit", "on").code
         == 0
     )
     (case.records_directory / "stop").write_text("exit", encoding="utf-8")

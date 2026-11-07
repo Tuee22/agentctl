@@ -161,7 +161,8 @@ path substitutes for the production interpreter.
 - Each notification goes to the supervisor's stderr and, through `AgentCtl.Supervisor.Log`, to a `notify` record in
   the JSONL decision log under `state`.
 - `agentctl-fake-agent` gains a scripted mode that plays screen fixtures advanced by time or by received input, and
-  records every byte it receives with the run's nonce.
+  records every byte it receives with the run's nonce and complete native pane target. Its shared input boundary
+  polls Windows readiness and yields without input, so the stop-file path cancels its reader before exit.
 
 #### Validation
 
@@ -319,6 +320,10 @@ then watch live sessions and send nothing.
   `request:R19`.
 - Each scenario test runs the real `agentctl supervisor run` through the passthrough on a private tmux server
   (`TMUX_TMPDIR` under the run dir, `TMUX` unset), over scripted fake agents in folders named with the run's nonce.
+- POSIX scenario cleanup requests SIGTERM and waits for the actual child exit before forcing failure cleanup.
+- Windows scenario controllers run in a second private native console. Normal cleanup signals Ctrl+Break and
+  waits for exit before the mux scope closes, so an in-flight client can drain. The fixture preserves the actual
+  child status and buffered stdout/stderr in its nonce-bound result; public timing arguments govern every case.
 - Every assertion that a pane received nothing is paired with the supervisor's lock-held observations of that pane,
   matched by target to its fake agent's nonce-bearing record (before its pause in the paused case), and with a
   control pane per agent, scripted to the overload-recovery sequence, whose received recovery text shows the byte

@@ -13,12 +13,20 @@ from pathlib import Path
 from typing import Literal, Protocol
 
 from agentctl.bootstrap import build
-from agentctl.process import Child, Output, stop
+from agentctl.process import Child, Output, finish, stop
 from agentctl.result import Ok
-from tests.harness.launch import LaunchCase, prepare
+from tests.harness.launch import (
+    LaunchCase,
+    NativePane,
+    PaneProgram,
+    native_pane,
+    prepare,
+)
+from tests.harness.nonce import fresh
 from tests.harness.oracle import Store, load, read_homes
 from tests.harness.sessions import rows
-from tests.harness.tmux import PrivateMux, object_value
+from tests.harness.terminal import await_exit
+from tests.harness.tmux import PrivateMux, object_value, private_mux
 
 BYTE_MAXIMUM = 255
 StopKind = Literal["interrupt", "terminate"]
@@ -127,6 +135,11 @@ class RunningSupervisor:
     prior_runs: frozenset[str]
     output: Output | None = None
 
+    @property
+    def pid(self) -> int:
+        """Expose the same owned controller identity observed in its lock."""
+        return self.child.pid
+
     def alive(self) -> bool:
         """Poll the same owned child whose lock and log are observed."""
         return self.child.handle.poll() is None
@@ -142,10 +155,126 @@ class RunningSupervisor:
     def finish(self) -> Output:
         """Reap the same owned child once, retaining its actual status and streams."""
         if self.output is None:
-            result = stop(self.child)
-            assert isinstance(result, Ok), result
-            self.output = result.value
+            try:
+                if self.alive():
+                    self.request_stop("terminate")
+                result = finish(self.child, timeout=10)
+                assert isinstance(result, Ok), result
+                self.output = result.value
+            finally:
+                if self.output is None:
+                    assert isinstance(stop(self.child), Ok)
         return self.output
+
+
+@dataclass(slots=True)
+class ConsoleSupervisor:
+    """One fixture-owned supervisor inside an isolated native Windows console."""
+
+    case: LaunchCase
+    prior_runs: frozenset[str]
+    driver: NativePane
+    kind: StopKind
+    trigger: Path
+    destination: Path
+    output: Output | None = None
+
+    @property
+    def pid(self) -> int:
+        """Read the fixture's independently observed live controller-lock identity."""
+        path = Path(str(self.destination) + ".pid")
+        record = object_value(path.read_text(encoding="utf-8"))
+        assert set(record) == {"nonce", "pid"}
+        assert record["nonce"] == self.case.nonce
+        value = record["pid"]
+        assert isinstance(value, int)
+        assert not isinstance(value, bool)
+        assert value > 0
+        return value
+
+    def alive(self) -> bool:
+        """Observe the private fixture's real pane without sending any input."""
+        return not self.driver.dead()
+
+    def request_stop(self, kind: StopKind) -> None:
+        """Release the native fixture's preselected, bounded console event."""
+        assert kind == self.kind
+        assert self.alive()
+        self.trigger.touch()
+
+    def finish(self) -> Output:
+        """Require the fixture's independently recorded child exit and identity."""
+        if self.output is None:
+            if self.alive():
+                self.request_stop(self.kind)
+            await_exit(self.driver)
+            assert self.destination.exists(), self.driver.capture()
+            record = object_value(self.destination.read_text(encoding="utf-8"))
+            assert set(record) == {"nonce", "pid", "status", "stdout", "stderr"}
+            assert record["nonce"] == self.case.nonce
+            pid = record["pid"]
+            assert isinstance(pid, int)
+            assert not isinstance(pid, bool)
+            assert pid > 0
+            assert pid == self.pid
+            status = record["status"]
+            assert isinstance(status, int)
+            assert not isinstance(status, bool)
+            stdout, stderr = record["stdout"], record["stderr"]
+            assert isinstance(stdout, str)
+            assert isinstance(stderr, str)
+            self.output = Output(status, stdout, stderr)
+        return self.output
+
+
+@contextmanager
+def console_supervisor(
+    case: LaunchCase,
+    kind: StopKind,
+    *,
+    initial: float = 0.3,
+    poll: float = 0.05,
+) -> Generator[ConsoleSupervisor]:
+    """Own a native console so cleanup requests a graceful controller stop."""
+    mux = case.mux
+    fixture = build.binary(mux.context, "test:agentctl-core-test")
+    core = build.binary(mux.context, "exe:agentctl-core")
+    assert isinstance(fixture, Ok), fixture
+    assert isinstance(core, Ok), core
+    prior_runs = frozenset(str(record["run"]) for record in log_records(case))
+    with private_mux(
+        mux.context, mux.family, mux.run_directory, fresh(mux.nonce)
+    ) as outer:
+        trigger = outer.scope / "request-stop"
+        destination = outer.scope / "controller-result.json"
+        driver = native_pane(
+            outer,
+            "console-controller",
+            PaneProgram(
+                (
+                    str(fixture.value),
+                    "--console-fixture",
+                    str(core.value),
+                    kind,
+                    str(trigger),
+                    str(destination),
+                    str(poll),
+                    str(initial),
+                    str(initial * 4),
+                    case.nonce,
+                ),
+                case.folder,
+                case.environment,
+            ),
+        )
+        console = ConsoleSupervisor(
+            case, prior_runs, driver, kind, trigger, destination
+        )
+        try:
+            yield console
+        finally:
+            console.finish()
+            case.records()
 
 
 @contextmanager
@@ -154,8 +283,14 @@ def supervisor(
     *,
     initial: float = 0.3,
     poll: float = 0.05,
-) -> Generator[RunningSupervisor]:
+) -> Generator[RunningSupervisor | ConsoleSupervisor]:
     """Use only supported timing flags, and never leave a controller behind."""
+    if case.mux.family == "Windows":
+        with console_supervisor(
+            case, "terminate", initial=initial, poll=poll
+        ) as running:
+            yield running
+        return
     previous = log_records(case)
     prior_runs = frozenset(str(record["run"]) for record in previous)
     started = build.start_binary(

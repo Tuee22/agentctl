@@ -4,6 +4,7 @@
 import hashlib
 import json
 import os
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -17,7 +18,7 @@ pytestmark = pytest.mark.evidence("real")
 
 def test_absence_record_precedes_first_file(tmp_path: Path) -> None:
     """A clean observed prefix gains one private witness which is never rewritten."""
-    value = context(tmp_path)
+    value = replace(context(tmp_path), family="Linux")
     env = dict(value.environment)
     nonce = fresh(os.environ.get("AGENTCTL_CHECK_NONCE", "focused"))
     initial = capture(tmp_path / "first", nonce, value.family, env, value.home)

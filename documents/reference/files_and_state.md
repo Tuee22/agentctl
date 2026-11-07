@@ -127,9 +127,11 @@ source is removed.
 The native snapshot reads at most 32 MiB from the opened spec and refuses a larger file. Linux and macOS inspect
 the opened parent directory and file, reject final symbolic links and retain owner and mode facts from those
 descriptors. Windows inspects real owner SIDs and DACLs, rejects reparse points, and treats access limited to the
-current user, LocalSystem and builtin Administrators as private. A null DACL, other effective allow entries or an
+current user, the object's OWNER RIGHTS principal, LocalSystem and builtin Administrators as private. A null DACL, other effective allow entries or an
 unsupported ACE form is refused. The common policy applies the equivalent private-file and directory permissions;
-Windows ownership is never inferred from emulated POSIX ids.
+Windows ownership is never inferred from emulated POSIX ids. An owner matches the current token's user SID or
+default owner SID; an elevated token can use builtin Administrators as its default owner. The DACL privacy
+checks apply independently of that ownership match.
 
 ## Adopted-Pane Registry
 
@@ -147,7 +149,7 @@ pane's exit status; it does not add a managed-session registry.
 | Field | Holds |
 |---|---|
 | `socket` | The adapter's opaque, stable server endpoint identity: a tmux socket path, or the psmux namespace and addressed server identity; compared at every use |
-| `pane` | The multiplexer's pane id, which is also the pane's name in `agentctl list` |
+| `pane` | The multiplexer's pane target, which is also the pane's name in `agentctl list`: `%id` for tmux or `=SESSION:.%id` for psmux |
 | `pid` | The process id of the pane's first process when it was adopted |
 | `agent` | `claude` or `codex`, as `--agent` gave it |
 

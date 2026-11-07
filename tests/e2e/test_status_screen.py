@@ -74,8 +74,11 @@ def test_screen_column_shows_fixture_class(root: Path, mux_server: PrivateMux) -
                 await_frame(mux_server, pane, fixtures[kind].text)
                 observed = rows(case.command("status", (name,)))[name]
                 assert observed["SCREEN"] == kind.value, REASON
+        target = mux_server.pane_option_target(name, pane)
         assert (
-            mux_server.raw("set-option", "-p", "-t", pane, "remain-on-exit", "on").code
+            mux_server.raw(
+                "set-option", "-p", "-t", target, "remain-on-exit", "on"
+            ).code
             == 0
         )
         publish(case.records_directory / "stop", "exit")

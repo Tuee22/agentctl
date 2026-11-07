@@ -9,7 +9,7 @@ import pytest
 
 from tests.harness.launch import LaunchCase, prepare
 from tests.harness.sessions import rows
-from tests.harness.tmux import PrivateMux, object_value
+from tests.harness.tmux import PrivateMux, object_value, pane_identifier
 
 REASON = "adopted pane policy differs from ownership oracle"
 PANE_FIELDS = 5
@@ -49,14 +49,14 @@ def pane_facts(mux: PrivateMux, pane: str) -> tuple[int, str, str]:
     assert output.code == 0, output
     fields = output.stdout.rstrip("\r\n").split("|")
     assert len(fields) == PANE_FIELDS
-    assert fields[0] == pane
+    assert fields[0] == pane_identifier(pane)
     assert fields[2] == "0", REASON
     return int(fields[1]), fields[3], fields[4]
 
 
 def no_options(mux: PrivateMux, session: str) -> None:
     """Require no agentctl option on a foreign session before or after adoption."""
-    target = "=" + session + ("" if mux.family == "Windows" else ":")
+    target = "=" + session + ":"
     output = mux.raw("show-options", "-t", target)
     assert output.code == 0
     assert "@agentctl_" not in output.stdout, REASON
@@ -139,6 +139,14 @@ def test_stale_entry_after_server_restart(mux_server: PrivateMux) -> None:
     pid, _, _ = pane_facts(mux_server, foreign.pane)
     other_pid, _, _ = pane_facts(mux_server, other.pane)
     assert pid != other_pid
+    if mux_server.family == "Windows":
+        assert pane_identifier(foreign.pane) == pane_identifier(other.pane)
+        refused = case.command(
+            "adopt", (pane_identifier(foreign.pane), "--agent", "claude")
+        )
+        assert refused.code != 0
+        assert "ambiguous pane id" in refused.stderr
+        assert not registry(case).exists()
     assert case.command("adopt", (foreign.pane, "--agent", "claude")).code == 0
     path = registry(case)
     original = path.read_bytes()

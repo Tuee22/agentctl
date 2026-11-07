@@ -1,6 +1,8 @@
 # Copyright (c) 2026 agentctl contributors.
 """Owned binary build caches sharing only agentctl's immutable dependency store."""
 
+import os
+import secrets
 import shutil
 from dataclasses import replace
 from pathlib import Path
@@ -14,9 +16,13 @@ def request(root: Path, directory: Path) -> binary.Request:
     """Keep source, output, homes, locks and pin edits in the test's own directory."""
     context = copy_project(root, directory)
     shared = context.host.cache / "cabal"
-    host = replace(
-        context.host, cache=directory / "cache", interactive=False, assume_yes=False
+    storage = os.environ.get("AGENTCTL_TEST_NATIVE_ROOT")
+    cache = (
+        Path(storage) / secrets.token_hex(4)
+        if storage is not None
+        else directory / "cache"
     )
+    host = replace(context.host, cache=cache, interactive=False, assume_yes=False)
     assert toolchain.record(context.tools, host.cache) == Ok(context.tools)
     private = host.cache / "cabal"
     private.mkdir(parents=True)

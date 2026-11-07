@@ -10,15 +10,20 @@ mode, log, nonce, sentinel = sys.argv[1:]
 assert isinstance(install(Path(log), nonce), Ok)
 program = "from pathlib import Path; import sys; Path(sys.argv[1]).write_text('executed')"
 argv = [sys.executable, "-c", program, sentinel]
+native_argv = (
+    [subprocess.list2cmdline([argument]) for argument in argv]
+    if os.name == "nt"
+    else argv
+)
 if mode == "subprocess":
     subprocess.run(argv, check=True)
 elif mode == "exec":
-    os.execv(sys.executable, argv)
+    os.execv(sys.executable, native_argv)
 elif mode == "system":
     assert os.system("echo " + nonce) == 0
 elif mode == "native":
     if os.name == "nt":
-        assert os.spawnv(os.P_WAIT, sys.executable, argv) == 0
+        assert os.spawnv(os.P_WAIT, sys.executable, native_argv) == 0
     else:
         pid = os.posix_spawn(sys.executable, argv, os.environ)
         assert os.waitpid(pid, 0)[1] == 0

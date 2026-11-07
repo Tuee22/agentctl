@@ -131,7 +131,7 @@ def _file_lock(handle: IO[str], *, unlock: bool) -> None:  # pragma: no cover
         if not isinstance(backend, WindowsLocks):
             message = "Windows locking interface is unavailable"
             raise OSError(message)
-        handle.seek(0)
+        handle.seek(4096)
         backend.locking(
             handle.fileno(), backend.LK_UNLCK if unlock else backend.LK_NBLCK, 1
         )

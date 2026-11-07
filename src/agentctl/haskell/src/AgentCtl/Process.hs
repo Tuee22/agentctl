@@ -12,6 +12,7 @@ module AgentCtl.Process
     runCommand,
     commandInvocation,
     foreground,
+    foregroundClient,
     foregroundCommand,
     replace,
     requestReap,
@@ -24,7 +25,7 @@ import qualified AgentCtl.Mux.Psmux as Psmux
 import qualified AgentCtl.Mux.Tmux as Tmux
 import AgentCtl.Mux.Types (Kind (..), Multiplexer, muxExecutable, muxKind)
 import Control.Concurrent (threadDelay)
-import Control.Concurrent.Async (concurrently)
+import Control.Concurrent.Async (wait, withAsync)
 import Control.Exception (IOException, catch)
 import qualified Data.ByteString as Bytes
 import Data.Char (isAscii, isDigit)
@@ -86,10 +87,10 @@ data ProcessError
   deriving (Eq, Show)
 
 run :: Invocation -> IO (Either ProcessError Output)
-run = runWith decodeOutput
+run = runWith True decodeOutput
 
 runStatus :: Invocation -> IO (Either ProcessError Int)
-runStatus = runWith (\status _ _ -> Right status)
+runStatus = runWith True (\status _ _ -> Right status)
 
 decodeOutput :: Int -> Bytes.ByteString -> Bytes.ByteString -> Either ProcessError Output
 decodeOutput status outBytes errBytes =
@@ -98,26 +99,38 @@ decodeOutput status outBytes errBytes =
     (Left exception, _) -> Left (InvalidUtf8 (Text.pack (show exception)))
     (_, Left exception) -> Left (InvalidUtf8 (Text.pack (show exception)))
 
-runWith :: (Int -> Bytes.ByteString -> Bytes.ByteString -> Either ProcessError value) -> Invocation -> IO (Either ProcessError value)
-runWith summarize invocation
+runWith :: Bool -> (Int -> Bytes.ByteString -> Bytes.ByteString -> Either ProcessError value) -> Invocation -> IO (Either ProcessError value)
+runWith processJobs summarize invocation
   | not (isAbsolute (executable invocation)) = pure (Left (RelativeExecutable (executable invocation)))
   | deadlineMicros invocation <= 0 = pure (Left InvalidDeadline)
   | otherwise = execute `catch` refused
   where
     refused :: IOException -> IO (Either ProcessError value)
     refused exception = pure (Left (SpawnFailed (Text.pack (show exception))))
-    execute = withBinaryFile (if System.os == "mingw32" then "NUL" else "/dev/null") ReadMode $ \input -> do
-      result <- timeout (deadlineMicros invocation) $
+    execute = withBinaryFile (if System.os == "mingw32" then "\\\\.\\NUL" else "/dev/null") ReadMode $ \input -> do
+      result <-
         Native.withCreateProcess (command input) $ \_ output errors process ->
           case (output, errors) of
             (Just out, Just err) -> do
               hSetBinaryMode out True
               hSetBinaryMode err True
-              (outBytes, errBytes) <- concurrently (Bytes.hGetContents out) (Bytes.hGetContents err)
-              status <- Native.waitForProcess process
-              pure (summarize (statusCode status) outBytes errBytes)
-            _ -> pure (Left MissingOutputPipes)
+              withAsync (Bytes.hGetContents out) $ \outputReader ->
+                withAsync (Bytes.hGetContents err) $ \errorReader -> do
+                  completed <- timeout (deadlineMicros invocation) $ do
+                    outBytes <- wait outputReader
+                    errBytes <- wait errorReader
+                    status <- waitForExit process
+                    pure (summarize (statusCode status) outBytes errBytes)
+                  case completed of
+                    Nothing -> Native.terminateProcess process >> pure Nothing
+                    Just value -> pure (Just value)
+            _ -> pure (Just (Left MissingOutputPipes))
       pure (fromMaybe (Left TimedOut) result)
+    waitForExit process = do
+      status <- Native.getProcessExitCode process
+      case status of
+        Just code -> pure code
+        Nothing -> threadDelay 10000 >> waitForExit process
     command input =
       (Native.proc (executable invocation) (arguments invocation))
         { Native.cwd = Just (directory invocation),
@@ -126,7 +139,7 @@ runWith summarize invocation
           Native.std_out = Native.CreatePipe,
           Native.std_err = Native.CreatePipe,
           Native.create_group = True,
-          Native.use_process_jobs = True
+          Native.use_process_jobs = processJobs
         }
 
 statusCode :: ExitCode -> Int
@@ -156,7 +169,9 @@ runCommand mux command context
             if now >= deadline
               then pure (Left TimedOut)
               else
-                run
+                runWith
+                  (Command.ownsProcessTree (muxKind mux) action)
+                  decodeOutput
                   ( commandInvocation
                       (muxKind mux)
                       (muxExecutable mux)
@@ -196,7 +211,13 @@ validateProgram (Program path programArguments programDirectory programEnvironme
     driveKey _ = False
 
 foreground :: Program -> IO (Either ProcessError Int)
-foreground program@(Program path programArguments programDirectory programEnvironment) = case validateProgram program of
+foreground = foregroundWith True
+
+foregroundClient :: Program -> IO (Either ProcessError Int)
+foregroundClient = foregroundWith False
+
+foregroundWith :: Bool -> Program -> IO (Either ProcessError Int)
+foregroundWith processJobs program@(Program path programArguments programDirectory programEnvironment) = case validateProgram program of
   Just failure -> pure (Left failure)
   Nothing -> execute `catch` refused
   where
@@ -210,8 +231,8 @@ foreground program@(Program path programArguments programDirectory programEnviro
               Native.std_in = Native.Inherit,
               Native.std_out = Native.Inherit,
               Native.std_err = Native.Inherit,
-              Native.close_fds = True,
-              Native.use_process_jobs = True,
+              Native.close_fds = System.os /= "mingw32",
+              Native.use_process_jobs = processJobs,
               Native.delegate_ctlc = True
             }
         )

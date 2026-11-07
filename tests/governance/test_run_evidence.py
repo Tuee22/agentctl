@@ -8,6 +8,7 @@ import platform
 import re
 from dataclasses import asdict
 from pathlib import Path
+from typing import Protocol, runtime_checkable
 
 import pytest
 
@@ -20,6 +21,15 @@ from tests.harness.git import repository
 
 pytestmark = pytest.mark.evidence("value")
 NODE = "tests/unit/test_example.py::test_one"
+
+
+@runtime_checkable
+class FifoOperations(Protocol):
+    """The native POSIX FIFO constructor, absent from Windows' os module."""
+
+    def mkfifo(self, path: Path) -> None:
+        """Create a filesystem special entry for the digest rejection control."""
+        ...
 
 
 def _record(**changes: object) -> dict[str, object]:
@@ -160,6 +170,7 @@ def test_digest_link_bytes_and_errors(tmp_path: Path) -> None:
         assert link.read_bytes() == b"changed"
     else:
         special = tmp_path / "src/unsupported"
+        assert isinstance(os, FifoOperations)
         os.mkfifo(special)
         assert isinstance(digest(tmp_path), Err)
         special.unlink()

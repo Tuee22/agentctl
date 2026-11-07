@@ -26,6 +26,21 @@ SOCKET_BYTES = 100
 EXIT_FIELDS = 3
 
 
+def pane_identifier(target: str) -> str:
+    """Extract the native id from an independently qualified pane target."""
+    return target.rsplit(":", maxsplit=1)[-1].removeprefix(".")
+
+
+def server_pid(path: Path) -> int:
+    """Read a private psmux PID record with its optional creation FILETIME."""
+    pid, separator, created = path.read_text(encoding="utf-8").strip().partition(":")
+    assert pid.isascii()
+    assert pid.isdigit()
+    assert int(pid) > 0
+    assert not separator or (created.isascii() and created.isdigit())
+    return int(pid)
+
+
 def object_value(text: str) -> dict[str, object]:
     """Require a real JSON object rather than treating malformed output as absent."""
     value: object = json.loads(text)
@@ -187,6 +202,22 @@ class PrivateMux:
         assert result.value.code == 0, result.value.stdout + result.value.stderr
         return object_value(result.value.stdout)
 
+    def pane_option_target(self, session: str, pane: str) -> str:
+        """Route an independent pane-option control to its native server."""
+        return (
+            "=" + session + ":" + pane_identifier(pane)
+            if self.family == "Windows"
+            else pane
+        )
+
+    def pane_target(self, session: str, pane: str) -> str:
+        """Include the pane component when a backend uses one server per session."""
+        return (
+            "=" + session + ":." + pane_identifier(pane)
+            if self.family == "Windows"
+            else pane
+        )
+
     def actor(
         self,
         session: str,
@@ -238,11 +269,12 @@ class PrivateMux:
         assert pane.startswith("%")
         assert pane[1:].isascii()
         assert pane[1:].isdigit()
+        pane = self.pane_target(session, pane)
         actor = Actor(
             session, pane, nonce, records, spec, status, folder, forwarded, environment
         )
         self.actors.append(actor)
-        held = self.command("remain-on-exit", pane=pane, enabled=True)
+        held = self.command("remain-on-exit", session=session, pane=pane, enabled=True)
         assert held["code"] == 0, held
         payload = {
             "argv": [str(agent), *forwarded],
@@ -257,8 +289,9 @@ class PrivateMux:
         pending.rename(spec)
         if self.family == "Windows":
             for pid_file in self.endpoint.glob("*.pid"):
-                self._register(int(pid_file.read_text(encoding="utf-8").strip()))
+                self._register(server_pid(pid_file))
         observed = actor.record()
+        assert observed["pane_id"] == pane_identifier(actor.pane)
         pid = observed["pid"]
         assert isinstance(pid, int)
         self._register(pid)
@@ -436,7 +469,7 @@ def private_mux(
     endpoint = (
         scope / "psmux"
         if family == "Windows"
-        else scope / f"tmux-{os.getuid()}/default"
+        else scope / f"tmux-{scope.stat().st_uid}/default"
     )
     mux = PrivateMux(
         context, family, run_directory, nonce, scope, environment, executable, endpoint

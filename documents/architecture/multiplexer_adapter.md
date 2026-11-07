@@ -16,7 +16,8 @@
 - Every action is a value of the closed vocabulary in `AgentCtl.Mux.Command`, rendered to argv by the pure
   `AgentCtl.Mux.Tmux` or `AgentCtl.Mux.Psmux` and run by `AgentCtl.Process`, the one runner. The vocabulary
   has no `kill-server`, no respawn and no command that takes a shell string.
-- Sessions are targeted as `=NAME` and agent panes by their `%id`. Managed identity lives in the session
+- Sessions are targeted as `=NAME`; agent pane targets retain their native id and, on psmux, their session.
+  Managed identity lives in the session
   options `@agentctl_owner`, `@agentctl_agent`, `@agentctl_folder` and `@agentctl_pane`, on the user's normal
   server.
 - No user text reaches multiplexer parsing: the pane command is the pane trampoline, and the agent's argv,
@@ -32,7 +33,8 @@ and WSL tmux, and psmux's alias reports psmux's own version in tmux's format (ps
 `tmux 3.3.8`), so a tmux floor read through it would judge the wrong program.
 
 The version comes from `-V`. tmux prints `tmux <version>`, such as `tmux 3.4` or `tmux 3.2a`; psmux prints
-`psmux <major>.<minor>.<patch> (<commit> <date>)`. A string the parser does not recognise is refused, and the
+`psmux <major>.<minor>.<patch> (<commit> <date>)`, optionally preceded by a `tmux` compatibility line naming that
+same three-component release. A mismatched banner, extra output or a string the parser does not recognise is refused, and the
 warning quotes it.
 
 | Multiplexer | Floor | Why this floor |
@@ -110,8 +112,10 @@ psmux = ["kill-session", "-t", "=api-claude"]
 provenance = "tool:tmux 3.4 tmux.1 target-session"
 ```
 
-The vocabulary's `Pane` and `OptionValue` constructors are private. Pane ids contain `%` followed by ASCII digits;
-identity values contain only nonempty ASCII letters, digits, `_`, `-` and `%`. Decoding rejects unknown actions,
+The vocabulary's `Pane` and `OptionValue` constructors are private. Native pane ids contain `%` followed by ASCII
+digits. A pane target can also retain its session as `=SESSION:.%id`; qualified session components exclude control
+characters and target separators. Bare psmux adoption resolves only a unique eligible session, refusing ambiguity.
+Identity values contain only nonempty ASCII letters, digits, `_`, `-` and `%`. Decoding rejects unknown actions,
 unknown identity keys, invalid names and pane ids, unsafe identity values and nonpositive capture lengths.
 Independent rows exercise every action on both renderers and these refusals
 (`tests/unit/test_mux_values.py::test_render_oracle`).
@@ -135,13 +139,22 @@ whitelist excludes them. [Create or attach](launch_contract.md#create-or-attach)
 re-attach and `switch-client`, and [sessions and ownership](sessions_and_ownership.md) for `kill-session -t =NAME`,
 the only command that ends anything.
 
-Tmux's set-option and show-options commands parse a pane target. Their session selector is `=NAME:`, retaining
-the exact session prefix while the colon identifies the session component. Psmux's session-option commands retain
-`=NAME` in their own renderer; their native behaviour is confirmed on its Windows lane.
+Both backends' set-option and show-options commands use the session selector `=NAME:`, retaining the exact
+session prefix while the colon identifies the session component. Session-option values can be quoted; identity
+readers compare the exact decoded names and values.
 
-Panes are targeted by `%id`. A session target resolves to the active pane of the current window, which is
+Tmux panes are targeted by `%id`. Psmux panes carry their exact session as `=NAME:.%id`, since separate servers
+can allocate the same native id. A session target resolves to the active pane of the current window, which is
 the user's choice once they split a window, so every capture and send names the agent pane's id, the one
 `new-session -P -F '#{pane_id}'` printed.
+
+Psmux pane-option commands qualify that pane id with its checked session, `=NAME:%id`, so their client routes to
+the selected per-session server. Its create client runs outside a terminating process-tree job, allowing the
+persistent server to outlive that client. Other bounded commands keep process-tree ownership
+(`tests/unit/test_mux_values.py::test_process_tree_policy_oracle`,
+`tests/integration/test_mux_real.py::test_private_server_roundtrip`).
+The native cross-server control captures both panes and sends input to only one, retaining separate process and
+observer identities (`tests/integration/test_mux_real.py::test_pane_targets_distinguish_servers`).
 
 Sessions live on the user's normal server (psmux's default namespace on Windows), so `tmux ls`, the user's
 key bindings and the status line see them. agentctl passes no `-L` or `-S`: tmux's own rule chooses the server, the socket named in `$TMUX` when it
@@ -212,7 +225,7 @@ the tmux client's command line. The RIGHT form gives tmux nothing to expand, spl
 | Namespaces | `-L` becomes a file prefix, `<ns>__<session>` | Session names never contain `__` |
 | Exit status | `#{pane_dead_status}` always returns 0 | The trampoline runs the agent as a child and writes a status file |
 | `#{pane_pid}` | The pane's own process | The trampoline, which waits for the agent |
-| `=` targets | Stripped on `has-session`, matching tmux's exact match; undocumented elsewhere | Rendered as `=NAME` everywhere; confirmed on Windows |
+| `=` targets | Exact session matching uses `=NAME`; session options use `=NAME:` and pane options use `=NAME:%id` | Preserve the exact session component when routing to a per-session server |
 | `;` chains | Commands before an unknown command have already run | Irrelevant: the adapter never chains |
 | `-c` | Whether it is format-expanded is undocumented | Never passed |
 | Claude settings | `claude-code-fix-tty` and `claude-code-force-interactive` (which sets `CLAUDE_CODE_FORCE_INTERACTIVE=1`) are on by default, `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is set when absent, and a pwsh `claude` function adds `--teammate-mode tmux` | The trampoline gives the agent the caller's environment and a direct argv, so neither the variables nor the function reach it; agentctl leaves the user's psmux options alone |

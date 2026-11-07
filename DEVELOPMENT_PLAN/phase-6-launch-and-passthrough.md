@@ -116,7 +116,7 @@ warn on the caller's terminal and exit non-zero.
   the multiplexer's reports, run by the shell through `AgentCtl.Process`.
 - Re-attach: when Sprint 6.1 decides re-attach and the pane is alive, preflight is skipped, the
   session is never killed, and ARGS given now produce a notice on stderr that they were not applied.
-  A dead leftover pane is replaced by a fresh launch.
+  A dead leftover pane is replaced by a fresh process and a live pane; a restarted psmux server can reuse its pane id.
 - Create: the login refusals and `launchArgv` (Sprints 5.1 and 5.2) run first, then preflight yields `Ready`.
   Reserve a spec path under the 0700 launch directory without publishing its contents. Create the session with
   the waiting trampoline, set the pane's remain-on-exit and all identity options, then atomically publish the
@@ -130,8 +130,11 @@ warn on the caller's terminal and exit non-zero.
   process's stderr, never into a pane, with the non-zero status from `tests/oracles/preflight.toml`.
 - `tests/integration/test_agent_argv_real.py` runs the trampoline directly on a private server with
   the final argv for logged-out claude and codex, so the real agents' argv acceptance is checked
-  without a login. The compiled mux relay is published by rename over the test-owned native client copy,
-  including a read-only native executable, while retaining the real backend separately.
+  without a login. Each accepted, bare-separator and rejected case has an independent home, configuration,
+  runtime directory and logged-out probe; overlapping panes share no agent database.
+  The compiled mux relay is published by rename into a separate owned bin directory alongside
+  copies of the controlled agents. Its caller PATH names that directory and the real backend resides separately;
+  already running servers retain their original executable path.
 - `tests/live/test_live_launch.py` runs in the fixed live folder under the real `state` dir with
   `DISABLE_AUTOUPDATER=1` on a private server and branches on each agent's login state: logged in,
   the pane is alive after the startup window and, on Linux, `/proc/<pane_pid>/cmdline` ends with the

@@ -58,6 +58,7 @@ environmentControl = do
 
 withFixture :: (FilePath -> IO ()) -> IO ()
 withFixture action = withSystemTempDirectory "agentctl-spec-" $ \directory -> do
+  Native.prepareStateDirectory directory >>= (@?= Right ())
   (path, handle) <- openBinaryTempFile directory "spec-"
   Bytes.hPut handle (Bytes.pack [0, 13, 10, 255])
   hClose handle
@@ -68,7 +69,7 @@ assertPrivate path = do
   result <- snapshot path
   case result of
     Right (access, bytes) -> do
-      assertBool "native private spec access refused" (accepts access)
+      assertBool ("native private spec access refused: " ++ show access) (accepts access)
       bytes @?= Bytes.pack [0, 13, 10, 255]
     Left failure -> assertFailure (show failure)
 
@@ -88,6 +89,7 @@ missingSnapshot = withSystemTempDirectory "agentctl-missing-spec-" $ \directory 
 
 oversizedSnapshot :: IO ()
 oversizedSnapshot = withSystemTempDirectory "agentctl-large-spec-" $ \directory -> do
+  Native.prepareStateDirectory directory >>= (@?= Right ())
   withFixture assertPrivate
   (path, handle) <- openBinaryTempFile directory "large-"
   hSetFileSize handle (32 * 1024 * 1024 + 1)
@@ -99,6 +101,7 @@ oversizedSnapshot = withSystemTempDirectory "agentctl-large-spec-" $ \directory 
 
 statusControl :: IO ()
 statusControl = withSystemTempDirectory "agentctl-status-" $ \directory -> do
+  Native.prepareStateDirectory directory >>= (@?= Right ())
   (path, handle) <- openBinaryTempFile directory "status-"
   hClose handle
   forM_

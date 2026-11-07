@@ -82,7 +82,7 @@ launch path spec = case Spec.argv spec of
                 removeFile path
                 if System.os == "mingw32"
                   then do
-                    result <- Process.foreground program
+                    result <- Process.foregroundClient program
                     writeStatus (Spec.statusPath spec) (fromRight 1 result)
                     pure (either (Left . ProgramFailed) Right result)
                   else Left . ProgramFailed <$> Process.replace program

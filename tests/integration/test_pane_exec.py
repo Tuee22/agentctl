@@ -11,7 +11,7 @@ import pytest
 
 from agentctl.bootstrap import build
 from agentctl.check.lanes import HostFacts
-from agentctl.process import run, stop
+from agentctl.process import finish, run, stop
 from agentctl.result import Err, Ok
 
 pytestmark = pytest.mark.evidence("real")
@@ -56,8 +56,11 @@ def _spec(
         "TMUX": "caller-server",
         "TMUX_PANE": "%0",
     }
+    interpreter = (
+        str(Path(sys.base_prefix) / "python.exe") if os.name == "nt" else sys.executable
+    )
     payload = {
-        "argv": [sys.executable, "-I", "-c", WITNESS, str(record), nonce, *FORWARDED],
+        "argv": [interpreter, "-I", "-c", WITNESS, str(record), nonce, *FORWARDED],
         "cwd": str(folder.resolve()),
         "env": environment,
         "status": str(status),
@@ -93,7 +96,9 @@ def test_spec_deleted_and_status_propagated(
     child = build.start_binary(haskell_build, _call(spec))
     assert isinstance(child, Ok), child
     try:
-        stdout, stderr = child.value.handle.communicate(timeout=15)
+        completed = finish(child.value, timeout=15)
+        assert isinstance(completed, Ok), completed
+        stdout, stderr = completed.value.stdout, completed.value.stderr
         assert child.value.handle.returncode == EXIT_STATUS, stderr
         assert stdout == "out-é\n"
         assert stderr == "err-é\n"
@@ -189,7 +194,9 @@ def test_background_binary_errors(
     )
     assert isinstance(child, Ok), child
     try:
-        stdout, stderr = child.value.handle.communicate(timeout=10)
+        completed = finish(child.value, timeout=10)
+        assert isinstance(completed, Ok), completed
+        stdout, stderr = completed.value.stdout, completed.value.stderr
         assert child.value.handle.returncode == 0, stderr
         assert json.loads(stdout)["protocol"] == 1
         assert not stderr
@@ -290,7 +297,9 @@ def test_delayed_spec_published_atomically(
         assert child.value.handle.poll() is None
         assert not record.exists()
         pending.rename(spec)
-        _stdout, stderr = child.value.handle.communicate(timeout=15)
+        completed = finish(child.value, timeout=15)
+        assert isinstance(completed, Ok), completed
+        stderr = completed.value.stderr
         assert child.value.handle.returncode == EXIT_STATUS, stderr
         assert json.loads(record.read_text(encoding="utf-8"))["nonce"] == "delayed"
         assert not spec.exists()
@@ -310,7 +319,9 @@ def test_missing_spec_times_out(
     assert isinstance(child, Ok), child
     began = time.monotonic()
     try:
-        stdout, stderr = child.value.handle.communicate(timeout=SPEC_WAIT_TIMEOUT)
+        completed = finish(child.value, timeout=SPEC_WAIT_TIMEOUT)
+        assert isinstance(completed, Ok), completed
+        stdout, stderr = completed.value.stdout, completed.value.stderr
         elapsed = time.monotonic() - began
         assert SPEC_WAIT_SECONDS - SPEC_WAIT_TOLERANCE <= elapsed < SPEC_WAIT_TIMEOUT
         assert child.value.handle.returncode != 0
