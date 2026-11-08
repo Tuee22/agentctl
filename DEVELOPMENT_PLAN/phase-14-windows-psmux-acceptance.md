@@ -1,6 +1,6 @@
 # Phase 14 — Windows and psmux acceptance
 
-**Status**: Planned
+**Status**: Active
 **Depends on**: [Phase 10 — Recovery supervisor](phase-10-supervisor.md)
 **Host lane**: windows-psmux
 **Gate**: `agentctl check`
@@ -83,9 +83,9 @@ the run repeats.
 
 ## Sprints
 
-### Sprint 14.1: Windows run and evidence [Planned]
+### Sprint 14.1: Windows run and evidence [Active]
 
-**Status**: Planned
+**Status**: Active
 **Implementation**: none — this phase adds no code
 **Validation tests**: `tests/unit/test_plan.py::test_plan_oracle`, `tests/e2e/test_fresh_bootstrap.py::test_ghcup_digest_matches_pin`, `tests/integration/test_mux_real.py::test_private_server_roundtrip`, `tests/integration/test_mux_real.py::test_instant_exit_status`, `tests/integration/test_handoff.py::test_child_mode_propagates_exit_status`, `tests/unit/test_agent_resolution.py::test_resolution_matches_oracle`, `tests/integration/test_agent_real.py::test_logged_out_by_construction`, `tests/e2e/test_launch.py::test_rerun_reattaches_without_preflight`, `tests/e2e/test_supervisor_run.py::test_sends_once_after_initial_delay`, `tests/e2e/test_supervisor_run.py::test_second_instance_refused`, `tests/integration/test_guard.py::test_containment_detects_owned_leak`, `haskell:agentctl-core-test/SpecReal/snapshot-is-owned-and-private`, `haskell:agentctl-core-test/SpecReal/missing-spec-is-refused`, `haskell:agentctl-core-test/SpecReal/oversized-spec-is-refused`, `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`
 **Mutants**: none — this phase adds no code
@@ -141,11 +141,11 @@ Record the EVIDENCE line of a passing `agentctl check` on a Windows host with ps
 
 #### Remaining Work
 
-The whole sprint.
+Run the complete gate on a Windows x86_64 host with psmux and native agent executables, and record evidence for the current covered tree.
 
 ## Remaining Work
 
-The whole phase: Sprint 14.1.
+Sprint 14.1 requires a Windows x86_64 host with psmux and native agent executables and passing gate evidence for the current covered tree.
 
 ## Documentation Requirements
 

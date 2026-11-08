@@ -41,8 +41,8 @@ This table is the sole cross-phase status source, and every phase header's `**St
 | 10 | [Recovery supervisor](phase-10-supervisor.md) | Done |
 | 11 | [Live agent acceptance](phase-11-live-agent-acceptance.md) | Done |
 | 12 | [Clean-host bootstrap acceptance](phase-12-clean-container-acceptance.md) | Done |
-| 13 | [macOS acceptance](phase-13-macos-acceptance.md) | Active |
-| 14 | [Windows and psmux acceptance](phase-14-windows-psmux-acceptance.md) | Planned |
+| 13 | [macOS acceptance](phase-13-macos-acceptance.md) | Done |
+| 14 | [Windows and psmux acceptance](phase-14-windows-psmux-acceptance.md) | Active |
 
 ## Working the Plan
 
