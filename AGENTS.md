@@ -13,6 +13,8 @@ Never run `git add`, `git commit` or `git push`, or move HEAD. Commits and human
 
 Tests use private multiplexer servers and test-owned XDG directories. Kill a private server only after checking its endpoint lies inside the run directory. Never modify the user's credentials, agent configuration, shell profiles, toolchain selection or running sessions. Check never prompts and tests never run package managers or sudo.
 
+For validation, an agent may create and use its own isolated WSL environment, install and configure agents there, and change those agents' configuration within that environment. It may copy the user's host credentials into that environment for authentication, keeping the host credentials intact and restricting access to the copies. These permissions do not extend to the user's existing environments or change the rules against login commands, live input, or answering dialogs during checks.
+
 Live acceptance launches real agents only in `<state>/live-acceptance/`, with automatic updating disabled. Ordinary check runs send no live input and answer no trust, bypass-warning or approval dialog.
 
 Every validation criterion must be executable without human intervention. Detect host capabilities and authentication state automatically; never request a login, answered dialog, manual inspection or fixture capture to obtain a gate pass. Preserve native-host and live-evidence requirements and report unavailable lanes honestly.

@@ -6,7 +6,7 @@
 **Gate**: `agentctl check`
 **Gate kind**: host-acceptance
 **Closes**: R1
-**Gate evidence**: 2026-11-07 ; clean-container ; agentctl check ; pass ; tree 5cf56eaf384f09e72dc81befb27192fe57be3ff3ae5b1649da2fe57ce04a1585 ; os=Linux,arch=x86_64,baseline=ca2d8bb33755344cb20bf9d9b3b30b01788d1be4
+**Gate evidence**: 2026-11-09 ; clean-container ; agentctl check ; pass ; tree bf7f8da97b8ec67a89b6297e99af59cc30d1ab80afff6f56f6ac73bc11da8cec ; os=Linux,arch=x86_64,baseline=791bf661a08d531b9483c0da6baa9ac7a8fb1266
 **Evidence covers**: `src/` `tests/` `pyproject.toml`
 
 > **Purpose**: Close R1 by running the two-stage clean-host recipe: from pipx alone agentctl provisions its build

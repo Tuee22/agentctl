@@ -1,4 +1,4 @@
 rule = "plan.status_consequences"
 path = "DEVELOPMENT_PLAN/phase-14-windows-psmux-acceptance.md"
-search = "# Phase 14 — Windows and psmux acceptance\n\n**Status**: Planned"
+search = "# Phase 14 — Windows and psmux acceptance\n\n**Status**: Active"
 replace = "# Phase 14 — Windows and psmux acceptance\n\n**Status**: Done"
