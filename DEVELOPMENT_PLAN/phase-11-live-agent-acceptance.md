@@ -1,12 +1,12 @@
 # Phase 11 — Live agent acceptance
 
-**Status**: Done
+**Status**: Active
 **Depends on**: [Phase 10 — Recovery supervisor](phase-10-supervisor.md)
 **Host lane**: live-agents
 **Gate**: `agentctl check`
 **Gate kind**: host-acceptance
 **Closes**: none
-**Gate evidence**: 2026-11-09 ; live-agents ; agentctl check ; pass ; tree bf7f8da97b8ec67a89b6297e99af59cc30d1ab80afff6f56f6ac73bc11da8cec ; os=Linux,arch=x86_64,baseline=791bf661a08d531b9483c0da6baa9ac7a8fb1266
+**Gate evidence**: none recorded
 **Evidence covers**: `src/` `tests/` `pyproject.toml`
 
 > **Purpose**: Confirm on a Linux host where claude and codex are logged in what the lower phases owe a live agent:
@@ -71,9 +71,9 @@ digest, and the run repeats.
 
 ## Sprints
 
-### Sprint 11.1: Live agent evidence [Done]
+### Sprint 11.1: Live agent evidence [Active]
 
-**Status**: Done
+**Status**: Active
 **Implementation**: none — this phase adds no code
 **Validation tests**: `tests/live/test_live_launch.py::test_live_launch`, `tests/live/test_live_classification.py::test_live_screen_classes`, `tests/live/test_live_supervision.py::test_live_watch_sends_nothing`
 **Mutants**: none — this phase adds no code
@@ -111,11 +111,11 @@ taking its logged-in branch for both agents.
 
 #### Remaining Work
 
-None.
+Run the complete gate on a live-agents host meeting its lane and record current evidence.
 
 ## Remaining Work
 
-None.
+Run the complete gate on a live-agents host meeting its lane and record current evidence.
 
 ## Documentation Requirements
 
