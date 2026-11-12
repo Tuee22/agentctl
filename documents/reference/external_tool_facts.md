@@ -2,7 +2,7 @@
 
 **Status**: Reference only
 **Supersedes**: N/A
-**Owning phase**: [Gate-integrity apparatus](../../DEVELOPMENT_PLAN/phase-1-gate-integrity-apparatus.md)
+**Owning phase**: [Python discipline and gate integrity](../../DEVELOPMENT_PLAN/phase-1-python-discipline-and-gate-integrity.md)
 
 > **Purpose**: Record the verified facts about external tools that agentctl's decisions and oracles rest on, each with the tool version, the date it was verified and the command or source that verified it.
 
@@ -315,6 +315,45 @@ belongs to the Windows acceptance lane; Linux compilation does not prove a Win32
 | Each psmux session allocates its own pane ids beginning at `%1`. Different sessions can therefore expose the same id, and restarting a session can reuse an id. Targeting requires the session component to distinguish those panes. | psmux 3.4.0 | 2026-11-05 | `https://raw.githubusercontent.com/psmux/psmux/v3.4.0/src/main.rs` (`cli_sessions_with_pane_id`); native private-server controls in `tests/e2e/test_adopt.py` |
 | `PeekConsoleInputW` returns available console events without consuming them or waiting for input. `PeekNamedPipe` observes available pipe bytes. The observer polls readiness before reading and yields while no characters are available. | Win32 console and pipe APIs | 2026-11-05 | `https://learn.microsoft.com/en-us/windows/console/peekconsoleinput`; `https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-peeknamedpipe`; `tests/e2e/test_scripted_fake.py::test_scripted_agent_records_every_byte` |
 
+## Pinned psmux Source Qualification
+
+These rows record source inspection, not a local build or passing native qualification. The source baseline
+is a candidate; artifact/source/patch identities and actual behavioral receipts remain required.
+
+| Fact | Version | Verified | Source |
+|---|---|---|---|
+| The released 3.4.0 revision predates the client frame-queue fix. Reinstalling that release does not identify the later source correction. | psmux 3.4.0, `20aa1d7` | 2026-11-12 | `https://github.com/psmux/psmux/releases/tag/v3.4.0`; `https://github.com/psmux/psmux/pull/882` |
+| The maintainer replaces superseded unread full frames while keeping the socket reader draining. A previously bounded channel could trigger the server write timeout, detach the client and destroy a destroy-unattached session. | `759bf78776e5cda3f86d8a67a8f8aa2ee2ce95ce` | 2026-11-12 | `https://github.com/psmux/psmux/commit/759bf78776e5cda3f86d8a67a8f8aa2ee2ce95ce`; `https://github.com/psmux/psmux/pull/882` |
+| The candidate preserves clipboard/bell one-shot information across superseded frames. Its queue coalesces adjacent frame/frame and no-change/no-change entries; arbitrary alternating state/control sequences do not establish a global memory bound. | `063ca7026eb2b7b91a74d3f858bdec3dfc841dbb` | 2026-11-12 | `https://raw.githubusercontent.com/psmux/psmux/063ca7026eb2b7b91a74d3f858bdec3dfc841dbb/src/client_frame_queue.rs`; `https://raw.githubusercontent.com/psmux/psmux/063ca7026eb2b7b91a74d3f858bdec3dfc841dbb/src/frame_oneshot.rs` |
+| The candidate implements native wrapped-row joining. Its test documents an unsupported wide-glyph-at-final-column case; source inspection alone does not qualify all Unicode reconstruction. | same source candidate | 2026-11-12 | `https://raw.githubusercontent.com/psmux/psmux/063ca7026eb2b7b91a74d3f858bdec3dfc841dbb/tests-rs/test_capture_pane_join.rs` |
+| The candidate capture target helper can fall back to the active pane after an explicit pane ID is unresolved. Agentctl requires fail-closed behavior and independent stale-target controls. | same source candidate | 2026-11-12 | `https://raw.githubusercontent.com/psmux/psmux/063ca7026eb2b7b91a74d3f858bdec3dfc841dbb/src/copy_mode.rs` (`capture_target`) |
+| Upstream supplies separate synthetic-client and real-server blocked-output regressions; the real-server case observes attachment, no detached hook, session survival and detach after output resumes. | same source candidate | 2026-11-12 | `https://raw.githubusercontent.com/psmux/psmux/063ca7026eb2b7b91a74d3f858bdec3dfc841dbb/tests/test_client_frame_backpressure.py`; `https://raw.githubusercontent.com/psmux/psmux/063ca7026eb2b7b91a74d3f858bdec3dfc841dbb/tests/test_issue882_client_output_stall.ps1` |
+
+## Native Rust and Windows Build Preparation
+
+| Fact | Version | Verified | Source |
+|---|---|---|---|
+| Rustup supports private `CARGO_HOME` and `RUSTUP_HOME`; the selected environment must continue to supply them when using that toolchain. | rustup documented installation interface | 2026-11-12 | `https://rust-lang.github.io/rustup/installation/index.html#choosing-where-to-install` |
+| Native MSVC Rust needs a linker, libraries and Windows API import libraries. Rustup's automatic offer can install Visual Studio Community, so unattended agentctl preparation must resolve the qualified prerequisites itself. | rustup Windows MSVC documentation | 2026-11-12 | `https://rust-lang.github.io/rustup/installation/windows-msvc.html` |
+| Psmux's native build uses Windows resource compilation and requests a static CRT; the chosen workflow therefore qualifies the Windows SDK/resource compiler as well as Cargo/rustc. | psmux source candidate `063ca7026eb2b7b91a74d3f858bdec3dfc841dbb` | 2026-11-12 | `https://raw.githubusercontent.com/psmux/psmux/063ca7026eb2b7b91a74d3f858bdec3dfc841dbb/build.rs`; `https://raw.githubusercontent.com/psmux/psmux/063ca7026eb2b7b91a74d3f858bdec3dfc841dbb/.cargo/config.toml` |
+| Cargo `--bins` selects binary targets; `--locked` preserves lockfile resolution, `--offline` disallows network, and `--frozen` combines those requirements. | Cargo documented build interface | 2026-11-12 | `https://doc.rust-lang.org/cargo/commands/cargo-build.html` |
+| Visual Studio setup supports explicit component plans, quiet operation, waiting and no-restart behavior. Installation privilege and restart-required outcomes are distinct readiness conditions. | Visual Studio 2022 installer interface | 2026-11-12 | `https://learn.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio?view=vs-2022`; `https://learn.microsoft.com/en-us/visualstudio/install/create-a-network-installation-of-visual-studio#error-codes` |
+
+## WSL2 Validation and Resource Controls
+
+These are documented interfaces, not claims about this workstation's installed WSL version or effective
+resource limits. The runbook requires actual capability observations before using them.
+
+| Fact | Version | Verified | Source |
+|---|---|---|---|
+| `wsl.conf` controls a distribution's settings; `.wslconfig` controls the shared WSL2 VM, including global RAM/processor settings. A dedicated distro name alone does not establish independent VM resource limits. | WSL2 documented configuration interface | 2026-11-12 | `https://learn.microsoft.com/en-us/windows/wsl/wsl-config` |
+| WSL exposes distribution/version listing and import/version selection. The default install can select Ubuntu, so Debian and version 2 must be selected/observed explicitly. | WSL documented command interface | 2026-11-12 | `https://learn.microsoft.com/en-us/windows/wsl/basic-commands` |
+| Each WSL2 distribution has an ext4 VHD; its configured maximum, allocated host bytes and filesystem available space are different observations. | WSL2 documented VHD storage interface | 2026-11-12 | `https://learn.microsoft.com/en-us/windows/wsl/disk-space` |
+| Windows files can be accessed through mounted drive paths such as `/mnt/c`; cross-filesystem performance and case/permission behavior differ from a Linux-native filesystem. | WSL documented filesystem interface | 2026-11-12 | `https://learn.microsoft.com/en-us/windows/wsl/filesystems` |
+| `mount --bind olddir newdir` exposes an existing tree at another path; mount inspection and bidirectional source observations are needed to establish the intended checkout binding. | Linux mount interface, source documentation | 2026-11-12 | `https://man7.org/linux/man-pages/man8/mount.8.html` |
+| cgroup v2 controllers apply hierarchical resource limits to processes and descendants. Available/effective controllers must be observed; declarations alone do not prove enforcement. | Linux cgroup v2 documented interface | 2026-11-12 | `https://docs.kernel.org/admin-guide/cgroup-v2.html` |
+| Systemd scopes/slices support resource-control settings backed by cgroups, including CPU and memory controls; installed version and effective controller support determine availability. | systemd resource-control documentation | 2026-11-12 | `https://www.freedesktop.org/software/systemd/man/devel/systemd.resource-control.html` |
+
 ## Related
 
 - [rationale.md](../../DEVELOPMENT_PLAN/rationale.md#decisions) — the `tool:` decisions these rows support.
@@ -322,4 +361,5 @@ belongs to the Windows acceptance lane; Linux compilation does not prove a Win32
 - [toolchain_bootstrap.md](../engineering/toolchain_bootstrap.md) — the pins and floors built on the ghcup, GHC and cabal rows.
 - [multiplexer_adapter.md](../architecture/multiplexer_adapter.md) — the tmux and psmux behaviour the adapter relies on.
 - [launch_contract.md](../architecture/launch_contract.md#argument-assembly) — argument assembly and login checks built on the claude and codex rows.
+- [validation_runbook.md](../operations/validation_runbook.md) — native and WSL2 preparation requirements.
 - [quality_gate.md](../engineering/quality_gate.md#tool-configuration) — the tool configuration built on the Python tooling rows.

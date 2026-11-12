@@ -1,150 +1,123 @@
 # agentctl Development Plan
 
 **Status**: Authoritative source
-**Supersedes**: `agentctl-plan.md`, the concept note this plan replaces; [the concept-note disposition](rationale.md#concept-note-disposition) records where every item in it went.
+**Supersedes**: N/A
 
-> **Purpose**: Carry the single cross-phase status table and the rules for working, validating and finishing the plan.
+> **Purpose**: Own the phase status table, execution order and independent evidence needed to build and finish the product.
 
 ## How to Read This Plan
 
-The plan is a build recipe. Its phases build agentctl from an empty repository, and their numbers are the execution
-order: at phase *n* only the artifacts of phases at or below *n* exist, and every `**Depends on**` names a lower phase
-([§ A](development_plan_standards.md#a-one-continuous-constructive-narrative)).
+The plan is a constructive recipe. Earlier phases define complete narrow contracts; later phases extend those
+contracts without replacing them. Existing incompatible implementations are migration inputs owned in
+[the deletion ledger](legacy_tracking_for_deletion.md), not evidence that a revised contract is complete.
+[The standards](development_plan_standards.md) govern structure and closure; [the overview](00-overview.md)
+owns requirements, architecture and capability dependencies.
 
-- Phases 0 and 1 are governance: this plan, both validators and the check skeleton, then the gate-integrity apparatus
-  and the request-derived oracles, frozen before any product code exists.
-- Phases 2 to 10 build the product: the toolchain bootstrap, the Haskell package and build, the multiplexer adapter,
-  agent adapters and preflight, the launch command, session management, pane observation, the recovery state machine
-  and the supervisor.
-- Phases 11 to 14 are host-acceptance phases. They add no code: each runs the same gate on a live or foreign host and
-  confirms what earlier phases owe it.
-
-[00-overview.md](00-overview.md) holds the requirements and the architecture, [rationale.md](rationale.md) says why the
-design has this shape, and [development_plan_standards.md](development_plan_standards.md) governs every file here.
+- Governance and independent phase evidence precede strict Python enforcement and migration.
+- Minimal Python bootstrap precedes Haskell runtime provisioning, Debian tmux, launch, sessions, observation and recovery.
+- Native Windows preparation and qualification extend those common contracts using one private source-built backend.
+- Linux clean/live, native Windows and native macOS evidence are earned separately. Final Linux aggregation reads
+  their current receipts without needing both foreign hardware families in one phase.
 
 ## Current Phase Status
 
-This table is the sole cross-phase status source, and every phase header's `**Status**` must equal its row.
-
 | # | Phase | Status |
 |---|---|---|
-| 0 | [Governance, documentation standards and the check skeleton](phase-0-governance-and-check-skeleton.md) | Done |
-| 1 | [Gate-integrity apparatus](phase-1-gate-integrity-apparatus.md) | Done |
-| 2 | [Toolchain bootstrap](phase-2-toolchain-bootstrap.md) | Done |
-| 3 | [Haskell package, quality legs and digest-keyed build](phase-3-haskell-package-and-build.md) | Done |
-| 4 | [Multiplexer adapter](phase-4-multiplexer-adapter.md) | Done |
-| 5 | [Agent adapters and preflight](phase-5-agent-adapters-and-preflight.md) | Done |
-| 6 | [Launch command and passthrough](phase-6-launch-and-passthrough.md) | Done |
-| 7 | [Session management and adoption](phase-7-session-management-and-adoption.md) | Done |
-| 8 | [Pane observation and classification](phase-8-pane-observation-and-classification.md) | Done |
-| 9 | [Recovery state machine and backoff](phase-9-recovery-state-machine.md) | Done |
-| 10 | [Recovery supervisor](phase-10-supervisor.md) | Done |
-| 11 | [Live agent acceptance](phase-11-live-agent-acceptance.md) | Done |
-| 12 | [Clean-host bootstrap acceptance](phase-12-clean-container-acceptance.md) | Done |
-| 13 | [macOS acceptance](phase-13-macos-acceptance.md) | Done |
-| 14 | [Windows and psmux acceptance](phase-14-windows-psmux-acceptance.md) | Active |
+| 0 | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) | Active |
+| 1 | [Python discipline and gate integrity](phase-1-python-discipline-and-gate-integrity.md) | Planned |
+| 2 | [Python bootstrap and handoff](phase-2-python-bootstrap-and-handoff.md) | Planned |
+| 3 | [Haskell runtime and platform policy](phase-3-haskell-runtime-and-platform-policy.md) | Planned |
+| 4 | [Debian tmux and multiplexer](phase-4-debian-tmux-and-multiplexer.md) | Planned |
+| 5 | [Agent preflight and launch](phase-5-agent-preflight-and-launch.md) | Planned |
+| 6 | [Session management and adoption](phase-6-session-management-and-adoption.md) | Planned |
+| 7 | [Pane observation and classification](phase-7-pane-observation-and-classification.md) | Planned |
+| 8 | [Recovery and supervisor](phase-8-recovery-and-supervisor.md) | Planned |
+| 9 | [Windows toolchain and psmux build](phase-9-windows-toolchain-and-psmux-build.md) | Planned |
+| 10 | [Windows backend qualification](phase-10-windows-backend-qualification.md) | Planned |
+| 11 | [Windows application acceptance](phase-11-windows-application-acceptance.md) | Planned |
+| 12 | [Linux live and clean acceptance](phase-12-linux-live-and-clean-acceptance.md) | Planned |
+| 13 | [macOS acceptance](phase-13-macos-acceptance.md) | Planned |
+| 14 | [Release evidence and closure](phase-14-release-evidence-and-closure.md) | Planned |
 
 ## Working the Plan
 
-`AGENTS.md`, which Sprint 0.6 writes, is the canonical home of the agent working rules; these steps are the plan's
-side of them.
-
-1. Take the lowest-numbered `Active` phase. When none is Active, take the lowest-numbered `Planned` phase whose
-   dependencies are all `Done`, and set it and its first sprint to `Active`, together with its row here, in one
-   change. The host-acceptance phases depend only on [Phase 10 — Recovery supervisor](phase-10-supervisor.md), so
-   each is taken up whenever a host meeting its lane is available, whatever the state of the others.
-2. Within that phase, work the `Active` sprint first, then the `Planned` sprints in id order, setting each to `Active`
-   as it starts. When the Active sprint's Remaining Work names a later sprint of the same phase, work in id order until
-   that sprint is `Done`, then close the Active one.
-3. A sprint closes when its Validation tests exist, are collected and pass, its applicable mutants are killed by
-   the tests they name, and `agentctl check` passes. Its Status becomes `Done` and its Remaining Work becomes `None.`
-   Before Sprint 1.2 introduces the mutant runner, Phase 0 uses its direct negative-control tests; its declared
-   mutants become mandatory in Sprint 1.2 and re-prove Phase 0 on every run thereafter (§ M).
-4. A phase closes when its last sprint closes and `agentctl check` passes on a host meeting its `**Host lane**`. Its
-   header and its row here become `Done` in the same change.
-5. A host-acceptance phase records, as its `**Gate evidence**`, the `EVIDENCE` line that passing run printed.
-6. A change under a covered path (`src/`, `tests/` or `pyproject.toml`) reopens every Done host-acceptance phase in the
-   same change: its Status and its row here return to `Active`, and its Gate evidence to `none recorded`.
-7. A design error is fixed by rewriting the phase that introduced it, and validation resumes from that phase.
-8. Agents never run `git add`, `git commit` or `git push`, or move HEAD. Commits and human review are optional and
-   never block closure or phase advancement ([§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure)).
-   After a qualifying gate pass, update the plan and continue to the next eligible sprint or phase.
+1. Work the lowest Active phase. Otherwise select the lowest eligible Planned phase whose declared prerequisites
+   are Done. Update its header, first sprint and row here together.
+2. Work its Active sprint, then its Planned sprints in order. A planned revised contract can have standing
+   implementation artifacts; its ledger rows describe precisely what is not accepted. If an Active sprint needs a named later sprint of the same phase to provide its gate instrumentation, keep it Active, work those sprints in order, then return to close it; this grants no dependency on a later phase.
+3. Run the sole no-argument gate, `agentctl check`. It inventories and runs every present test/leg and reports
+   independent phase/lane verdicts alongside the overall checkout result. It neither skips nor deselects tests.
+4. Close a sprint only from a complete passing verdict covering its required artifacts, tests, applicable
+   mutants, coverage, prerequisites, documentation and hardware. A later owned failure stays visible without
+   invalidating an earlier complete verdict. Shared integrity failures invalidate all affected consumers.
+5. A phase closes only when all its sprints close and its required lane receipts match current phase input
+   identities. Set every completed Remaining Work to `None.` and its row/header to Done together.
+6. Each phase needs Linux and at most one additional native family, Windows or macOS. Dedicated WSL2 is Linux
+   evidence only, under the [validation runbook](../documents/operations/validation_runbook.md). Missing native
+   capability remains unmet; it never becomes a documented-fixture or manual-attestation pass.
+7. A changed contract is rewritten at its owning phase, and its affected prerequisite consumers lose closure
+   until re-proved. Evidence invalidation follows the declared input graph, not numbering or every later file.
+8. Never stage, commit, push or move HEAD. No clean tree, review, dialog or human checkpoint is a closure
+   prerequisite. Use current executable receipts and continue to the next eligible phase.
 
 ## Validation Policy
 
-A phase is `Done` when its own gate passes on a host meeting its Host lane, the governed documents it names are
-aligned with what it built, and no work remains in its scope.
+The gate implementation and validators are governed implementation work; specification edits do not prove them.
+The first Active phase migrates the existing global early-abort gate and old status/evidence assumptions.
+The `PHASE` receipt is the phase closure authority; the aggregate `EVIDENCE` receipt is whole-product closure.
+A nonzero overall exit from a later failure cannot erase an independently trustworthy earlier passing receipt.
+A shared write-guard, collection, nonce, source census or containment failure cannot be attributed away.
 
-- Every validation criterion is executable by an agent without human intervention. No commit, clean worktree,
-  review, approval, manual attestation, answered dialog or requested screen capture is a closure condition. Agents
-  record machine-observed host evidence; unavailable capabilities remain unmet, and activities listed as not proven
-  are outside the gate rather than manual work owed before closure.
-- `agentctl check` is the only gate, and it takes no arguments. Focused tests and application-owned build calls help
-  while working and never close a sprint or a phase. Agents never invoke cabal or the core binary directly.
-- A **self-verifying** phase is re-proved by every check run: the tests its sprints cite are collected and pass, and
-  its applicable mutants are killed, in that run, so the phase stores nothing. The Phase 0 activation boundary above
-  requires no mutation claim before the runner exists and permits no later exemption.
-- A **host-acceptance** phase adds no code. It records the EVIDENCE line of a passing run on its lane, and the plan
-  validator recomputes that row's tree digest and compares its lane. A digest proves the tree is current, not that a
-  run happened.
-- What counts as evidence is in [§ L](development_plan_standards.md#l-evidence-classes-and-what-cannot-count); the
-  gate, its kinds and the lanes are in [§ N](development_plan_standards.md#n-the-single-gate-gate-kinds-and-host-lanes);
-  the no-skip suite is in [§ O](development_plan_standards.md#o-the-no-skip-suite-and-host-state-adaptivity); the
-  ratchet and automatic closure are in
-  [§ P](development_plan_standards.md#p-the-ratchet-and-automatic-closure).
+Each phase receipt binds its stable capability owner, required test/mutant/coverage set, prerequisite receipts,
+all owned/shared input bytes, relevant tool/backend identities and actual host facts. Later-only files do not
+enter an earlier input closure. Final release evidence binds the complete source tree and all required native
+receipts. A local digest proves currency, not historical authenticity.
 
 ## Definition of Done
 
-A phase is `Done` when all of these hold:
-
-1. Every sprint is `Done` with Remaining Work `None.`, the phase's own Remaining Work is `None.`, and every phase it
-   depends on is `Done` — enforced by `plan.status-consequences`.
-2. Every Validation test its sprints cite was collected and passed in this check run, and every Implementation path
-   they cite exists — enforced by `plan.cited-ids` and `plan.cited-paths`.
-3. Every Gate Integrity row's applicable mutants exist and name that row's tests as killers, and each `owed` entry
-   and acceptance `## Confirms` entry match in both directions — enforced by `plan.gate-integrity`. Phase 0's
-   declared mutants activate in Sprint 1.2; direct negative controls are required before that boundary.
-4. `agentctl check` passes on a host meeting the phase's Host lane, and a host-acceptance phase's Gate evidence row
-   matches its lane and the current tree — enforced by `plan.lanes` and `plan.evidence-rows`.
-5. The phase header's Status equals its row in the status table, and no governed document states a phase's status
-   — enforced by `plan.status-harmony` and `docs.no-status`.
+- All owned sprint contracts are implemented and their required executable evidence is present and passing.
+- Every requirement has one closing sprint and every standing incompatible shape has a non-Done deletion owner.
+- Every present first-party artifact is censused; no legacy label conceals code, tests, failures or coverage.
+- Declared Linux and optional foreign receipts are current; shared prerequisite evidence is trustworthy.
+- Every deletion row owned by the closing phase is removed with its actual shape.
+- Governed docs, source contracts, validators, runtime behavior and the status table agree.
+- The only closure command is `agentctl check`; focused tools supply development evidence, never closure.
 
 ## Exit Definition
 
-The plan is complete when every requirement in [00-overview.md](00-overview.md#requirements) is closed and every phase
-is `Done`.
+Every requirement in [the overview](00-overview.md#requirements) is closed, every phase is Done, the
+[ledger](legacy_tracking_for_deletion.md) is empty, and the aggregate gate verdict passes with current
+native receipts. Build/install preparation and publication are separate from noninteractive gate execution.
 
 ## Document Index
 
 | File | Purpose |
 |---|---|
-| [README.md](README.md) | This file: the status table and the rules for working the plan |
-| [development_plan_standards.md](development_plan_standards.md) | How the plan is structured and how status and evidence are earned |
-| [00-overview.md](00-overview.md) | The architecture, the requirements table, phase responsibilities, the dependency flow and non-goals |
-| [system-components.md](system-components.md) | The inventory of modules, test apparatus, external tools and per-user directories |
-| [rationale.md](rationale.md) | The verbatim request, decisions, design justification, rejected alternatives and the concept-note disposition |
-| [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) | Unwanted shapes still standing in the tree, each with the phase that deletes it |
-| [phase-0-governance-and-check-skeleton.md](phase-0-governance-and-check-skeleton.md) | The governed suite, the package skeleton, `agentctl check` with its Python legs, the gate plugin, both validators and the root documents |
-| [phase-1-gate-integrity-apparatus.md](phase-1-gate-integrity-apparatus.md) | The oracle store and frozen request-derived oracles, mutants, the ratchet and write-guard, the spawn audit, source guards, coverage, closure rules and the evidence line |
-| [phase-2-toolchain-bootstrap.md](phase-2-toolchain-bootstrap.md) | Host facts, OS prerequisites with consent, ghcup reuse or the pinned download, the pinned GHC and cabal, and the clean-lane recipe |
-| [phase-3-haskell-package-and-build.md](phase-3-haskell-package-and-build.md) | The Cabal project, the build, test, fourmolu and hlint legs, the handshake and the digest-keyed build |
-| [phase-4-multiplexer-adapter.md](phase-4-multiplexer-adapter.md) | tmux and psmux resolution and floors, the typed command vocabulary and its one runner, the pane trampoline and the fake agent |
-| [phase-5-agent-adapters-and-preflight.md](phase-5-agent-adapters-and-preflight.md) | The agent table, launch argv, auth classification and login refusals, and preflight with the opaque `Ready` |
-| [phase-6-launch-and-passthrough.md](phase-6-launch-and-passthrough.md) | Folder-derived session names, launch orchestration, raw passthrough and the handoff |
-| [phase-7-session-management-and-adoption.md](phase-7-session-management-and-adoption.md) | `list`, `status`, `attach`, `stop` and `adopt` |
-| [phase-8-pane-observation-and-classification.md](phase-8-pane-observation-and-classification.md) | Capture, normalisation, fingerprints and the per-agent screen classifiers |
-| [phase-9-recovery-state-machine.md](phase-9-recovery-state-machine.md) | The pure transition function, its safety predicates, and bounded backoff with seeded jitter |
-| [phase-10-supervisor.md](phase-10-supervisor.md) | The watch commands, `supervisor run`, the decision log and the scenario matrix |
-| [phase-11-live-agent-acceptance.md](phase-11-live-agent-acceptance.md) | `agentctl check` on a host where both agents are logged in |
-| [phase-12-clean-container-acceptance.md](phase-12-clean-container-acceptance.md) | The two-stage clean-host run that starts from pipx alone |
-| [phase-13-macos-acceptance.md](phase-13-macos-acceptance.md) | `agentctl check` on macOS |
-| [phase-14-windows-psmux-acceptance.md](phase-14-windows-psmux-acceptance.md) | `agentctl check` on Windows with psmux |
+| [README.md](README.md) | Execution and the sole cross-phase status source |
+| [development_plan_standards.md](development_plan_standards.md) | Phase structure, ownership, evidence, hardware and closure |
+| [00-overview.md](00-overview.md) | Product requirements and additive architecture |
+| [system-components.md](system-components.md) | Stable capability, module, resource and test ownership |
+| [rationale.md](rationale.md) | Request anchors, current decisions, amendment precedence and alternatives |
+| [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) | Standing incompatible shapes and their deletion owners |
+| [phase-0-governance-and-phase-evidence.md](phase-0-governance-and-phase-evidence.md) | The governed target architecture, requirement ownership, legacy census and one gate with independent phase and lane verdicts |
+| [phase-1-python-discipline-and-gate-integrity.md](phase-1-python-discipline-and-gate-integrity.md) | Project-owned strict Python doctrine, local executable enforcement, typed native boundaries and migration of existing package, gate and test code |
+| [phase-2-python-bootstrap-and-handoff.md](phase-2-python-bootstrap-and-handoff.md) | A portable pipx/Click entry point and only the Python work needed before Haskell exists: bootstrap directories, pinned ghcup/GHC/cabal, native source build and raw handoff |
+| [phase-3-haskell-runtime-and-platform-policy.md](phase-3-haskell-runtime-and-platform-policy.md) | Haskell owns runtime host policy, typed effect interpretation, consent and reusable artifact preparation |
+| [phase-4-debian-tmux-and-multiplexer.md](phase-4-debian-tmux-and-multiplexer.md) | The common checked-backend interface and Debian tmux implementation, including Haskell-owned APT provisioning and a private pane trampoline |
+| [phase-5-agent-preflight-and-launch.md](phase-5-agent-preflight-and-launch.md) | User-installed agent discovery, authentication refusal, immutable argv assembly and folder-derived launch/reattach |
+| [phase-6-session-management-and-adoption.md](phase-6-session-management-and-adoption.md) | Session management and adoption use checked instance identity and retain the distinction between access, ownership and supervision |
+| [phase-7-pane-observation-and-classification.md](phase-7-pane-observation-and-classification.md) | The generic observation and guarded-input contract precedes recovery and every foreign backend |
+| [phase-8-recovery-and-supervisor.md](phase-8-recovery-and-supervisor.md) | The complete Linux recovery application consumes the already-qualified observation and conditional-submission capability |
+| [phase-9-windows-toolchain-and-psmux-build.md](phase-9-windows-toolchain-and-psmux-build.md) | Haskell prepares native Windows build dependencies and compiles pinned psmux sources locally |
+| [phase-10-windows-backend-qualification.md](phase-10-windows-backend-qualification.md) | Qualify the exact native candidate for attached-client memory behavior, capture correctness, exact identity and guarded input |
+| [phase-11-windows-application-acceptance.md](phase-11-windows-application-acceptance.md) | Native Windows acceptance of the shared application, private psmux artifact and registered resources |
+| [phase-12-linux-live-and-clean-acceptance.md](phase-12-linux-live-and-clean-acceptance.md) | Debian clean-host and logged-in agent acceptance, with dedicated WSL2 permitted for Linux evidence on a Windows host |
+| [phase-13-macos-acceptance.md](phase-13-macos-acceptance.md) | The additive Darwin implementation and native acceptance of bootstrap, process/filesystem semantics and the common tmux backend contract |
+| [phase-14-release-evidence-and-closure.md](phase-14-release-evidence-and-closure.md) | Whole-product closure joins current independent native receipts and requires an empty migration ledger |
 
 ## Related
 
-- [development_plan_standards.md](development_plan_standards.md) — the rules this file applies.
-- [00-overview.md](00-overview.md) — the requirements the Exit Definition refers to.
-- [system-components.md](system-components.md) — where each component lives and which phase owns it.
-- [rationale.md](rationale.md) — why the plan has this shape and what it rejects.
-- [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — shapes still standing and their deleting phases.
-- [documents/README.md](../documents/README.md) — the index of the governed documentation.
+- [standards](development_plan_standards.md) — governance.
+- [overview](00-overview.md) — requirements and dependencies.
+- [documents](../documents/README.md) — contract homes.
+- [agent rules](../AGENTS.md) — repository working policy.

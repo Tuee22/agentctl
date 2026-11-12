@@ -2,272 +2,203 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Owning phase**: [Multiplexer adapter](../../DEVELOPMENT_PLAN/phase-4-multiplexer-adapter.md)
+**Owning phase**: [Debian tmux and multiplexer](../../DEVELOPMENT_PLAN/phase-4-debian-tmux-and-multiplexer.md)
 
-> **Purpose**: Define how the core binary finds tmux or psmux, the one typed vocabulary it drives them with,
-> how it targets sessions and records their identity, and the isolation under which tests run the real
-> multiplexer.
+> **Purpose**: Define Haskell-owned runtime provisioning, qualified backend identity, typed terminal operations and isolated session routing.
 
 ## TL;DR
 
-- The binary drives tmux on Linux and macOS (at least 3.2) and psmux on Windows (at least 3.4.0, always as
-  `psmux.exe`). It resolves the multiplexer once per command to an absolute path and checks the floor before
-  anything else (R12.1).
-- Every action is a value of the closed vocabulary in `AgentCtl.Mux.Command`, rendered to argv by the pure
-  `AgentCtl.Mux.Tmux` or `AgentCtl.Mux.Psmux` and run by `AgentCtl.Process`, the one runner. The vocabulary
-  has no `kill-server`, no respawn and no command that takes a shell string.
-- Sessions are targeted as `=NAME`; agent pane targets retain their native id and, on psmux, their session.
-  Managed identity lives in the session
-  options `@agentctl_owner`, `@agentctl_agent`, `@agentctl_folder` and `@agentctl_pane`, on the user's normal
-  server.
-- No user text reaches multiplexer parsing: the pane command is the pane trampoline, and the agent's argv,
-  working directory and environment travel in its spec file.
-- Tests run the real multiplexer only in a scope they own: `TMUX_TMPDIR` with `TMUX` unset for tmux,
-  `PSMUX_DATA_DIR` with `PSMUX_NO_WARM=1` for psmux.
+- Haskell owns runtime dependency observation, planning, consent, provisioning, qualification and execution.
+  Debian uses an APT-provided tmux; Windows uses an agentctl-built, qualified native psmux.
+- A backend is a capability with an absolute executable, artifact identity, namespace and supported operations.
+  A version banner or a PATH match alone does not authorize automated input.
+- Windows uses a stable private registry and controlled configuration. A system psmux installation and its
+  sessions remain separate. Debian tmux retains the normal user-server convention for interactive sessions.
+- All terminal commands and installers pass through `AgentCtl.Process`. Session operations and provisioning
+  actions have separate closed vocabularies; neither accepts arbitrary shell text.
+- Observation and recovery require coherent target-bound snapshots and guarded submission. An unavailable
+  guarantee produces an explicit unsupported capability, not a heuristic fallback.
+
+This contract starts with Debian and extends to the Windows backend through
+[Windows toolchain and psmux build](../../DEVELOPMENT_PLAN/phase-9-windows-toolchain-and-psmux-build.md) and
+[Windows backend qualification](../../DEVELOPMENT_PLAN/phase-10-windows-backend-qualification.md).
+Those extensions implement the same capability contract rather than replace the Debian semantics.
 
 ## Resolution and Version Floors
 
-`AgentCtl.Mux` looks up `tmux` on PATH on Linux and macOS, and `psmux.exe` through PATH and PATHEXT on Windows.
-It never uses `tmux.exe` or `pmux.exe`, the aliases psmux ships: `tmux.exe` is also the name of MSYS2, Cygwin
-and WSL tmux, and psmux's alias reports psmux's own version in tmux's format (psmux 3.3.8 answers
-`tmux 3.3.8`), so a tmux floor read through it would judge the wrong program.
+`AgentCtl.Mux` consumes a Haskell runtime plan and produces an opaque qualified backend. Native OS facts are
+observed in Haskell. On Linux the distribution must identify itself as Debian with exact `ID=debian` in
+`/etc/os-release`. An APT executable or a Debian-like distribution name does not establish that policy.
+Other Linux distributions return an unsupported-host failure before runtime installation or session mutation.
 
-The version comes from `-V`. tmux prints `tmux <version>`, such as `tmux 3.4` or `tmux 3.2a`; psmux prints
-`psmux <major>.<minor>.<patch> (<commit> <date>)`, optionally preceded by a `tmux` compatibility line naming that
-same three-component release. A mismatched banner, extra output or a string the parser does not recognise is refused, and the
-warning quotes it.
+On Debian, reuse an executable only after its actual version and required behavior qualify. If tmux is absent,
+Haskell presents and applies the verified APT plan with explicit consent and sufficient privilege, then
+re-resolves and qualifies the result. A repository that cannot supply supported behavior yields a typed
+failure; agentctl does not add package repositories or retry installation indefinitely. The supported minimum
+and verified APT arguments live in [external tool facts](../reference/external_tool_facts.md) and the backend
+oracle, rather than being inferred from which executable appears first on PATH.
 
-| Multiplexer | Floor | Why this floor |
-|---|---|---|
-| tmux | 3.2 | Every behaviour this contract uses is present by 3.2: exact `=` targets (2.1), direct execution of a pane command of two or more arguments (documented by 2.9), and remain-on-exit with `#{pane_dead}` and `#{pane_dead_status}`. The floor admits Ubuntu 22.04, Debian 12 and EL 9 and their successors, which ship 3.2a or newer, and refuses Ubuntu 20.04's 3.0a, Debian 11's 3.1c and EL 8's 2.7. |
-| psmux | 3.4.0 | Quote-aware handling of paths containing spaces in the pane command (arrived in 3.3.9 and 3.4), `-L` honoured over `$TMUX` (3.3.7), and a bare `kill-server` that ends only its own namespace (3.3.8). The trampoline's paths sit under the user's profile, which can contain spaces. |
+A warm qualified runtime performs no APT operation, download or build. Consent and privilege are separate:
+an elevated process or a successful sudo probe does not itself authorize installation. Noninteractive
+execution without consent refuses; checks and tests answer no package-manager, approval or installer dialog.
 
-Resolution and the floor are the first check of [preflight](launch_contract.md#preflight), and every command
-that drives sessions runs them too; the warnings, remedies and exit codes of a missing or too-old multiplexer
-are in [failure and warnings](launch_contract.md#failure-and-warnings). The accepted and refused version
-strings are rows of `tests/oracles/mux_commands.toml`, and a missing multiplexer is tested by running the
-subject under a constructed PATH that lacks it, never by inspecting the host.
+On Windows, PATH discovery does not select the runtime backend. Haskell owns these steps:
 
-`AgentCtl.Mux.resolve` receives the OS family, Linux distribution, working directory and environment explicitly.
-It searches only those PATH directories for the native candidate, checks executability, canonicalises the chosen
-path, and runs `-V` through `AgentCtl.Process` with a ten-second deadline. Windows searches only `psmux.exe`, with
-case-insensitive environment keys; an alias never supplies a psmux capability. The opaque `Multiplexer` retains the
-checked kind, absolute path and observed version for the command to reuse.
+1. Select the pinned source, patch set, build profile, Rust target and required native linker/SDK capabilities.
+2. Reuse an accepted private artifact whose identity agrees with that complete build key.
+3. On a miss, take an interprocess lock, recheck, observe missing prerequisites and calculate a concrete plan.
+4. Provision authorized prerequisites; use private `RUSTUP_HOME` and `CARGO_HOME` and absolute compiler paths.
+5. Download the verified official source archive through Haskell, validate archive entries and extract into
+   short owned staging storage. Archive traversal, links and unexpected source identity are failures.
+6. Apply the recorded hardening patches, build with the locked dependency plan, run artifact qualification,
+   record provenance and atomically publish an immutable version directory.
 
-The version, candidate and remedy kernels run through the JSONL evaluator against independent rows
-(`tests/unit/test_mux_values.py::test_version_floor_oracle`,
-`tests/unit/test_mux_values.py::test_resolution_candidates_oracle`,
-`tests/unit/test_mux_values.py::test_remedy_oracle`). Native missing/present PATH controls and the host's version
-probe are separate from those value claims (`haskell:agentctl-core-test/MuxReal/absent-multiplexer-unavailable`,
-`haskell:agentctl-core-test/MuxReal/host-multiplexer-meets-floor`).
+The initial upstream base is `063ca7026eb2b7b91a74d3f858bdec3dfc841dbb`. It includes frame coalescing,
+clipboard/bell preservation and genuine joined capture, but its name alone grants no qualification. Wide-glyph
+wraps, missing explicit target behavior, queue stress and the recovery capability require independent
+controls and any necessary recorded patches. No moving branch or plain `3.4.0` banner identifies an accepted
+build. [External tool facts](../reference/external_tool_facts.md) owns the pinned source observations.
 
-`AgentCtl.Session.Name` also keeps its constructor private. It accepts nonempty ASCII letters, digits, `_` and `-`,
-with neither a leading dash nor `__`, and provides a text accessor for rendering. Independent acceptance cases and
-an external caller that fails to compile protect that boundary
-(`tests/unit/test_mux_values.py::test_session_name_oracle`,
-`tests/integration/test_mux_resolution.py::test_session_name_constructor_is_private`).
+The toolchain contract includes a qualified x64 MSVC linker, libraries, resource compiler and Windows SDK.
+Haskell observes actual compile/link/resource capability rather than assuming that Cargo or a product
+registration suffices. An unavailable privilege or reboot requirement is a named not-ready outcome. Haskell
+never opens UAC, answers an installer, reboots the host or changes global Rust selection and shell profiles.
+
+The manifest binds source/archive/patch/lockfile identities, Rust and native build-tool identities, build
+configuration and executable hashes. A failed or interrupted build publishes nothing. A changed pin creates a
+new directory and never overwrites an executable used by a running server.
+
+The separately declared macOS adapter uses native tmux and native host qualification. Windows psmux is never
+used by Linux or macOS, and WSL tmux evidence never supplies a Windows or macOS result.
 
 ## The Typed Vocabulary and the One Runner
 
-`AgentCtl.Mux.Command` is closed: a value names one multiplexer action, `AgentCtl.Mux.Tmux` and
-`AgentCtl.Mux.Psmux` render it as argv with pure functions, and `AgentCtl.Process`, the only importer of
-`System.Process` (`src.one-process-module`), runs it and decodes the output as UTF-8, never the locale
-encoding; [the supervisor contract](supervisor_contract.md) owns what becomes of a capture. The adapter issues
-one command per invocation and never chains commands with `;`.
+`AgentCtl.Mux.Command` expresses terminal intent as closed values. Backend renderers and capability adapters
+interpret those values; `AgentCtl.Process` owns every native spawn, exec and bounded process lifecycle.
+Provisioning commands are a different closed plan interpreted through that runner. No shell string accepts
+user input as executable syntax.
 
-| Action | tmux argv | Used by |
-|---|---|---|
-| create the agent session | `new-session -d -s <name> -P -F '#{pane_id}' -- <binary> pane-exec <spec>` | launch |
-| does the session exist | `has-session -t =<name>` | launch, sessions |
-| read sessions, options and panes | `list-sessions -F <format>`, `show-options -t =<name>:`, `list-panes -s -t =<name> -F <format>` | launch, `list`, `status` |
-| read pane state | `display-message -p -t %<id> '#{pane_pid} #{pane_dead} #{pane_dead_status} #{pane_dead_signal}'` | launch, `status`, the supervisor |
-| inspect pane identity and hints | `display-message -p -t %<id> <format>` | adoption and revalidation; endpoint, pane and pid are identity, session and command text are hints |
-| set identity | `set-option -t =<name>: @agentctl_<key> <value>` | launch |
-| hold or release a dead pane | `set-option -p -t %<id> remain-on-exit on`, then `set-option -p -u -t %<id> remain-on-exit` | launch |
-| capture | `capture-pane -p -J -t %<id> -S -<lines>` | launch, `status`, the supervisor |
-| capture styled viewport | `capture-pane -p -e -t %<id> -S 0` | pane observation for `status` and the supervisor |
-| type text literally | `send-keys -l -t %<id> -- <text>` | the supervisor |
-| submit | `send-keys -t %<id> Enter` | the supervisor |
-| attach or switch | `attach-session -t =<name>`, `switch-client -t =<name>` | launch, `attach` |
-| end a session | `kill-session -t =<name>` | launch cleanup, `stop` |
+| Operation | Contract |
+|---|---|
+| Create | Create one checked name with the absolute pane trampoline and a private spec |
+| Exists and discover | Read exact session names, native panes, options and current identity |
+| Inspect | Return a complete target-bound snapshot, or a named unsupported/incoherent result |
+| Guarded submit | Compare the target generation and observation token and submit the permitted literal text plus Enter as one ordered operation |
+| Attach or switch | Open an inherited-stream client against the exact selected backend and namespace |
+| Stop | End one owned exact session; forgetting an adoption does not send a terminal command |
+| Remain-on-exit | Temporarily retain the agent pane for startup status handling |
 
-Pane observation reads dead state, cursor coordinates and dimensions through the inspection command before and
-after its plain and styled captures. Unequal snapshots retry within the caller's original deadline. Native
-faint/plain twins and a cursor change between snapshots exercise the production capture edge
-(`tests/integration/test_capture_real.py::test_capture_keeps_prompt_visuals`,
-`tests/integration/test_capture_real.py::test_capture_retries_changed_cursor`).
+The vocabulary contains no production `kill-server`, pane respawn, global configuration change, arbitrary
+shell command, login command or model-switch action. Typed construction and private capability constructors
+keep provisioning authority, session ownership and the right to submit input distinct.
 
-There is no value for `kill-server`, `kill-pane`, `respawn-pane`, `respawn-window`, `run-shell`, `if-shell`,
-`pipe-pane`, `source-file`, a global `set-option -g`, or any command that takes a shell string. Production code
-therefore cannot end the user's server, the supervisor cannot restart a process (R19), and no user setting
-outside agentctl's own sessions and agent panes can change. Each rendering is a row of
-`tests/oracles/mux_commands.toml`, compared as a value, and any argv difference fails:
-
-```toml
-[[render]]
-action = "kill-session"
-session = "api-claude"
-tmux = ["kill-session", "-t", "=api-claude"]
-psmux = ["kill-session", "-t", "=api-claude"]
-provenance = "tool:tmux 3.4 tmux.1 target-session"
-```
-
-The vocabulary's `Pane` and `OptionValue` constructors are private. Native pane ids contain `%` followed by ASCII
-digits. A pane target can also retain its session as `=SESSION:.%id`; qualified session components exclude control
-characters and target separators. Bare psmux adoption resolves only a unique eligible session, refusing ambiguity.
-Identity values contain only nonempty ASCII letters, digits, `_`, `-` and `%`. Decoding rejects unknown actions,
-unknown identity keys, invalid names and pane ids, unsafe identity values and nonpositive capture lengths.
-Independent rows exercise every action on both renderers and these refusals
-(`tests/unit/test_mux_values.py::test_render_oracle`).
-
-The tmux terminal can close before the child exit status is published: `pane_dead` alone is insufficient.
-A reader waits, within its existing deadline, for a normal exit status or a signal name as well as terminal
-closure. A dead tmux pane with no published status requests SIGCHLD through `AgentCtl.Process.requestReap`, which
-reads and validates that backend's live server pid before notifying it. This requests normal child accounting
-without terminating the server or sending pane input; psmux never uses this path
-(`tests/unit/test_mux_values.py::test_reap_policy_oracle`). The dead-status kernel consumes the normalised positive signal number as `128 + signal`, otherwise
-its nonnegative exit status. Psmux
-uses only the nonnegative status read from its spec's status file, regardless of pane status or signal. Missing or
-negative status remains unavailable (`tests/unit/test_mux_values.py::test_dead_status_rule_oracle`).
+Bounded queries drain stdout and stderr concurrently as bytes and decode UTF-8 explicitly. Timeout, malformed
+output, invalid encoding and unsupported capability remain typed failures. Foreground clients inherit terminal
+streams; they do not run through a buffering capture relay. Session creation permits the owned persistent
+server to outlive its creating client, while query subprocesses retain bounded process-tree ownership.
 
 ## Targets and Session Options
 
-Every session target is `=NAME`, an exact match. Without the `=`, tmux tries a session id, the exact name, a
-prefix and then an fnmatch pattern, so `has-session -t api` succeeds when only `api-v2` exists and
-`kill-session -t api` can end it. Names never contain `.` or `:`, the target separators, because the name
-whitelist excludes them. [Create or attach](launch_contract.md#create-or-attach) uses these targets for the
-re-attach and `switch-client`, and [sessions and ownership](sessions_and_ownership.md) for `kill-session -t =NAME`,
-the only command that ends anything.
+Every session operation identifies an exact name, using the backend's checked exact-target representation.
+The name alphabet excludes target separators and namespace ambiguity. A pane identity includes the backend
+kind, registry/socket identity, server generation, session identity and native pane generation. A native
+`%id` alone cannot identify a psmux pane across per-session servers.
 
-Both backends' set-option and show-options commands use the session selector `=NAME:`, retaining the exact
-session prefix while the colon identifies the session component. Session-option values can be quoted; identity
-readers compare the exact decoded names and values.
+An explicit missing, dead or replaced target returns a failure. Capture and submission never fall back to
+an active pane, a prefix sibling or a newly created server with a reused numeric id. Name-based hints,
+command text and process names cannot substitute for process creation or backend generation identity.
 
-Tmux panes are targeted by `%id`. Psmux panes carry their exact session as `=NAME:.%id`, since separate servers
-can allocate the same native id. A session target resolves to the active pane of the current window, which is
-the user's choice once they split a window, so every capture and send names the agent pane's id, the one
-`new-session -P -F '#{pane_id}'` printed.
-
-Psmux pane-option commands qualify that pane id with its checked session, `=NAME:%id`, so their client routes to
-the selected per-session server. Its create client runs outside a terminating process-tree job, allowing the
-persistent server to outlive that client. Other bounded commands keep process-tree ownership
-(`tests/unit/test_mux_values.py::test_process_tree_policy_oracle`,
-`tests/integration/test_mux_real.py::test_private_server_roundtrip`).
-The native cross-server control captures both panes and sends input to only one, retaining separate process and
-observer identities (`tests/integration/test_mux_real.py::test_pane_targets_distinguish_servers`).
-
-Sessions live on the user's normal server (psmux's default namespace on Windows), so `tmux ls`, the user's
-key bindings and the status line see them. agentctl passes no `-L` or `-S`: tmux's own rule chooses the server, the socket named in `$TMUX` when it
-is set and the default socket otherwise. Launch writes the identity of each managed session as session
-options:
+Managed sessions carry the following owned metadata:
 
 | Option | Value |
 |---|---|
-| `@agentctl_owner` | `agentctl`; the session is managed |
-| `@agentctl_agent` | `claude` or `codex` |
-| `@agentctl_folder` | the canonical folder path, base64url-encoded without padding from its UTF-8 bytes |
-| `@agentctl_pane` | the agent pane's `%id` |
-| `@agentctl_status` | the private trampoline status-file path, encoded like the folder; retained dead psmux panes read their exit status from it |
+| `@agentctl_owner` | `agentctl` |
+| `@agentctl_agent` | The checked Claude or Codex identity |
+| `@agentctl_folder` | Canonical folder encoded as base64url UTF-8 |
+| `@agentctl_pane` | The selected native agent pane id |
+| `@agentctl_status` | Encoded private trampoline status-file path where needed |
+| `@agentctl_backend` | The accepted backend/profile identity associated with creation |
 
-Options live and die with their session, so they never describe a session that has ended, and a server
-restart takes them away together with the pane ids they name. Encoding the folder and status path draws each
-value from the same `[A-Za-z0-9_-]` set as session names, so no
-multiplexer parsing rule can touch it, and `list` decodes it for display. agentctl sets no option on a session
-it does not own, never sets a global option, and holds remain-on-exit at pane scope only during the startup
-window, then unsets it so that the user's own setting applies again.
+Options are session-owned facts, not durable proof that an executable still runs. Observation revalidates
+against the actual server instance and executable provenance. Session-server PID creation identity prevents
+PID reuse from granting old authority. Artifact hash and source revision cannot be inferred from a client
+version string.
+
+On Debian, interactive tmux sessions remain on the normal user-selected server, preserving ordinary tmux
+visibility and explicit adoption. On Windows, new managed sessions use an agentctl-owned stable
+`PSMUX_DATA_DIR`, a controlled config and disabled unsolicited warm provisioning. That registry is separate
+from the system installation; ordinary system `psmux ls` does not list agentctl's sessions. User access goes
+through `agentctl list` and `agentctl attach`.
+
+The private Windows registry is stable across accepted build versions. Before connecting or sending a write,
+Haskell identifies the actual running server and applies the qualified client/server compatibility matrix.
+Repointing an executable or a command alias does not update existing clients or servers. Legacy discovery
+and read-only diagnostics can remain available without granting automatic recovery. Migration deliberately
+recreates a session after it is drained; no upgrade silently stops or restarts an agent. External Windows
+adoption names its separate registry explicitly and retains external ownership.
 
 ## Format Expansion, Separators and the Trampoline
 
-tmux applies its own parsing to parts of its command line:
+Session creation gives the multiplexer only checked names and agentctl-generated paths. User arguments,
+working directory and environment travel in the private pane spec, not a multiplexer shell command.
 
-- **Format expansion.** The `-s` and `-c` values of `new-session` are format-expanded: `#(cmd)` runs `cmd`
-  with `/bin/sh`, `##` becomes `#`, and short aliases such as `#S`, `#H` and `#D` are substituted. A folder
-  named `#(touch x)` passed to `-c` runs a command.
-- **The `;` separator.** An argv element ending in an unescaped `;` ends the tmux command there; the `;` is
-  stripped and the rest of argv starts a new tmux command. An element that is exactly `;` is dropped.
-- **Silent exec failure.** A pane command of two or more elements is exec'd directly with no shell, and a
-  failed exec calls `_exit(1)` and prints nothing, so the session simply disappears.
-- **The server's environment.** A pane gets the environment the server started with plus the
-  `update-environment` variables, not the caller's. `-e` values are not expanded, but they sit on the client's
-  argv, where other processes can read them.
+- No user folder is passed through a format-expanded multiplexer `-c` field. The client working directory
+  and the trampoline's validated spec establish the agent's directory.
+- No secret environment value is placed on a multiplexer argv with `-e`.
+- No multiplexer command chain is assembled with semicolons.
+- The trampoline starts the agent with its literal argv and the caller's environment, excluding injected
+  multiplexer agent-tuning variables that were absent in the caller.
+- Creation failures are shown on the invoking terminal, and startup cleanup touches only the new owned
+  session. A previous managed, adopted or foreign session is never launch cleanup.
 
-The adapter removes each hazard instead of escaping it:
-
-- `-s` receives only whitelisted names ([session names](launch_contract.md#session-names)).
-- `AgentCtl.Process.commandInvocation` builds both bounded and foreground calls with argv and cwd in separate fields.
-- `-c` is never passed. The `new-session` client runs with the canonical folder as its working directory, which
-  tmux takes as the start directory, and the trampoline sets the agent's working directory from its spec.
-- The pane command is exactly three agentctl-generated elements: the absolute path of the published binary,
-  `pane-exec` and the absolute spec path. Neither path ends in `;`, and no element carries user text.
-- No `-e` is passed: the caller's environment travels in the 0600 spec, so environment values stay off the multiplexer command line and the pane
-  sees the caller's environment rather than the server's.
-- The trampoline reports its own failures in the pane before it exits, and instant-exit capture relays them,
-  so no failure is silent.
-- Option values are whitelisted words, base64url text or pane ids, and the only text ever typed is the
-  supervisor's per-agent constant, sent with `send-keys -l`, which types characters instead of reading key
-  names.
-
-```text
-WRONG  new-session -d -s api-claude -c '/home/ana/#(touch x)' -- /usr/bin/claude fix; --dangerously-skip-permissions
-RIGHT  new-session -d -s api-claude -P -F '#{pane_id}' -- <binary> pane-exec <spec>
-```
-
-The WRONG form runs `touch x` while expanding `-c`, ends the tmux command at `fix;` so that claude starts
-without its mandatory flag and the flag becomes a failing tmux command, and leaves the agent's argv readable on
-the tmux client's command line. The RIGHT form gives tmux nothing to expand, split or expose.
-[The pane trampoline](launch_contract.md#the-pane-trampoline) owns the spec file rules.
+The Windows trampoline waits for its native agent child and publishes the actual status privately. Psmux's
+placeholder pane status is not the child's exit code. On POSIX the trampoline replaces itself with the agent;
+normal exit and signal observations follow the declared native status contract.
 
 ## psmux Differences
 
-| Topic | psmux behaviour | Consequence for the adapter |
-|---|---|---|
-| Server model | One server process per session, reached over loopback TCP with an auth key; registry files under `~\.psmux\`, the `.port` file written last as the readiness beacon | After `new-session`, poll `has-session` with a bounded timeout instead of sleeping |
-| Namespaces | `-L` becomes a file prefix, `<ns>__<session>` | Session names never contain `__` |
-| Exit status | `#{pane_dead_status}` always returns 0 | The trampoline runs the agent as a child and writes a status file |
-| `#{pane_pid}` | The pane's own process | The trampoline, which waits for the agent |
-| `=` targets | Exact session matching uses `=NAME`; session options use `=NAME:` and pane options use `=NAME:%id` | Preserve the exact session component when routing to a per-session server |
-| `;` chains | Commands before an unknown command have already run | Irrelevant: the adapter never chains |
-| `-c` | Whether it is format-expanded is undocumented | Never passed |
-| Claude settings | `claude-code-fix-tty` and `claude-code-force-interactive` (which sets `CLAUDE_CODE_FORCE_INTERACTIVE=1`) are on by default, `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is set when absent, and a pwsh `claude` function adds `--teammate-mode tmux` | The trampoline gives the agent the caller's environment and a direct argv, so neither the variables nor the function reach it; agentctl leaves the user's psmux options alone |
-| Nesting | Blocked inside psmux; panes carry `TMUX` and `TMUX_PANE` | `switch-client`, as with tmux |
-| `kill-server` | Since 3.3.8 a bare form ends only the default namespace | Never used in production |
+| Topic | Required handling |
+|---|---|
+| Per-session servers | Qualify each actual server instance; disambiguate equal native pane ids |
+| Client frame queue | Coalesce superseded state without blocking the socket reader; preserve ordered controls and one-shot fields; qualify the declared workload and byte-budget policy |
+| Joined text | Join only native soft-wrap continuations; retain intentional newlines, spaces and Unicode glyph boundaries |
+| Dead status | Use the trampoline's status receipt instead of placeholder native dead status |
+| Registry | Use the stable owned registry and controlled config for managed sessions |
+| Existing system installation | Leave its executables, aliases, configuration, registry and running sessions untouched |
+| Backend update | Preserve immutable builds and running sessions; use actual client/server compatibility evidence |
+| Recovery input | Require the coherent observation and guarded-submit capability; ordinary separate capture/send commands do not establish it |
+
+Frame coalescing does not by itself prove globally bounded memory under every possible stream. Qualification
+includes frame/no-change alternation, control bursts, variable frame sizes and the explicit policy for
+non-coalescible backlog. A blocking reader is not a permitted fix: it can move the stall to a server write
+timeout and disconnect the attached client.
 
 ## Isolation
 
-Production code has no isolation switch: it never passes `-L` or `-S`, and `src.no-test-branches` rejects any
-test-only path (`tests/governance/test_source_guards.py::test_no_test_branches_fixtures`). Tests isolate it from outside, through the environment, as
-[testing](../engineering/testing.md#isolation) records in full:
+Tests supply unique nonce-bound registry/socket/config roots and owned XDG directories. Tmux tests unset the
+user's `TMUX` and use a short owned socket location. Windows tests supply an absolute owned `PSMUX_DATA_DIR`,
+controlled configuration and `PSMUX_NO_WARM=1` to every candidate subprocess. Production private Windows
+routing is a real product property, not a hidden test-only branch.
 
-- **tmux.** `TMUX_TMPDIR` points at a short test-owned directory, mode 0700, because tmux refuses a socket
-  directory with permissions for others, and `TMUX` is unset, so the subject's normal server is a private
-  server under the run dir. The socket path stays within 100 bytes (precondition P6), since Unix socket paths
-  are limited to about 104 bytes on macOS and 108 on Linux.
-- **kill-server.** Only `tests/harness/tmux.py` runs it, and only after asserting that the socket lies under
-  the run dir. A developer's shell is commonly inside the default server, so a bare `kill-server` would end the
-  user's sessions.
-- **psmux.** Every psmux process gets an absolute, test-owned `PSMUX_DATA_DIR`, which gives it its own registry
-  and server guard, and `PSMUX_NO_WARM=1`, which disables pre-spawned warm servers. Teardown never runs
-  `taskkill /im psmux.exe`, which would end the user's psmux too.
-- **The observer.** `agentctl-fake-agent`, copied into a temp bin as `claude` or `codex`, records argv, working
-  directory, environment keys, the multiplexer session and the run's nonce, and either exits at once or stays
-  running.
+Teardown proves ownership from the actual endpoint and process-creation identity before stopping a private
+server or child. It never kills by executable image name. Native build workspaces have a complete path-length
+budget and are registered with containment even when a shorter sibling storage root is necessary. Test
+resource cleanup errors preserve the original diagnostic and remain failures.
 
-Against a real private server the tests show an instant exit held by remain-on-exit, `=ab` ending `ab` but not
-`ab-c`, the elements `x;`, `#{pane_id}` and `#(id)` arriving verbatim, and the pane environment equalling the
-caller's when the server started with a different one. The `containment` check step fails when a private
-server or an observer pid is still alive, or when a session carrying the run's nonce exists on the user's
-server (`tests/integration/test_mux_real.py::test_containment_sees_leftover_server`). Real psmux runs only on a Windows host, and macOS tmux only on a Mac; until then psmux rendering is
-proven as values.
+The dependency's synthetic client regression and a real-server stall test measure private committed memory,
+not just resident memory. A capped vulnerable negative control proves the observer sees the defect without
+exhausting the workstation. Native Windows evidence, pane survival, output resumption, exact target controls,
+raw joined capture and conditional-input races form separate obligations. Linux validation may use the
+owned WSL2 environment described by [testing](../engineering/testing.md); it supplies Linux evidence only.
 
 ## Related
 
-- [launch contract](launch_contract.md) — the session names, the pane trampoline and the failure warnings.
-- [sessions and ownership](sessions_and_ownership.md) — how `list`, `attach` and `stop` read these options.
-- [supervisor contract](supervisor_contract.md) — the captures and literal sends made through this vocabulary.
-- [python and haskell boundary](python_haskell_boundary.md) — why only the binary drives the multiplexer.
-- [testing](../engineering/testing.md#isolation) — the isolation recipes these tests use.
-- [external tool facts](../reference/external_tool_facts.md) — the verified tmux and psmux facts cited here.
-- [Windows and psmux acceptance](../../DEVELOPMENT_PLAN/phase-14-windows-psmux-acceptance.md) — where real
-  psmux behaviour is confirmed.
-- [Multiplexer adapter](../../DEVELOPMENT_PLAN/phase-4-multiplexer-adapter.md) — the phase that builds this
-  adapter.
+- [Python and Haskell boundary](python_haskell_boundary.md) — one runtime owner and explicit consent transport.
+- [Launch contract](launch_contract.md) — checked creation and the pane trampoline.
+- [Sessions and ownership](sessions_and_ownership.md) — instance identity, adoption and allowed mutations.
+- [Supervisor contract](supervisor_contract.md) — snapshots, guarded delivery and safety limits.
+- [Testing](../engineering/testing.md) — isolated native observers and host evidence.
+- [External tool facts](../reference/external_tool_facts.md) — verified pins and native tool behavior.
+- [Debian tmux and multiplexer](../../DEVELOPMENT_PLAN/phase-4-debian-tmux-and-multiplexer.md) — the common backend contract.
+- [Windows toolchain and psmux build](../../DEVELOPMENT_PLAN/phase-9-windows-toolchain-and-psmux-build.md) — native source preparation.
+- [Windows backend qualification](../../DEVELOPMENT_PLAN/phase-10-windows-backend-qualification.md) — accepted Windows behavior.

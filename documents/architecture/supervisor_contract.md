@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Owning phase**: [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md)
+**Owning phase**: [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md)
 
 > **Purpose**: Define how the recovery supervisor observes watched panes, classifies their screens, decides
 > through the recovery state machine and sends its one recovery text, and the actions it never takes.
@@ -12,9 +12,9 @@
 - `agentctl supervisor run` is a foreground loop only the user starts. Each poll captures and classifies the
   agent pane of every watched, unpaused target and steps a pure state machine: MONITORING, SUSPECTED_FAILURE,
   CONFIRM_IDLE, BACKOFF, RECOVERY_SENT, VERIFY, then MONITORING or ESCALATE (R18).
-- It types only the per-agent recovery text, only from BACKOFF on a fresh overload at an idle prompt, and only if
-  a re-capture just before `send-keys -l` shows the screen unchanged. Other failures escalate, nothing is sent
-  during work, dialogs or typed input, stale scrollback never triggers, and backoff is bounded (R18.1 to R18.4).
+- It submits only the per-agent recovery text, only from BACKOFF on a fresh overload at an idle prompt, through
+  a qualified target-bound guarded operation. Changed identity, input, output or watch intent aborts delivery.
+  Work, dialogs, typed input, unknown state and stale scrollback never authorize input; backoff is bounded.
 - Every observation, decision, attempt and result is logged for `logs` (R18.5); `watch`, `unwatch`, `pause` and
   `resume-watch` give opt-in, opt-out and manual pause (R18.6).
 - It never kills a session, switches models, restarts a process or sends login input (R17, R19). Whether its
@@ -22,33 +22,47 @@
 
 ## Capture, Normalisation and Fingerprints
 
-`AgentCtl.Observe.Capture` runs `capture-pane -p -J -t %<id> -S -100` on the agent pane, the id in
-`@agentctl_pane` for a managed session or the registry's revalidated pane id for an adopted one, decodes the
-output as UTF-8 and reads the pane's dead state with it, so `Exited` never depends on text. The pure
-`AgentCtl.Observe.Normalize` converts CRLF and bare CR to LF, strips trailing spaces and tabs from each line,
-drops trailing blank lines and keeps the final 100 lines without a trailing newline. Leading indentation and
-non-ASCII text are preserved; normalising twice equals normalising once
-(`tests/integration/test_capture_real.py::test_capture_roundtrip_on_private_server`,
-`haskell:agentctl-core-test/Normalize/idempotent`).
+`AgentCtl.Observe.Capture` consumes a qualified backend observation capability, not arbitrary text returned
+from whichever pane is active. One observation binds the backend/registry, server instance, session and pane
+generation, native process creation identity, dead state, joined text, styled viewport, cursor and dimensions
+to the same coherent snapshot. An opaque token records the output and input activity revisions needed by
+[guarded submission](#send-discipline).
 
-Capture also reads an unjoined styled viewport with `capture-pane -p -e -S 0` and native cursor coordinates and
-dimensions. Matching pane facts before and after these reads establish the visual snapshot; a changing snapshot
-retries within the caller's existing deadline. Numeric facts use a printable delimiter so their parsing remains
-stable under the C locale. The joined text remains the normalized classification and fingerprint input.
+A qualified joined capture uses native soft-wrap information. It retains real newlines, printed spaces,
+Unicode glyph boundaries and scrollback range semantics. A full-width row is not evidence that the next row
+is a continuation. Wide glyphs at the final column, combining characters, narrow widths, resize and history
+boundaries are native acceptance cases. A missing explicit target yields a refusal, never the active pane.
 
-`AgentCtl.Observe.Fingerprint` represents an error block with separate preceding text, error content and following
-text. Only the normalised error content enters its UTF-8 SHA-256 hash, rendered as lowercase hexadecimal. Redraws,
-scrolling, surrounding output and a second occurrence of identical error text keep the fingerprint; a changed
-normalised error block changes it (`haskell:agentctl-core-test/Fingerprint/stable-under-redraw`,
-`haskell:agentctl-core-test/Fingerprint/different-error-differs`). Bounded captures expose no reliable absolute
-occurrence position shared by both multiplexers, so this contract claims none.
+The common contract requires a concrete server-ordered snapshot/submission implementation for each backend.
+The Debian adapter uses the APT-provided tmux; its command/control primitives and hostile concurrency behavior
+must establish that contract through native tests. Merely reading matching cursor facts around independent
+plain and styled captures, or repeating two complete captures, does not prove atomicity. No tmux fork,
+heuristic reconstruction or best-effort send is silently assumed. If the required protocol cannot be
+established, automatic input is unsupported and the capability cannot be admitted. Read-only operations can
+still report that limitation. The Windows backend implements and qualifies the equivalent guarded capability
+through its recorded source/patch profile.
 
-A fingerprint is **handled** per target for the supervisor run once a baseline, send, completed incident or
-escalation marks it handled. It never opens an incident again in that run, so stale scrollback never re-triggers
-and every further send needs both unhandled error content and a new machine transition (R18.3). This deliberately
-suppresses a genuine recurrence with identical normalised text, even after intervening work; the failure mode is
-a missed recovery rather than another send to stale text. A restart or resume takes a baseline and marks its
-existing error handled, so restarting supervision does not turn visible stale text into a retry.
+After obtaining a snapshot, the pure normalizer converts CRLF and bare CR to LF, strips trailing spaces and
+tabs from each logical line, drops trailing blank lines and retains the final 100 logical lines without a final newline.
+Leading indentation and non-ASCII text are preserved. Raw backend correctness is checked independently before
+normalization, so normalization cannot hide broken joins or erroneous target selection. Invalid UTF-8,
+malformed metadata, changing identity, unsupported capability and timeout are named unavailable observations;
+none can advance a send decision.
+
+`AgentCtl.Observe.Fingerprint` separates preceding text, the recognized error block and following text. Only
+normalized error content enters its UTF-8 SHA-256. Redraws, surrounding output and a repeated occurrence of
+identical content keep the fingerprint; changed normalized error content changes it. This is content identity,
+not a claim of a unique absolute event position in bounded scrollback.
+
+A handled fingerprint is remembered per target for the supervisor run after a baseline, confirmed submission,
+completed incident or escalation handles it. It cannot open another incident in that run. A genuine identical
+recurrence can therefore be missed; stale content cannot authorize another submission. Restart, watch-revision
+change and resume establish a baseline rather than treating existing errors as new work.
+
+The scope of the guarded protocol is explicit: it serializes backend-visible pane state and input events.
+It cannot reveal an agent's latent internal work or provider state. This limit never licenses treating an
+unknown or changing screen as idle. The no-unsafe-send requirement remains a qualification obligation, with
+independently observed hostile input/output at every snapshot and submission boundary.
 
 ## Screen Classes and Fixture Provenance
 
@@ -206,21 +220,28 @@ class and, for `LoginScreen` and `AuthError`, the command the user types, such a
 
 ## Send Discipline
 
-1. A send happens only on the step from BACKOFF to RECOVERY_SENT, to a target that is watched and not paused.
-2. Immediately before it the supervisor re-captures, re-normalises, re-classifies and re-fingerprints the pane;
-   a changed class, fingerprint or normalised text aborts the send, and the fresh observation is stepped instead
-   (`tests/unit/test_supervisor_values.py::test_send_guard_oracle`,
-   `tests/e2e/test_supervisor_scenarios.py::test_screen_change_aborts_send`). The guard narrows the gap to one
-   capture but cannot close it: a key the user presses in that instant is not seen, and no phase proves otherwise.
-   This is the same plain-text normalisation used for observations; ANSI escape bytes inside plain capture text
-   remain content. Equality also requires an overload and a present fingerprint, so an identical blocked screen
-   cannot authorize a send.
-3. The text goes as `send-keys -l -t <pane> -- <text>`, then a separate `send-keys -t <pane> Enter`: `-l` types the
-   text as characters, never reading a word such as `Enter` or `C-c` as a key name, and the separate Enter
-   submits it as one keystroke rather than as a newline inside the text.
-4. The target selects the agent pane within its native server, including the exact session component on psmux;
-   an adopted pane is revalidated against its recorded
-   server socket, id and pid just before; a stale entry is never sent to.
+1. A delivery offer exists only on the BACKOFF to RECOVERY_SENT decision for a watched, unpaused, currently
+   revalidated target with a recognized idle overload and an unhandled fingerprint.
+2. The supervisor obtains a fresh coherent snapshot, normalizes/classifies it and compares its full identity,
+   class, fingerprint, relevant text, styled prompt and activity token with the state that authorized the
+   offer. Any difference steps the new observation from the previous machine state and submits nothing.
+3. Under the watch-intent lock, the supervisor verifies the entry revision and stop request, then asks the
+   backend to conditionally submit against the exact snapshot token and target generation. The backend checks
+   the condition in the same ordering domain as pane updates and all client input. A stale or invalid token
+   causes no write. It never falls back to a different pane or unconditional send.
+4. The accepted operation submits the fixed per-agent text literally and the submit key as one noninterleaved
+   operation. User input cannot appear between the text and its submit key. Literal words such as `Enter` are
+   never interpreted as key names. Two unrelated send subprocesses are not this capability.
+5. The result distinguishes confirmed submission, stale rejection, unsupported capability and uncertain or
+   failed delivery. Only confirmed submission commits RECOVERY_SENT and handles the submitted fingerprint.
+   A transport timeout after possible acceptance is uncertain, not an automatic retry. It closes or pauses
+   the incident with an unresolved notice rather than risking duplicate input or an unexpected draft.
+
+A backend lacking the qualified conditional operation can perform permitted read-only diagnostics but cannot
+submit automated recovery input. The native qualification matrix includes output changes at unchanged cursor
+coordinates, concurrent user keystrokes, watch/pause revisions, target replacement, server restart, a lost
+response after acceptance and interruption between the logical text and submit components. Each no-send case
+has an independent positive receiver proving that its observer is active.
 
 ## Watch Commands and supervisor run
 
@@ -252,7 +273,7 @@ intent state. Effective changes advance the registry and entry revisions; repeat
 Watch commands serialize reload, transition and publication under the short native `watch.lock`, with a five-second
 contention bound. The supervisor holds the same lock while checking current intent immediately before a send.
 Between protected polling sections it yields twenty milliseconds with the lock released, allowing watch commands
-to acquire it even when native work exceeds the poll interval. The guard and send stay in the same protected section
+to acquire it even when native work exceeds the poll interval. The current-intent check and guarded backend request stay in the same protected section
 (`tests/e2e/test_supervisor_scenarios.py::test_paused_target_never_sent`).
 The process-wide stop scope restores prior handlers when it exits; native Windows console Ctrl+C and Ctrl+Break
 set the same stop request as its C runtime SIGINT/SIGTERM handlers. No handler performs logging or multiplexer I/O.
@@ -267,9 +288,9 @@ fingerprints through pause, unwatch and rewatch for that supervisor process. Dro
 fingerprint and records `ended`; a revision change establishes a fresh baseline. A planned send state is committed
 only after delivery, and an aborted guard steps the fresh observation from the prior state.
 One target receives at most one guard/send offer per poll. If that fresh step proposes another send, the proposal
-is recorded and delivery waits for the next poll without marking the unsent fingerprint handled. A command failure
-handles the incident, escalates and records `unresolved`; an identity change without a safe capture ends the old
-incident and resets the baseline.
+is recorded and delivery waits for the next poll without marking the unsent fingerprint handled. A command failure or uncertain backend delivery
+handles the incident without replay, escalates and records `unresolved`; an identity change without a safe
+capture ends the old incident and resets the baseline.
 The entry revision lets a later poll detect a pause and resume even if the paused state occurred between polls
 (`tests/unit/test_watch_values.py::test_watch_transitions_oracle`,
 `tests/e2e/test_watch_commands.py::test_list_and_status_show_watch_state`).
@@ -287,7 +308,7 @@ fields of each kind (`tests/e2e/test_supervisor_log.py::test_records_match_schem
 |---|---|---|
 | `observation` | at every capture of a watched, unpaused target, unchanged screens included | the screen class, error fingerprint and machine state |
 | `decision` | at every step of the machine | the state before and after, the rule and the action, an incident's close included |
-| `attempt` | after every send offered to the guard resolves | the recovery text, pre-send class and fingerprint, and outcome `sent`, `aborted` on a changed screen, or `failed` on a command error |
+| `attempt` | after every send offered to the guard resolves | the fixed recovery text, snapshot/profile identity, pre-send class and fingerprint, and a typed confirmed, stale-rejected, unsupported, failed or uncertain delivery outcome |
 | `result` | once when an incident closes | `recovered`, `ended`, `not-acknowledged`, `unresolved` or `escalated` |
 | `notify` | for every notification | the level and the message printed on stderr |
 
@@ -300,8 +321,7 @@ unwatching an open incident writes its `ended` result when the loop sees the cha
 ## Forbidden Actions
 
 The supervisor never kills a session or pane, runs `kill-server`, switches models, restarts a process, sends
-login input or answers a dialog (R17, R19). Its command plan renders only captures, pane-state queries, the
-literal send and Enter, and `tests/oracles/forbidden_actions.toml` lists the verbs no action renders
+login input or answers a dialog (R17, R19). Its command plan renders only qualified observations, pane-state queries and conditional submissions, and `tests/oracles/forbidden_actions.toml` lists the verbs no action renders
 (`kill-session`, `kill-server`, `kill-pane`, `respawn-pane`, `respawn-window`, `new-session`, `new-window`) and
 the tokens no recovery text carries (`/model`, `/login`, each agent's login commands)
 (`tests/unit/test_supervisor_values.py::test_command_plan_oracle`).
@@ -319,12 +339,12 @@ managed and adopted pane alive with its pid unchanged (`tests/e2e/test_superviso
 Every "receives nothing" runs beside a control pane per agent, scripted to the recovery sequence, whose received
 text shows the byte record was live. On a host with logged-in agents the live run sends nothing
 (`tests/live/test_live_supervision.py::test_live_watch_sends_nothing`), confirmed by
-[Live agent acceptance](../../DEVELOPMENT_PLAN/phase-11-live-agent-acceptance.md).
+[Linux live and clean acceptance](../../DEVELOPMENT_PLAN/phase-12-linux-live-and-clean-acceptance.md).
 
 ## The Recovery Text
 
 The recovery text is one constant per agent in `AgentCtl.Agent`, fixed by
-[decision D-48](../../DEVELOPMENT_PLAN/rationale.md#decisions) and the agent-table rows of
+[the recovery-text decision](../../DEVELOPMENT_PLAN/rationale.md#decisions) and the agent-table rows of
 `tests/oracles/launch_argv.toml`: a short, single-line, plain-language request to continue the interrupted work.
 It begins with no `/` and holds no remedy command
 (`haskell:agentctl-core-test/Agent/recovery-text-is-plain`) and none of the forbidden tokens. It is not
@@ -344,6 +364,5 @@ honest limit: a conversation can resume, but an interrupted internal tool call i
 - [testing](../engineering/testing.md#observers-and-nonces) — the fake agent and nonces the matrix relies on.
 - [files and state](../reference/files_and_state.md) — the watch set, the lock and the log formats.
 - [cli reference](../reference/cli_reference.md) — the supervisor commands and their exit statuses.
-- [Pane observation and classification](../../DEVELOPMENT_PLAN/phase-8-pane-observation-and-classification.md) — builds the classifiers.
-- [Recovery state machine and backoff](../../DEVELOPMENT_PLAN/phase-9-recovery-state-machine.md) — builds the machine.
-- [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) — builds this supervisor.
+- [Pane observation and classification](../../DEVELOPMENT_PLAN/phase-7-pane-observation-and-classification.md) — builds the classifiers.
+- [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) — builds the machine and supervisor.

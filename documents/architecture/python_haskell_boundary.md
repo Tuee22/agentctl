@@ -2,215 +2,151 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Owning phase**: [Launch command and passthrough](../../DEVELOPMENT_PLAN/phase-6-launch-and-passthrough.md)
+**Owning phase**: [Python bootstrap and handoff](../../DEVELOPMENT_PLAN/phase-2-python-bootstrap-and-handoff.md)
 
-> **Purpose**: State what the Python click layer owns, what the core binary owns, how a command crosses from
-> one to the other, and which single module owns each invariant that spans both layers.
+> **Purpose**: Define the smallest Python bootstrap, the Haskell-owned runtime, and the typed handoff between them.
 
 ## TL;DR
 
-- Python (`src/agentctl/`) owns only what must happen before a binary exists, plus the gate: the per-user
-  directories, the OS prerequisites (with consent), ghcup, GHC and cabal, the digest-keyed build, and
-  `agentctl check`. It implements no launch, session or supervisor behaviour, and it never spawns tmux, psmux,
-  claude or codex.
-- The core binary, `agentctl-core`, owns everything after bootstrap: the multiplexer, the agent argv,
-  preflight, launch, session management and the supervisor. Every warning after bootstrap is the binary's.
-- Every command except `check` passes through raw. `main(argv)` in `src/agentctl/cli.py` lets the group parse global options, then
-  `RawCommand` preserves the entire tail before command parsing, and the binary dispatches `claude` and `codex` on its raw arguments before
-  option parsing, so ARGS reach the agent byte for byte.
-- The handoff is `execve` on POSIX and a child process whose exit status becomes agentctl's on Windows. The
-  binary is never on PATH, answers a handshake (protocol version and command list), and refuses to run
-  without the handoff.
-- Each invariant that spans both layers has one owner, and the other layer holds no copy of it.
+- `pipx` installs a portable Python package with Click and bundled Haskell source. Installation of the Python
+  package performs no native compilation. Python obtains the Haskell executable on its first required use.
+- Python owns only bootstrap directories, the prerequisites needed to build Haskell, ghcup, pinned GHC and
+  cabal, source-digest-keyed compilation and publication, raw transport, and the development gate adapter.
+- Haskell owns runtime host policy, dependency planning and provisioning, multiplexer acquisition and
+  qualification, agent checks, launch, sessions, observation and recovery. Python implements none of these.
+- Windows Haskell builds a private psmux from pinned source using a privately selected Rust toolchain and
+  qualified native linker/SDK prerequisites. Debian Haskell reuses or provisions tmux through APT.
+- Claude and Codex remain user-installed. Their absence is a Haskell refusal, never an installation action.
+
+This page states the target contract. Source shapes requiring migration are owned by the
+[deletion ledger](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md); a document is not implementation evidence.
 
 ## What Python Owns
 
-Python runs first, because something must exist before the binary does. Its responsibilities, in the order
-a first run meets them:
+`src/agentctl/paths.py` derives absolute `cache`, `data` and `state` roots from explicit platform, environment
+and home values. The same roots serve bootstrap and runtime; Haskell validates them and derives only owned
+subdirectories. [Files and state](../reference/files_and_state.md) owns their layout.
 
-1. **Per-user directories.** `src/agentctl/paths.py` decides `cache`, `data` and `state`, honouring the XDG
-   overrides on every OS. Their defaults and contents are in [files and state](../reference/files_and_state.md).
-2. **OS prerequisites.** `src/agentctl/bootstrap/prereqs.py` probes the C compiler and linker, `-lgmp`, curl
-   or wget, CA certificates and make. An interactive run asks before installing; a non-interactive run requires
-   the global `--assume-yes` as consent and root or `sudo -n` for privilege, and never prompts. Passwordless sudo
-   alone grants no consent; [the bootstrap consent contract](../engineering/toolchain_bootstrap.md#os-prerequisites)
-   owns the OS-specific commands and the macOS dialog.
-3. **ghcup.** `src/agentctl/bootstrap/ghcup.py` reuses an existing ghcup at or above the floor, or downloads
-   the pinned binary with urllib and verifies its published SHA-256.
-4. **GHC and cabal.** `src/agentctl/bootstrap/toolchain.py` installs the pins without changing the user's
-   default selection and invokes both by the absolute paths `ghcup whereis` prints.
-   It verifies both versions before atomically recording those strings; a warm ensure runs only their two version
-   checks. `check/toolchain.py` supplies native readiness observations and invokes the same selection-preserving
-   code path (`tests/integration/test_toolchain.py::test_warm_run_spawns_only_version_checks`).
-5. **The build.** `src/agentctl/bootstrap/build.py` builds the bundled Cabal project into
-   `cache/build/<digest>` and publishes the binary atomically into `data/bin/<digest>`; a digest hit builds
-   nothing.
-6. **The handoff.** `src/agentctl/bootstrap/handoff.py` ensures the binary for the current digest exists,
-   then hands the command to it.
+The bootstrap ensures the core binary for the bundled sources and pins. A valid digest hit goes directly to
+handoff. A miss takes a build lock, observes the missing native Haskell prerequisites, applies only the
+authorized bootstrap plan, verifies ghcup and the pinned GHC/cabal, builds outside the package source tree,
+checks the handshake and atomically publishes an immutable executable. A concurrent caller reuses the
+published winner. [Toolchain bootstrap](../engineering/toolchain_bootstrap.md) and
+[binary build](../engineering/binary_build.md) own this process.
 
-Steps 2 to 5 belong to [the toolchain bootstrap](../engineering/toolchain_bootstrap.md) and
-[the binary build](../engineering/binary_build.md). `agentctl check` is Python's own command and never passes
-through; [the quality gate](../engineering/quality_gate.md#check-steps) owns its steps and legs. The global
-option `--assume-yes` is Python's: it governs consent for step 2 and is never forwarded.
+Python follows the strict doctrine in [code standards](../engineering/code_standards.md): immutable typed
+values, single assignment, total calculation kernels and explicit effect adapters. Framework capabilities and
+native decoder trees remain borrowed boundaries, never mutable application state. No runtime dependency
+policy is duplicated to make a Python fallback.
+
+The development gate remains accessible only as `agentctl check`. Its Python adapter runs the quality tools
+and evidence joins described by [the quality gate](../engineering/quality_gate.md), invoking Haskell-owned
+runtime subjects through their public application or test interfaces. The gate contains no second installer.
 
 ## What the Core Binary Owns
 
-- Multiplexer resolution, version floors and the typed tmux and psmux vocabulary
-  ([multiplexer adapter](multiplexer_adapter.md)).
-- The agent table, argument assembly, login refusals, auth classification, preflight and the opaque `Ready`,
-  launch, instant-exit capture and the pane trampoline ([launch contract](launch_contract.md)).
-- `list`, `status`, `attach`, `stop` and `adopt` ([sessions and ownership](sessions_and_ownership.md)).
-- `watch`, `unwatch`, `pause`, `resume-watch`, `logs` and `supervisor run`
-  ([supervisor contract](supervisor_contract.md)).
+The Haskell application obtains native host facts and calculates a typed runtime plan before applying it:
 
-The binary never invokes ghcup, GHC or cabal: its one runner, `AgentCtl.Process`, interprets typed commands,
-and the vocabulary has no command for them.
+| Host | Haskell-owned runtime behavior |
+|---|---|
+| Debian Linux | Require exact Debian identity, reuse a supported tmux or provision it through APT with consent, then qualify the resolved executable |
+| Windows x86_64 | Ensure qualified native linker/SDK capabilities and private pinned Rust/Cargo, fetch verified psmux source and patches, build, qualify and publish privately |
+| macOS | Apply the separately declared native macOS adapter and host prerequisites; Linux or Windows evidence does not qualify it |
+| Other Linux distribution or unsupported host | Return a typed unsupported-platform refusal before runtime mutation |
+
+Source acquisition uses Haskell HTTPS and archive adapters where practical. If an external acquisition tool
+is required, Haskell owns its idempotent provision and exact invocation too. The runtime does not depend on
+Git, curl or an archive CLI merely to fetch the pinned psmux source. It never installs an agent CLI, npm agent
+package, credential or login state.
+
+Haskell reuses accepted runtime artifacts without package-manager, download or build work. A missing
+prerequisite, denied consent, unavailable privilege, required reboot, failed verification or failed build has
+a named failure outcome. It does not prompt through an installer, answer a dialog, change global toolchain
+selection, or silently substitute a system psmux. [The multiplexer adapter](multiplexer_adapter.md) owns
+the backend contract and [the launch contract](launch_contract.md#preflight) its use by commands.
+
+Haskell retains one native process runner, `AgentCtl.Process`, for runtime commands and installers. Its
+typed provisioning vocabulary is distinct from the session vocabulary, so permission to install tmux does
+not authorize a shell command or an action against an existing session.
 
 ## Raw Passthrough
 
-A parser that interprets the tail would change it: click claims `--help` for itself and treats the first bare
-`--` as its own separator, so `agentctl claude -- --yolo` would reach the agent without its `--`. Both layers
-therefore split before they parse.
+Click recognizes the public command and the global bootstrap options before the command. The remaining
+argument sequence crosses unchanged: empty arguments, Unicode, newlines, `--`, `--help` and shell-like text
+remain distinct values. `AgentCtl.Agent.Argv` alone assembles agent flags and rejects login-shaped input.
 
-- **Python.** `main(argv)` enters the click group, which reads global options before the command. A passthrough
-  command uses `RawCommand.parse_args` to retain every tail element without a command parser, and its invoke method
-  returns explicit transport data to the group dispatcher. The tail goes to the binary unchanged:
-  `agentctl --assume-yes claude --model opus -- fix` forwards `claude --model opus -- fix`, while
-  `agentctl claude --assume-yes` forwards `--assume-yes` to claude. Only `check` and the global options are
-  parsed by click, and click's command table lists the passthrough commands so that `agentctl --help`
-  shows them (`tests/unit/test_passthrough.py::test_every_command_but_check_passes_through`,
-  `tests/unit/test_passthrough.py::test_raw_tail_keeps_dashdash_and_help`).
-- **The binary.** `agentctl-core` dispatches `claude` and `codex` on its raw arguments before
-  optparse-applicative runs, and parses the session and supervisor commands normally. Usage and error text
-  name the program `agentctl`, so runtime output never shows the binary's name either
-  (`tests/integration/test_passthrough.py::test_usage_text_names_agentctl`).
-- **The command surface.** Python's passthrough table equals the command list the binary reports in its
-  handshake, and both follow `tests/oracles/command_surface.toml`; a command present on one side only fails
-  (`tests/integration/test_passthrough.py::test_passthrough_table_equals_binary_commands`).
-- **Through-stack rows.** The R9 rows of `tests/oracles/launch_argv.toml` include `--`, `-- --yolo`, `--help`,
-  `-h`, the empty string, `x;`, `#{pane_id}`, `$(id)` and an embedded newline. Each is compared at three
-  points: the tail Python hands off (the spawn audit), the pure argv assembly (`agentctl-core-eval`), and the
-  argv the agent receives, recorded by `agentctl-fake-agent` with its nonce
-  (`tests/e2e/test_passthrough_argv.py::test_through_stack_rows`).
+Global `--assume-yes` expresses consent to the concrete prerequisite plan. Click conveys its meaning through
+a dedicated typed handoff field, separate from the raw command tail. Thus a global consent option authorizes
+the Haskell plan, while `agentctl claude --assume-yes` still gives that tail argument to Claude. Haskell does
+not recover consent by inspecting agent arguments or by observing that privileged execution is possible.
+
+The command table and the core handshake have one contract, with the development gate adapter declared
+explicitly. Through-stack tests compare the actual forwarded arguments with independent expected values
+(`tests/e2e/test_passthrough_argv.py::test_through_stack_rows`).
 
 ## The Handoff
 
-`bootstrap/handoff.py` builds the binary's argv as the command name followed by the raw tail, and sets the
-protocol version and the absolute `cache`, `data` and `state` paths in the binary's environment as
-`AGENTCTL_CACHE_DIR`, `AGENTCTL_DATA_DIR` and `AGENTCTL_STATE_DIR`. `AgentCtl.Paths` validates these supplied
-paths and derives only owned subdirectories; it never computes a per-user location. The handoff also supplies
-`AGENTCTL_DISTRIBUTION` for the platform-specific install hints.
+`bootstrap/handoff.py` supplies the protocol version, the absolute root directories and the explicit consent
+value. Haskell validates this envelope before dispatch. Runtime OS and Debian distribution policy belong to
+Haskell; a Python distribution hint is not authority to install a runtime package.
 
-- **POSIX: `execve`.** On Unix the new executable is loaded into the current process with the same process
-  id. The binary then owns the user's terminal, signals and exit status directly, and no Python process
-  stays alive beside it. Python flushes stdout and stderr first, because `exec` discards unflushed buffers.
-- **Windows: a child process.** Windows has no in-place replacement of that kind, so Python starts the binary
-  as a child with inherited stdio, leaves console interrupts to the child while it waits, and exits with the
-  child's exit code. `ty` and hostbootstrap hand off the same way.
-
-Either way, the exit status agentctl reports is the binary's own; for a launch whose agent exits during
-startup it is the agent's ([instant exit](launch_contract.md#instant-exit)). The mode is a pure choice by OS
-family (`tests/unit/test_handoff.py::test_handoff_mode_by_os_family`), and the child mode is run on every host
-to show the child's status survives (`tests/integration/test_handoff.py::test_child_mode_propagates_exit_status`).
+On POSIX Python flushes its streams and replaces itself with the core executable. On Windows it starts the
+core as a child with inherited terminal streams, leaves console interrupts to the child, waits and returns
+the child's exit status. Raw transport introduces no shell. The core executable is addressed by its published
+absolute path and is never exposed as a second user command.
 
 ## The Handshake and Direct Invocation
 
-The handshake is the binary's answer to one question: which protocol version it speaks and which commands it
-provides. It carries no digest and needs no CPP; the binary's identity is the sha256 of the path
-`cabal list-bin` prints, which [the binary build](../engineering/binary_build.md) owns.
+The handshake identifies the handoff protocol and public command vocabulary. A protocol change, including
+consent-envelope changes, changes its data home and has accepting and refusing protocol controls. Source and
+toolchain identity are checked by the binary-build owner rather than inferred from a version banner.
 
-The protocol version is `1`, supplied as `AGENTCTL_PROTOCOL_VERSION`; `--handshake` answers a JSON object with
-`protocol` and `commands`. The command list excludes Python's `check`. Missing and different versions refuse
-ordinary commands before dispatch, and the JSONL evaluator checks the same pure protocol kernel against
-`tests/oracles/protocol.toml`
-(`tests/integration/test_haskell_legs.py::test_direct_invocation_refused`,
-`tests/integration/test_eval_executable.py::test_every_case_answered`).
-
-- Python publishes a build only after the binary answers with the protocol version Python expects, and the
-  passthrough table is compared with the command list the binary answers.
-- The binary refuses every command when the protocol version from the handoff is absent or different, and its
-  refusal tells the user to run `agentctl` instead, without naming the binary
-  (`tests/integration/test_passthrough.py::test_binary_refuses_direct_run`).
-- `pane-exec` is the one command the multiplexer, not Python, invokes; the pane's environment is the server's,
-  so it carries no handoff. Its authority is its spec file instead, whose rules are in
-  [the pane trampoline](launch_contract.md#the-pane-trampoline).
-- The refusal guards against accidental direct use and is not a security boundary: a user who finds the
-  binary under `data/bin/<digest>` and sets the variables can run it.
+Ordinary dispatch without a valid handoff refuses with a remedy naming `agentctl`. This prevents accidental
+direct use and is not a security boundary against the account owner. The pane trampoline is the explicit
+exception: its authority is the owned private spec described by
+[the pane trampoline](launch_contract.md#the-pane-trampoline), not inherited bootstrap variables.
 
 ## The Python Spawn Set
 
-Every Python spawn goes through `src/agentctl/process.py`, the only module that spawns or execs
-(`src.one-process-module`), and downloads use urllib, never a spawned downloader.
+Every Python process operation goes through `src/agentctl/process.py`. The permitted families are the core
+handoff/handshake, the Haskell bootstrap toolchain and its necessary native probes, and the development gate's
+declared tools and read-only evidence observers. There is no Python Rust, Cargo, psmux, tmux, Claude, Codex or
+runtime package-manager execution path.
 
-| Executable | Spawned by | When |
-|---|---|---|
-| the core binary | `bootstrap/handoff.py`, `bootstrap/build.py` | each passthrough command, after the digest check; the handshake after a build |
-| ghcup, the reused or the verified pinned binary | `bootstrap/ghcup.py`, `bootstrap/toolchain.py` | `install ghc`, `install cabal --no-set` and `whereis`, only while a pin is missing |
-| GHC and cabal, by absolute path | `bootstrap/toolchain.py`, `bootstrap/build.py`, `check/legs.py` | `--numeric-version` on warm runs; build, test and `list-bin`; building fourmolu and hlint into `cache/tools/<pin-digest>` |
-| the C compiler | `bootstrap/prereqs.py` | the link probe against `-lgmp` |
-| sudo with the OS package manager; `xcode-select --install` on macOS | `bootstrap/prereqs.py` | after interactive consent; non-interactively only with `--assume-yes` and root or `sudo -n`, with the macOS dialog handled as the bootstrap contract states |
-| ruff, ty, pytest, fourmolu, hlint | `check/legs.py` | `agentctl check` only |
-| git | `check/preconditions.py`, `check/ratchet.py` | `agentctl check` only, read-only |
-
-Python never spawns tmux, psmux, claude, codex, a shell, curl or wget, or the ghcup bootstrap script. The
-spawn audit in `src/agentctl/check/audit.py`, a `sys.addaudithook` observer, records every spawn the suite's
-subjects make: a digest hit records only the binary's execve on POSIX or child creation on Windows
-(`tests/integration/test_passthrough.py::test_warm_passthrough_spawns_only_the_binary`), a bootstrap run's ghcup argv must
-match the provisioning plan in `tests/oracles/bootstrap_plan.toml`, and package-manager and sudo spawns are
-vetoed so that no test runs one. Each absence assertion is paired with the recorded spawn that proves the audit was live.
+Bootstrap privilege changes use the bootstrap consent contract. Runtime privilege changes occur only in the
+Haskell runtime planner. Ordinary tests veto real package-manager and sudo invocations on both paths; native
+preparation uses explicitly owned setup environments outside ordinary test execution. The spawn audit pairs
+each absence assertion with an observed allowed operation so an inactive observer cannot prove isolation.
 
 ## Single Owners
 
-| Invariant | Owner | The other layer | Enforced by |
-|---|---|---|---|
-| Session names | `AgentCtl.Session.Name` | Python computes no name | `tests/oracles/session_names.toml`; the spawn audit shows Python forwarding only the raw tail |
-| Mandatory flags, their placement and dedupe | `AgentCtl.Agent.Argv` | Python forwards ARGS unchanged | `tests/oracles/launch_argv.toml`, through the stack |
-| Login refusals and remedies | `AgentCtl.Agent.Argv`, `AgentCtl.Agent.Auth` | nothing constructs a login | `src.no-login-construction` |
-| Spawning and exec | `src/agentctl/process.py`, `AgentCtl.Process` | nothing else imports a process API | `src.one-process-module` |
-| Per-user directories | `src/agentctl/paths.py` | `AgentCtl.Paths` receives them and computes none | `paths.py` is pure over OS family, environment and home, so its tests cover every OS family on any host |
-| The right to launch | `AgentCtl.Preflight`, the only producer of `Ready` | `AgentCtl.Launch` creates a session only from a `Ready` | a compile-fail fixture matched by GHC diagnostic code, with a compiling twin |
-| The command surface | the binary's handshake command list | Python's passthrough table equals it | `tests/oracles/command_surface.toml`, both directions |
-| Toolchain and build | `src/agentctl/bootstrap/` | the binary's runner has no ghcup, GHC or cabal command | `src.one-process-module` |
-| Warnings after bootstrap | the binary, on the invoking terminal | Python prints only bootstrap progress, consent prompts and check output | `tests/oracles/preflight.toml` |
-
-The per-user directories have one owner because the two languages disagree: Python's platformdirs and
-Haskell's `getXdgDirectory` give different macOS and Windows paths, so two computations would publish a
-binary where the other side never looks.
+| Invariant | Owner | Other layer's responsibility |
+|---|---|---|
+| Initial executable and Haskell build toolchain | Python bootstrap | Haskell does not bootstrap itself |
+| Root directory convention | `src/agentctl/paths.py` | `AgentCtl.Paths` validates supplied roots and derives owned children |
+| Consent transport | Python handoff envelope | Haskell validates and applies consent to its actual runtime plan |
+| Runtime platform policy and dependency provisioning | Haskell runtime planner | Python forwards the command without a runtime fallback |
+| Multiplexer binary, identity and capabilities | Haskell backend owner | Python never searches for or launches a multiplexer |
+| Agent availability, authentication and argv | Haskell agent/preflight modules | Python preserves raw arguments |
+| Session and recovery behavior | Haskell session/supervisor modules | Python implements no parallel model |
+| Development evidence and closure | `agentctl check` | Product commands expose subjects, never a second closing runner |
 
 ## WRONG and RIGHT
 
-```text
-WRONG  Python appends the mandatory flags: handoff(["claude", *args, "--dangerously-skip-permissions"])
-RIGHT  Python forwards the raw tail: handoff(["claude", *raw_tail]); AgentCtl.Agent.Argv assembles the argv
-```
-
-The WRONG form puts a second copy of the argv rules in Python, which drifts from the binary's dedupe and `--`
-placement, and by the time click has parsed `args` the user's first `--` is already gone.
-
-```text
-WRONG  agentctl list runs `tmux list-sessions` from Python
-RIGHT  agentctl list passes through; AgentCtl.Sessions reads the session options and the adopted registry
-```
-
-The WRONG form spawns tmux from Python, outside the spawn set, and rebuilds the session model in a second
-language that cannot see the adopted registry's rules.
-
-```text
-WRONG  AgentCtl.Paths computes its own cache directory with getXdgDirectory
-RIGHT  AgentCtl.Paths takes cache, data and state from the handoff that paths.py prepared
-```
-
-The WRONG form publishes into one macOS or Windows directory and looks for the binary in another.
+| WRONG | RIGHT | Why |
+|---|---|---|
+| Python downloads psmux or invokes Cargo before forwarding | Haskell computes and applies the Windows backend plan | Runtime policy has one owner |
+| Infer runtime consent from a successful sudo probe | Carry explicit consent in the handoff | Privilege is a capability, not authorization |
+| Add required agent flags in Click | Assemble them in `AgentCtl.Agent.Argv` | Raw transport must preserve the user's tail |
+| Install Claude because launch cannot find it | Return an actionable missing-agent refusal | Agent installation and credentials remain user-owned |
 
 ## Related
 
-- [launch contract](launch_contract.md) — what the binary does with the raw tail it receives.
-- [multiplexer adapter](multiplexer_adapter.md) — the typed vocabulary behind the binary's one runner.
-- [binary build](../engineering/binary_build.md) — the digest, the atomic publish and binary identity.
-- [toolchain bootstrap](../engineering/toolchain_bootstrap.md) — the prerequisites, ghcup, GHC and cabal steps.
-- [quality gate](../engineering/quality_gate.md) — `agentctl check`, the one command that never passes through.
-- [testing](../engineering/testing.md#observers-and-nonces) — how the spawn audit and the fake agent observe.
-- [files and state](../reference/files_and_state.md) — the per-user directories Python decides.
-- [system components](../../DEVELOPMENT_PLAN/system-components.md) — the inventory of both packages.
-- [Launch command and passthrough](../../DEVELOPMENT_PLAN/phase-6-launch-and-passthrough.md) — the phase that
-  builds this boundary.
+- [Launch contract](launch_contract.md) — raw arguments, preflight and the trampoline.
+- [Multiplexer adapter](multiplexer_adapter.md) — runtime provisioning and backend capabilities.
+- [Code standards](../engineering/code_standards.md) — Python and Haskell source doctrine.
+- [Toolchain bootstrap](../engineering/toolchain_bootstrap.md) — obtaining the initial native executable.
+- [Binary build](../engineering/binary_build.md) — immutable compilation and publication.
+- [Quality gate](../engineering/quality_gate.md) — one command and phase evidence.
+- [Files and state](../reference/files_and_state.md) — owned storage roots.
+- [Python bootstrap and handoff](../../DEVELOPMENT_PLAN/phase-2-python-bootstrap-and-handoff.md) — the owning build phase.

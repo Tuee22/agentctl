@@ -2,9 +2,9 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Owning phase**: [Haskell package, quality legs and digest-keyed build](../../DEVELOPMENT_PLAN/phase-3-haskell-package-and-build.md)
+**Owning phase**: [Python discipline and gate integrity](../../DEVELOPMENT_PLAN/phase-1-python-discipline-and-gate-integrity.md)
 
-> **Purpose**: State the rules every Python and Haskell module of agentctl follows, why each exists, and which leg or check holds it.
+> **Purpose**: Define the required Python and Haskell source discipline, its rationale, and the evidence each named check supplies.
 
 These rules carry over the concept note's engineering rules (strict typing, functional style and result types;
 [the concept-note disposition](../../DEVELOPMENT_PLAN/rationale.md#concept-note-disposition), rows CN-14 and
@@ -15,6 +15,50 @@ gate-closure condition. Tests follow the same rules as the package, and ruff and
 
 ## Python
 
+**Authoring doctrine and evidence.** Python is the bootstrap and command-transport layer described by
+[the boundary contract](../architecture/python_haskell_boundary.md). Its decisions are total functions over
+validated immutable values; its effects occur in explicit adapters. Failures carry typed reasons, values are
+never mutated, names are assigned once, and closed choices are handled exhaustively. These requirements apply
+to package code, tests and boundary declarations. They are agentctl's own source discipline and introduce no
+additional runtime library or alternative checker command.
+
+A named check establishes only the rule and cases its cited tests exercise. The remaining requirements are
+mandatory authoring doctrine, not claims that the current source guards mechanically establish purity,
+immutability or totality. Adding a mechanical rule requires accepting and refusing controls and an applicable
+mutant in the existing gate. An implementation needing migration gains no exemption from a passing subset of
+checks, and a documentation change supplies no source-conformance evidence.
+
+**Pure core and effectful edge.**
+
+- Each module has an explicit role: pure calculation or effectful adapter. The role follows its actual
+  operations and dependencies. Relabelling calculation code as an adapter does not permit hidden mutable
+  domain state. The import graph is acyclic, and a pure module imports no effectful module.
+- Core computations take all inputs as values. Filesystem and process access, environment reads, working
+  directory, clocks, randomness, parser execution, Click, logging and terminal output belong to adapters.
+  `PurePath` can represent a path in calculations; a filesystem capability cannot stand in for a path value.
+- A read-only interface or callback annotation alone proves neither purity nor stable ownership. Any native
+  capability or callback used by core has an explicit effect-free implementation and lifetime contract.
+  Adapters snapshot external state before passing ordinary values to calculations.
+- Time, locale choices and random state arrive explicitly. A pure random algorithm returns its next immutable
+  state along with its result. Decimal arithmetic, where used, takes an explicit context rather than reading
+  ambient settings. Repeating a calculation with the same supported inputs preserves both inputs and result.
+
+**Totality and finite inputs.**
+
+- A core function returns its declared outcome for every input in its supported domain. The contract states
+  size and depth bounds, native-operation assumptions and resource limits; an annotation alone supplies none
+  of these guarantees. Expected failure is a value, and genuine absence has a separate representation.
+- A core function has no `raise`, statement `for` or `while`, suspension, resource management or recursion
+  driven by input depth. Use finite comprehensions, exhaustive matches and bounded folds. Internal lazy
+  producers require a justified finite bound and an effect-free producer.
+- Indexing, mapping lookup, numeric conversion, division, extrema, regular-expression groups and other
+  partial operations require a sufficient validated domain, a total accessor, or an explicitly named
+  failure outcome. A guard covers all relevant failures of the operation, including overflow and subtype
+  behavior, rather than just its most familiar error.
+- Public collection calculations consume finite immutable snapshots. Caller-owned iterators can mutate
+  state, perform I/O, raise or fail to terminate; an `Iterable` annotation does not make them suitable inputs.
+  An adapter materializes a bounded snapshot before calling core.
+
 **Types.**
 
 - Every function, parameter, return value and callback is annotated (ruff's `ANN` rules under
@@ -22,22 +66,29 @@ gate-closure condition. Tests follow the same rules as the package, and ruff and
 - No `Any`, `typing.cast` or `typing.no_type_check`: ruff's banned-api rejects the imports, and
   `src.suppression-ban` rejects the names wherever an alias could carry them
   (`tests/governance/test_source_guards.py::test_suppression_ban_fixtures`).
-- Native API coverage exceptions match the complete definition line, path and physical line number. The fixed
-  entries are `src/agentctl/check/preconditions.py:127` for kernel advisory locking, `src/agentctl/process.py:125`
-  for the POSIX liveness syscall, and `src/agentctl/process.py:136` for Win32 query handles. Each API requires its
-  native kernel. A moved line, altered text or another path loses the exception
-  (`tests/governance/test_source_guards.py::test_coverage_exception_scope`). Native hosts exercise real lock
-  contention and owned live/reaped processes (`tests/integration/test_runtime_boundaries.py::test_single_run_lock_releases`,
-  `tests/integration/test_guard.py::test_containment_detects_owned_leak`). Windows confirmation belongs to
-  [Windows and psmux acceptance](../../DEVELOPMENT_PLAN/phase-14-windows-psmux-acceptance.md).
-- No ignore comment of any kind: `# type: ignore`, `# ty: ignore`, `# noqa` and `# ruff: noqa` are banned by
-  `src.suppression-ban`, and `# pragma: no cover` stands only at a line its allowlist names
-  (`tests/governance/test_source_guards.py::test_suppression_ban_fixtures`).
-- Closed vocabularies are `enum.Enum` members or `Literal` unions, records are frozen dataclasses, and choices are
-  unions of record types. `dict[str, object]` never appears in core logic, and `TypedDict` only at a parsing
-  boundary.
-- No custom `.pyi` stub exists unless a dependency ships without types; click 8.5.0 ships its own. A stub that
-  does exist is narrow, pinned to its dependency's version, and tested.
+- No `object` annotation or top-type substitute hides unknown data. This applies inside aliases, generics,
+  forward references and bounds as well as direct annotations. Literal values and annotation metadata retain
+  their value meaning; a vocabulary member whose spelling is `object` is not a type annotation.
+- No `isinstance`, `issubclass`, comparison of `type(...)`, or reflective narrowing through `getattr`,
+  `hasattr`, `callable` or computed method lookup. Parse structural input with `match` at its declared boundary,
+  then carry the validated type. Order overlapping patterns most-specific first: `bool` precedes `int`.
+- Native API evidence names its actual kernel and complete owned subprocess/ABI subject. Linux controls do
+  not establish Windows or Darwin syscalls. Native receipts are independent requirements of their own lanes,
+  while portable planning and refusal controls execute on Linux.
+- No source-level ignore, noqa, formatter-disable, type-ignore or coverage pragma supplies acceptance.
+  Existing native exceptions are migration inputs in the deletion ledger, not doctrine exemptions. Native
+  per-subject coverage and receipts preserve the required evidence without adding an unreachable-arm exclusion.
+- Closed vocabularies are enum members, `Literal` unions or unions of records. Domain records are final,
+  frozen, slotted, keyword-only dataclasses with recursively immutable fields. Behavior lives in module-level
+  functions; ordinary mutable classes and concrete domain inheritance are excluded. Protocols describe
+  capabilities, and exceptions belong to named edge failure contracts. Concrete first-party classes are final.
+- A validated domain value is constructed only through its defining module's factory returning `Result`.
+  Direct constructors, `NewType`, `TypeGuard`, `TypeIs` and record replacement cannot bypass its invariants.
+  Replacement remains appropriate for ordinary frozen records without construction invariants.
+- A project-owned `.pyi` declaration exists only where a native or third-party API lacks sufficiently precise
+  types for its supported boundary. It describes actual runtime names, signatures, borrowing and return shapes,
+  including native mutable parser trees. Its version and native conformance are tested. It never invents an
+  immutable result or a nonexistent export to satisfy a type checker.
 - No `from __future__ import annotations` and no `if TYPE_CHECKING:` block. The body of such a block never runs,
   so full branch coverage would need the exclusion that `pragma: no cover` bans; an import used only in
   annotations is an ordinary import.
@@ -51,43 +102,69 @@ gate-closure condition. Tests follow the same rules as the package, and ruff and
   type-parameter syntax, and `Result` as their union. Each module declares its own union of error records, and a
   function whose failure is anticipated (a missing tool, a declined consent, a digest mismatch, a build error)
   returns `Err` of one of them.
+- `None` represents genuine optional absence, never a failed parse, failed lookup or validation error whose
+  cause the caller needs. Collection composition preserves input order and failure reasons; it does not
+  discard unsuccessful elements or introduce another competing outcome convention.
 - Only an I/O adapter catches an exception, only a narrow standard-library one such as `OSError`,
   `subprocess.TimeoutExpired` or `urllib.error.URLError`, and it translates it to a typed error where it arises.
   An unexpected defect propagates as a traceback; nothing swallows it, and no retry loop is driven by
   exceptions.
 - `main(argv)` in `src/agentctl/cli.py` turns a `Result` into the exit code and the message the user sees.
-- A `match` over a closed union names every member and has no wildcard case, so a new member is a type error at
-  every match instead of a silent fallthrough; the pinned-config co-design confirms that ty reports the gap.
+- A `match` over a closed union names every member without a success catch-all. A new variant must produce a
+  diagnostic from the pinned type/source controls in every relevant return shape, rather than silently falling
+  through. No type-checker capability is assumed without its accepting and refusing control.
+  Open boundary parsers may use a rejecting wildcard, and a generic success-payload extractor may handle its
+  declared open payload domain. Neither permits a success catch-all over a closed domain. Exhaustiveness
+  evidence covers functions returning `None` as well as value-returning functions; an unreachable assertion
+  does not authorize a coverage exclusion or other suppression.
 
 **Values and purity.**
 
-- Functions map immutable values to immutable values: `@dataclass(frozen=True, slots=True)`, tuples and
-  frozensets. No mutable global, mutable default or in-place update of a domain value exists.
-- Expressions, comprehensions, pattern matching and small functions are preferred to imperative mutation, without
-  forcing every branch into an expression where a plain statement is clearer.
+- Owned values, fields and returns are concrete recursively immutable values: tuples, frozensets, immutable
+  scalars, enums and frozen records. An outer frozen record or tuple containing mutable data is insufficient.
+  A live mapping proxy is a view, not an immutable snapshot. Generic payloads obey the same ownership contract.
+- Read-only parameter interfaces can restrict the callee's operations but do not establish immutable backing
+  storage, finiteness or stability through another alias. Native parser nodes, handles and framework objects
+  are explicitly borrowed edge capabilities with bounded lifetimes, not owned application values. Mutable
+  collection annotations belong only to honest native decoder contracts, not domain APIs.
+- No first-party in-place container mutation, attribute mutation, `global`, `nonlocal`, shared mutable state,
+  mutable default or hidden cache exists. This includes local accumulator containers, aliases to mutators,
+  subscript assignment or deletion, descriptor writes and reflective mutation. Native I/O necessarily changes
+  external state; that change remains confined to its named adapter and is not a mutable domain model.
+- A local name is bound once per scope, across assignments, parameters, loop targets, captures, context-manager
+  and exception binders, and assignment expressions. Branches return values rather than rebind an accumulator.
+  A comprehension's fresh iteration binding is distinct from assigning a previously bound name. `_` is a
+  discard only when no later read resolves to that binding.
+- Prefer small named functions, expressions, comprehensions and structural matches. Data records carry no
+  behavioral methods. Ordinary values are assembled completely at construction and replaced by new values.
 - Decisions are pure: the provisioning plan, the leg table and verdict, the digest rule, the lane predicates and
   `paths.py` over OS family, environment and home take values and return values, so their tests are `value`
   evidence on every host.
 - Platform choices are functions of the OS value `hostfacts.py` gathers once. No other module branches on
-  `sys.platform` or `os.name`, so every platform's branch runs, is covered and is type-checked on every host.
+  `sys.platform` or `os.name`, so all pure platform-policy values can be exercised and type-checked on Linux. Native adapters execute only on their actual kernel lane and require its separate receipt; pure policy tests cannot stand in for those syscalls.
 
 **Spawns only in `process.py`, and other effects at the edge.**
 
 - Every spawn and exec goes through `src/agentctl/process.py`, the only module that imports `subprocess` or calls
   an `os.exec*`, `os.spawn*`, `os.posix_spawn` or `os.system` function (`src.one-process-module`), and the only one
   where ruff allows S603 and S606.
-- An argv is always a list. Nothing runs a shell or builds a command string, so no user text is ever re-parsed.
+- An argv is an immutable sequence of separate argument values. The process adapter materializes the native
+  library's required container at the boundary. Nothing runs a shell or builds a command string, so no user
+  text is ever re-parsed.
 - Filesystem writes, the urllib download and the handoff live in thin adapters. A file agentctl owns is written
   to a temporary file in the same directory and renamed into place, so an interrupted install or build leaves
   the old file or nothing, and private files are created with their final mode (0600, in a 0700 directory).
-- agentctl unpacks no archive and reads no project configuration, and its only network request is the pinned
+- The Python bootstrap unpacks no archive and reads no project configuration, and its only network request is the pinned
   ghcup URL; cabal and ghcup reach Hackage and downloads.haskell.org as spawned tools. No secret goes on an argv
   or into a log.
 
 **Typed parsing at boundaries.** Everything from outside, whether TOML (the pins, the oracles), JSON
 (`direct_url.json`, `agentctl-core-eval` output), process output, `/etc/os-release`, environment variables or
 downloaded bytes, is parsed into a domain value where it arrives or turned there into a typed error, so core logic
-never handles an unparsed `str`, `bytes` or `dict`. Process output is decoded as UTF-8 explicitly, never through
+never handles an unparsed `str`, `bytes` or native mapping. Decoder aliases describe the complete supported
+recursive native value vocabulary. The parser validates structure, bounds and invariants once and constructs
+an immutable domain value; it does not launder untyped data through `object`, casts or dishonest annotations.
+Process output is decoded as UTF-8 explicitly, never through
 the locale. Python subprocess pipes drain bytes before the caller decodes them and applies universal-newline
 handling, so an invalid byte becomes a typed error rather than an exception in a Windows reader thread
 (`tests/integration/test_runtime_boundaries.py::test_process_errors_and_teardown`,
@@ -97,6 +174,13 @@ library's `shlex` for the shell-quoted `ID` and `VERSION_ID` fields of `os-relea
 
 **Tests.** `unittest.mock` is banned, and `monkeypatch` serves only `setenv`, `delenv` and `chdir`; effects are
 observed through the spawn audit and the fake agent ([testing](testing.md#observers-and-nonces)).
+
+Each pure contract has executable accepting, hostile-input, failure, composition and collection cases where
+applicable, with explicit finite bounds. Repeated evaluations preserve inputs and results. Relevant ambient
+perturbations exercise independence from locale, timezone, working directory, hash order and external state.
+An edge refusal checks the typed reason and observable behavior, not merely a nonzero exit that could hide a
+traceback. Source-rule controls and mutants establish their named obligations; finite examples do not prove
+universal termination, arbitrary callback purity or the soundness of every native dependency.
 
 The check lock loads the standard-library OS extension through a runtime-checked protocol. This keeps the Windows and POSIX interfaces typed without importing an unavailable extension on the other OS; the adapter holds the operating-system lock until its scope exits.
 
@@ -121,12 +205,11 @@ common warnings
   unused binding and requires the build leg to fail.
 - No Haskell CPP: the handshake needs none, because it carries no digest, and a module whose meaning depends on CPP is
   one the style legs cannot read as written.
-- No package the build compiles from Hackage uses `build-type: Configure`, because Windows provisioning installs
-  no MSYS2; that this holds on a real Windows host is confirmed by
-  [Windows and psmux acceptance](../../DEVELOPMENT_PLAN/phase-14-windows-psmux-acceptance.md).
+- Every new Haskell dependency has verified native build requirements for its supported platform. A dependency
+  requiring Unix configure tools cannot silently rely on an unprovisioned Windows environment; its real build
+  requirements belong to the bootstrap plan and native evidence.
 - Dependencies are few and resolved at the pinned `index-state`, starting from the concept note's candidates
-  (`optparse-applicative`, `process`, `directory`, `filepath`, `time`, `async`, `stm`, `tasty`); no TOML parser
-  is needed, because agentctl reads no configuration file. `-Wunused-packages` removes any that a component stops
+  (`optparse-applicative`, `process`, `directory`, `filepath`, `time`, `async`, `stm`, `tasty`); runtime pins and state are validated package-owned data; a parser adds no user-project configuration surface. `-Wunused-packages` removes any that a component stops
   using.
 
 **Style.** `fourmolu.yaml` and `.hlint.yaml` live in `src/agentctl/haskell/`. `fourmolu.yaml` writes out
@@ -285,4 +368,4 @@ Generated sequences cover unsafe screens and require successful safe sends as th
 - [python_haskell_boundary.md](../architecture/python_haskell_boundary.md) — the single owners these rules protect.
 - [system-components.md](../../DEVELOPMENT_PLAN/system-components.md#haskell-package) — every module these rules apply to.
 - [rationale.md](../../DEVELOPMENT_PLAN/rationale.md#concept-note-disposition) — where the concept note's engineering rules went.
-- [Haskell package, quality legs and digest-keyed build](../../DEVELOPMENT_PLAN/phase-3-haskell-package-and-build.md) — the phase that builds the warnings stanza and the style legs.
+- [Python bootstrap and handoff](../../DEVELOPMENT_PLAN/phase-2-python-bootstrap-and-handoff.md) — the phase that builds the warnings stanza and the style legs.

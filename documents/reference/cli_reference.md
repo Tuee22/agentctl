@@ -2,114 +2,86 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Owning phase**: [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md)
+**Owning phase**: [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md)
 
-> **Purpose**: List every agentctl command with its arguments, what it does and its exit status.
+> **Purpose**: Define public commands, raw transport, runtime preparation, capability reporting and exit outcomes.
 
-`agentctl` is the only command you run. `check` runs in agentctl's Python layer; every other command passes, with its
-arguments untouched, to the core binary, which agentctl builds and starts for you and which you never call directly.
-Each command below names the phase that builds it, and the plan's
-[status table](../../DEVELOPMENT_PLAN/README.md#current-phase-status) records which of those phases are built.
+`agentctl` is the permanent pipx/Click entry point. Python obtains the source-built Haskell application and
+forwards product commands. The developer-only `check` command reports complete phase/lane evidence.
+The [plan](../../DEVELOPMENT_PLAN/README.md) owns completion status; a command is exposed only when its real
+owning contract is introduced, with no future placeholder in the handshake.
 
 ## Global Options
 
-Global options go before the command; after the command, every token belongs to it.
+Global options precede the command. Every token after `claude` or `codex`, including `--help`, belongs to
+that agent's raw tail except the checked mandatory-flag/login rules in the launch contract.
 
-| Option | Meaning | Owning phase |
+| Option | Meaning | Owner |
 |---|---|---|
-| `--assume-yes` | Consents in advance to installing missing OS prerequisites. Linux uses root or `sudo -n` without a terminal prompt. The option also applies to check; check refuses missing macOS Command Line Tools without opening their dialog (`tests/unit/test_preconditions.py::test_prerequisite_inspection_platforms_and_errors`). Example: `agentctl --assume-yes list`. | [Toolchain bootstrap](../../DEVELOPMENT_PLAN/phase-2-toolchain-bootstrap.md) |
-| `--help` | `agentctl --help` lists the commands, and `agentctl <command> --help` describes one. After `claude` or `codex`, `--help` is one of the ARGS and goes to the agent. | [Governance, documentation standards and the check skeleton](../../DEVELOPMENT_PLAN/phase-0-governance-and-check-skeleton.md) |
+| `--assume-yes` | Authorizes a concrete missing-prerequisite preparation plan under the applicable privilege policy. Python uses it for bootstrap and passes a typed consent value to Haskell for runtime preparation; it is not appended to agent argv. Privilege alone grants no consent. Tests and check do not run real package managers or installer dialogs. | [Haskell runtime and platform policy](../../DEVELOPMENT_PLAN/phase-3-haskell-runtime-and-platform-policy.md) |
+| `--help` | Describes the introduced public surface without installing runtime dependencies. Agent-side help remains a raw agent argument. | [Python bootstrap and handoff](../../DEVELOPMENT_PLAN/phase-2-python-bootstrap-and-handoff.md) |
 
 ## Names
 
-`NAME` below is a name exactly as `agentctl list` prints it: a managed session's name, such as `api-claude`, or an
-adopted pane's id, such as `%3` on tmux or `=foreign:.%1` on psmux. Windows pane ids include the session because
-different servers can contain the same numeric id. A bare Windows id resolves only when unambiguous; `foreign:%1`
-also names a pane explicitly. A managed session is named `<folder>-<agent>` after the folder it was launched from,
-and a different folder with the same name gets `<folder>-<8 hex digits>-<agent>`
-([session names](../architecture/launch_contract.md#session-names)). Every command works on one multiplexer server:
-the one `$TMUX` names when it is set, otherwise your default server.
+Managed names derive from canonical folder plus agent, with a path-hash disambiguator for equal basenames.
+Targets retain exact namespace/registry, server/session instance and native pane identity.
+Debian tmux uses the selected user server; managed Windows sessions use agentctl's stable private registry.
+A system psmux command's default listing does not include that private namespace.
+
+External adoption names its registry/endpoint explicitly through the target descriptor defined by
+[sessions and ownership](../architecture/sessions_and_ownership.md#identity). An ambiguous bare pane id is
+refused. A live external session can be incompatible with observation or guarded input even when attachment
+is permitted; compatibility grants no ownership.
 
 ## Commands
 
-| Command | Arguments | What it does | Owning phase |
+| Command | Arguments | Contract | Owner |
 |---|---|---|---|
-| `agentctl claude [ARGS...]` | `ARGS`: passed to claude verbatim | Launches claude for the current folder in a tmux (Linux, macOS) or psmux (Windows) session named `<folder>-claude`, after checking the multiplexer, claude and claude's login, then attaches you to it. claude gets `ARGS` with `--dangerously-skip-permissions` at the end, or immediately before the first bare `--`; copies of that flag before the `--` are dropped. When the folder's session is alive, it re-attaches without the checks and says that `ARGS` were not applied. Login-shaped `ARGS` (`auth login…`, `setup-token`, a `/login` prompt) are refused. | [Launch command and passthrough](../../DEVELOPMENT_PLAN/phase-6-launch-and-passthrough.md) |
-| `agentctl codex [ARGS...]` | `ARGS`: passed to codex verbatim | The same for codex, in `<folder>-codex`, with `--dangerously-bypass-approvals-and-sandbox --no-daemon` placed the same way; copies of those flags and of `--yolo` before the `--` are dropped. `login…` is refused. | [Launch command and passthrough](../../DEVELOPMENT_PLAN/phase-6-launch-and-passthrough.md) |
-| `agentctl list` | none | One row per managed session, then one per adopted pane: name or pane id, agent, folder (managed sessions only), whether the agent's pane is alive (`stale` for an adopted pane that failed revalidation), and whether a client is attached. Sessions agentctl neither manages nor adopted are not listed. | [Session management and adoption](../../DEVELOPMENT_PLAN/phase-7-session-management-and-adoption.md) |
-| `agentctl status [NAME]` | `NAME`, optional; without it, the managed sessions launched from the current folder | The `list` facts plus the agent pane's id and pid and, for a dead pane, its exit status; the screen class read from the pane ([Pane observation and classification](../../DEVELOPMENT_PLAN/phase-8-pane-observation-and-classification.md)); and the watch state, `watched` or `paused` ([Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md)). | [Session management and adoption](../../DEVELOPMENT_PLAN/phase-7-session-management-and-adoption.md) |
-| `agentctl attach NAME` | `NAME`: a managed session | Attaches your terminal to the session; inside tmux it switches your client instead, and without a terminal it prints the attach command and exits 0. It changes nothing on the session, and an adopted pane is refused. | [Session management and adoption](../../DEVELOPMENT_PLAN/phase-7-session-management-and-adoption.md) |
-| `agentctl stop NAME` | `NAME` | A managed session ends, with the agent in it. An adopted pane is forgotten and keeps running, with a notice saying so. Anything else is refused and left untouched. | [Session management and adoption](../../DEVELOPMENT_PLAN/phase-7-session-management-and-adoption.md) |
-| `agentctl adopt PANE --agent AGENT` | `PANE`: a pane id such as `%3`; `AGENT`: `claude` or `codex` | Registers a pane agentctl did not create, without taking ownership; it then appears in `list` under its id and can be watched, and agentctl never ends it. A pane that does not exist, belongs to a managed session or is already adopted is refused. | [Session management and adoption](../../DEVELOPMENT_PLAN/phase-7-session-management-and-adoption.md) |
-| `agentctl watch NAME` | `NAME` | Adds the session or pane to the watch set that `supervisor run` observes. | [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) |
-| `agentctl unwatch NAME` | `NAME` | Removes it from the watch set; the session and its pane are not touched. | [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) |
-| `agentctl pause NAME` | `NAME` | Keeps the watch entry, suspends captures and recovery decisions, and drops an open incident. `resume-watch` takes a fresh baseline before detecting new failures. | [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) |
-| `agentctl resume-watch NAME` | `NAME` | Clears the pause. It resumes supervision, not the agent's goal. | [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) |
-| `agentctl logs NAME` | `NAME` | Prints, in log order, the supervisor's records for exactly that target: every observation, decision, attempt and result, and every notification. | [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) |
-| `agentctl supervisor run [OPTIONS]` | the timing options below | Runs the recovery supervisor in the foreground over the watch set until SIGINT (Ctrl-C) or SIGTERM. Nothing starts it for you, one runs at a time, and stopping it leaves every session running. It never switches models, restarts a crashed agent or sends login input, and its notifications go to its stderr and to the log. | [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) |
-| `agentctl check` | none | Runs the quality gate over the checkout agentctl is installed from: every step and leg, the entire test suite included. It needs an editable install of that checkout with the `dev` extra, and it never prompts. | [Governance, documentation standards and the check skeleton](../../DEVELOPMENT_PLAN/phase-0-governance-and-check-skeleton.md) |
+| `agentctl claude [ARGS...]` | Literal agent arguments | For a new launch, check the user-installed claude and authentication early, prepare/qualify the host backend under consent, create its folder session and attach. Place the required bypass flag before a first bare -- or at the end. Reattach preserves the running process without agent reinstall or fresh authentication. | [Agent preflight and launch](../../DEVELOPMENT_PLAN/phase-5-agent-preflight-and-launch.md) |
+| `agentctl codex [ARGS...]` | Literal agent arguments | The corresponding codex launch, preserving its required bypass and no-daemon flags and refusing login-shaped arguments. A missing selected agent fails clearly; agentctl never installs either CLI. | [Agent preflight and launch](../../DEVELOPMENT_PLAN/phase-5-agent-preflight-and-launch.md) |
+| `agentctl list` | none | List managed and explicitly adopted targets with ownership, identity, lifecycle and backend qualification; no agent login is required. | [Session management and adoption](../../DEVELOPMENT_PLAN/phase-6-session-management-and-adoption.md) |
+| `agentctl status [NAME]` | Optional exact target | Show target/process/dead facts, backend profile and observed class/watch state where qualified; unavailable facts remain explicitly unavailable. | [Session management and adoption](../../DEVELOPMENT_PLAN/phase-6-session-management-and-adoption.md) |
+| `agentctl attach NAME` | Managed exact target | Use its compatible qualified client/endpoint, switch inside the same namespace where valid, or report an attach instruction without a terminal. Do not restart or migrate the session. | [Session management and adoption](../../DEVELOPMENT_PLAN/phase-6-session-management-and-adoption.md) |
+| `agentctl stop NAME` | Exact managed/adopted target | End only a revalidated managed session; forget an adoption without ending its pane. | [Session management and adoption](../../DEVELOPMENT_PLAN/phase-6-session-management-and-adoption.md) |
+| `agentctl adopt PANE --agent AGENT` | Explicit pane/endpoint descriptor and agent | Record checked external identity without ownership or changing its settings. External Windows registry selection is explicit, not inherited from the managed namespace. | [Session management and adoption](../../DEVELOPMENT_PLAN/phase-6-session-management-and-adoption.md) |
+| `agentctl watch NAME` | Exact target | Enable opt-in supervision only with the required checked observation/input capabilities; incompatible targets receive a named refusal. | [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) |
+| `agentctl unwatch NAME` | Exact target | Remove watch intent without touching its process or session. | [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) |
+| `agentctl pause NAME` | Exact target | Keep watch intent but stop observations/recovery and discard the open incident. | [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) |
+| `agentctl resume-watch NAME` | Exact target | Take a fresh baseline and resume supervision, not the agent's internal goal. | [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) |
+| `agentctl logs NAME` | Exact target | Print complete decision, observation, attempt, delivery and notification records without secrets or captured private screen content. | [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) |
+| `agentctl supervisor run [OPTIONS]` | Timing policy | Run the explicit foreground loop with one owner lock and qualified conditional submission. Unknown delivery halts/escalates rather than replaying input. Stop releases its lock without ending targets. | [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) |
+| `agentctl check` | none | Run all introduced legs and present tests, retain all failures and emit complete per-phase/lane and overall reports. | [Governance and phase evidence](../../DEVELOPMENT_PLAN/phase-0-governance-and-phase-evidence.md) |
 
-`list` and `status` use the [session table format](../architecture/sessions_and_ownership.md#what-each-command-may-touch),
-with a JSON-string folder field so a path cannot split the tab-separated rows.
-`status` appends `SCREEN`, containing the current [screen class](../architecture/supervisor_contract.md#screen-classes-and-fixture-provenance).
-An unvalidated stale entry reports `Unknown`.
-Both tables append `WATCHED` and `PAUSED`, each `yes` or `no`; a paused target remains watched.
-Repeated `watch` preserves a pause. Enabling or resuming watch intent requires a current managed or adopted target;
-pause and unwatch can disable an existing stale entry.
+The [launch contract](../architecture/launch_contract.md) owns exact flags, login refusal and startup behavior.
+The [supervisor contract](../architecture/supervisor_contract.md) owns state progression, fingerprints,
+guarded submission and explicit limits. Public tables use escaped/structured fields so hostile folder text
+cannot create extra rows. No command prints credentials, full environments or source-build secrets.
 
-`agentctl supervisor run` takes these timing options and reads no configuration file:
-
-| Option | Default | Meaning |
-|---|---|---|
-| `--poll-seconds` | `5` | Seconds between captures of each watched pane |
-| `--initial-delay-seconds` | `30` | The backoff delay before the first recovery attempt |
-| `--max-delay-seconds` | `900` | The longest any backoff delay grows |
-| `--multiplier` | `2` | The factor by which each backoff delay exceeds the one before |
-| `--jitter-fraction` | `0.2` | The random spread applied to each delay, as a fraction of it |
-
-The contracts behind these rows are in [the launch contract](../architecture/launch_contract.md),
-[sessions and ownership](../architecture/sessions_and_ownership.md), [the supervisor contract](../architecture/supervisor_contract.md)
-and [the quality gate](../engineering/quality_gate.md).
-
-This table is joined both ways against the code by
-`tests/integration/test_command_surface.py::test_cli_reference_joins_click_and_handshake`: every command in click's
-command list, and every command in the core binary's handshake command list, has a row here, and every row whose owning
-phase the status table records as built is in click's list and, except `check`, in the handshake list.
+Timing options remain explicit values: poll interval, initial/max delay, multiplier and jitter fraction.
+Their defaults and bounds live in the independent backoff/settings oracle and are validated as a whole.
+No hidden profile/config parser changes these values.
 
 ## Exit Status
 
-`agentctl claude` and `agentctl codex` exit with the status of their outcome
-([failure and warnings](../architecture/launch_contract.md#failure-and-warnings)):
+Successful product operations return zero; typed usage/readiness/ownership/authentication/capability failures
+return nonzero with the specific problem and remedy on stderr. An agent exiting inside the startup window
+propagates its actual status and captured output, with no failed owned session left behind.
+A later interactive detach does not claim to report the agent's eventual exit.
 
-| Status | Outcome |
-|---|---|
-| `0` | Your client detached, or the session ended; without a terminal, the session exists and its attach command was printed |
-| `1` | Any other launch failure, such as both of the folder's names being held by other sessions |
-| `2` | Login-shaped `ARGS` refused |
-| `3` | Multiplexer missing |
-| `4` | Multiplexer older than its floor |
-| `5` | Agent missing |
-| `6` | Windows `.cmd` or `.bat` shim refused |
-| `7` | Agent logged out |
-| `8` | Auth check failed |
-| The agent's own status | The agent exited during the startup window; its output is shown first and its session closed ([instant exit](../architecture/launch_contract.md#instant-exit)) |
+A failed source build, missing consent/elevation, pending reboot, unsupported Linux distribution, malformed
+artifact, missing requested agent or unqualified backend creates no new agent session. Bootstrap failure
+precedes product dispatch and preserves its complete diagnostic.
 
-After the startup window the multiplexer client does not carry the agent's exit status, so a launch that attached exits
-0 however the agent later ends.
-
-Every other command exits 0 when it did what its row says, and non-zero with a warning on stderr when it failed or
-refused ([troubleshooting](../operations/troubleshooting.md)). In particular, `stop` exits 0 for a managed session and for
-an adopted pane; `logs` exits non-zero when the target has no records; `supervisor run` exits 0 on SIGINT or SIGTERM and
-non-zero while another supervisor holds the lock; and `check` exits 0 only when every step and leg ran and passed. A
-first run that cannot provision the toolchain or build the core binary, such as one meeting a missing prerequisite
-without consent, exits non-zero before the command itself runs.
+The gate's overall exit reports complete checkout health. Phase closure instead consumes the canonical
+complete passing phase/lane report over current owned and prerequisite inputs; a later-only failure remains
+visible without erasing earlier trustworthy evidence. Final product closure requires aggregate success.
 
 ## Related
 
-- [troubleshooting.md](../operations/troubleshooting.md) — each warning a command can print, and what to type.
-- [installation.md](../operations/installation.md) — installing agentctl, the first run and `--assume-yes`.
-- [files_and_state.md](files_and_state.md) — the files these commands read and write.
-- [launch_contract.md](../architecture/launch_contract.md) — the full contract of `claude` and `codex`.
-- [sessions_and_ownership.md](../architecture/sessions_and_ownership.md) — managed sessions, adopted panes and their commands.
-- [supervisor_contract.md](../architecture/supervisor_contract.md) — what `supervisor run` observes, decides and sends.
-- [python_haskell_boundary.md](../architecture/python_haskell_boundary.md) — how every command but `check` reaches the core binary.
+- [installation](../operations/installation.md) — pipx and first-use preparation.
+- [troubleshooting](../operations/troubleshooting.md) — named refusals and remedies.
+- [files and state](files_and_state.md) — private artifacts and runtime registries.
+- [launch](../architecture/launch_contract.md) — exact argv and startup.
+- [sessions](../architecture/sessions_and_ownership.md) — ownership and adoption.
+- [supervisor](../architecture/supervisor_contract.md) — guarded recovery.
+- [gate](../engineering/quality_gate.md) — phase evidence and overall result.

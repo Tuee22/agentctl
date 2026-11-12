@@ -2,198 +2,139 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Owning phase**: [Session management and adoption](../../DEVELOPMENT_PLAN/phase-7-session-management-and-adoption.md)
+**Owning phase**: [Session management and adoption](../../DEVELOPMENT_PLAN/phase-6-session-management-and-adoption.md)
 
-> **Purpose**: Define which sessions agentctl manages, which panes it only adopts, how it identifies each, and
-> what `list`, `status`, `attach`, `stop` and `adopt` may do to them.
+> **Purpose**: Define managed and adopted identities, backend compatibility, and the authority of each session command.
 
 ## TL;DR
 
-- A **managed** session is one that `agentctl claude` or `agentctl codex` created. Its identity lives in its
-  `@agentctl_*` session options, so it exists exactly as long as the session does, and no file lists it.
-- An **adopted** pane is a pre-existing pane the user registers with `agentctl adopt %N --agent claude|codex`.
-  It is recorded in the adopted registry under `state` and is never owned: `stop` forgets it and leaves it
-  running (R17.1).
-- Everything else is **foreign**: agentctl lists none of it and touches none of it.
-- `list`, `status`, `attach`, `stop` and `adopt` work with no supervisor running (R16). A session ends only
-  through `kill-session -t =NAME` on a managed session, and agentctl never runs `kill-server`.
+- A managed session is created by agentctl and carries its live owned metadata. An adoption registers an
+  existing pane without transferring ownership. Other sessions remain foreign.
+- A target includes its backend/namespace and live generation identity. A session name, pane number or PID
+  alone cannot authorize a write after a server or pane has been replaced.
+- Debian tmux uses the normal user-selected server. Managed Windows sessions use agentctl's qualified psmux
+  build and stable private registry; system-installed psmux remains separate.
+- Session commands do not require a supervisor or an installed agent CLI merely to manage existing work.
+  Watching, human attachment and ownership are independent.
+- Only explicit `stop` or cleanup of a newly failed owned launch ends a managed session. Forgetting an
+  adoption, stopping the supervisor or updating a backend never ends an adopted pane.
 
 ## Managed, Adopted and Foreign
 
-| Kind | How it arises | Identity | Addressed as |
+| Kind | Authority | Durable record | Ordinary address |
 |---|---|---|---|
-| Managed | launch created it | session options on the live server | its session name, such as `api-claude` |
-| Adopted | `agentctl adopt %N --agent claude\|codex` | an entry in the adopted registry | its pane id, such as `%3` |
-| Foreign | any other session or pane | none | not addressable; commands naming it refuse |
+| Managed | Exact owned session operations | Live `@agentctl_*` options; no ghost-session listing file | Checked session name |
+| Adopted | Read/observe, and guarded recovery only when explicitly watched and qualified | Private adopted registry | Complete pane target and backend identity |
+| Foreign | No mutation or automatic recovery | None | Explicit adoption may register an eligible live pane |
 
-Every command talks to one server, the one tmux itself chooses: the server named in `$TMUX` when it is set,
-otherwise the user's default server. A pane id is unique only within its server, so `%3` always means the
-pane `%3` on that server.
+Tmux's selected socket defines its namespace. A Windows backend's canonical registry/config identity defines
+its namespace, and each per-session psmux server has its own generation identity. Equal pane numbers on two
+servers or equal session names in two registries remain different targets. Ambient `TMUX` text is a routing
+hint rather than proof that two clients belong to the same namespace.
+
+A system psmux installation coexists with agentctl's private build. Normal system commands retain the system
+registry; `agentctl list` and `agentctl attach` retain agentctl's registry. External Windows adoption names its
+registry explicitly and uses a separately checked client/server compatibility path. Discovery does not alter
+that registry or import its settings into the private managed backend.
 
 ## Identity
 
-**Managed sessions.** Launch writes `@agentctl_owner` (`agentctl`), `@agentctl_agent`, `@agentctl_folder` and
-`@agentctl_pane` when it creates the session ([multiplexer adapter](multiplexer_adapter.md)), and every
-command reads them from the live server; nothing caches them. Options live and die with the session, so a
-session the user ends with tmux, or one lost to a server restart, simply stops being listed. The same options
-let launch find a folder's session and re-attach ([create or attach](launch_contract.md#create-or-attach)).
-Launch also records its private trampoline status-file path in `@agentctl_status`, encoded like the folder.
-Queries read that file for a retained dead psmux pane, while tmux supplies native exit and signal status. An
-unpublished dead-pane status waits within the existing query deadline; an unavailable status never becomes success.
+A managed session retains checked owner, agent, canonical folder, native pane and trampoline status metadata.
+Its backend/profile identity records the qualified runtime at creation. Every use reads live session facts;
+metadata is not proof that the recorded executable still runs. The adapter checks the actual server instance,
+endpoint/registry, session creation identity, pane generation and process creation identity where available.
+Canonical folder comparison is case-folded on Windows and byte-preserving on POSIX.
 
-**Adopted panes.** The adopted registry is `<state>/adopted.json`, rewritten atomically (a temporary file
-renamed into place); [files and state](../reference/files_and_state.md) owns its format. Each entry holds the
-server's endpoint identity in the `socket` field, the pane id, the pid of the pane's first process at adoption and
-the agent. The adapter supplies a tmux socket path or an opaque psmux identity containing the namespace and
-addressed server: its opaque string encodes a JSON array of `psmux`, the reported namespace and the stable session
-id. Windows need not have a filesystem socket. Every use revalidates the entry: its endpoint must
-name the live server the command talks to, and the pane id must exist
-there with the recorded pid. An entry whose server is gone, whose pane id is missing or whose pid differs,
-because the server restarted and reused the id, is **stale**: `list` and `status` show it as stale, nothing
-captures from or sends to it, and `stop` forgets it. A restart that reuses both the id and the pid for another
-process on the same socket is not detected, because the socket, pane id and pid are all revalidation compares.
+An adopted registry entry stores the complete checked endpoint/registry, backend identity, server generation,
+session and pane identity, process creation identity and explicit agent choice. The registry is an immutable
+snapshot published atomically under an owned lock. Names and `pane_current_command` are display hints; they
+cannot identify the agent, take ownership or authorize a new process after PID reuse.
 
-Windows pane targets include the session, for example `=foreign:.%1`, because different psmux servers can each
-contain `%1`. The table and adopted registry retain this complete target. Adoption also accepts `foreign:%1` as
-input and normalises it; a bare `%1` resolves only when one eligible session contains it. Ambiguity refuses without
-changing the registry (`tests/e2e/test_adopt.py::test_stale_entry_after_server_restart`).
+An entry whose endpoint, server instance, pane generation or process creation identity no longer agrees is
+stale. Stale entries remain diagnosable but are never captured or sent input. A server that restarts with the
+same socket, numeric pane id and PID still has a different generation; it cannot inherit old authority. An
+explicit missing pane does not fall back to the active pane or a prefix sibling.
 
-`#{pane_current_command}` is a hint, never proof of what runs in a pane: `list` shows it beside an adopted pane,
-and `adopt` takes the agent from `--agent` rather than guessing it from the process name.
+Psmux targets retain the checked session as well as the native pane id. A bare pane id is accepted only if
+exactly one eligible server contains it; ambiguity is a typed refusal that changes no registry. An external
+adopted pane has no agentctl trampoline status file, so unavailable exit status remains unavailable rather
+than being replaced by psmux's placeholder zero.
+
+The running server's executable provenance is checked independently from the command client's artifact.
+New-client/old-server combinations expose only their qualified operations. An accepted version banner alone
+never enables supervision. Backend incompatibility is distinct from a stale target: a live legacy session can
+remain accessible for its tested read-only or attachment operations while automated recovery is unavailable.
 
 ## The Commands
 
-- **`list`** prints one row for each managed session on the server, then one for each adopted pane: its name
-  or pane id, the agent, the folder (decoded from `@agentctl_folder`; managed sessions only), whether the agent's
-  pane is alive (`stale` for an adopted entry that failed revalidation) and whether a client is attached;
-  adopted panes are marked adopted. Foreign sessions are not listed.
-- **`status [NAME]`** prints the same facts for one session or pane, plus the agent pane's id and pid and, for a
-  dead pane, its exit status. With no argument it reports the managed sessions launched from the current folder,
-  both agents included. A name that is neither managed nor adopted is refused with a non-zero exit.
-  [Pane observation and classification](../../DEVELOPMENT_PLAN/phase-8-pane-observation-and-classification.md)
-  adds the screen class, from a capture this `status` run takes, classified by the agent `@agentctl_agent`
-  names or, for an adopted pane, the agent recorded at adoption;
-  [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) adds the watch state, `watched` or
-  `paused`, and watching never takes ownership.
-- **`attach NAME`** takes a managed session and hands the terminal to it the way launch does:
-  `attach-session -t =NAME`, `switch-client -t =NAME` when `$TMUX` is set, or, with no TTY, the printed attach
-  command and exit 0. It changes nothing on the session. An adopted pane or a foreign session is refused; the
-  multiplexer's own commands reach it.
-- **`stop NAME`** depends on the kind:
-  - a managed session ends with `kill-session -t =NAME`, its agent pane included, and the command exits 0;
-  - an adopted pane, stale or not, is forgotten and nothing else happens; agentctl prints
-    `agentctl: %3 is adopted, not owned. Registration removed; agentctl did not end the pane.` and exits 0;
-  - anything else is refused with a non-zero exit, and nothing is touched:
-    `agentctl: api is not a session agentctl manages; nothing was stopped.`
-- **`adopt PANE --agent claude|codex`** reads the pane's `#{pane_pid}` and records the entry. It refuses with a
-  non-zero exit, recording nothing, when the pane does not exist, belongs to a managed session, or is already
-  adopted, or when it is no longer alive. It sets no option, sends no key and ends nothing: adopting a pane transfers
-  no ownership.
+- `list` reports managed sessions in the selected namespace and registered adopted targets, with ownership,
+  agent, folder, live/dead/stale state, pane/process identity, attachment, backend/profile compatibility and
+  watch state. It does not enumerate unrelated foreign sessions as managed work.
+- `status [NAME]` selects an owned or registered target, or the managed sessions for the current folder. It
+  adds current observation/classification only after identity and capability checks. Stale, incoherent or
+  incompatible observations display `Unknown` or the named unavailable reason without sending input.
+- `attach NAME` selects a managed session and invokes its exact qualified foreground client and namespace.
+  Within a compatible client in that namespace it can switch; without a terminal it prints `agentctl attach
+  NAME`. It changes no session metadata, agent installation or authentication state.
+- `stop NAME` ends one currently revalidated managed session by exact target. For an adopted target, live or
+  stale, it removes only the registration and states that the pane continues running. A foreign name refuses
+  without sending a terminal command.
+- `adopt PANE --agent claude|codex` registers an eligible live external pane with explicit agent choice and
+  complete identity. It refuses a missing, dead, ambiguous, managed or already registered target. It never
+  sets session options, types keys, installs an agent or ends a process.
+
+[The CLI reference](../reference/cli_reference.md) owns exact syntax, output fields and exits. JSON quoting
+within tabular display preserves folder, session and command text containing whitespace or control characters.
+Human-readable hints remain separate from fields used for identity. An empty listing still has a header.
 
 ## What Each Command May Touch
 
-`list` prints a tab-separated table headed `NAME`, `AGENT`, `FOLDER`, `STATE`, `EXIT`, `CLIENTS`,
-`PANE`, `PID`, `KIND`, `SESSION` and `COMMAND`. Folder, session and command cells are JSON strings, preserving quotes,
-separators and control characters without splitting a row. The final columns show the containing session and the
-adopted pane's current-command hint; hints never establish identity. A running pane has `STATE` `alive` and no exit
-status, shown as `-`; a retained dead managed pane has `STATE` `dead` and its actual exit status. An adopted pane's
-unavailable status is also `-`, since psmux's native status variable is a placeholder and a foreign pane has no
-agentctl trampoline status file. A stale entry shows its recorded pane and pid and no current hint. An empty result
-still prints the header. The pure ownership rows and
-the native server tests agree on these facts (`tests/unit/test_sessions_values.py::test_list_rows_match_oracle`,
-`tests/e2e/test_sessions.py::test_list_shows_only_managed`,
-`tests/e2e/test_sessions.py::test_status_reports_dead_pane`).
-
-`status` appends `SCREEN`, the pane's current [screen class](supervisor_contract.md#screen-classes-and-fixture-provenance).
-Each invocation takes a fresh capture and selects the classifier from the managed agent option or adopted registry
-entry. A stale adopted entry displays `Unknown` without capturing an unvalidated pane
-(`tests/e2e/test_status_screen.py::test_screen_column_shows_fixture_class`,
-`tests/e2e/test_status_screen.py::test_screen_column_uses_the_agents_classifier`).
-
 | Action | Managed | Adopted | Foreign |
 |---|---|---|---|
-| `list`, `status` | yes | yes, revalidated | no |
-| `attach` | yes | refused | refused |
-| set session options | launch, at creation only | never | never |
-| capture and send, once watched | the supervisor, at the agent pane | the supervisor, after revalidation | never |
-| `kill-session -t =NAME` | `stop`, and launch cleaning up its own failed launch | never | never |
-| `kill-server` | never | never | never |
+| List and status | Live facts and checked observation | Registered identity and checked observation | No ordinary managed row |
+| Attach | Qualified foreground client | Explicit external-user workflow only | No implicit attachment |
+| Session-option writes | Creation-owned metadata and bounded startup handling | Never | Never |
+| Guarded recovery | Explicitly watched and fully qualified target | Explicitly watched, revalidated and fully qualified target | Never |
+| Session termination | Explicit stop or cleanup of this failed new launch | Never | Never |
+| Server termination, respawn, global settings | Never | Never | Never |
 
-`kill-server` is not in the typed vocabulary at all, so no production path can end the user's server, and
-the exact `=NAME` target means `stop api` can never reach `api-claude`. The decisions behind this table are pure
-and their rows are in `tests/oracles/session_ownership.toml`
-(`tests/unit/test_sessions_values.py::test_list_rows_match_oracle`,
-`tests/unit/test_sessions_values.py::test_stop_plan_matches_oracle`,
-`tests/unit/test_adopt_values.py::test_adopt_rows_match_oracle`). The real tests run on a private server beside a
-foreign session the harness creates as their control:
+Exact targeting protects prefix siblings. A target is revalidated immediately before every write, and a
+conditional backend operation rechecks its generation at execution. Permission to forget a registration
+carries no terminal mutation capability. An adopted stale entry can be forgotten without connecting to a new
+server that happens to reuse its name.
 
-- `list` shows the managed sessions and not the harness's own, which the harness's `list-sessions` does show
-  (`tests/e2e/test_sessions.py::test_list_shows_only_managed`), and `status` reports a dead pane with its exit
-  status and defaults to the current folder (`tests/e2e/test_sessions.py::test_status_reports_dead_pane`,
-  `tests/e2e/test_sessions.py::test_status_defaults_to_current_folder`);
-- `stop` ends only the named managed session, refuses the foreign one and never prefix-matches
-  (`tests/e2e/test_sessions.py::test_stop_kills_only_the_named_managed_session`,
-  `tests/e2e/test_sessions.py::test_stop_refuses_foreign_session`,
-  `tests/e2e/test_sessions.py::test_stop_never_prefix_matches`);
-- `attach` attaches or switches under a PTY and prints its command without one
-  (`tests/e2e/test_sessions.py::test_attach_and_switch_under_pty`,
-  `tests/e2e/test_sessions.py::test_attach_without_tty_prints_command`);
-- after `stop %N` the adopted pane is alive with the same pid and its entry is gone, its session carrying no
-  agentctl option (`tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership`), and a server restarted under
-  the test, whose new pane reuses the id with another pid, leaves the entry stale and never acted on
-  (`tests/e2e/test_adopt.py::test_stale_entry_after_server_restart`).
+A backend build/update prepares a new immutable artifact; it does not rewrite existing sessions or aliases.
+A deliberate migration identifies the client and server separately, preserves old artifacts needed by active
+sessions, and recreates only sessions whose owner explicitly requests recreation. No update silently restarts
+agents or turns legacy sessions into compatible ones by editing metadata.
 
 ## Independence from the Supervisor
 
-Being managed or adopted, being watched and being attached by a human are independent. Attaching changes
-neither ownership nor supervision, unwatching never ends the agent, and stopping the supervisor never ends a
-managed or adopted session; [the supervisor contract](supervisor_contract.md) owns those last two rules (R17).
+Session management, adoption, watching and human attachment are independent. The supervisor starts only when
+the user requests it. Attaching does not grant watch permission; watching does not grant ownership; pause and
+unwatch change only watch intent. Stopping supervision releases its lock and leaves managed and adopted panes
+and their process identities intact.
 
-Session management never needs the supervisor. Every command here reads the session options and the adopted
-registry directly, and the supervisor is a foreground process that nothing starts automatically, so sessions
-stay listable, attachable and stoppable whether or not one is running.
+A command uses only its actual prerequisites. Listing, status, attachment and stopping do not demand both
+agent CLIs or fresh authentication. Reattaching an existing live session does not apply new agent ARGS. A new
+launch follows [the launch contract](launch_contract.md#preflight) and checks only its requested agent.
 
 ## WRONG and RIGHT
 
-```text
-WRONG  stop api-claude runs: kill-session -t api-claude
-RIGHT  stop api-claude runs: kill-session -t =api-claude
-```
-
-Without the `=`, a target that matches no session exactly falls back to prefix and pattern matching, so after
-`api-claude` has ended the WRONG command ends `api-claude2`.
-
-```text
-WRONG  stop %3, on an adopted pane, runs: kill-pane -t %3
-RIGHT  stop %3 removes the registry entry, says %3 is still running, and exits 0
-```
-
-The pane predates agentctl and belongs to the user; adopting it registered the pane and transferred nothing,
-so ending it would kill a process agentctl never owned (R17.1).
-
-```text
-WRONG  launch records each managed session in a registry file, and list reads that file
-RIGHT  launch writes the @agentctl_* options, and list reads them from the live server
-```
-
-A file keeps listing a session after the user ends it with tmux or the server restarts, so `list` shows
-ghosts and `stop` aims at names that may now belong to another session.
-
-`list` and `status` append `WATCHED` and `PAUSED` as `yes` or `no`. Watch intent is independent of ownership:
-registered foreign panes remain adopted, and pausing or unwatching changes only the watch registry. Repeated watch
-preserves an existing pause, and effective changes advance the target's revision for the next supervisor baseline
-(`tests/e2e/test_watch_commands.py::test_list_and_status_show_watch_state`,
-`tests/e2e/test_watch_commands.py::test_unwatch_never_touches_session`).
+| WRONG | RIGHT | Why |
+|---|---|---|
+| Resolve a psmux pane by `%1` across every server | Retain backend registry, server/session generation and `%1` | Numeric ids can be equal on different servers |
+| Trust a registry PID after restart | Compare process creation and server/pane generation identities | Numeric reuse does not preserve ownership |
+| Stop an adopted pane with a terminal kill command | Forget its registration and leave it alive | Adoption transfers no ownership |
+| Reconnect with any PATH psmux after an upgrade | Use the qualified client/server combination and exact registry | A new executable does not patch a running server |
+| Treat a system registry as agentctl's private registry | Name and validate the external registry explicitly | Coexistence requires separate runtime state |
 
 ## Related
 
-- [launch contract](launch_contract.md) — how managed sessions are named, created and re-attached.
-- [multiplexer adapter](multiplexer_adapter.md) — the session options, `=NAME` targets and the missing
-  `kill-server`.
-- [supervisor contract](supervisor_contract.md) — watching managed sessions and adopted panes, and R17.
-- [files and state](../reference/files_and_state.md) — the adopted registry's format.
-- [cli reference](../reference/cli_reference.md) — the syntax and exit codes of these commands.
-- [Windows and psmux acceptance](../../DEVELOPMENT_PLAN/phase-14-windows-psmux-acceptance.md) — where psmux pane
-  ids and options are confirmed.
-- [Session management and adoption](../../DEVELOPMENT_PLAN/phase-7-session-management-and-adoption.md) — the
-  phase that builds these commands.
+- [Launch contract](launch_contract.md) — canonical names and create-or-attach.
+- [Multiplexer adapter](multiplexer_adapter.md) — qualification, registries and exact targets.
+- [Supervisor contract](supervisor_contract.md) — watch intent and guarded recovery.
+- [Files and state](../reference/files_and_state.md) — private registry and state schemas.
+- [CLI reference](../reference/cli_reference.md) — syntax, output and diagnostics.
+- [Session management and adoption](../../DEVELOPMENT_PLAN/phase-6-session-management-and-adoption.md) — the owning phase.
+- [Windows application acceptance](../../DEVELOPMENT_PLAN/phase-11-windows-application-acceptance.md) — native Windows instance and coexistence evidence.

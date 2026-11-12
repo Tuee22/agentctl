@@ -3,18 +3,40 @@
 **Status**: Reference only
 **Supersedes**: N/A
 
-> **Purpose**: Introduce agentctl and direct readers to its commands, contracts and development plan.
+> **Purpose**: Introduce the source-built terminal-agent launcher and its governed installation and validation.
 
-agentctl manages terminal coding agents. Its Python application provides a single entry point and a quality gate for the editable checkout.
+agentctl exposes one pipx-installed Click command for launching and managing Claude and Codex in terminal
+multiplexer sessions, with optional conservative recovery supervision.
 
-Install from this checkout with `pipx install --editable '.[dev]'` or `uv tool install --editable '.[dev]'`, using Python 3.12 or later. Run `agentctl check` from the checkout root to validate it.
+The Python package carries source resources and bootstraps the Haskell application locally. Haskell owns
+runtime dependency preparation and session behavior: Debian Linux uses supported APT-managed tmux; Windows
+builds a pinned private psmux with its private toolchain and isolated registry. Claude and Codex are installed
+by the user and checked before a fresh launch. See [installation](documents/operations/installation.md).
 
-Run `agentctl claude [ARGS...]` or `agentctl codex [ARGS...]` from a project folder to start or reattach its named multiplexer session. Agent arguments pass through unchanged, with the mandatory permission flags added. The first launch provisions the pinned Haskell toolchain and builds the core binary when needed. See the [command reference](documents/reference/cli_reference.md) for argument and authentication rules.
+## Commands
 
-`agentctl status` includes each pane's current screen class.
+- `agentctl claude [ARGS...]` and `agentctl codex [ARGS...]` launch or reattach by folder.
+- `agentctl list`, `status`, `attach`, `stop` and `adopt` manage sessions and explicit external adoption.
+- `agentctl watch`, `unwatch`, `pause`, `resume-watch`, `logs` and `supervisor run` control opt-in recovery.
+- `agentctl check` is the sole development gate, reporting complete phase/lane evidence and overall health.
 
-Use `agentctl list` to list managed sessions and adopted panes, `agentctl status [NAME]` to inspect them, and `agentctl attach NAME` or `agentctl stop NAME` to attach to or end a managed session. `agentctl adopt PANE --agent claude|codex` registers an existing pane; stopping an adopted pane only forgets its registration and leaves it running.
+The [CLI reference](documents/reference/cli_reference.md) defines arguments and refusals.
+The [development plan](DEVELOPMENT_PLAN/README.md) records which target contracts have qualifying evidence;
+the [deletion ledger](DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) records standing migration work.
 
-Use `agentctl watch NAME|%ID` to enable recovery supervision, `agentctl pause NAME|%ID` to pause it, `agentctl resume-watch NAME|%ID` to resume it, and `agentctl unwatch NAME|%ID` to opt out. Run `agentctl supervisor run` in the foreground to supervise watched targets and `agentctl logs NAME|%ID` to read a target's decision log. Stopping the supervisor leaves agent sessions running. See the [supervisor contract](documents/architecture/supervisor_contract.md) for recovery conditions and safety rules.
+## Contributing and Validation
 
-The [development plan](DEVELOPMENT_PLAN/README.md) records implementation progress and validation requirements. The [documentation index](documents/README.md) links the contracts, engineering guides and command reference.
+Install the editable checkout with its dev extra through pipx and follow [AGENTS.md](AGENTS.md).
+Python follows project-owned strict functional standards; Haskell owns runtime provisioning.
+Never stage, commit, push or move HEAD as an agent.
+
+On Windows, Linux validation may use a dedicated right-sized Debian WSL2 instance with all Linux dependencies
+and a verified bind mount of the live Windows checkout. Native Windows and macOS evidence remain separate.
+Read the [validation runbook](documents/operations/validation_runbook.md) before preparing resources.
+
+## Related
+
+- [documents](documents/README.md) — canonical product contracts.
+- [development plan](DEVELOPMENT_PLAN/README.md) — execution and status.
+- [code standards](documents/engineering/code_standards.md) — source discipline.
+- [quality gate](documents/engineering/quality_gate.md) — validation and evidence.

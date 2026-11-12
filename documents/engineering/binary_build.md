@@ -2,183 +2,84 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Owning phase**: [Haskell package, quality legs and digest-keyed build](../../DEVELOPMENT_PLAN/phase-3-haskell-package-and-build.md)
+**Owning phase**: [Python bootstrap and handoff](../../DEVELOPMENT_PLAN/phase-2-python-bootstrap-and-handoff.md)
 
-> **Purpose**: State where the Cabal project lives and why, how a digest of its sources and pins keys the build, how the binary is built, published and identified, and what the wheel and sdist carry.
+> **Purpose**: Define source-built executable identities, immutable caches, qualification and publication for the Haskell application and its Haskell-managed Windows backend.
 
-This page is the prose home of R5 in the [requirements table](../../DEVELOPMENT_PLAN/00-overview.md#requirements);
-its data home is `tests/oracles/pins.toml`. `src/agentctl/bootstrap/cache.py` computes source identity,
-`bootstrap/binary.py` orchestrates reuse and publication, and `bootstrap/build.py` owns the one Cabal path.
-The application and `agentctl check` share that path, so the binary a user runs is built as the gate builds it.
-The GHC and cabal it uses come from the
-[toolchain bootstrap](toolchain_bootstrap.md); how the binary is handed a command, and the handshake it
-answers, are in [the Python and Haskell boundary](../architecture/python_haskell_boundary.md).
+This page specifies the required contract. The phases join source, packaging, native controls and receipts;
+an existing cache entry does not establish conformance to its build or capability policy.
 
 ## The Cabal Project as Package Data
 
-The Cabal project is a directory of the Python package, `src/agentctl/haskell/`:
+The Python distribution carries Haskell sources beside the bootstrap. Pipx exposes Click without native
+compilation during wheel installation. First use obtains the pinned toolchain and builds those installed
+sources. Editable installs read the live checkout, including uncommitted files; builds require no commit or
+clean worktree. Output and dependency stores remain outside package sources.
 
-| Path | Holds |
-|---|---|
-| `agentctl-core.cabal` | the `AgentCtl.*` library, the executables `agentctl-core`, `agentctl-core-eval` and `agentctl-fake-agent`, the test suite `agentctl-core-test`, and the common warnings stanza of the [code standards](code_standards.md) |
-| `cabal.project` | the pinned Hackage `index-state` |
-| `fourmolu.yaml`, `.hlint.yaml` | the repository style configuration the `fourmolu` and `hlint` legs read |
-| `app/`, `src/`, `test/` | the executables' mains, the library, and the tasty suite |
-
-It lives inside the package for three reasons:
-
-- **Editable installs see every edit.** An editable install links the package directory, so the sources check
-  builds are the checkout's own, byte for byte.
-- **Wheels and sdists carry it with no extra rule.** hatchling's ordinary selection includes package data and
-  honours `.gitignore`.
-- **One location in every install kind.** The build finds the project beside `agentctl/bootstrap/`, whether
-  that is the checkout under an editable install or `site-packages` under a wheel install. cabal writes only
-  under `--builddir` and `CABAL_DIR`, so nothing is ever written beside the sources.
-
-```text
-WRONG  [tool.hatch.build.targets.wheel.force-include]  "haskell" = "agentctl/haskell"
-RIGHT  the Cabal project is src/agentctl/haskell/, ordinary package data, with no force-include rule
-```
-
-The WRONG form copies the tree into editable wheels as a snapshot, so check would build stale sources after
-the first edit, and its directory walk ignores `.gitignore`, so a checkout with a local build ships
-`dist-newstyle/` ([decision D-23](../../DEVELOPMENT_PLAN/rationale.md#decisions)).
+The inventory includes the Cabal manifest/project and every declared application, library and test source. Actual foundation/protocol and transport-test components have only introduced prerequisite imports; later product libraries and the final command executable extend that component graph. No early component advertises a future stub. The complete gate attempts every present component, while early build-mechanism evidence uses its actual independent native component and failure controls.
+The Python package ships no developer-built application binary. After bootstrap, Haskell owns the native
+Windows psmux source-build workflow and its independent source/patch/toolchain identity.
 
 ## The Digest
 
-The digest is a SHA-256 over three inputs. Each field has an eight-byte unsigned big-endian byte length followed
-by its bytes, so field boundaries are unambiguous:
+Each native component identity length-prefixes its actual source/dependency-closure path/body pairs, relevant manifest/pins and platform identity. An early foundation/transport component contains no later product source. The full runtime executable has its own cumulative implemented-source identity; a later executable change does not alter an earlier independent component receipt. Missing required sources, links, special entries and incomplete traversal return typed errors.
+Style configuration has a separate identity unless it changes compilation. Inventory projection is pure;
+filesystem reads and native hashing capabilities stay at explicit edges.
 
-1. the relative POSIX path and the bytes of `agentctl-core.cabal`, `cabal.project`, and every file under
-   `app/`, `src/` and `test/`, in sorted path order;
-2. the bytes of `src/agentctl/bootstrap/pins.toml`, which holds the GHC and cabal pins;
-3. the host's platform triple, the one that selects the ghcup pin, so a home directory shared between machines
-   never hands one of them the other's binary.
-
-Paths use UTF-8 and the triple uses ASCII. Directory entries contribute no bytes. Missing required files,
-symlinks, special files and incomplete directory traversal refuse the build rather than silently omitting inputs
-(`tests/unit/test_digest.py::test_inventory_and_protocol_boundaries`).
-
-`fourmolu.yaml` and `.hlint.yaml` change no binary and are left out, as is everything outside the project
-except the pins, so a documentation or Python edit never rebuilds Haskell. `tests/unit/test_digest.py::test_oracle_rows`
-applies the digest rows of `tests/oracles/pins.toml`: it computes every expected digest with `hashlib` from this
-rule, never with the subject's own helper, and requires that editing a `.hs` file, the `.cabal` file,
-`cabal.project` or a pin changes the digest while editing `fourmolu.yaml` or a file outside the project does
-not.
+The psmux digest includes upstream revision/archive, complete ordered patch contents, workspace and lockfile
+inputs, exact Rust compiler/target, relevant MSVC/SDK identities, build flags and backend capability schema.
+Its banner is not its identity. Cached dependencies are admitted by recorded inputs rather than presence alone.
 
 ## Build and Publish
 
-A command that needs the binary takes these steps, and stops at the first that answers:
+An accepted application digest entry is checked before provisioning. A miss acquires a native build lock,
+checks again, ensures the exact toolchain, builds in owned storage, verifies the handshake and publishes a
+sibling staging directory with one rename. Published entries remain immutable. Concurrent waiters reuse the
+qualified winner; failed builds and incomplete staged entries never replace a previous executable.
 
-1. **Digest hit.** If `data/bin/<digest>/agentctl-core` (`agentctl-core.exe` on Windows) exists, nothing is built
-   and nothing is spawned before the handoff (`tests/integration/test_build_cache.py::test_second_run_spawns_nothing`).
-2. **Lock.** Otherwise the build takes the native advisory lock `cache/build/<digest>/build.lock` and looks again,
-   so a waiter reuses the published winner (`tests/integration/test_build_cache.py::test_waiter_uses_published_winner`).
-   Contention waits for at most 30 minutes; other kernel errors refuse immediately. Scope exit releases the lock,
-   including exceptions (`tests/integration/test_binary_boundaries.py::test_native_lock_contention_timeout_and_exception_release`).
-3. **Toolchain.** The provisioning plan of the [toolchain bootstrap](toolchain_bootstrap.md) runs, and is empty on
-   a provisioned host.
-4. **Index.** `cabal update` runs only when the private package index does not yet reach the pinned
-   `index-state`. agentctl records the `index-state` each successful update ran for, so a warm run makes no
-   network request.
-5. **Build.** `<cabal> build exe:agentctl-core --enable-tests -w <ghc> --builddir=<cache>/build/<digest>`, run in
-   the project directory with absolute `<cabal>` and `<ghc>` from `ghcup whereis`.
-6. **Publish.** Under `data/locks/<digest>.publish.lock`, the file `cabal list-bin exe:agentctl-core` names is copied into a
-   temporary directory under `data/bin/`, asked for the handshake, and only when it answers with the protocol
-   version Python expects is that directory renamed to `data/bin/<digest>`. A winner found before publication is
-   retained. Owned staging directories are removed, while every published digest directory stays untouched
-   (`tests/integration/test_binary_boundaries.py::test_native_lock_spawn_hash_and_publication_race_controls`).
+Haskell uses the same lifecycle for psmux with a separate lock. The reusable builder publishes a build-verified candidate; the separate backend-profile admission requires native behavioral qualification before runtime use. A later profile supplies exact patch/recipe bytes as consumer inputs, without making that profile a prerequisite for the earlier generic builder contract. Cargo uses the locked
+dependency graph and an explicit compiler rather than PATH or an upstream moving default. Online locked
+resolution and offline frozen resolution have distinct readiness requirements; a lockfile alone does not
+promise an offline build.
 
-The flags are the ones check's `cabal-build` leg uses, which builds `all` instead of one executable
-([the eight legs](quality_gate.md#the-eight-legs)). `--enable-tests` therefore gives a user's build the same
-solver plan as the gate's without compiling the tests, and a binary published by a passthrough command is the
-one check's identity step compares. A failed build or a wrong handshake publishes nothing and leaves every
-other digest's directory as it was (`tests/integration/test_build_cache.py::test_failed_build_keeps_previous`,
-`tests/integration/test_build_cache.py::test_handshake_mismatch_rejected`).
-
-Index preparation runs from the owned Cabal directory, including configuration initialization, so Cabal's own
-configuration cache stays outside the bundled sources. A warm receipt requires both the exact project pin and
-the private package index. Missing or unreadable pins, project-local overrides and failed updates produce typed
-build errors and cannot publish a successful receipt
-(`tests/integration/test_build_boundaries.py::test_private_index_receipt_and_failure_boundaries`,
-`tests/unit/test_haskell_gate.py::test_index_pin_and_owned_environment`).
-
-Internal native executions use this same resolver. `build.execute_binary` captures the result;
-`build.start_binary` returns an owned child handle with the same explicit handoff and settings, and its caller
-waits for and reaps that child. Background calls accept no supplied input. Real controls cover working execution,
-unknown targets, an unavailable working directory and the input refusal
-(`tests/integration/test_pane_exec.py::test_background_binary_errors`).
-
-**A private cabal directory.** Every cabal invocation sets `CABAL_DIR` to `cache/cabal`, which then holds
-cabal's configuration, the package index and the store. The user's cabal configuration therefore cannot change
-the flags, repositories or store this build uses, and agentctl never updates the user's package index or adds
-to the user's store. The pinned fourmolu and hlint are built through the same directory into
-`cache/tools/<pin-digest>`. Dependencies compiled into the store are shared between digests, so a source edit
-recompiles only the project's own components. The formats of these directories are in
-[files and state](../reference/files_and_state.md).
-
-**Never on PATH.** `[project.scripts]` in `pyproject.toml` names only `agentctl`, so pipx links nothing else;
-agentctl writes into no directory on PATH; and public binary commands refuse to run without the handoff. The
-internal pane-exec command consumes its private launch spec as [the launch contract](../architecture/launch_contract.md#the-pane-trampoline)
-defines. A user never
-needs its path, and no user-facing document names it.
+Windows roots have a measured native path budget including the deepest generated component filename. A short
+root is registered with canonical path, owner and run nonce before use. Roots outside the main temporary
+folder remain subject to accounting, containment and cleanup. Changing global long-path policy is not a
+validation prerequisite. All build and probe children are reaped before final resource inspection.
 
 ## Binary Identity
 
-Binary identity is the SHA-256 of the file `cabal list-bin exe:agentctl-core` names. Check's `binary-identity`
-step runs after the `cabal-build` leg: it asks `cabal list-bin` for the path built in this run, publishes that
-binary through step 6 when its digest has no directory yet, and then requires the SHA-256 of the built file to
-equal the SHA-256 of `data/bin/<digest>/agentctl-core`, and `agentctl-core` to resolve nowhere on PATH. The
-suite's end-to-end tests run the published binary, so they exercise the bytes cabal built from this tree in
-this run; a stub placed at the digest path, or a binary published from other sources, fails the step.
+The independently located application compiler output and published executable have the same SHA-256 and
+answer the required handoff protocol. The public command is `agentctl`; the internal application runs only
+through its wrapper, application-owned build/test path or authorized pane trampoline.
 
-- **No embedded digest.** The handshake reports the protocol version and the command list only. A digest the
-  binary reported about itself would be a subject self-report, which never counts as evidence; the digest path
-  and the hash of the built file identify it from outside
-  ([decision D-25](../../DEVELOPMENT_PLAN/rationale.md#decisions)).
-- **Test executables stay unpublished.** The suite runs `agentctl-core-eval` and `agentctl-fake-agent` from the
-  paths `cabal list-bin` gives in the same build directory.
-- **Reproducibility is not claimed.** GHC does not promise bit-identical output between builds. A published
-  binary whose build directory was deleted, as clearing the `cache` directory does, can differ from a rebuild of
-  the same digest; the step then fails naming both hashes, and deleting that one `data/bin/<digest>` directory
-  is the remedy. agentctl itself never overwrites it.
+A psmux receipt records source, patches, toolchain, build settings, all produced alias hashes and capability
+results. Agentctl invokes the selected absolute `psmux.exe` path, never installs replacement system aliases,
+and separately identifies the actual running server. Replacing a file or changing a client path upgrades
+neither old servers nor attached clients. [Multiplexer adapter](../architecture/multiplexer_adapter.md)
+owns runtime compatibility and isolation.
 
 ## Packaging
 
-- **Wheel.** The `agentctl` package, including `agentctl/haskell/` with every checkout file under
-  `src/agentctl/haskell/`, and `agentctl/bootstrap/pins.toml`.
-- **sdist.** Every file the VCS does not ignore, which includes the Cabal project, `tests/` and `pyproject.toml`.
-- **What never ships.** `.gitignore` lists `dist-newstyle/`. Check builds outside the tree, so a
-  `dist-newstyle/` exists only after an inner-loop `cabal build` in the checkout, and hatchling's selection
-  leaves it out. No binary is committed or shipped: every host compiles its own from the bundled sources.
-
-A wheel and an sdist built from a copy of the checkout must contain every checkout file under
-`src/agentctl/haskell/` and no `dist-newstyle/` path
-(`tests/integration/test_haskell_legs.py::test_wheel_ships_haskell_sources`). That a non-editable install
-provisions and builds from those sources on a pristine host is confirmed by
-[Clean-host bootstrap acceptance](../../DEVELOPMENT_PLAN/phase-12-clean-container-acceptance.md), whose Stage A
-installs a copied tree without `--editable`.
+Wheel/sdist controls inspect installed package resources, Haskell sources, pins and owned backend patch data.
+Their filesystem census includes newly introduced uncommitted files. Binaries, local builds, credentials,
+user configuration and developer caches are excluded. Runtime dependencies remain separate from optional
+development tools. Strict Python doctrine is project-owned and introduces no helper-package dependency.
 
 ## Upgrade
 
-Upgrading is reinstalling with pipx (`pipx reinstall agentctl`, `pipx upgrade agentctl`, or
-`pipx install --force` with the new source).
-The new package data has a new digest, so the next command builds into a new `cache/build/<digest>` and
-publishes a new `data/bin/<digest>`; the older directory is neither overwritten nor deleted.
-
-- A pane trampoline, a supervisor, or on Windows a running `agentctl-core.exe` keeps running the older binary
-  undisturbed, so an upgrade never restarts an agent.
-- A failed build of the new digest publishes nothing; the command reports the build error and exits non-zero.
-- No rollback machinery exists, because an upgrade replaces nothing. Older digests' directories stay until the
-  user removes agentctl's per-user directories, as [installation](../operations/installation.md) describes.
+Changed accepted inputs select a new immutable directory. Upgrades replace no executable in use, restart no
+agent, silently migrate no server and erase no known-good entry. Failed qualification leaves the prior
+artifact available. Explicit migration reports affected sessions and their capabilities; ordinary session
+commands do not turn an upgrade into an implicit restart.
 
 ## Related
 
-- [toolchain_bootstrap.md](toolchain_bootstrap.md) — where the GHC and cabal that build the binary come from.
-- [quality_gate.md](quality_gate.md#check-steps) — the `cabal-build`, `binary-identity` and `cabal-test` steps that use this build.
-- [code_standards.md](code_standards.md) — the warnings stanza and style files inside the Cabal project.
-- [python_haskell_boundary.md](../architecture/python_haskell_boundary.md) — the handoff and the handshake the publish step asks for.
-- [files_and_state.md](../reference/files_and_state.md) — the formats of `cache` and `data`.
-- [rationale.md](../../DEVELOPMENT_PLAN/rationale.md#rejected-alternatives) — why no binary is on PATH and no digest is embedded.
-- [system-components.md](../../DEVELOPMENT_PLAN/system-components.md#haskell-package) — the inventory of the Cabal project.
-- [Haskell package, quality legs and digest-keyed build](../../DEVELOPMENT_PLAN/phase-3-haskell-package-and-build.md) — the phase that builds this contract.
+- [toolchain_bootstrap.md](toolchain_bootstrap.md) — the two preparation stages.
+- [python_haskell_boundary.md](../architecture/python_haskell_boundary.md) — raw handoff and ownership.
+- [multiplexer_adapter.md](../architecture/multiplexer_adapter.md) — backend/server identity.
+- [files_and_state.md](../reference/files_and_state.md) — build, publication and receipt locations.
+- [quality_gate.md](quality_gate.md) — native identity and phase-input evidence.
+- [code_standards.md](code_standards.md) — immutable inventories and typed failures.
+- [Python bootstrap and handoff](../../DEVELOPMENT_PLAN/phase-2-python-bootstrap-and-handoff.md) — application build owner.
+- [Windows toolchain and psmux build](../../DEVELOPMENT_PLAN/phase-9-windows-toolchain-and-psmux-build.md) — backend build owner.

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Owning phase**: [Governance, documentation standards and the check skeleton](../DEVELOPMENT_PLAN/phase-0-governance-and-check-skeleton.md)
+**Owning phase**: [Governance and phase evidence](../DEVELOPMENT_PLAN/phase-0-governance-and-phase-evidence.md)
 
 > **Purpose**: Define how agentctl's governed documents are structured, named, linked, worded and kept current, and list every documentation check with the test that proves it and its negative fixture.
 
@@ -17,7 +17,25 @@ that name no check; optional human review adds no gate-closure requirement.
 - `documents/` is the only documentation root, with four categories: `architecture/`, `engineering/`, `operations/` and
   `reference/`.
 - Each page owns one topic and names the one phase that builds its contract. It opens with the metadata block and ends
-  with `## Related`; an architecture page opens with `## TL;DR`.
+  with `## Target Contracts and Migration Evidence
+
+Governed pages describe required target contracts; the plan alone records whether their implementation and
+evidence qualify. An existing command or a newly written rule supplies no conformance evidence by itself.
+Every standing incompatible shape has a concrete deletion owner in the plan ledger; all present source and
+tests remain in the gate census.
+
+A named enforcement claim identifies the actual test/control that establishes it. A required new mechanism
+is explicitly a deliverable of its owning contract, not a claim that the current validator already implements
+it. Accepting/refusing controls and applicable mutants accompany new enforcement. No skip, suppression,
+alternate runner or hidden legacy source bridges the migration.
+
+The single gate emits independently attributable phase/lane verdicts and a complete overall result. Prose
+must distinguish a phase-specific passing receipt from final whole-product acceptance. An unmet later native
+lane does not invalidate an earlier Linux contract, while shared integrity failures invalidate all consumers.
+Each phase needs Linux and at most one additional native family. WSL2 facts are Linux facts and use the
+dedicated-instance, resource/dependency and same-checkout bind-mount contract in the validation runbook.
+
+## Related`; an architecture page opens with `## TL;DR`.
 - The plan owns status. A page states the contract its owning phase builds, in the present tense, and never says
   whether that phase is built.
 - Each fact has one home, a prose home that states it or a data home the tests read, and other pages link that home.
@@ -57,7 +75,7 @@ Checked by `docs.metadata` (`tests/governance/test_doc_validator.py::test_docs_m
 ## Root Documents
 
 The repository root holds three entry documents, all written by
-[Governance, documentation standards and the check skeleton](../DEVELOPMENT_PLAN/phase-0-governance-and-check-skeleton.md):
+[Governance and phase evidence](../DEVELOPMENT_PLAN/phase-0-governance-and-phase-evidence.md):
 
 - **`README.md`** orients a new reader: what agentctl is, how to install it, and the commands whose owning phase the plan
   records as built. It links both indexes, `DEVELOPMENT_PLAN/README.md` and `documents/README.md`, states no status and
@@ -145,7 +163,7 @@ Checked by `docs.no-status` (`tests/governance/test_doc_validator.py::test_docs_
 WRONG: The supervisor arrives in Phase 10, Sprint 10.2.
 WHY:   inserting a phase renumbers every later one and sprints move between phases;
        a title stays right, and a link fails loudly when its file goes away.
-RIGHT: [Recovery supervisor](../../DEVELOPMENT_PLAN/phase-10-supervisor.md) builds `supervisor run`.
+RIGHT: [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) builds `supervisor run`.
 ```
 
 Checked by `docs.links` (`tests/governance/test_doc_validator.py::test_docs_links`) and `docs.phase-citation`

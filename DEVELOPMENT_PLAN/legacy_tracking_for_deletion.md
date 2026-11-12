@@ -3,28 +3,44 @@
 **Status**: Authoritative source
 **Supersedes**: N/A
 
-> **Purpose**: Name each shape still standing in the tree that the architecture does not want, where
-> it is, why it must go, and the one phase whose work deletes it.
+> **Purpose**: Inventory standing incompatible implementations and assign each migration to its contract owner.
 
-A row names a shape that is still present, its location, why it must go, and exactly one deleting
-phase, which exists and is not Done; `plan.legacy-ledger` checks the header and the deleting phase.
-The ledger schedules nothing: the deleting phase's own Remaining Work states the deletion, and a row
-leaves the table in the same change that removes its shape. An empty table is the healthy state. A
-shape that must never return is held out by an absence guard, a test or validator check, rather than
-by a row here, and a shape the design never builds is explained in
-[rationale.md](rationale.md#rejected-alternatives).
+A row describes code still present, not a postponed excuse or an excluded source set. Its single deletion
+owner is non-Done and its phase deliverables include the replacement and evidence. Existing artifacts do not
+make a revised contract started or complete. Remove the row only with the actual shape and its positive
+replacement/absence controls. Every present source remains in the gate's census; final acceptance requires
+this table empty. Candidate external source defects belong to backend qualification, not to an unrecorded
+claim that the workstation installation is patched.
 
 ## Tracked Shapes
 
 | Shape | Location | Why it must go | Deleted by |
 |---|---|---|---|
-
-The table is empty.
+| Global early-abort verdict, monolithic native build attribution and whole-tree-only phase evidence | `src/agentctl/check/steps.py`, `evidence.py`, `lanes.py`, `validator/closure.py` | Later-only failures and changes prevent complete earlier contracts from closing; replace with independent input-closed phase/lane reports. | [Phase 0 — Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+| Old plan grammar, hard-coded phase/lane/prefix joins and literal owner ratchet | `src/agentctl/check/validator/plan.py`, `plan_data.py`, `ratchet.py`, `tests/harness/trees.py`, `tests/oracles/check_steps.toml` | Validators and metadata models must recognize revised ownership/evidence contracts, including lower acceptance-receipt prerequisites, while retaining semantic oracle/mutant protection. | [Phase 0 — Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+| Runtime type tests, top-type decoding and reflective narrowing | `src/agentctl/cli.py`, `bootstrap/binary.py`, `bootstrap/pins.py`, `hostfacts.py`, `check/gate_plugin.py`, `tests/` | Parse honest native unions once through structural boundaries; remove isinstance/object/type comparisons/hasattr rather than suppress their findings. | [Phase 1 — Python discipline and gate integrity](phase-1-python-discipline-and-gate-integrity.md) |
+| Mutable containers, rebinding, behavioral data classes and mutable framework state | `src/agentctl/check/audit.py`, `bootstrap/cache.py`, `bootstrap/build.py`, `process.py`, `check/`, `tests/harness/`, `tests/` | Single assignment and recursively immutable owned values apply to the application, checker and tests; explicitly borrowed native capabilities remain narrow. | [Phase 1 — Python discipline and gate integrity](phase-1-python-discipline-and-gate-integrity.md) |
+| Missing core/edge census and imprecise native/framework boundary declarations | `src/agentctl/`, `tests/`, `src/agentctl/check/validator/source.py` | Totality, finite domains, exhaustive closed matches and actual native type contracts need local executable accepting/refusing controls and mutants. | [Phase 1 — Python discipline and gate integrity](phase-1-python-discipline-and-gate-integrity.md) |
+| Source-level native coverage exceptions and unproven cross-host branch assumptions | `src/agentctl/check/preconditions.py`, `process.py`, `validator/source.py`, `tests/oracles/lint_config.toml` | Replace source suppressions with independently observed native subprocess/ABI receipts; do not lower coverage or invent Linux proof for foreign syscalls. | [Phase 1 — Python discipline and gate integrity](phase-1-python-discipline-and-gate-integrity.md) |
+| Python runtime distribution hints and consent consumed before handoff | `src/agentctl/bootstrap/handoff.py`, `cli.py`, `hostfacts.py` | Keep only bootstrap platform checks in Python; Haskell owns runtime distribution policy and receives explicit typed consent separately from agent argv. | [Phase 2 — Python bootstrap and handoff](phase-2-python-bootstrap-and-handoff.md) |
+| Nested short build roots and lost/encoding-dependent diagnostics | `tests/harness/haskell.py`, `src/agentctl/check/steps.py`, `tests/integration/test_haskell_mutations.py` | Budget complete generated native paths, register every external root, preserve primary and cleanup diagnostics and prove containment rather than guessing from transient files. | [Phase 2 — Python bootstrap and handoff](phase-2-python-bootstrap-and-handoff.md) |
+| PATH-only runtime multiplexer resolution and non-Debian install remedies | `src/agentctl/haskell/src/AgentCtl/Mux.hs`, `Preflight.hs`, `app/Core.hs` | Haskell must prepare/qualify Debian tmux, reject unsupported Linux before effects, and share explicit provisioning primitives with foreign implementations. | [Phase 4 — Debian tmux and multiplexer](phase-4-debian-tmux-and-multiplexer.md) |
+| Agent discovery occurs after costly mux preparation | `src/agentctl/haskell/src/AgentCtl/Preflight.hs`, `Launch.hs` | Fresh launch checks the requested user-installed agent early; reattachment and management retain command-specific prerequisites without auto-install/login. | [Phase 5 — Agent preflight and launch](phase-5-agent-preflight-and-launch.md) |
+| Endpoint-free or incomplete server/pane identity | `src/agentctl/haskell/src/AgentCtl/Session/Identity.hs`, `Adopt.hs`, `Sessions.hs` | Instance generation, endpoint and actual executable provenance prevent stale/recycled-pane and cross-registry mistakes. | [Phase 6 — Session management and adoption](phase-6-session-management-and-adoption.md) |
+| Multi-read snapshots compare only cursor/dead/geometry | `src/agentctl/haskell/src/AgentCtl/Observe/Capture.hs`, `Mux/Tmux.hs`, `Mux/Psmux.hs` | Equal cursor facts do not imply equal content; coherent observation and concrete guarded-submission evidence precede automated input. | [Phase 7 — Pane observation and classification](phase-7-pane-observation-and-classification.md) |
+| Separate literal/Enter calls and uncertain delivery retry assumptions | `src/agentctl/haskell/src/AgentCtl/Supervisor/Runtime.hs`, `Supervisor/Delivery.hs` | Use qualified server-ordered submission receipts, fail closed on activity/identity changes and never blindly replay an ambiguous outcome. | [Phase 8 — Recovery and supervisor](phase-8-recovery-and-supervisor.md) |
+| Lazy base fixture marker and render-file handles | `src/agentctl/haskell/app/FakeAgent.hs` | Strict finite reads and deterministic handle closure are necessary for native capture before scripted supervision exists. | [Phase 4 — Debian tmux and multiplexer](phase-4-debian-tmux-and-multiplexer.md) |
+| Launch marker replacement without explicit generation acknowledgment | `tests/harness/launch.py` | Atomic publication and independently acknowledged generations preserve exact rendered input without timing-only readiness. | [Phase 5 — Agent preflight and launch](phase-5-agent-preflight-and-launch.md) |
+| Scripted scenario timing-only readiness and incomplete stop receipts | `src/agentctl/haskell/app/ScriptedAgent.hs`, `tests/harness/supervisor_signals.py`, `tests/e2e/test_supervisor_scenarios.py` | Extend the already correct base observer with generation/input/stop receipts; preserve forbidden-input and lifecycle assertions. | [Phase 8 — Recovery and supervisor](phase-8-recovery-and-supervisor.md) |
+| Windows external psmux PATH prerequisite and no private Rust/source build | `src/agentctl/haskell/src/AgentCtl/Mux.hs`, `Preflight.hs`, `src/agentctl/bootstrap/pins.toml` | Haskell owns pinned private Rust/MSVC/SDK readiness, verified source+patch fetch, native build and immutable publish, independently of system psmux. | [Phase 9 — Windows toolchain and psmux build](phase-9-windows-toolchain-and-psmux-build.md) |
+| Released psmux banner accepted as capability and normal registry inheritance | `src/agentctl/haskell/src/AgentCtl/Mux/Psmux.hs`, `Mux.hs`, `tests/harness/tmux.py` | Admit exact qualified client/server artifacts and a stable private registry/config; test memory, control events, wide wraps, missing-target refusal and guarded input. | [Phase 10 — Windows backend qualification](phase-10-windows-backend-qualification.md) |
+| Windows native leaks, long-path and stop behavior without complete resource receipts | `tests/harness/supervisor_signals.py`, `tests/integration/test_guard.py`, `tests/integration/test_mux_real.py` | Native acceptance needs current process creation, endpoint, path budget and primary/cleanup diagnostics; no image-name teardown or manual inspection. | [Phase 10 — Windows backend qualification](phase-10-windows-backend-qualification.md) |
+| Clean-host recipe and host observation assume externally prepared runtime mux | `tests/lanes/clean-host.Dockerfile`, `tests/e2e/test_fresh_bootstrap.py`, `tests/harness/host.py` | Two-stage preparation must prove Haskell tmux installation, bound WSL/live subjects and all current source identities without package managers inside tests. | [Phase 4 — Debian tmux and multiplexer](phase-4-debian-tmux-and-multiplexer.md) |
 
 ## Related
 
-- [development_plan_standards.md](development_plan_standards.md) — § I defines absence guards and this
-  ledger.
-- [rationale.md](rationale.md#rejected-alternatives) — explains shapes the design never builds; this
-  file holds only shapes still standing.
-- [README.md](README.md) — the status table that says whether a deleting phase is Done.
+- [standards](development_plan_standards.md#i-absence-guards-and-the-legacy-ledger) — deletion and absence evidence.
+- [overview](00-overview.md) — target requirements.
+- [inventory](system-components.md) — one owner per capability.
+- [rationale](rationale.md#rejected-alternatives) — shapes excluded by design.
+- [README](README.md) — execution and current owners.

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Owning phase**: [Launch command and passthrough](../../DEVELOPMENT_PLAN/phase-6-launch-and-passthrough.md)
+**Owning phase**: [Agent preflight and launch](../../DEVELOPMENT_PLAN/phase-5-agent-preflight-and-launch.md)
 
 > **Purpose**: Define what `agentctl claude` and `agentctl codex` do, from the session name and the agent argv
 > through preflight, failures, create-or-attach and instant exit to the pane trampoline.
@@ -14,8 +14,9 @@
   folder holds that name; re-running in the same folder re-attaches (R7, R8).
 - ARGS pass verbatim; user copies of the mandatory flags and codex's `--yolo` are removed, the flags go last or
   just before the first bare `--` (R9, R10, R11), and login-shaped ARGS are refused (R13).
-- Preflight checks the multiplexer, the agent and its login before any session exists, and only it produces
-  `Ready` (R12.1, R12.2). A failure leaves no session, warns on the user's own terminal and exits non-zero (R12).
+- Haskell checks the requested user-installed agent early, ensures the host backend through its runtime plan,
+  and validates authentication before creating a session. Only successful preflight produces `Ready`. A failed
+  new launch leaves no new session and reports its reason on the invoking terminal.
 - The pane runs `agentctl-core pane-exec <spec>`: the agent's argv, working directory and environment travel in
   a 0600 spec file, never on the multiplexer's command line.
 
@@ -122,108 +123,104 @@ both agents, a preflight records one auth-status probe and no login
 
 ## Preflight
 
-`AgentCtl.Preflight` builds a pure closed program with multiplexer, agent and auth requests. Its I/O interpreter
-runs those requests in order, stops at the first failure, and creates nothing: no session,
-no spec and no state.
+`AgentCtl.Preflight` interprets a pure closed program over native host facts, agent discovery, authentication
+and the Haskell runtime dependency plan. The runtime is described by
+[the multiplexer adapter](multiplexer_adapter.md#resolution-and-version-floors). Python does not search for,
+install or launch the multiplexer or agent.
 
-1. **Multiplexer.** tmux or psmux resolves and meets its floor ([multiplexer adapter](multiplexer_adapter.md)).
-2. **Agent.** `claude` or `codex` resolves on PATH to an absolute path. On Windows only a native `.exe`, found
-   through PATHEXT, qualifies: a `.cmd` or `.bat` shim started through CreateProcessW has its arguments
-   re-parsed by cmd.exe, which would expose verbatim ARGS to injection. PATH directories are searched in order;
-   Windows tries PATHEXT entries in order and compares names case-insensitively. The first executable match decides,
-   including a shim refusal without falling through to a later native file. Relative PATH entries are joined to the
-   absolute caller directory; POSIX names compare case-sensitively. Native filesystem observations feed this pure
-   selector, and the selected path is canonicalised once.
-3. **Login.** `claude auth status` or `codex login status` runs by absolute path in the caller's environment,
-   the one the trampoline later gives the pane, and only its exit code counts: 0 is logged in, 1 is logged out,
-   and any other exit, a signal, a failure to start or no exit within 10 s is `check failed`.
+Before any runtime mutation, Linux must identify itself as Debian with exact `ID=debian`; the Windows path
+requires its supported native architecture. Unsupported platform facts produce an immediate named refusal.
+A live session eligible for reattachment uses its existing qualified backend and follows
+[create or attach](#create-or-attach); it does not reinstall an agent or repeat authentication.
 
-The shared runner's status-only operation drains both streams as bytes without decoding them. Invalid UTF-8
-therefore cannot change a successful exit into a failed auth check
-(`haskell:agentctl-core-test/ProcessReal/status-only-ignores-bytes`).
-Exit codes alone decide, because claude prints JSON on stdout and codex writes only to stderr in wording that
-changes between versions; a usage error or a hung probe never tells a logged-in user to log in again. Success is
-`Ready`, whose constructor `AgentCtl.Preflight` does not export, and `AgentCtl.Launch` creates a session only
-from a `Ready`, so a launch that skips preflight does not compile.
+For a genuinely new launch, the selected Claude or Codex executable is checked before expensive backend
+preparation. Agentctl never installs either agent, an agent package manager, or an authentication state.
+A missing selected CLI produces an actionable user-installation message; the other CLI is irrelevant to that
+launch. Session listing, attachment and stopping do not require either CLI merely to inspect existing work.
 
-The rows in `tests/oracles/auth_status.toml` cover exits 0, 1, 2 and 127, a signal and a timeout
-(`tests/unit/test_auth_status.py::test_classify_auth_matches_oracle`). The real CLIs, logged out by construction
-(empty `CLAUDE_CONFIG_DIR` and `CODEX_HOME`, the latter setting `cli_auth_credentials_store = "file"`, no auth
-variables, `DISABLE_AUTOUPDATER=1`), exit 1 (`tests/integration/test_agent_real.py::test_logged_out_by_construction`).
-With no tmux on a constructed PATH the fake agent records nothing, against the same PATH with tmux
-(`tests/integration/test_preflight.py::test_order_mux_then_agent_then_auth`), and `ready_constructed.hs.txt`
-constructs the private `VerifiedReady` constructor as an expression and fails with `GHC-88464`, while its twin
-`ready_from_preflight.hs.txt` compiles
-(`tests/integration/test_ready_opaque.py::test_ready_constructor_is_not_exported`).
+Agent discovery resolves PATH in order to one absolute executable. On Windows a `.cmd` or `.bat` shim is
+refused rather than reparsed by cmd.exe or skipped in favor of a later candidate. Only a native executable
+qualifies. Relative search entries are interpreted against the caller's absolute working directory. The
+selected path is retained throughout the operation.
+
+The authentication status probe runs by that absolute path in the environment the trampoline gives the
+agent. Its actual exit status decides readiness; a nonzero usage error, signal, invalid operation or timeout
+is a check failure, not evidence that the user is logged out. The status-only runner drains both streams as
+bytes, so diagnostic encoding does not manufacture an authentication failure. Login commands are never run.
+
+The runtime planner reuses a qualified backend or prepares the missing one under explicit consent. Debian
+uses APT-managed tmux. Windows Haskell obtains private Rust/Cargo and native build capabilities and builds a
+qualified psmux under the private artifact root. The consent envelope comes from the handoff, separately
+from ARGS; privilege does not imply consent. A declined plan, unavailable privilege, pending reboot, source
+verification failure or build failure returns a named error and creates no agent session.
+
+`Ready` combines the validated agent, authentication result, backend artifact/profile and current namespace.
+Its constructor remains private. The creation path accepts only that capability and revalidates the target
+namespace before mutation. No spec or session is published while a prerequisite is unready. A failed install
+cannot become a fallback to an arbitrary PATH psmux.
 
 ## Failure and Warnings
 
-Warnings go to the binary's stderr, which is the user's own terminal, never into the pane, where they would
-vanish with the session. Every line starts `agentctl: `, and `tests/oracles/preflight.toml` holds each line per
-class and OS (`tests/unit/test_preflight.py::test_failure_warnings_match_oracle`). Install hints start with
-`agentctl: install it with: ` followed by the exact agent or multiplexer remedy:
+Every runtime failure is a typed Haskell result rendered on the invoking terminal. Messages identify the
+failed capability and an actionable remedy without echoing secret environment values or arbitrary user
+arguments. Their exit codes and exact expected forms belong to `tests/oracles/preflight.toml` and
+[the CLI reference](../reference/cli_reference.md).
 
-| Class | Exit | Warning |
-|---|---|---|
-| Login-shaped ARGS | 2 | `login commands must be run yourself: claude auth login` (or `codex login`) |
-| Multiplexer missing | 3 | `tmux 3.2 or later is required, and none was found on PATH.`, then the install hint |
-| Multiplexer below its floor | 4 | `tmux 3.1c at /usr/bin/tmux is older than 3.2, the oldest version agentctl supports.`, then the hint |
-| Agent missing | 5 | `claude was not found on PATH.`, then the install hint |
-| Windows shim refused | 6 | `codex resolves only to <path>\codex.cmd; agentctl starts only a native codex.exe.`, then the hint |
-| Logged out | 7 | `claude is not logged in, so no session was started.`, then `log in yourself by typing: claude auth login` |
-| Auth check failed | 8 | ``could not tell whether codex is logged in: `codex login status` exited 2.``, then `run it yourself to see why; no session was started.` |
-| Instant exit | the agent's own | the relayed pane output, then `codex exited with status 2 during startup; its session was closed.` |
-| Any other launch failure | 1 | what failed, such as both session names being held by other sessions |
+| Failure family | Required behavior |
+|---|---|
+| Unsupported Linux distribution or architecture | Fail before runtime installation or session mutation |
+| Selected agent missing | Name that CLI and the user-owned installation remedy; run no agent installer |
+| Native Windows executable unavailable | Name the refused shim and required native CLI |
+| Logged out | Name the discrete login command for the user; run no login flow |
+| Authentication probe unavailable or indeterminate | Report the probe failure without asserting logout |
+| Runtime dependency unready | Identify denied consent, privilege, reboot, verification, build or qualification reason |
+| Backend or server incompatible | Identify actual artifact/server and unavailable operation; do not silently substitute |
+| Agent instant exit | Relay captured startup output and the actual agent exit status |
+| Other launch failure | Report the cause and clean up only resources this launch created |
 
-| Install hint | Linux and macOS | Windows |
-|---|---|---|
-| multiplexer | the distribution's tmux package, for example `sudo apt install tmux`; `brew install tmux` on macOS | `winget install psmux` |
-| claude | `curl -fsSL https://claude.ai/install.sh \| bash` | `winget install Anthropic.ClaudeCode` |
-| codex | `curl -fsSL https://chatgpt.com/codex/install.sh \| sh` | `powershell -ExecutionPolicy ByPass -c "irm https://chatgpt.com/codex/install.ps1 \| iex"` |
+A missing tmux can be remedied by Haskell's authorized Debian provisioning plan. A missing Windows backend
+can be remedied by Haskell's authorized private source-build plan. A generic system psmux installation
+instruction is not a substitute for that qualification workflow.
 
-The login remedy is `claude auth login` (`--console` for Anthropic Console billing, `--sso` for single sign-on)
-or `codex login` (`codex login --device-auth` on a headless or remote machine)
-(`tests/unit/test_auth_status.py::test_remedy_names_the_command_to_type`); the agent-missing warning names the
-hint for the host's OS (`tests/integration/test_preflight.py::test_missing_agent_names_install_hint`). Each "no
-session is left behind" test pairs the absence with a positive control, the fake agent's record that the
-session existed or the same run with the check passing
-(`tests/e2e/test_launch.py::test_preflight_failure_leaves_nothing`).
+Failure controls pair refusal with a successful native twin and independently observed resource state.
+The missing-agent path establishes that no package-manager, Rust, psmux-build or agent-install operation
+occurred; the declined provisioning path establishes that no session exists. Refusal tests inspect the
+reason, not merely a nonzero exit that could conceal an unexpected traceback.
 
 ## Create or Attach
 
-`AgentCtl.Launch` runs these steps:
+`AgentCtl.Launch` first checks the raw login shape and calculates the canonical folder and candidate names.
+Haskell validates the runtime platform. Read-only discovery of an accepted existing backend then looks for
+this folder's live owned session. A valid match reattaches without agent installation or authentication;
+ARGS are not reapplied, and the command explains that they were not applied.
 
-1. Refuse login-shaped ARGS and assemble the argv, both pure, before anything is spawned.
-2. Resolve the multiplexer (preflight check 1), which finding a session needs.
-3. Look for this folder's session ([session names](#session-names)). A **live** one is re-attached: re-attach
-   skips the rest of preflight, so neither the agent nor its login is checked, and ARGS given with it are not
-   applied, which agentctl says: `agentctl: api-claude is already running; the arguments given were not applied.`
-   A **dead leftover**, every pane dead as remain-on-exit leaves it, is ended with `kill-session -t =NAME`, and
-   the launch continues afresh.
-4. Run preflight checks 2 and 3 to obtain `Ready`.
-5. Run `new-session -d -s <name> -P -F '#{pane_id}' -- <binary> pane-exec <spec>` from a client whose working
-   directory is the canonical folder, set the agent pane's remain-on-exit and the identity options, and only
-   then write the spec, so remain-on-exit is on before the agent can start.
-6. Watch the startup window ([instant exit](#instant-exit)); when the agent is alive at its end, unset
-   remain-on-exit and hand over, as re-attach also does:
-   - **No TTY** (standard input or output is not a terminal): print the attach command, such as
-     `tmux attach-session -t =api-claude`, and exit 0, leaving the session running.
-   - **`$TMUX` set:** `switch-client -t =NAME` on the server `$TMUX` names, where the session was created, since
-     tmux reads `$TMUX` when given no socket; tmux refuses to attach inside its own server, and psmux blocks nesting.
-   - **Otherwise:** `attach-session -t =NAME`; agentctl exits 0 when the client detaches or the session ends.
+If a new launch is needed, early agent/authentication checks and the runtime ensure described by
+[preflight](#preflight) produce `Ready`. A dead owned leftover can be replaced only after its complete identity
+is checked. A foreign session, a stale name now held by another instance, or an external adoption is never
+cleanup for a new launch.
 
-The plan is pure (`tests/unit/test_launch_plan.py::test_launch_plan_matches_oracle`), and on a private server a
-re-run keeps the session and runs no second auth probe (`tests/e2e/test_launch.py::test_rerun_reattaches_without_preflight`),
-a same-basename folder gets the hash form (`tests/e2e/test_launch.py::test_same_basename_other_folder_gets_hash_form`),
-a dead leftover is replaced (`tests/e2e/test_launch.py::test_dead_leftover_pane_is_replaced`), and each hand-over
-holds (`tests/e2e/test_launch.py::test_no_tty_prints_attach_command`,
-`tests/e2e/test_launch.py::test_inside_tmux_switches_client`, `tests/e2e/test_launch.py::test_attach_under_pty`).
-[Sessions and ownership](sessions_and_ownership.md) owns the identity a re-run finds.
+Creation uses the checked session name, the absolute pane trampoline and an unpredictable private spec
+path. The creating client runs in the canonical folder. Launch sets the agent pane's temporary remain-on-exit
+and owned metadata before releasing the spec, so startup failure remains observable. It then observes the
+startup window and hands control to the correct backend:
 
-A new session may open on claude's bypass-permissions warning, its workspace-trust dialog or codex's
-directory-trust screen; each keeps the pane alive, and the user answers it after attaching. agentctl never
-answers one, because accepting writes the user's settings and is the user's consent. The logged-in launch is
-confirmed by [Live agent acceptance](../../DEVELOPMENT_PLAN/phase-11-live-agent-acceptance.md).
+- Without terminal input/output, print `agentctl attach NAME` and leave the live session running. This command
+  preserves private Windows routing and backend identity instead of asking the user to find a psmux binary.
+- From a compatible attached client in the same backend namespace, use the backend's checked switch operation.
+- Otherwise open a foreground client by the qualified absolute executable against the exact namespace.
+
+A system psmux pane does not count as being inside agentctl's private Windows registry merely because `TMUX`
+is set. Namespace identity decides whether switching is possible. A cross-namespace attach does not end the
+user's current client, rewrite global aliases, or migrate any running server.
+
+The private Windows registry and qualified client/server compatibility table are described by
+[sessions and ownership](sessions_and_ownership.md). Replacing the artifact used for new sessions never
+restarts an existing one. Legacy sessions retain visible compatibility diagnostics and do not authorize
+unsupported automated recovery.
+
+A new agent may wait at a workspace-trust, permissions or login-related dialog. Agentctl neither answers it
+nor sends a prompt to clear it. Native live validation observes the fixed live-acceptance folder with
+updating disabled and no input; it cannot infer every classifier's correctness from an idle startup screen.
 
 ## Instant Exit
 
@@ -283,12 +280,11 @@ folder named `#(touch <sentinel>)` runs nothing (`tests/e2e/test_launch.py::test
 
 ## Related
 
-- [multiplexer adapter](multiplexer_adapter.md) — the vocabulary, floors and session options used here.
+- [multiplexer adapter](multiplexer_adapter.md) — runtime qualification, provisioning and session options used here.
 - [sessions and ownership](sessions_and_ownership.md) — `list`, `attach` and `stop` for launched sessions.
 - [python and haskell boundary](python_haskell_boundary.md) — the raw passthrough that delivers ARGS unchanged.
 - [troubleshooting](../operations/troubleshooting.md) — each warning, the other install routes, what to type.
 - [cli reference](../reference/cli_reference.md) — every command and its exit status.
 - [files and state](../reference/files_and_state.md) — the spec and status file formats.
 - [external tool facts](../reference/external_tool_facts.md) — the claude, codex, tmux and psmux facts cited.
-- [Agent adapters and preflight](../../DEVELOPMENT_PLAN/phase-5-agent-adapters-and-preflight.md) — builds argv, refusals, preflight.
-- [Launch command and passthrough](../../DEVELOPMENT_PLAN/phase-6-launch-and-passthrough.md) — builds the rest.
+- [Agent preflight and launch](../../DEVELOPMENT_PLAN/phase-5-agent-preflight-and-launch.md) — builds argv, refusals, preflight and launch.
