@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from agentctl.check.evidence import EvidenceClass, EvidenceError, classification
-from agentctl.result import Err
+from agentctl.foundation import Err
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,8 +34,9 @@ def orphan_modules(
     collected: frozenset[str],
     cited: frozenset[str],
     support: frozenset[str],
+    failed_modules: frozenset[str] = frozenset(),
 ) -> tuple[str, ...]:
-    """Join filesystem modules to collection, sprint citations and support."""
+    """Join filesystem modules to collection, failed collectors and support."""
     modules = frozenset(node.split("::", 1)[0] for node in collected)
     files = frozenset(
         path.relative_to(root).as_posix() for path in (root / "tests").rglob("*.py")
@@ -46,7 +47,15 @@ def orphan_modules(
         if (Path(path).name.startswith("test_") or Path(path).name.endswith("_test.py"))
         and path in support
     )
-    return tuple(sorted((files - modules - support) | (modules - cited) | hidden_tests))
+    test_modules = modules | failed_modules
+    return tuple(
+        sorted(
+            (files - test_modules - support)
+            | (test_modules - cited)
+            | (failed_modules - files)
+            | hidden_tests
+        )
+    )
 
 
 def _record(config: pytest.Config, message: str) -> None:
@@ -105,6 +114,8 @@ def pytest_collection_finish(session: pytest.Session) -> None:
     config.stash[STATE] = replace(
         state, collected=frozenset(item.nodeid for item in session.items)
     )
+    if len(config.stash[STATE].collected) != len(session.items):
+        _record(config, "duplicate collected node id")
     if not session.items:
         _record(config, "empty collection")
     for item in session.items:
@@ -139,8 +150,19 @@ def pytest_collection_finish(session: pytest.Session) -> None:
             if support_file.exists()
             else frozenset()
         )
+        failed_modules = frozenset(
+            record.removeprefix("collection failed: ")
+            for record in config.stash[STATE].forbidden
+            if record.startswith("collection failed: tests/")
+            and record.endswith(".py")
+            and "::" not in record
+        )
         for orphan in orphan_modules(
-            config.rootpath, config.stash[STATE].collected, citations, support
+            config.rootpath,
+            config.stash[STATE].collected,
+            citations,
+            support,
+            failed_modules,
         ):
             _record(config, f"tests.orphan-modules: {orphan}")
 
@@ -152,10 +174,24 @@ def pytest_deselected(items: list[pytest.Item]) -> None:
 
 
 @pytest.hookimpl(wrapper=True)
+def pytest_make_collect_report(
+    collector: pytest.Collector,
+) -> Generator[None, pytest.CollectReport, pytest.CollectReport]:
+    """Retain failed collectors even when independent modules can still execute."""
+    report = yield
+    if report.failed:
+        _record(collector.config, f"collection failed: {report.nodeid}")
+    return report
+
+
+@pytest.hookimpl(wrapper=True)
 def pytest_runtest_protocol(item: pytest.Item, nextitem: pytest.Item | None) -> object:
     """Record actual execution independently of the collection hook."""
     del nextitem
     state = item.config.stash[STATE]
+    if item.nodeid in state.executed:
+        _record(item.config, f"duplicate execution: {item.nodeid}")
+        state = item.config.stash[STATE]
     item.config.stash[STATE] = replace(state, executed=state.executed | {item.nodeid})
     return (yield)
 
@@ -174,6 +210,18 @@ def pytest_runtest_makereport(
     if report.when == "call" and report.passed:
         state = item.config.stash[STATE]
         item.config.stash[STATE] = replace(state, passed=state.passed | {item.nodeid})
+    return report
+
+
+@pytest.hookimpl(wrapper=True, specname="pytest_runtest_makereport")
+def pytest_fixture_phase(
+    item: pytest.Item, call: pytest.CallInfo[None]
+) -> Generator[None, pytest.TestReport, pytest.TestReport]:
+    """Keep setup and teardown damage shared until fixture ownership is known."""
+    del call
+    report = yield
+    if report.when != "call" and report.failed:
+        _record(item.config, f"fixture phase failed: {item.nodeid}")
     return report
 
 

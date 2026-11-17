@@ -69,7 +69,7 @@ def test_docs_owning_phase(root: Path, tmp_path: Path) -> None:
             for line in original.splitlines()
             if not line.startswith("**Owning phase**:")
         ),
-        original.replace("phase-6-launch-and-passthrough.md", "missing.md"),
+        original.replace("phase-2-python-bootstrap-and-handoff.md", "missing.md"),
     ):
         page.write_text(text, encoding="utf-8")
         assert check(tree, "owning-phase") == (

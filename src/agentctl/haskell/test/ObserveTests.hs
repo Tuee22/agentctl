@@ -12,7 +12,8 @@ import Data.List (nub)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertEqual, testCase)
+import Test.Tasty.HUnit (assertEqual)
+import TestSource (testCase)
 
 tests :: [TestTree]
 tests =

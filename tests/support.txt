@@ -6,6 +6,12 @@ tests/harness/trees.py
 tests/harness/git.py
 tests/harness/nonce.py
 tests/harness/host.py
+tests/harness/isolation.py
+tests/harness/workspace.py
+tests/harness/haskell_fixtures.py
+tests/harness/tmux_fixtures.py
+tests/harness/transport_fixture.py
+tests/harness/bootstrap_caller.py
 tests/harness/http.py
 tests/harness/bootstrap.py
 tests/harness/bootstrap_origin.py

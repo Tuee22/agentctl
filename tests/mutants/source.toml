@@ -105,3 +105,11 @@ search = "if tool == \"ty\""
 replace = "if False"
 killers = ["tests/integration/test_static_legs.py::test_ty_ignores_user_config"]
 reason = "user config weakened ty"
+
+[[amendment]]
+id = "M-guard-process-allowlist-wide"
+prior_sha256 = "254fb10920ecc175ca97a6b5b636fdfb2ac3b238bf8ca3fb29668609c1c0a6e5"
+revised_sha256 = "6c3887cae7515bccc3bb37d706443d3d60392301492638f5db8ac8a6d6c50ab8"
+search = "if relative == \"src/agentctl/foundation_process.py\":"
+replace = "if relative.startswith(\"src/agentctl/\"):"
+provenance = "decision:D-106"

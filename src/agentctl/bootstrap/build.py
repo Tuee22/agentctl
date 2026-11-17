@@ -50,6 +50,7 @@ class BuildContext:
     host: HostContext
     tools: Toolchain
     options: tuple[str, ...] = ()
+    prepared_index_only: bool = False
 
     @property
     def cabal_directory(self) -> Path:
@@ -197,6 +198,30 @@ def ensure_index(context: BuildContext) -> Result[None, BuildError]:
         return Err(BuildError(f"Cannot prepare the private Cabal index: {exc}"))
 
 
+def verify_prepared_index(context: BuildContext) -> Result[None, BuildError]:
+    """Refuse missing or stale private index data without updating or writing it."""
+    state = index_state(context.project)
+    if isinstance(state, Err):
+        return state
+    directory = context.cabal_directory
+    try:
+        ready = (
+            (directory / "config").is_file()
+            and (directory / "packages/hackage.haskell.org/01-index.tar").is_file()
+            and (directory / "agentctl-index-state").read_text(encoding="utf-8")
+            == state.value
+        )
+    except FileNotFoundError:
+        ready = False
+    except (OSError, UnicodeError) as exc:
+        return Err(BuildError(f"Cannot inspect the private Cabal index: {exc}"))
+    return (
+        Ok(None)
+        if ready
+        else Err(BuildError("Prepare the pinned Cabal index before running check"))
+    )
+
+
 def arguments(context: BuildContext, verb: str, target: str) -> tuple[str, ...]:
     """Share the exact tests-enabled build and lookup flags across every caller."""
     return (
@@ -212,7 +237,11 @@ def arguments(context: BuildContext, verb: str, target: str) -> tuple[str, ...]:
 
 def compile_target(context: BuildContext, target: str) -> Result[Output, BuildError]:
     """Compile a selected component while its caller owns the build-directory lock."""
-    indexed = ensure_index(context)
+    indexed = (
+        verify_prepared_index(context)
+        if context.prepared_index_only
+        else ensure_index(context)
+    )
     if isinstance(indexed, Err):
         return indexed
     return invoke(context, arguments(context, "build", target))
@@ -255,8 +284,9 @@ class BinaryCall:
     target: str
     arguments: tuple[str, ...] = ()
     input_text: str | None = None
-    protocol: str | None = "1"
+    protocol: str | None = "2"
     settings: tuple[tuple[str, str], ...] = ()
+    consent: str | None = "false"
 
 
 def execute_binary(
@@ -285,6 +315,7 @@ def call_environment(context: BuildContext, call: BinaryCall) -> dict[str, str]:
             if call.protocol is not None
             else {}
         ),
+        **({"AGENTCTL_ASSUME_YES": call.consent} if call.consent is not None else {}),
         **dict(call.settings),
     }
 

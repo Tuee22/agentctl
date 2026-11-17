@@ -1,6 +1,7 @@
 # Copyright (c) 2026 agentctl contributors.
 """Append-only values and read-only git adapters have independent controls."""
 
+import hashlib
 import json
 import os
 import sys
@@ -10,13 +11,17 @@ from pathlib import Path
 import pytest
 
 from agentctl.check.ratchet import (
+    MutantAmendment,
     RowFact,
+    RowRelocation,
     Setting,
     append_only,
     check,
     config_tightens,
     configuration,
     head,
+    mutant_amendment_matches,
+    relocation_problems,
     rows,
 )
 from agentctl.process import run
@@ -32,6 +37,171 @@ CONFIG = (
     '[tool.ty.rules]\nall = "error"\n[tool.pytest]\nstrict = true\n'
     "[tool.coverage.report]\nfail_under = 100\n"
 )
+
+
+@pytest.mark.evidence("value")
+def test_mutant_relocation_preserves_all_rows() -> None:
+    """An explicitly anchored move preserves both record and amendment exactly."""
+    source, destination = "tests/mutants/mixed.toml", "tests/mutants/later.toml"
+    record = RowFact("M-example-control", '{"value":1}')
+    amendment = RowFact("amendment:M-example-control", '{"revision":1}')
+    before = ((source, record), (source, amendment))
+    after = ((destination, record), (destination, amendment))
+    rationale = "| D-93 | Move `M-example-control` without changing it. |\n"
+    moves = tuple(
+        RowRelocation(
+            row.identifier,
+            source,
+            destination,
+            hashlib.sha256(row.contents.encode()).hexdigest(),
+            "decision:D-93",
+        )
+        for row in (record, amendment)
+    )
+    assert relocation_problems(before, after, moves, rationale) == ()
+    assert relocation_problems(before, after, (), rationale)
+    assert relocation_problems(before, ((destination, record),), moves, rationale)
+    assert relocation_problems(
+        before, ((destination, record), (source, amendment)), moves[:1], rationale
+    )
+    assert relocation_problems(before, after, moves, "")
+    assert relocation_problems(before, (*after, (source, record)), moves, rationale)
+    altered = (
+        (destination, RowFact(record.identifier, '{"value":2}')),
+        (destination, amendment),
+    )
+    assert relocation_problems(before, altered, moves, rationale), (
+        "a moved protected mutant record could be edited"
+    )
+    assert relocation_problems(before, after, (moves[0], moves[0]), rationale)
+    new_amendment = RowFact("amendment:M-new-control", '{"revision":1}')
+    assert relocation_problems(
+        before, (*after, (source, new_amendment)), moves, rationale
+    )
+    new_record = RowFact("M-new-control", '{"value":1}')
+    assert relocation_problems(
+        before,
+        (*after, (destination, new_record), (source, new_amendment)),
+        moves,
+        rationale,
+    )
+
+
+@pytest.mark.evidence("real")
+def test_relocations_preserve_committed_rows(tmp_path: Path) -> None:
+    """An actual HEAD and live corpus permit only documented, exact row moves."""
+    root = tmp_path / "subject"
+    source = "tests/mutants/mixed.toml"
+    destination = "tests/mutants/later.toml"
+    first = (
+        '[[mutant]]\nid = "M-example-first"\nsearch = "a"\n'
+        '[[amendment]]\nid = "M-example-first"\nsearch = "new"\n'
+    )
+    second = '[[mutant]]\nid = "M-example-second"\nsearch = "b"\n'
+    revision = repository(root, ((source, (first + second).encode()),), with_head=True)
+    (root / source).write_text(second, encoding="utf-8")
+    (root / destination).write_text(first, encoding="utf-8")
+    assert isinstance(check(root), Err)
+    original = rows(first, "mutant")
+    assert isinstance(original, Ok)
+    proposal = "".join(
+        f'[[relocation]]\nid = "{row.identifier}"\n'
+        f'source = "{source}"\ndestination = "{destination}"\n'
+        f'sha256 = "{hashlib.sha256(row.contents.encode()).hexdigest()}"\n'
+        'provenance = "decision:D-93"\n'
+        for row in original.value
+    )
+    rationale = root / "DEVELOPMENT_PLAN/rationale.md"
+    rationale.parent.mkdir()
+    rationale.write_text(
+        "| D-93 | Move `M-example-first` unchanged. |\n", encoding="utf-8"
+    )
+    manifest = root / "tests/mutant_relocations.toml"
+    manifest.write_text(proposal, encoding="utf-8")
+    assert check(root) == Ok(revision)
+    (root / destination).write_text(first.replace('"a"', '"changed"'), encoding="utf-8")
+    assert isinstance(check(root), Err), "edited relocated record was accepted"
+    (root / destination).write_text(first, encoding="utf-8")
+    (root / destination).write_text(
+        first.replace('search = "new"', 'search = "altered"'), encoding="utf-8"
+    )
+    assert isinstance(check(root), Err)
+    (root / destination).write_text(first, encoding="utf-8")
+    (root / source).write_text(second.replace('"b"', '"changed"'), encoding="utf-8")
+    assert isinstance(check(root), Err)
+    (root / source).write_text(second, encoding="utf-8")
+    manifest.write_text(proposal + proposal, encoding="utf-8")
+    assert isinstance(check(root), Err)
+    manifest.write_text(proposal, encoding="utf-8")
+    rationale.write_text("| D-93 | Other change. |\n", encoding="utf-8")
+    assert isinstance(check(root), Err)
+    rationale.write_text(
+        "| D-93 | Move `M-example-first` unchanged. |\n", encoding="utf-8"
+    )
+    (root / source).write_text(first + second, encoding="utf-8")
+    assert isinstance(check(root), Err)
+
+
+@pytest.mark.evidence("value")
+def test_mutant_amendment_content_binding() -> None:
+    """Content binding preserves the named defect, target, killer and reason."""
+    original = {
+        "id": "M-example-control",
+        "operator": "delete",
+        "target": "src/example.py",
+        "search": "old source",
+        "replace": "",
+        "killers": ["tests/unit/test_x.py::test_x"],
+        "reason": "named failure",
+    }
+    changed = {**original, "search": "new source"}
+
+    def row(value: dict[str, str | list[str]]) -> RowFact:
+        return RowFact("M-example-control", json.dumps(value, sort_keys=True))
+
+    before, after = row(original), row(changed)
+    amendment = MutantAmendment(
+        before.identifier,
+        hashlib.sha256(before.contents.encode()).hexdigest(),
+        hashlib.sha256(after.contents.encode()).hexdigest(),
+    )
+    assert mutant_amendment_matches(before, after, amendment)
+    assert not mutant_amendment_matches(
+        before, row({**changed, "reason": "other"}), amendment
+    )
+    altered = row({**changed, "killers": ["tests/unit/test_y.py::test_y"]})
+    revised = MutantAmendment(
+        before.identifier,
+        amendment.before_sha256,
+        hashlib.sha256(altered.contents.encode()).hexdigest(),
+    )
+    assert not mutant_amendment_matches(before, altered, revised)
+    for field, value in (
+        ("target", "src/other.py"),
+        ("operator", "widen"),
+        ("reason", "other reason"),
+        ("search", ""),
+    ):
+        altered = row({**changed, field: value})
+        revised = MutantAmendment(
+            before.identifier,
+            amendment.before_sha256,
+            hashlib.sha256(altered.contents.encode()).hexdigest(),
+        )
+        assert not mutant_amendment_matches(before, altered, revised)
+    invalid_before = row({**original, "killers": []})
+    invalid_after = row({**changed, "killers": []})
+    invalid_binding = MutantAmendment(
+        before.identifier,
+        hashlib.sha256(invalid_before.contents.encode()).hexdigest(),
+        hashlib.sha256(invalid_after.contents.encode()).hexdigest(),
+    )
+    assert not mutant_amendment_matches(invalid_before, invalid_after, invalid_binding)
+    assert not mutant_amendment_matches(
+        before,
+        after,
+        MutantAmendment(before.identifier, "0" * 64, amendment.after_sha256),
+    )
 
 
 @pytest.mark.evidence("value")
@@ -64,6 +234,29 @@ def test_amends_row_accepted() -> None:
     assert isinstance(second, Ok)
     assert append_only(first.value, second.value) == ()
     assert isinstance(rows(ORACLE + ORACLE, "oracle"), Err)
+
+
+@pytest.mark.evidence("value")
+def test_mutant_amendments_are_append_only() -> None:
+    """An amendment and its original are independently protected from edits."""
+    original = '[[mutant]]\nid = "M-example-one"\nsearch = "old"\n'
+    amendment = '[[amendment]]\nid = "M-example-one"\nsearch = "new"\n'
+    baseline = rows(original + amendment, "mutant")
+    assert isinstance(baseline, Ok)
+    assert {entry.identifier for entry in baseline.value} == {
+        "M-example-one",
+        "amendment:M-example-one",
+    }
+    for changed in (
+        original,
+        amendment,
+        original + amendment.replace('"new"', '"other"'),
+    ):
+        current = rows(changed, "mutant")
+        if isinstance(current, Ok):
+            assert append_only(baseline.value, current.value)
+        else:
+            assert isinstance(current, Err)
 
 
 @pytest.mark.evidence("real")

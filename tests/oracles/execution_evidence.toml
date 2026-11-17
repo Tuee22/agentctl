@@ -1,0 +1,31 @@
+[[case]]
+id = "evidence.current.complete"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { nonce = "current", recorded = "current", mutant = true }
+expected = true
+
+[[case]]
+id = "evidence.stale.refused"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { nonce = "current", recorded = "stale", mutant = true }
+expected = false
+
+[[case]]
+id = "evidence.empty.refused"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { nonce = "", recorded = "", mutant = true }
+expected = false
+
+[[case]]
+id = "evidence.mutant.missing"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { nonce = "current", recorded = "current", mutant = false }
+expected = false

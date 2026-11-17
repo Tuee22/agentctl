@@ -20,7 +20,8 @@ import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import qualified System.Info as System
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
+import Test.Tasty.HUnit (assertBool, assertFailure, (@?=))
+import TestSource (testCase)
 
 tests :: [TestTree]
 tests =

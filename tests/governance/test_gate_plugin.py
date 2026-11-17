@@ -8,8 +8,14 @@ from pathlib import Path
 
 import pytest
 
+from agentctl.check.evidence import parse_manifest
 from agentctl.check.gate_plugin import orphan_modules
 from agentctl.check.legs import coverage_commands
+from agentctl.check.phase_reports import (
+    CollectionScope,
+    collection_failures,
+    observe_collection,
+)
 from agentctl.process import run
 from agentctl.result import Ok
 
@@ -117,6 +123,24 @@ def test_deselection_fails_session(
     assert "deselected:" in manifest.read_text(encoding="utf-8")
 
 
+def test_duplicate_nodes_fail_session(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Duplicate collection and execution cannot collapse into passing sets."""
+    manifest = _suite(pytester, monkeypatch)
+    assert _run(pytester).ret == 0
+    pytester.makeconftest(
+        "def pytest_collection_modifyitems(config, items):\n"
+        "    items.append(items[-1])\n"
+    )
+    assert _run(pytester).ret == 1
+    observed = manifest.read_text(encoding="utf-8")
+    assert "duplicate collected node id" in observed, (
+        "duplicate collection was not reported"
+    )
+    assert "duplicate execution:" in observed, "duplicate execution was not reported"
+
+
 def test_orphan_module_fails(tmp_path: Path) -> None:
     """Reject uncited, uncollected and support-hidden test modules."""
     tests = tmp_path / "tests"
@@ -135,6 +159,14 @@ def test_orphan_module_fails(tmp_path: Path) -> None:
     )
     assert orphan_modules(tmp_path, collected, cited, support | cited) == (
         "tests/test_example.py",
+    )
+    assert orphan_modules(tmp_path, frozenset(), cited, support, cited) == ()
+    assert orphan_modules(tmp_path, frozenset(), frozenset(), support, cited) == (
+        "tests/test_example.py",
+    )
+    missing = frozenset({"tests/test_missing.py"})
+    assert orphan_modules(tmp_path, collected, cited | missing, support, missing) == (
+        "tests/test_missing.py",
     )
 
 
@@ -175,6 +207,88 @@ def test_manifest_matches_execution(
     assert set(data["collected"]) != set(data["executed"]), (
         "manifest invented execution"
     )
+
+
+def test_collection_error_preserves_other_execution(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A broken module is recorded while an independent test really executes."""
+    manifest = _suite(pytester, monkeypatch)
+    assert _run(pytester, "--continue-on-collection-errors").ret == 0
+    (pytester.path / "tests").mkdir()
+    (pytester.path / "test_collection_error_preserves_other_execution.py").rename(
+        pytester.path / "tests/test_early.py"
+    )
+    (pytester.path / "tests/test_broken.py").write_text(
+        "def invalid(:\n", encoding="utf-8"
+    )
+    plan = pytester.path / "DEVELOPMENT_PLAN"
+    plan.mkdir()
+    (plan / "phase-example.md").write_text(
+        "`tests/test_early.py::test_one`\n`tests/test_broken.py::test_missing`\n",
+        encoding="utf-8",
+    )
+    assert _run(pytester, "--continue-on-collection-errors").ret != 0
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    assert "collection failed: tests/test_broken.py" in data["forbidden"]
+    assert data["executed"] == [
+        "tests/test_early.py::test_one",
+        "tests/test_early.py::test_two",
+    ]
+    assert data["collected"] == data["executed"] == data["passed"]
+    parsed = parse_manifest(data)
+    assert isinstance(parsed, Ok)
+    scopes = (
+        CollectionScope(
+            0,
+            frozenset({"tests/test_early.py::test_one"}),
+            frozenset({"tests/test_early.py"}),
+        ),
+        CollectionScope(
+            1,
+            frozenset({"tests/test_broken.py::test_missing"}),
+            frozenset({"tests/test_broken.py"}),
+        ),
+    )
+    observed = observe_collection(parsed.value, "nested-nonce")
+    result = collection_failures(scopes, observed)
+    assert isinstance(result, Ok)
+    assert not result.value[0][1]
+    assert "collection failed: tests/test_broken.py" in result.value[1][1]
+
+
+def test_fixture_failures_remain_shared(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Setup and teardown failures cannot masquerade as local test-body failures."""
+    manifest = _suite(pytester, monkeypatch)
+    module = "test_fixture_failures_remain_shared.py"
+    early, late = module + "::test_one", module + "::test_two"
+    scopes = (
+        CollectionScope(0, frozenset({early}), frozenset({module})),
+        CollectionScope(1, frozenset({late}), frozenset({module})),
+    )
+    consumers = ((early, frozenset({0})), (late, frozenset({1})))
+    for body in (
+        "raise RuntimeError('setup')\n    yield",
+        "yield\n    raise RuntimeError('teardown')",
+    ):
+        (pytester.path / module).write_text(
+            'import pytest\npytestmark = pytest.mark.evidence("value")\n'
+            "@pytest.fixture\ndef fixture():\n    " + body + "\n"
+            "def test_one():\n    assert True\n"
+            "def test_two(fixture):\n    assert True\n",
+            encoding="utf-8",
+        )
+        assert _run(pytester).ret != 0
+        parsed = parse_manifest(json.loads(manifest.read_text(encoding="utf-8")))
+        assert isinstance(parsed, Ok)
+        observation = observe_collection(parsed.value, "nested-nonce")
+        result = collection_failures(scopes, observation, case_consumers=consumers)
+        assert isinstance(result, Ok)
+        assert all(
+            "fixture phase failed: " + late in failures for _, failures in result.value
+        ), "fixture failure did not invalidate all consumers"
 
 
 def test_coverage_gap_fails(tmp_path: Path) -> None:

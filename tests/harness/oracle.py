@@ -27,6 +27,14 @@ class Problem:
 
 
 @dataclass(frozen=True, slots=True)
+class TreeIssue:
+    """One oracle diagnostic and its source, or shared damage when unknown."""
+
+    source: str | None
+    message: str
+
+
+@dataclass(frozen=True, slots=True)
 class Row:
     """One preserved specification case and its source anchor."""
 
@@ -84,12 +92,22 @@ def _object(value: dict[object, object]) -> Object | Problem:
     return Object(tuple(sorted(fields)))
 
 
-def read_homes(root: Path) -> Homes:
-    """Read source anchors without importing any implementation package."""
+def read_homes(
+    root: Path, *, include_decisions: bool = True, include_tools: bool = True
+) -> Homes:
+    """Read requested anchor families without importing an implementation."""
     overview = (root / "DEVELOPMENT_PLAN/00-overview.md").read_text(encoding="utf-8")
-    rationale = (root / "DEVELOPMENT_PLAN/rationale.md").read_text(encoding="utf-8")
-    external = (root / "documents/reference/external_tool_facts.md").read_text(
-        encoding="utf-8"
+    rationale = (
+        (root / "DEVELOPMENT_PLAN/rationale.md").read_text(encoding="utf-8")
+        if include_decisions
+        else ""
+    )
+    external = (
+        (root / "documents/reference/external_tool_facts.md").read_text(
+            encoding="utf-8"
+        )
+        if include_tools
+        else ""
     )
     requirements: tuple[tuple[str, str], ...] = tuple(
         (str(match[1]), str(match[2]))
@@ -223,6 +241,30 @@ def load(path: Path, homes: Homes) -> Store | Problem:
     return parse(data, homes)
 
 
+def load_scoped(path: Path, root: Path) -> Store | Problem:
+    """Validate every row using exactly the anchor families those rows name."""
+    try:
+        data = tomllib.loads(path.read_text(encoding="utf-8"))
+        cases = data.get("case")
+        if not isinstance(cases, list):
+            return Problem("oracle must contain case rows")
+        sources = frozenset(
+            source.partition(":")[0]
+            for case in cases
+            if isinstance(case, dict)
+            for source in (case.get("provenance"),)
+            if isinstance(source, str)
+        )
+        homes = read_homes(
+            root,
+            include_decisions="decision" in sources,
+            include_tools="tool" in sources,
+        )
+    except (OSError, UnicodeError, tomllib.TOMLDecodeError) as exc:
+        return Problem(str(exc))
+    return parse(data, homes)
+
+
 def imports_subject(source: str) -> bool:
     """Detect direct, aliased, relative and dynamic subject imports."""
     for node in ast.walk(ast.parse(source)):
@@ -250,11 +292,10 @@ def check_tree(root: Path) -> tuple[str, ...]:
     paths = tuple(sorted((root / "tests/oracles").glob("*.toml")))
     if not paths:
         return ("oracles.independence: empty oracle store",)
-    homes = read_homes(root)
     problems: tuple[str, ...] = ()
     identifiers = frozenset[str]()
     for path in paths:
-        result = load(path, homes)
+        result = load_scoped(path, root)
         if isinstance(result, Problem):
             problems += (f"oracles.independence: {path.name}: {result.message}",)
         else:
@@ -264,10 +305,41 @@ def check_tree(root: Path) -> tuple[str, ...]:
                     f"oracles.independence: {path.name}: duplicate row id across files",
                 )
             identifiers = identifiers | own
-    source = (root / "tests/harness/oracle.py").read_text(encoding="utf-8")
-    if imports_subject(source):
-        problems += ("oracles.independence: loader imports subject",)
+    try:
+        source = (root / "tests/harness/oracle.py").read_text(encoding="utf-8")
+        if imports_subject(source):
+            problems += ("oracles.independence: loader imports subject",)
+    except (OSError, UnicodeError, SyntaxError) as exc:
+        problems += ("oracles.independence: cannot inspect loader: " + str(exc),)
     return problems
+
+
+def tree_observations(root: Path) -> tuple[tuple[str, ...], tuple[TreeIssue, ...]]:
+    """Identify per-file oracle diagnostics without localizing ambiguous damage.
+
+    The resulting observations do not authenticate the checkout, execution or
+    ownership. Duplicate row IDs remain shared because both files are affected.
+    """
+    paths = tuple(
+        sorted(
+            path.relative_to(root).as_posix()
+            for path in (root / "tests/oracles").glob("*.toml")
+        )
+    )
+    issues: tuple[TreeIssue, ...] = ()
+    for message in check_tree(root):
+        sources = tuple(
+            path
+            for path in paths
+            if message.startswith("oracles.independence: " + Path(path).name + ": ")
+        )
+        source = (
+            sources[0]
+            if len(sources) == 1 and "duplicate row id across files" not in message
+            else None
+        )
+        issues += (TreeIssue(source, message),)
+    return paths, issues
 
 
 def assert_oracle[T, U](

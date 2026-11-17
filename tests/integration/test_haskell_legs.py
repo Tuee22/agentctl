@@ -16,10 +16,19 @@ from hatchling.build import build_sdist, build_wheel
 
 from agentctl.bootstrap import build
 from agentctl.check import haskell
-from agentctl.check.steps import run_tools
+from agentctl.check.evidence import Entry, source_census
+from agentctl.check.steps import (
+    _run_tools_observed,
+    native_snapshot_unchanged,
+    run_tools,
+)
 from agentctl.process import Output, run
 from agentctl.result import Err, Ok
 from tests.harness.haskell import copy_project
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
+
+haskell_build = _haskell_build_fixture
+PROTOCOL_VERSION = 2
 
 pytestmark = pytest.mark.evidence("real")
 
@@ -40,6 +49,83 @@ def test_werror_fires(root: Path, tmp_path: Path) -> None:
     assert isinstance(result, Err), "unused binding did not fail the Werror build"
     assert "unusedControl" in result.error.message
     assert "Werror=unused-top-binds" in result.error.message
+
+
+def test_failed_native_suite_preserves_case_observation(
+    root: Path, tmp_path: Path
+) -> None:
+    """A real failed suite retains its case outcome without becoming a pass."""
+    context = copy_project(root, tmp_path)
+    main = context.project / "test/Main.hs"
+    source = main.read_text(encoding="utf-8")
+    original = "validHandoff Nothing @?= False"
+    assert source.count(original) == 1
+    main.write_text(
+        source.replace(original, "validHandoff Nothing @?= True"), encoding="utf-8"
+    )
+    assert haskell.compile_all(context) == Ok(None)
+    directory = tmp_path / "report"
+    result = haskell.run_suites(context, directory, "native-failure")
+    assert isinstance(result, Err), "failed native suite was accepted"
+    observed = haskell.native_observation(directory, "native-failure")
+    assert isinstance(observed, Ok), "failed native suite lost its observations"
+    node = "haskell:agentctl-core-test/Handshake/handoff-required"
+    assert node in observed.value.executed
+    assert node not in observed.value.passed
+    assert "failed: " + node in observed.value.forbidden
+    assert "native-command-failed" in observed.value.forbidden
+    assert isinstance(haskell.native_evidence(directory, "native-failure"), Err)
+    source_entries = tuple(
+        Entry(
+            "src/agentctl/haskell/" + path.relative_to(context.project).as_posix(),
+            "file",
+            (path.read_bytes(),),
+        )
+        for path in sorted((context.project / "test").glob("*.hs"))
+    )
+    sources = haskell.read_sources(
+        directory, "native-failure", observed.value.collected, source_entries
+    )
+    assert isinstance(sources, Ok), sources
+    assert dict(sources.value)[node] == "src/agentctl/haskell/test/Main.hs"
+
+
+def test_native_case_sources_match_compiled_callsites(
+    haskell_build: build.BuildContext,
+) -> None:
+    """Every actual listed case has one compiler-reported source file."""
+    listed = build.execute_binary(
+        haskell_build, build.BinaryCall("test:agentctl-core-test", ("--list-tests",))
+    )
+    sources = build.execute_binary(
+        haskell_build,
+        build.BinaryCall("test:agentctl-core-test", ("--agentctl-test-sources",)),
+    )
+    assert isinstance(listed, Ok)
+    assert listed.value.code == 0
+    assert isinstance(sources, Ok)
+    assert sources.value.code == 0
+    rows = tuple(line.split("\t") for line in sources.value.stdout.splitlines())
+    pair_fields = 2
+    assert rows
+    assert all(len(row) == pair_fields and row[1] for row in rows)
+    names = tuple(row[0] for row in rows)
+    assert len(set(names)) == len(names)
+    assert frozenset(names) == frozenset(listed.value.stdout.splitlines())
+    expected = haskell.listed(listed.value.stdout)
+    assert isinstance(expected, Ok)
+    observed = haskell.observe_sources(haskell_build, expected.value)
+    assert isinstance(observed, Ok), observed
+    assert {node for node, _path in observed.value} == expected.value
+    mapped = {name: Path(path).as_posix() for name, path in rows}
+    assert mapped["agentctl-core-test.Handshake.protocol-fields"].endswith(
+        "test/Main.hs"
+    )
+    assert mapped["agentctl-core-test.Backoff.grows-to-cap"].endswith(
+        "test/RecoveryTests.hs"
+    )
+    for path in mapped.values():
+        assert (haskell_build.project / path).is_file(), path
 
 
 def test_user_cabal_config_ignored(root: Path, tmp_path: Path) -> None:
@@ -103,7 +189,7 @@ def test_every_suite_routed(
         "import Test.Tasty.HUnit (assertEqual)\n"
         "import Test.Tasty.Runners.AntXML (antXMLRunner)\n"
         "main :: IO ()\nmain = do\n"
-        '  assertEqual "fixture protocol" 1 (handshakeProtocol handshake)\n'
+        '  assertEqual "fixture protocol" 2 (handshakeProtocol handshake)\n'
         "  defaultMainWithIngredients (antXMLRunner : defaultIngredients) "
         '(testGroup "agentctl-core-test" [])\n',
         encoding="utf-8",
@@ -116,7 +202,7 @@ def test_every_suite_routed(
 
 def test_direct_invocation_refused(haskell_build: build.BuildContext) -> None:
     """Absent and different versions refuse every command; the correct handoff works."""
-    for supplied in (None, "0", "2"):
+    for supplied in (None, "0", "1"):
         for arguments in (("--handshake",), ("list",), ()):
             result = build.execute_binary(
                 haskell_build,
@@ -133,7 +219,21 @@ def test_direct_invocation_refused(haskell_build: build.BuildContext) -> None:
     )
     assert isinstance(result, Ok), result
     assert result.value.code == 0
-    assert json.loads(result.value.stdout)["protocol"] == 1
+    assert json.loads(result.value.stdout)["protocol"] == PROTOCOL_VERSION
+    for consent in (None, "", "TRUE", "1"):
+        refused = build.execute_binary(
+            haskell_build,
+            build.BinaryCall("exe:agentctl-core", ("--handshake",), consent=consent),
+        )
+        assert isinstance(refused, Ok), refused
+        assert refused.value.code != 0, "core accepted invalid consent"
+        assert "agentctl" in refused.value.stderr
+    accepted = build.execute_binary(
+        haskell_build,
+        build.BinaryCall("exe:agentctl-core", ("--handshake",), consent="true"),
+    )
+    assert isinstance(accepted, Ok), accepted
+    assert accepted.value.code == 0, "core refused valid consent"
     assert build.execute_binary(
         haskell_build, build.BinaryCall("exe:agentctl-core", ("unknown",))
     ) == Ok(Output(1, "", "Run agentctl to manage terminal agents.\n"))
@@ -181,12 +281,28 @@ def test_wheel_ships_haskell_sources(root: Path, tmp_path: Path) -> None:
 
 
 def test_native_leg_execution_and_failures(
-    haskell_build: build.BuildContext, tmp_path: Path
+    root: Path, haskell_build: build.BuildContext, tmp_path: Path
 ) -> None:
     """The real gate path executes both native legs and reports refused contexts."""
-    for name in ("cabal-build", "cabal-test"):
-        step = haskell.HaskellStep(name, haskell_build.host, haskell_build.project)
-        assert run_tools(haskell_build.project, tmp_path, "fresh", (step,)) == 0
+    build_step = haskell.HaskellStep(
+        "cabal-build", haskell_build.host, haskell_build.project
+    )
+    assert run_tools(haskell_build.project, tmp_path, "fresh", (build_step,)) == 0
+    captured = source_census(root)
+    assert isinstance(captured, Ok)
+    test_step = haskell.HaskellStep(
+        "cabal-test", haskell_build.host, haskell_build.project
+    )
+    observed = _run_tools_observed(
+        haskell_build.project,
+        tmp_path,
+        "fresh",
+        (test_step,),
+        source_entries=captured.value,
+    )
+    assert observed.code == 0
+    assert isinstance(observed.native, Ok), "real native evidence was not captured"
+    assert native_snapshot_unchanged(tmp_path, "fresh", observed.native) == 0
     missing = replace(haskell_build.host, cache=tmp_path / "absent-cache")
     assert (
         haskell.run_step(

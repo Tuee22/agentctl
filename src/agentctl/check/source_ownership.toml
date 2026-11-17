@@ -1,0 +1,4748 @@
+# Partial Phase 0 declarations; unlisted checkout entries remain unowned.
+version = 1
+
+[[artifacts]]
+path = "src/agentctl/check/hyperv_ssh.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_hyperv_ssh.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/hyperv_guest_protocol.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_hyperv_guest_protocol.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/hyperv_guest.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_hyperv_guest.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/hyperv_capacity.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_hyperv_capacity.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/foundation_style_values.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/foundation_process.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/foundation_process_identity.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_hyperv_observe.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/hyperv_snapshot.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_hyperv_snapshot.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/hyperv_storage.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_hyperv_storage.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/hyperv_observe.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_hyperv_observe.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/hyperv_facts.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_hyperv_facts.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/foundation.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/foundation_paths.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/foundation_host.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/haskell/test/TestSource.hs"
+capability = "native-build"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/process_identity.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_binding_workflow.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/binding_workflow.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/binding_launcher.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_binding_launcher.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/binding_stopped.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_binding_stopped.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/binding_process.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_binding_process.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/binding_wsl.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_binding_wsl.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/binding_protocol.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_binding_protocol.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_binding_peer_cleanup.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/wsl_mount.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_wsl_mount.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/wsl_guest_sample.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_wsl_guest_sample.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_wsl_guest_sample.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/wsl_host_sample.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_wsl_host_sample.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_wsl_host_sample.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/wsl_monitor.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_wsl_monitor.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/wsl_tree.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_wsl_tree_observation.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/wsl_cgroup.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_wsl_cgroup_observation.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/wsl_budget.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_wsl_budget.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/binding_transaction.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_binding_transaction.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_wsl_encoding.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_wsl_storage_observation.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/wsl_registration.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_wsl_registration.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_binding_host.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/binding_transport.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_binding_transport.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/binding_peer.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_binding_peer.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/binding_inventory.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_binding_inventory.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/binding_challenge.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_binding_challenge.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/pin_values.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/mutant_relocations.toml"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = false
+
+[[phases]]
+number = 0
+prerequisites = []
+
+[[phases]]
+number = 1
+prerequisites = [0]
+
+[[phases]]
+number = 2
+prerequisites = [1]
+
+[[phases]]
+number = 3
+prerequisites = [2]
+
+[[phases]]
+number = 4
+prerequisites = [3]
+
+[[phases]]
+number = 5
+prerequisites = [4]
+
+[[phases]]
+number = 6
+prerequisites = [5]
+
+[[phases]]
+number = 7
+prerequisites = [6]
+
+[[phases]]
+number = 8
+prerequisites = [7]
+
+[[phases]]
+number = 9
+prerequisites = [8]
+
+[[phases]]
+number = 10
+prerequisites = [9]
+
+[[phases]]
+number = 11
+prerequisites = [10]
+
+[[phases]]
+number = 12
+prerequisites = [8]
+
+[[phases]]
+number = 13
+prerequisites = [8]
+
+[[phases]]
+number = 14
+prerequisites = [11, 12, 13]
+
+[[artifacts]]
+path = "src/agentctl/check/ownership.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/source_ownership.toml"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/phase0_mutant_ownership.toml"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/phase_reports.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/steps.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/evidence.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/lanes.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/oracles/phase_ownership.toml"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/harness/oracle.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_oracles.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_check_legs.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0, 2]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_forbidden_surfaces.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_ratchet.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_spawn_audit.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/haskell/src/AgentCtl/Agent.hs"
+capability = "agent-launch"
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/argv.toml"
+capability = "agent-mutants"
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/auth.toml"
+capability = "agent-mutants"
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/preflight.toml"
+capability = "agent-mutants"
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/haskell/test/NameTests.hs"
+capability = "agent-native-tests"
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/haskell/test/ObserveTests.hs"
+capability = "observation-native-tests"
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/haskell/test/RecoveryTests.hs"
+capability = "supervisor-native-tests"
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_session_names.py"
+capability = "agent-launch-tests"
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_backoff.py"
+capability = "supervisor-tests"
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/gate_plugin.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/legs.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/plan_data.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/ratchet.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/mutants.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/writeguard.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/validator/__init__.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/validator/closure.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/validator/docs.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/validator/plan.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_phase_reports.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_ownership_manifest.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_plan_validator.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_gate_plugin.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_run_evidence.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_release_receipts.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_mutants.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_guard.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0, 1]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_runtime_boundaries.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_socket_preconditions.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/phase.toml"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/evidence.toml"
+capability = "governance-mutants"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/bootstrap_startup.toml"
+capability = "bootstrap-mutants"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/bootstrap_plan.toml"
+capability = "bootstrap-mutants"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/governance_preconditions.toml"
+capability = "governance-mutants"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/build_cache.toml"
+capability = "bootstrap-mutants"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/governance_identity.toml"
+capability = "governance-mutants"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/governance_native_controls.toml"
+capability = "governance-mutants"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/governance_style.toml"
+capability = "governance-mutants"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/style_legs.toml"
+capability = "bootstrap-mutants"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/toolchain.toml"
+capability = "bootstrap-mutants"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/governance_toolchain.toml"
+capability = "governance-mutants"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/linux_clean_recipe.toml"
+capability = "linux-clean-recipe-mutants"
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/linux_mutant_ownership.toml"
+capability = "linux-clean-recipe-mutants"
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/haskell_build.toml"
+capability = "bootstrap-mutants"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/governance_packaging.toml"
+capability = "governance-mutants"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/classify_status.toml"
+capability = "sessions-mutants"
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/observation_status.toml"
+capability = "observation-mutants"
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = "tests/oracles/check_steps.toml"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-0-governance-and-phase-evidence.md'
+capability = 'plan-phase-0'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-1-python-discipline-and-gate-integrity.md'
+capability = 'plan-phase-1'
+owner = 1
+consumers = [1]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-2-python-bootstrap-and-handoff.md'
+capability = 'plan-phase-2'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-3-haskell-runtime-and-platform-policy.md'
+capability = 'plan-phase-3'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-4-debian-tmux-and-multiplexer.md'
+capability = 'plan-phase-4'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-5-agent-preflight-and-launch.md'
+capability = 'plan-phase-5'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-6-session-management-and-adoption.md'
+capability = 'plan-phase-6'
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-7-pane-observation-and-classification.md'
+capability = 'plan-phase-7'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md'
+capability = 'plan-phase-8'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-9-windows-toolchain-and-psmux-build.md'
+capability = 'plan-phase-9'
+owner = 9
+consumers = [9]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-10-windows-backend-qualification.md'
+capability = 'plan-phase-10'
+owner = 10
+consumers = [10]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-11-windows-application-acceptance.md'
+capability = 'plan-phase-11'
+owner = 11
+consumers = [11]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-12-linux-live-and-clean-acceptance.md'
+capability = 'plan-phase-12'
+owner = 12
+consumers = [12]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-13-macos-acceptance.md'
+capability = 'plan-phase-13'
+owner = 13
+consumers = [13]
+required = true
+
+[[artifacts]]
+path = 'DEVELOPMENT_PLAN/phase-14-release-evidence-and-closure.md'
+capability = 'plan-phase-14'
+owner = 14
+consumers = [14]
+required = true
+
+[[artifacts]]
+path = 'documents/architecture/launch_contract.md'
+capability = 'documentation-phase-5'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'documents/architecture/multiplexer_adapter.md'
+capability = 'documentation-phase-4'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'documents/architecture/python_haskell_boundary.md'
+capability = 'documentation-phase-2'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'documents/architecture/sessions_and_ownership.md'
+capability = 'documentation-phase-6'
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = 'documents/architecture/supervisor_contract.md'
+capability = 'documentation-phase-8'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'documents/documentation_standards.md'
+capability = 'documentation-phase-0'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'documents/engineering/binary_build.md'
+capability = 'documentation-phase-2'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'documents/engineering/code_standards.md'
+capability = 'documentation-phase-1'
+owner = 1
+consumers = [1]
+required = true
+
+[[artifacts]]
+path = 'documents/engineering/quality_gate.md'
+capability = 'documentation-phase-0'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'documents/engineering/testing.md'
+capability = 'documentation-phase-1'
+owner = 1
+consumers = [1]
+required = true
+
+[[artifacts]]
+path = 'documents/engineering/toolchain_bootstrap.md'
+capability = 'documentation-phase-3'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = 'documents/operations/installation.md'
+capability = 'documentation-phase-2'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'documents/operations/troubleshooting.md'
+capability = 'documentation-phase-3'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = 'documents/operations/validation_runbook.md'
+capability = 'documentation-phase-0'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'documents/README.md'
+capability = 'documentation-phase-0'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'documents/reference/cli_reference.md'
+capability = 'documentation-phase-8'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'documents/reference/external_tool_facts.md'
+capability = 'documentation-phase-1'
+owner = 1
+consumers = [1]
+required = true
+
+[[artifacts]]
+path = 'documents/reference/files_and_state.md'
+capability = 'documentation-phase-3'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = ".gitattributes"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = ".gitignore"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "AGENTS.md"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "CLAUDE.md"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "README.md"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "DEVELOPMENT_PLAN"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "DEVELOPMENT_PLAN/README.md"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "DEVELOPMENT_PLAN/00-overview.md"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "DEVELOPMENT_PLAN/development_plan_standards.md"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "DEVELOPMENT_PLAN/rationale.md"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "DEVELOPMENT_PLAN/system-components.md"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "documents"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/validator"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/harness"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/mutants"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/oracles"
+capability = "shared-governance"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Protocol.hs'
+capability = 'native-transport'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Process.hs'
+capability = 'native-runtime'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Native.hs'
+capability = 'native-runtime'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/native_fs.c'
+capability = 'native-runtime'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/native_process.c'
+capability = 'native-runtime'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/native_stop.c'
+capability = 'native-runtime'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Paths.hs'
+capability = 'native-runtime'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Mux.hs'
+capability = 'debian-mux'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Mux/Command.hs'
+capability = 'debian-mux'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Mux/Tmux.hs'
+capability = 'debian-mux'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Mux/Types.hs'
+capability = 'debian-mux'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/PaneExec.hs'
+capability = 'debian-mux'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/PaneExec/Spec.hs'
+capability = 'debian-mux'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/app/FakeAgent.hs'
+capability = 'debian-mux'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/tmux.py'
+capability = 'debian-mux'
+owner = 4
+consumers = [4, 5, 6, 7, 8, 12]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Agent/Argv.hs'
+capability = 'agent-launch'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Agent/Auth.hs'
+capability = 'agent-launch'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Agent/Types.hs'
+capability = 'agent-launch'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Preflight.hs'
+capability = 'agent-launch'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Launch.hs'
+capability = 'agent-launch'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Session/Name.hs'
+capability = 'agent-launch'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/launch.py'
+capability = 'agent-launch'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Sessions.hs'
+capability = 'sessions'
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Adopt.hs'
+capability = 'sessions'
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Session/Identity.hs'
+capability = 'sessions'
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Observe/Capture.hs'
+capability = 'observation'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Observe/Classify/Agent.hs'
+capability = 'observation'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Observe/Classify/Claude.hs'
+capability = 'observation'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Observe/Classify/Codex.hs'
+capability = 'observation'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Observe/Classify/Input.hs'
+capability = 'observation'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Observe/Classify.hs'
+capability = 'observation'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Observe/Fingerprint.hs'
+capability = 'observation'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Observe/Normalize.hs'
+capability = 'observation'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Recovery/Backoff.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Recovery/Machine.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor/Commands.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor/Delivery.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor/Guard.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor/Lock.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor/Log/File.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor/Log.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor/Poll.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor/Runtime.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor/Settings.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor/Watch.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/app/ScriptedAgent.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/app/SupervisorFixture.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/app/fake_signals.c'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/supervisor_signals.py'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Mux/Psmux.hs'
+capability = 'psmux-backend'
+owner = 10
+consumers = [10]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/process.py'
+capability = 'python-effects'
+owner = 1
+consumers = [1]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/result.py'
+capability = 'python-effects'
+owner = 1
+consumers = [1]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap/__init__.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap/binary.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap/build.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap/cache.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap/ghcup.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap/handoff.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap/pins.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap/pins.toml'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap/plan.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap/prereqs.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap/style.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap/toolchain.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/bootstrap'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/cli.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/hostfacts.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/paths.py'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/resources'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/resources/python-startup.pth'
+capability = 'python-bootstrap'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/__init__.py'
+capability = 'gate-ownership'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/e2e/test_adopt.py'
+capability = 'sessions-tests'
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = 'tests/e2e/test_launch.py'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5, 11]
+required = true
+
+[[artifacts]]
+path = 'tests/e2e/test_passthrough_argv.py'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/e2e/test_sessions.py'
+capability = 'sessions-tests'
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = 'tests/e2e/test_supervisor_log.py'
+capability = 'supervisor-tests'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/e2e/test_supervisor_run.py'
+capability = 'supervisor-tests'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/e2e/test_supervisor_scenarios.py'
+capability = 'supervisor-tests'
+owner = 8
+consumers = [8, 11, 13]
+required = true
+
+[[artifacts]]
+path = 'tests/governance/test_source_guards.py'
+capability = 'governance-tests'
+owner = 0
+consumers = [0, 1]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_agent_auth_probe.py'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_build_cache.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_capture_real.py'
+capability = 'observation-tests'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_ghcup.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_handoff.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2, 11]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_haskell_legs.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_haskell_style_legs.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_mux_reap.py'
+capability = 'mux-tests'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_mux_real.py'
+capability = 'mux-tests'
+owner = 4
+consumers = [4, 13]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_pane_exec.py'
+capability = 'mux-tests'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_passthrough.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2, 5]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_passthrough.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_static_legs.py'
+capability = 'governance-tests'
+owner = 0
+consumers = [0, 2]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_toolchain.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_launch_argv.py'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_plan.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_recovery_transitions.py'
+capability = 'supervisor-tests'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_screen_classes.py'
+capability = 'observation-tests'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/trees.py'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/governance/test_doc_validator.py'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_binary_unnamed'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_binary_unnamed/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_enforcement_cited'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_enforcement_cited/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_links'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_links/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_metadata'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_metadata/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_no_status'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_no_status/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_owning_phase'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_owning_phase/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_phase_citation'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_phase_citation/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_root_entry'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_root_entry/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_structure'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_structure/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_taxonomy'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/docs_taxonomy/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_dependency_direction'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_dependency_direction/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_disposition_table'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_disposition_table/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_fileset'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_fileset/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_header'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_header/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_legacy_ledger'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_legacy_ledger/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_no_narrative'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_no_narrative/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_requirements_table'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_requirements_table/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_sprint_structure'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_sprint_structure/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_status_consequences'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_status_consequences/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_status_harmony'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/docs_negative/plan_status_harmony/case.toml'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/ApprovalDialog'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/ApprovalDialog/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/ApprovalDialog/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/ApprovalDialog/overload-precedence.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/ApprovalDialog/overload-precedence.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/AuthError'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/AuthError/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/AuthError/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/BypassWarning'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/BypassWarning/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/BypassWarning/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/ContextExhausted'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/ContextExhausted/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/ContextExhausted/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Exited'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Exited/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Exited/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/IdlePrompt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/IdlePrompt/after-output.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/IdlePrompt/after-output.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/IdlePrompt/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/IdlePrompt/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/LoginScreen'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/LoginScreen/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/LoginScreen/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Overloaded'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Overloaded/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Overloaded/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/PartialInput'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/PartialInput/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/PartialInput/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/PartialInput/overload-precedence.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/PartialInput/overload-precedence.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/TrustDialog'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/TrustDialog/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/TrustDialog/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Unknown'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Unknown/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Unknown/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Unknown/error-without-prompt.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Unknown/error-without-prompt.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/UsageLimit'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/UsageLimit/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/UsageLimit/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Working'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Working/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Working/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Working/overload-precedence.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/claude/Working/overload-precedence.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/ApprovalDialog'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/ApprovalDialog/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/ApprovalDialog/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/ApprovalDialog/overload-precedence.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/ApprovalDialog/overload-precedence.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/AuthError'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/AuthError/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/AuthError/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/BypassWarning'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/BypassWarning/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/BypassWarning/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/ContextExhausted'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/ContextExhausted/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/ContextExhausted/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Exited'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Exited/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Exited/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/IdlePrompt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/IdlePrompt/after-output.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/IdlePrompt/after-output.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/IdlePrompt/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/IdlePrompt/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/LoginScreen'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/LoginScreen/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/LoginScreen/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Overloaded'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Overloaded/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Overloaded/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/PartialInput'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/PartialInput/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/PartialInput/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/PartialInput/overload-precedence.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/PartialInput/overload-precedence.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/TrustDialog'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/TrustDialog/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/TrustDialog/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Unknown'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Unknown/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Unknown/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Unknown/error-without-prompt.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Unknown/error-without-prompt.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/UsageLimit'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/UsageLimit/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/UsageLimit/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Working'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Working/documented.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Working/documented.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Working/overload-precedence.toml'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/screens/codex/Working/overload-precedence.txt'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/screens.py'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/governance/test_screen_fixtures.py'
+capability = 'screen-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/bootstrap'
+capability = 'bootstrap-fixtures'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/bootstrap/ghcup_actor.py.txt'
+capability = 'bootstrap-fixtures'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/bootstrap/prereq_actor.py.txt'
+capability = 'bootstrap-fixtures'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/bootstrap/toolchain_actor.py.txt'
+capability = 'bootstrap-fixtures'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/haskell'
+capability = 'bootstrap-fixtures'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/haskell/cache_actor.py.txt'
+capability = 'bootstrap-fixtures'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/haskell/cache_boundary_actor.py.txt'
+capability = 'bootstrap-fixtures'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/haskell/edge_actor.py.txt'
+capability = 'bootstrap-fixtures'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/haskell/style_actor.py.txt'
+capability = 'bootstrap-fixtures'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/terminal'
+capability = 'terminal-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/terminal/utf8-and-wrap.txt'
+capability = 'terminal-fixtures'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/auth_status.toml'
+capability = 'agent-oracles'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/backoff.toml'
+capability = 'supervisor-oracles'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/check_legs.toml'
+capability = 'governance-oracles'
+owner = 0
+consumers = [0, 2]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/command_surface.toml'
+capability = 'bootstrap-oracles'
+owner = 2
+consumers = [2, 8]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/forbidden_actions.toml'
+capability = 'supervisor-oracles'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/launch_argv.toml'
+capability = 'agent-oracles'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/log_records.toml'
+capability = 'supervisor-oracles'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/mux_commands.toml'
+capability = 'mux-oracles'
+owner = 4
+consumers = [4, 5]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/pins.toml'
+capability = 'bootstrap-oracles'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/preflight.toml'
+capability = 'agent-oracles'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/recovery_transitions.toml'
+capability = 'observation-oracles'
+owner = 7
+consumers = [7, 8]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/session_names.toml'
+capability = 'agent-oracles'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/session_ownership.toml'
+capability = 'session-oracles'
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/forbidden_surfaces.toml'
+capability = 'discipline-oracles'
+owner = 1
+consumers = [1]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/lint_config.toml'
+capability = 'discipline-oracles'
+owner = 1
+consumers = [1]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/bootstrap_plan.toml'
+capability = 'bootstrap-oracles'
+owner = 2
+consumers = [2, 4, 12]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/prerequisites.toml'
+capability = 'bootstrap-oracles'
+owner = 2
+consumers = [2, 3]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/protocol.toml'
+capability = 'bootstrap-oracles'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/python_startup.toml'
+capability = 'bootstrap-oracles'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/style_tools.toml'
+capability = 'bootstrap-oracles'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/toolchain_preconditions.toml'
+capability = 'bootstrap-oracles'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/oracles/toolchain_storage.toml'
+capability = 'bootstrap-oracles'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/mutants/adopt.toml'
+capability = 'session-mutants'
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = 'tests/mutants/backoff.toml'
+capability = 'supervisor-mutants'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/mutants/classify.toml'
+capability = 'observation-mutants'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'tests/mutants/ghcup.toml'
+capability = 'bootstrap-mutants'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/mutants/machine.toml'
+capability = 'supervisor-mutants'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/mutants/names.toml'
+capability = 'agent-mutants'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/mutants/prerequisites.toml'
+capability = 'bootstrap-mutants'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/mutants/supervisor.toml'
+capability = 'supervisor-mutants'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/bootstrap_mutant_ownership.toml'
+capability = 'bootstrap-mutants'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/agent_mutant_ownership.toml'
+capability = 'agent-mutants'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/sessions_mutant_ownership.toml'
+capability = 'sessions-mutants'
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/supervisor_mutant_ownership.toml'
+capability = 'supervisor-mutants'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_preconditions.py'
+capability = 'governance-tests'
+owner = 0
+consumers = [0, 2]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_prereqs_consent.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_prereqs_real.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_prereqs.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_prerequisite_readiness.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_preflight.py'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_ready_opaque.py'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_agent_resolution.py'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_agent_table.py'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_auth_status.py'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_preflight.py'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_adopt_values.py'
+capability = 'sessions-tests'
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_supervisor_values.py'
+capability = 'supervisor-tests'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_watch_values.py'
+capability = 'supervisor-tests'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'pyproject.toml'
+capability = 'gate-ownership'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/__init__.py'
+capability = 'gate-ownership'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/audit.py'
+capability = 'gate-ownership'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/preconditions.py'
+capability = 'gate-ownership'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/validator/source.py'
+capability = 'gate-ownership'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/haskell.py'
+capability = 'bootstrap-checks'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/haskell_mutants.py'
+capability = 'bootstrap-checks'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/identity.py'
+capability = 'bootstrap-checks'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/prerequisites.py'
+capability = 'bootstrap-checks'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/style.py'
+capability = 'bootstrap-checks'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/toolchain.py'
+capability = 'bootstrap-checks'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/mutants/gate.toml'
+capability = 'governance-mutants'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/mutants/integrity.toml'
+capability = 'governance-mutants'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/mutants/source.toml'
+capability = 'governance-mutants'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/governance_mutant_ownership.toml'
+capability = 'governance-mutants'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/observation_mutant_ownership.toml'
+capability = 'observation-mutants'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell'
+capability = 'native-build'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/.hlint.yaml'
+capability = 'native-build'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/agentctl-core.cabal'
+capability = 'native-build'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/app'
+capability = 'native-build'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/app/Core.hs'
+capability = 'native-build'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/app/Eval.hs'
+capability = 'native-build'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/cabal.project'
+capability = 'native-build'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/fourmolu.yaml'
+capability = 'native-build'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src'
+capability = 'native-build'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl'
+capability = 'native-build'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/test'
+capability = 'native-build'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/test/Main.hs'
+capability = 'native-build'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/test/MuxTests.hs'
+capability = 'native-tests'
+owner = 3
+consumers = [3, 4]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/test/SpecTests.hs'
+capability = 'native-tests'
+owner = 3
+consumers = [3, 4]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/native_utf8.h'
+capability = 'native-runtime'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/test/state_fixture.c'
+capability = 'native-runtime'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Mux'
+capability = 'debian-mux'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/PaneExec'
+capability = 'debian-mux'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/test/MuxFixture.hs'
+capability = 'debian-mux'
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Agent'
+capability = 'agent-launch'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Session'
+capability = 'agent-launch'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/test/AgentFixture.hs'
+capability = 'agent-launch'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/test/AgentTests.hs'
+capability = 'agent-launch'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Observe'
+capability = 'observation'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Observe/Classify'
+capability = 'observation'
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Recovery'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/src/AgentCtl/Supervisor/Log'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/test/SupervisorTests.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/test/ConsoleFixture.hs'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/test/console_fixture.c'
+capability = 'supervisor'
+owner = 8
+consumers = [8]
+required = true
+
+
+[[artifacts]]
+path = 'tests/__init__.py'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/conftest.py'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/governance/__init__.py'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/__init__.py'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/__init__.py'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/unit'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/__init__.py'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/support.txt'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/git.py'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/nonce.py'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/host.py'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/isolation.py'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/workspace.py'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/haskell_fixtures.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/tmux_fixtures.py'
+capability = 'debian-mux'
+owner = 4
+consumers = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'documents/architecture'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'documents/engineering'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'documents/operations'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'documents/reference'
+capability = 'shared-governance'
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/audit'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/audit/actor.py.txt'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/format'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/format/negative.py.txt'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/format/valid.py.txt'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/readlink'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/readlink/reader.py.txt'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/ruff'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/ruff/negative.py.txt'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/ruff/valid.py.txt'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/ty'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/ty/negative.py.txt'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/ty/valid.py.txt'
+capability = 'governance-fixtures'
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = 'tests/e2e'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/e2e/__init__.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/binary.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/bootstrap.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/bootstrap_origin.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/evaluate.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/haskell.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/http.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/passthrough.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/bootstrap_caller.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/transport_fixture.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_bootstrap_caller.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/agents.py'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/live.py'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5, 7, 8, 12]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/ready_constructed.hs.txt'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/fixtures/static_negative/ready_from_preflight.hs.txt'
+capability = 'agent-launch-tests'
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/sessions.py'
+capability = 'sessions-tests'
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/supervisor.py'
+capability = 'supervisor-tests'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/supervisor_barrier.py'
+capability = 'supervisor-tests'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/supervisor_cases.py'
+capability = 'supervisor-tests'
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_check_steps.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_identity.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_lane.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_cli.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_digest.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_ghcup.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_handoff.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_haskell_gate.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_hostfacts.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_paths.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_style_tools.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_toolchain.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_toolchain_gate.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_binary_boundaries.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_bootstrap_origin.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_build_boundaries.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_hostfacts.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_style_cache.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_toolchain_real.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_style_config.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_fake_agent.py"
+capability = "mux-tests"
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_tmux_harness.py"
+capability = "mux-tests"
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_host_mux_probe.py"
+capability = "mux-tests"
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_mux_resolution.py"
+capability = "agent-launch-tests"
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_agent_argv_real.py"
+capability = "agent-launch-tests"
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_agent_real.py"
+capability = "agent-launch-tests"
+owner = 5
+consumers = [5, 11]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_launch_plan.py"
+capability = "agent-launch-tests"
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_sessions_values.py"
+capability = "session-tests"
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = "tests/oracles/execution_evidence.toml"
+capability = "governance-oracles"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/oracles/lane_evidence.toml"
+capability = "governance-oracles"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/oracles/closure_evidence.toml"
+capability = "governance-oracles"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/live"
+capability = "test-live-container"
+owner = 0
+consumers = [0, 5, 7, 8, 12]
+required = true
+
+[[artifacts]]
+path = "tests/live/__init__.py"
+capability = "test-live-container"
+owner = 0
+consumers = [0, 5, 7, 8, 12]
+required = true
+
+[[artifacts]]
+path = "tests/live/test_live_launch.py"
+capability = "agent-launch-live-tests"
+owner = 5
+consumers = [5, 12]
+required = true
+
+[[artifacts]]
+path = "tests/live/test_live_classification.py"
+capability = "pane-classification-live-tests"
+owner = 7
+consumers = [7, 12]
+required = true
+
+[[artifacts]]
+path = "tests/live/test_live_supervision.py"
+capability = "supervisor-live-tests"
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = "tests/lanes"
+capability = "linux-clean-recipe"
+owner = 4
+consumers = [4, 12]
+required = true
+
+[[artifacts]]
+path = "tests/lanes/clean-host.Dockerfile"
+capability = "linux-clean-recipe"
+owner = 4
+consumers = [4, 12]
+required = true
+
+[[artifacts]]
+path = "tests/e2e/test_fresh_bootstrap.py"
+capability = "bootstrap-observation-tests"
+owner = 2
+consumers = [2, 4, 12]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_haskell_mutations.py"
+capability = "native-build-mutation-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_eval_executable.py"
+capability = "bootstrap-protocol-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_python_startup.py"
+capability = "bootstrap-startup-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_clean_host_recipe.py"
+capability = "linux-clean-recipe-tests"
+owner = 4
+consumers = [4, 12]
+required = true
+
+[[artifacts]]
+path = "tests/e2e/test_status_screen.py"
+capability = "pane-classification-e2e-tests"
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = "tests/e2e/test_scripted_fake.py"
+capability = "supervisor-scripted-e2e-tests"
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = "tests/e2e/test_watch_commands.py"
+capability = "supervisor-watch-e2e-tests"
+owner = 8
+consumers = [8]
+required = true
+
+[[artifacts]]
+path = "TMUX_BUG.md"
+capability = "windows-psmux-investigation"
+owner = 10
+consumers = [10]
+required = true
+
+# Planned sources are declared for attribution; their cited tests remain unmet
+# until the files exist and their actual collection and execution are verified.
+[[artifacts]]
+path = "tests/integration/test_wsl_binding.py"
+capability = "wsl-binding-tests"
+owner = 0
+consumers = [0, 12]
+required = false
+
+[[artifacts]]
+path = "tests/integration/test_clean_runtime.py"
+capability = "clean-runtime-tests"
+owner = 4
+consumers = [4, 12]
+required = false
+
+[[artifacts]]
+path = "tests/live/test_live_supervisor.py"
+capability = "supervisor-live-tests"
+owner = 8
+consumers = [8, 12]
+required = false
+
+[[artifacts]]
+path = "tests/integration/test_guarded_submit.py"
+capability = "guarded-submit-tests"
+owner = 7
+consumers = [7, 8, 10, 13]
+required = false
+
+[[artifacts]]
+path = "tests/integration/test_psmux_build.py"
+capability = "psmux-build-tests"
+owner = 9
+consumers = [9, 11]
+required = false
+
+[[artifacts]]
+path = "tests/mutants/capture.toml"
+capability = "census-mutants-phase-7"
+owner = 7
+consumers = [7]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/capture_phase3.toml"
+capability = "census-mutants-phase-3"
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/capture_phase4.toml"
+capability = "census-mutants-phase-4"
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/launch.toml"
+capability = "census-mutants-phase-5"
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/launch_phase3.toml"
+capability = "census-mutants-phase-3"
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/mux.toml"
+capability = "census-mutants-phase-4"
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/mux_phase5.toml"
+capability = "census-mutants-phase-5"
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/mux_phase10.toml"
+capability = "census-mutants-phase-10"
+owner = 10
+consumers = [10]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/passthrough.toml"
+capability = "census-mutants-phase-2"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/passthrough_phase5.toml"
+capability = "census-mutants-phase-5"
+owner = 5
+consumers = [5]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/sessions.toml"
+capability = "census-mutants-phase-6"
+owner = 6
+consumers = [6]
+required = true
+
+[[artifacts]]
+path = "tests/mutants/sessions_phase4.toml"
+capability = "census-mutants-phase-4"
+owner = 4
+consumers = [4]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/haskell/bootstrap-src/AgentCtl/Bootstrap/Protocol.hs"
+capability = "native-transport"
+owner = 2
+consumers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_bootstrap_foundation.py"
+capability = "bootstrap-tests"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/haskell/test/BootstrapTransportProbe.hs"
+capability = "native-build"
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/foundation_process_values.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_foundation_process_values.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/haskell/bootstrap-src"
+capability = "native-transport"
+owner = 2
+consumers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/haskell/bootstrap-src/AgentCtl"
+capability = "native-transport"
+owner = 2
+consumers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/haskell/bootstrap-src/AgentCtl/Bootstrap"
+capability = "native-transport"
+owner = 2
+consumers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/wsl_vhd.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_wsl_vhd.py"
+capability = "wsl-binding-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/wsl_capacity.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_wsl_capacity.py"
+capability = "wsl-binding-tests"
+owner = 0
+consumers = [0]
+required = true

@@ -4,8 +4,8 @@
 from dataclasses import dataclass
 from pathlib import Path, PurePath, PurePosixPath
 
-from agentctl.bootstrap.style import StyleTools
-from agentctl.result import Err, Ok, Result
+from agentctl.foundation import Err, Ok, Result
+from agentctl.foundation_style_values import StyleTools
 
 
 @dataclass(frozen=True, slots=True)
@@ -15,6 +15,7 @@ class Leg:
     name: str
     argv: tuple[str, ...]
     after: tuple[tuple[str, ...], ...] = ()
+    after_failure: bool = False
 
 
 def targets(root: Path) -> Result[tuple[str, ...], str]:
@@ -120,9 +121,11 @@ def python_legs(
                 "pytester",
                 "-p",
                 "agentctl.check.gate_plugin",
+                "--continue-on-collection-errors",
                 "tests",
             ),
             coverage_commands(python, root, run_dir),
+            after_failure=True,
         ),
     )
 
@@ -140,7 +143,7 @@ def style_legs(tools: StyleTools, files: tuple[str, ...]) -> tuple[Leg, ...]:
     """Check every discovered source using the absolute pinned tool executables."""
     return (
         Leg("fourmolu", (tools.fourmolu.as_posix(), "--mode", "check", *files)),
-        Leg("hlint", (tools.hlint.as_posix(), "app", "src", "test")),
+        Leg("hlint", (tools.hlint.as_posix(), "app", "bootstrap-src", "src", "test")),
     )
 
 

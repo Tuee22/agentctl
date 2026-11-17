@@ -4,9 +4,9 @@
 from dataclasses import dataclass
 
 from agentctl.bootstrap import prereqs
-from agentctl.hostfacts import HostContext, read_distribution
-from agentctl.paths import Family
-from agentctl.result import Err, Ok, Result
+from agentctl.foundation import Err, Family, Ok, Result
+from agentctl.foundation_host import HostContext
+from agentctl.hostfacts import read_distribution
 
 
 @dataclass(frozen=True, slots=True)

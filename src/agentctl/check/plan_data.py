@@ -51,31 +51,36 @@ def section(text: str, name: str, *, level: int = 2) -> str:
     return str(match.group(1)).strip()
 
 
+def phase_text(path: Path, text: str) -> Phase | None:
+    """Parse one named phase from supplied text without reading the filesystem."""
+    name = re.fullmatch(r"phase-(\d+)-[a-z-]+\.md", path.name)
+    if name is None:
+        return None
+    matches = tuple(
+        re.finditer(r"^### Sprint (\d+\.\d+): [^\n]+ \[([^\]]+)\]$", text, re.MULTILINE)
+    )
+    sprints = tuple(
+        Sprint(
+            match[1],
+            match[2],
+            text[
+                match.end() : matches[index + 1].start()
+                if index + 1 < len(matches)
+                else text.find("\n## Remaining Work", match.end())
+            ],
+        )
+        for index, match in enumerate(matches)
+    )
+    return Phase(int(name[1]), path, text, sprints)
+
+
 def phases(root: Path) -> tuple[Phase, ...]:
     """Parse phase files by numeric identity, retaining malformed metadata."""
-    found: list[Phase] = []
-    for path in (root / "DEVELOPMENT_PLAN").glob("phase-*.md"):
-        name = re.fullmatch(r"phase-(\d+)-[a-z-]+\.md", path.name)
-        if name:
-            text = path.read_text(encoding="utf-8")
-            matches = tuple(
-                re.finditer(
-                    r"^### Sprint (\d+\.\d+): [^\n]+ \[([^\]]+)\]$", text, re.MULTILINE
-                )
-            )
-            sprints = tuple(
-                Sprint(
-                    match[1],
-                    match[2],
-                    text[
-                        match.end() : matches[index + 1].start()
-                        if index + 1 < len(matches)
-                        else text.find("\n## Remaining Work", match.end())
-                    ],
-                )
-                for index, match in enumerate(matches)
-            )
-            found.append(Phase(int(name[1]), path, text, sprints))
+    found = tuple(
+        parsed
+        for path in (root / "DEVELOPMENT_PLAN").glob("phase-*.md")
+        if (parsed := phase_text(path, path.read_text(encoding="utf-8"))) is not None
+    )
     return tuple(sorted(found, key=lambda phase: phase.number))
 
 

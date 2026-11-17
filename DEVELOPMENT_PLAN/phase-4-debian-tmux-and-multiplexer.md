@@ -20,6 +20,7 @@ This phase needs Linux only. The declared tests are executable contracts; an abs
 | Requirement | Oracle | Observer | Mutants | Tests |
 |---|---|---|---|---|
 | R12.1 — Debian tmux readiness and APT preparation | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | `M-tmux-apt-on-unsupported-host`, `M-tmux-warm-reinstalls` | `haskell:agentctl-core-test/TmuxProvision/reuse-supported-install`, `haskell:agentctl-core-test/TmuxProvision/apt-plan-and-refusals`, `tests/integration/test_tmux_provision.py::test_unsupported_linux_never_installs` |
+| R12.1 — Clean-host recipe | `tests/oracles/bootstrap_plan.toml` | value: independent clean-host recipe expectations | `M-boot-recipe-stage-a-root` | `tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle` |
 | R12.1 — Typed mux operations and pane execution | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | `M-mux-prefix-target`, `M-pane-spec-environment-on-argv` | `tests/integration/test_mux_real.py::test_private_server_roundtrip`, `tests/integration/test_mux_real.py::test_instant_exit_status`, `tests/integration/test_pane_exec.py::test_private_spec_policy` |
 | R12.1 — Backend capability and instance identity | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | `M-backend-client-version-as-server-proof` | `haskell:agentctl-core-test/Backend/identity-and-capability-contract`, `tests/integration/test_mux_real.py::test_pane_targets_distinguish_servers` |
 
@@ -34,9 +35,9 @@ This phase needs Linux only. The declared tests are executable contracts; an abs
 ### Sprint 4.1: Debian tmux readiness and APT preparation [Planned]
 
 **Status**: Planned
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Mux.hs`, `src/agentctl/haskell/src/AgentCtl/Provision/Tmux.hs`
-**Validation tests**: `haskell:agentctl-core-test/TmuxProvision/reuse-supported-install`, `haskell:agentctl-core-test/TmuxProvision/apt-plan-and-refusals`, `tests/integration/test_tmux_provision.py::test_unsupported_linux_never_installs`
-**Mutants**: `M-tmux-apt-on-unsupported-host`, `M-tmux-warm-reinstalls`
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Mux.hs`, `src/agentctl/haskell/src/AgentCtl/Provision/Tmux.hs`, `tests/lanes/clean-host.Dockerfile`
+**Validation tests**: `haskell:agentctl-core-test/TmuxProvision/reuse-supported-install`, `haskell:agentctl-core-test/TmuxProvision/apt-plan-and-refusals`, `tests/integration/test_tmux_provision.py::test_unsupported_linux_never_installs`, `tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle`, `tests/integration/test_host_mux_probe.py::test_host_probe_and_constructed_absence`
+**Mutants**: `M-tmux-apt-on-unsupported-host`, `M-tmux-warm-reinstalls`, `M-boot-recipe-stage-a-root`
 **Closes**: R12.1
 **Docs to update**: `documents/architecture/multiplexer_adapter.md`, `documents/architecture/launch_contract.md`, `documents/engineering/toolchain_bootstrap.md`
 
@@ -61,8 +62,8 @@ The whole sprint.
 ### Sprint 4.2: Typed mux operations and pane execution [Planned]
 
 **Status**: Planned
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Mux/`, `src/agentctl/haskell/src/AgentCtl/PaneExec.hs`, `src/agentctl/haskell/src/AgentCtl/PaneExec/Spec.hs`, `tests/harness/tmux.py`
-**Validation tests**: `tests/integration/test_mux_real.py::test_private_server_roundtrip`, `tests/integration/test_mux_real.py::test_instant_exit_status`, `tests/integration/test_pane_exec.py::test_private_spec_policy`
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Mux/`, `src/agentctl/haskell/src/AgentCtl/PaneExec.hs`, `src/agentctl/haskell/src/AgentCtl/PaneExec/Spec.hs`, `src/agentctl/haskell/app/FakeAgent.hs`, `src/agentctl/haskell/app/SupervisorFixture.hs`, `tests/harness/tmux.py`
+**Validation tests**: `tests/integration/test_mux_reap.py::test_reap_observer_imports_without_launch`, `tests/integration/test_mux_reap.py::test_reap_request_validates_pid_before_notification`, `tests/integration/test_mux_real.py::test_private_server_roundtrip`, `tests/integration/test_mux_real.py::test_instant_exit_status`, `tests/integration/test_pane_exec.py::test_private_spec_policy`, `tests/integration/test_fake_agent.py::test_record_carries_nonce`, `tests/integration/test_tmux_harness.py::test_psmux_pid_record_shapes`
 **Mutants**: `M-mux-prefix-target`, `M-pane-spec-environment-on-argv`
 **Closes**: none
 **Docs to update**: `documents/architecture/multiplexer_adapter.md`, `documents/architecture/launch_contract.md`, `documents/engineering/toolchain_bootstrap.md`
@@ -73,7 +74,7 @@ Typed mux operations and pane execution supplies its complete owned contract thr
 
 #### Deliverables
 
-Deliver the independent base fake-agent/private-mux observer here, including strict finite file reads and deterministic handle closure; later scripted frames are additive observers. Create the closed command vocabulary, exact session/native pane targeting and checked identities. The trampoline reads a private bounded spec with argv, cwd and caller environment; it supplies reliable startup/exit observations. Production code has no kill-server, global option reset or shell-string command.
+Deliver the independent base fake-agent/private-mux observer here, including strict finite file reads and deterministic handle closure; later scripted frames are additive observers. Separate the base fake from its later supervisor fixture while preserving the extension's observations. Provide independent mux mutation and reap controls before later capture, session and launch tests, preserving their existing observations. Create the closed command vocabulary, exact session/native pane targeting and checked identities. The trampoline reads a private bounded spec with argv, cwd and caller environment; it supplies reliable startup/exit observations. Production code has no kill-server, global option reset or shell-string command.
 
 #### Validation
 

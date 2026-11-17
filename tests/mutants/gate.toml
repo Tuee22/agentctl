@@ -276,3 +276,19 @@ search = "if output.code != 0 or reason in output.stdout + output.stderr:"
 replace = "if False:"
 killers = ["tests/governance/test_mutants.py::test_baseline_must_pass"]
 reason = "failing baseline was accepted"
+
+[[amendment]]
+id = "M-legs-drop-pytest"
+prior_sha256 = "e5eb95da205e9a1716c2893882008fffe4b708b2ccebb53665482aca84afd05d"
+revised_sha256 = "2a0ffbc6d012a89df38a134f658532781011ade9d5ea3e7b82dc17804796efd7"
+search = "Leg(\n            \"pytest\",\n            (\n                python,\n                \"-m\",\n                \"coverage\",\n                \"run\",\n                f\"--rcfile={config}\",\n                f\"--data-file={run_dir / 'coverage'}\",\n                \"--branch\",\n                \"--source=agentctl\",\n                \"-m\",\n                \"pytest\",\n                \"-c\",\n                config,\n                f\"--rootdir={root}\",\n                \"-p\",\n                \"no:cacheprovider\",\n                \"-p\",\n                \"pytester\",\n                \"-p\",\n                \"agentctl.check.gate_plugin\",\n                \"--continue-on-collection-errors\",\n                \"tests\",\n            ),\n            coverage_commands(python, root, run_dir),\n            after_failure=True,\n        ),"
+replace = ""
+provenance = "decision:D-90"
+
+[[amendment]]
+id = "M-plugin-orphan-blind"
+prior_sha256 = "95f0b2f63861269c78eee5ffbb677597d3a3e461661be974bdec89a97f1aed10"
+revised_sha256 = "93c297650270739b8cc4ae3ce8f9650409366eede289857efa2749335df26297"
+search = "def orphan_modules(\n    root: Path,\n    collected: frozenset[str],\n    cited: frozenset[str],\n    support: frozenset[str],\n    failed_modules: frozenset[str] = frozenset(),\n) -> tuple[str, ...]:\n    \"\"\"Join filesystem modules to collection, failed collectors and support.\"\"\"\n    modules = frozenset(node.split(\"::\", 1)[0] for node in collected)\n    files = frozenset(\n        path.relative_to(root).as_posix() for path in (root / \"tests\").rglob(\"*.py\")\n    )\n    hidden_tests = frozenset(\n        path\n        for path in files\n        if (Path(path).name.startswith(\"test_\") or Path(path).name.endswith(\"_test.py\"))\n        and path in support\n    )\n    test_modules = modules | failed_modules\n    return tuple(\n        sorted(\n            (files - test_modules - support)\n            | (test_modules - cited)\n            | (failed_modules - files)\n            | hidden_tests\n        )\n    )"
+replace = "def orphan_modules(\n    root: Path,\n    collected: frozenset[str],\n    cited: frozenset[str],\n    support: frozenset[str],\n    failed_modules: frozenset[str] = frozenset(),\n) -> tuple[str, ...]:\n    \"\"\"Deliberate short circuit.\"\"\"\n    return ()"
+provenance = "decision:D-90"

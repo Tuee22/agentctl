@@ -37,19 +37,19 @@ class CoverageException:
 COVERAGE_EXCEPTIONS = (
     CoverageException(
         "src/agentctl/check/preconditions.py",
-        127,
+        126,
         "def _file_lock(handle: IO[str], *, unlock: bool) -> None:  # pragma: no cover",
         "Native kernel locks are covered by real contention controls on each host.",
     ),
     CoverageException(
-        "src/agentctl/process.py",
-        125,
+        "src/agentctl/foundation_process_identity.py",
+        44,
         "def _posix_alive(pid: int) -> Result[bool, SpawnError]:  # pragma: no cover",
         "Signal zero needs POSIX; real owned-process controls cover this API.",
     ),
     CoverageException(
-        "src/agentctl/process.py",
-        136,
+        "src/agentctl/foundation_process_identity.py",
+        55,
         "def _windows_alive(pid: int) -> Result[bool, SpawnError]:  # pragma: no cover",
         "Query handles need Win32; real owned-process controls run on Windows.",
     ),
@@ -128,7 +128,7 @@ def _imports(tree: ast.AST) -> dict[str, str]:
 
 def _process(tree: ast.AST, aliases: dict[str, str], relative: str) -> bool:
     """Permit process creation imports and calls only at the one boundary."""
-    if relative == "src/agentctl/process.py":
+    if relative == "src/agentctl/foundation_process.py":
         return False
     if any(
         name == "subprocess" or name.startswith("subprocess.")

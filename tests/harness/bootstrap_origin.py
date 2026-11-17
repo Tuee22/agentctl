@@ -4,10 +4,13 @@
 import hashlib
 import json
 import os
+import platform
 import secrets
 import shutil
 from collections.abc import Mapping
 from pathlib import Path
+
+from tests.harness.isolation import state_directory
 
 NONCE_LENGTH = 32
 
@@ -52,19 +55,6 @@ def entries(directories: tuple[Path, ...]) -> dict[str, str]:
                 else "absent"
             )
     return result
-
-
-def state_directory(family: str, env: Mapping[str, str], home: Path) -> Path:
-    """Read the documented state location without calling the application's policy."""
-    override = env.get("XDG_STATE_HOME")
-    if override is not None and Path(override).is_absolute():
-        return Path(override) / "agentctl"
-    if family == "Windows":
-        return (
-            Path(env.get("LOCALAPPDATA", str(home / "AppData/Local")))
-            / "agentctl/state"
-        )
-    return home / ".local/state/agentctl"
 
 
 def capture(
@@ -130,3 +120,8 @@ def capture(
     directory.mkdir(mode=0o700, parents=True, exist_ok=True)
     (directory / "bootstrap-host.json").write_text(json.dumps(result), encoding="utf-8")
     return result
+
+
+def bootstrap_before(directory: Path, nonce: str) -> None:
+    """Capture raw filesystem provenance before the provisioning step."""
+    capture(directory, nonce, platform.system(), os.environ, Path.home())

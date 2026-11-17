@@ -3,14 +3,14 @@
 
 import re
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Literal
 
-from agentctl.check.evidence import RunEvidence, digest
-from agentctl.check.lanes import Declaration, LaneState, parse_lane, refusals
+from agentctl.check.evidence import EvidenceError, RunEvidence, digest
+from agentctl.check.lanes import Declaration, LaneState, parse_phase_lane, refusals
 from agentctl.check.mutants import Mutant
 from agentctl.check.plan_data import Phase, field, phases, section, table
-from agentctl.result import Err, Ok, Result
+from agentctl.foundation import Err, Ok, Result
 
 INTEGRITY_COLUMNS = ("Requirement", "Oracle", "Observer", "Mutants", "Tests")
 OBSERVATION_FIELDS = 2
@@ -42,6 +42,27 @@ class Subject:
     name: str
     owner: str
     paths: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class MutantOwnerPolicy:
+    """Legacy prefix rules or complete explicit source-derived ownership."""
+
+    prefixes: tuple[tuple[str, tuple[str, ...]], ...]
+    owners: tuple[tuple[str, int], ...] | None
+
+
+@dataclass(frozen=True, slots=True)
+class CapturedPolicy:
+    """Guarded plan policy texts and their independently joined mutant owners."""
+
+    owners: tuple[tuple[str, int], ...] | None
+    standards: str
+    overview: str
+    regular_files: frozenset[str] | None = None
+    symlinks: frozenset[str] = frozenset()
+    directories: frozenset[str] = frozenset()
+    covered_digest: Result[str, EvidenceError] | None = None
 
 
 def tokens(value: str) -> tuple[str, ...]:
@@ -105,7 +126,26 @@ def integrity_row(cells: tuple[str, ...]) -> Result[IntegrityRow, ClosureError]:
     )
 
 
-def cited_paths(root: Path, declarations: tuple[Phase, ...]) -> tuple[str, ...]:
+def _captured_path_present(
+    root: Path, path: Path, captured: CapturedPolicy | None
+) -> bool:
+    """Check a captured source entry or independently resolve a live path."""
+    if captured is not None and captured.regular_files is not None:
+        return (
+            path.as_posix()
+            in captured.regular_files | captured.symlinks | captured.directories
+        )
+    return (root / path).exists() and (root / path).resolve().is_relative_to(
+        root.resolve()
+    )
+
+
+def cited_paths(
+    root: Path,
+    declarations: tuple[Phase, ...],
+    *,
+    captured: CapturedPolicy | None = None,
+) -> tuple[str, ...]:
     """Require every Done sprint's implementation to resolve to a durable artifact."""
     problems: tuple[str, ...] = ()
     for phase in declarations:
@@ -125,8 +165,7 @@ def cited_paths(root: Path, declarations: tuple[Phase, ...]) -> tuple[str, ...]:
                     or ".build" in path.parts
                     or path.parts[0] == "logs"
                     or path.suffix == ".log"
-                    or not (root / path).exists()
-                    or not (root / path).resolve().is_relative_to(root.resolve())
+                    or not _captured_path_present(root, path, captured)
                 )
             if invalid:
                 problems += ("plan.cited-paths: " + sprint.identifier,)
@@ -161,17 +200,23 @@ def cited_ids(
     return problems
 
 
-def _prefixes(root: Path) -> dict[str, tuple[str, ...]]:
-    """Read the authoritative phase-to-prefix table rather than a parallel list."""
-    text = (root / "DEVELOPMENT_PLAN/development_plan_standards.md").read_text(
-        encoding="utf-8"
-    )
+def _prefixes_from_text(text: str) -> dict[str, tuple[str, ...]]:
+    """Parse the authoritative phase-to-prefix table from supplied text."""
     return {
         filename: tuple(re.findall(r"`(M-[a-z]+-)`", line))
         for line in text.splitlines()
         if "| `M-" in line
         for filename in re.findall(r"\((phase-\d+-[a-z-]+\.md)\)", line)
     }
+
+
+def _prefixes(root: Path) -> dict[str, tuple[str, ...]]:
+    """Read the authoritative phase-to-prefix table rather than a parallel list."""
+    return _prefixes_from_text(
+        (root / "DEVELOPMENT_PLAN/development_plan_standards.md").read_text(
+            encoding="utf-8"
+        )
+    )
 
 
 def _owed(
@@ -221,41 +266,189 @@ def _executed(row: IntegrityRow, evidence: RunEvidence) -> bool:
     )
 
 
+def _canonical_oracle(name: str) -> bool:
+    """Reject aliases and paths outside the checkout on every host."""
+    path = PurePosixPath(name)
+    return bool(
+        name
+        and path.parts
+        and not path.is_absolute()
+        and path.as_posix() == name
+        and all(part not in {".", ".."} for part in path.parts)
+        and "\\" not in name
+        and ":" not in name
+    )
+
+
+def _oracle_present(root: Path, name: str) -> bool:
+    """Require a canonical checkout-local file, including after symlink resolution."""
+    if not _canonical_oracle(name):
+        return False
+    try:
+        candidate = (root / name).resolve(strict=True)
+        return (
+            candidate.is_relative_to(root.resolve(strict=True)) and candidate.is_file()
+        )
+    except (OSError, RuntimeError):
+        return False
+
+
+def _captured_oracle_present(root: Path, name: str, policy: CapturedPolicy) -> bool:
+    """Use census files and links whose containment was checked during capture."""
+    if policy.regular_files is None:
+        return _oracle_present(root, name)
+    return _canonical_oracle(name) and (
+        name in policy.regular_files or name in policy.symlinks
+    )
+
+
+def _row_diagnostics(
+    phase: Phase,
+    row: IntegrityRow,
+    requirements: frozenset[str],
+    policy: MutantOwnerPolicy,
+) -> tuple[str, ...]:
+    """Name unresolved requirement and mutant ownership for one row."""
+    missing = (
+        (
+            "plan.gate-integrity: "
+            + phase.path.name
+            + ": undeclared requirement "
+            + row.requirement,
+        )
+        if row.requirement not in requirements
+        else ()
+    )
+    return (
+        *missing,
+        *(
+            "plan.gate-integrity: "
+            + phase.path.name
+            + (
+                ": no authorized prefix for "
+                if policy.owners is None
+                else ": no matching source owner for "
+            )
+            + identifier
+            for identifier in row.mutants
+            if not _mutant_owned(phase, identifier, policy)
+        ),
+    )
+
+
+def _mutant_owned(phase: Phase, identifier: str, policy: MutantOwnerPolicy) -> bool:
+    """Require an exact owner when supplied; never fall back for missing claims."""
+    if policy.owners is None:
+        return identifier.startswith(dict(policy.prefixes).get(phase.path.name, ()))
+    return (identifier, phase.number) in policy.owners
+
+
+def _incomplete_owners(
+    owners: tuple[tuple[str, int], ...] | None, available: dict[str, Mutant]
+) -> bool:
+    """Refuse duplicate, omitted or invented source ownership claims."""
+    if owners is None:
+        return False
+    identifiers = tuple(identifier for identifier, _owner in owners)
+    return len(set(identifiers)) != len(identifiers) or frozenset(
+        identifiers
+    ) != frozenset(available)
+
+
+def _owner_diagnostics(
+    owners: tuple[tuple[str, int], ...] | None, available: dict[str, Mutant]
+) -> tuple[str, ...]:
+    return (
+        ("plan.gate-integrity: incomplete or duplicate source mutant owners",)
+        if _incomplete_owners(owners, available)
+        else ()
+    )
+
+
+def _join_diagnostics(
+    available: dict[str, Mutant],
+    declared: set[str],
+    declarations: tuple[Phase, ...],
+    rows: tuple[tuple[Phase, IntegrityRow], ...],
+) -> tuple[str, ...]:
+    """Report missing corpus ownership and inconsistent owed confirmations."""
+    return (
+        *(
+            "plan.gate-integrity: undeclared corpus mutant " + identifier
+            for identifier in sorted(set(available) - declared)
+        ),
+        *(
+            ("plan.gate-integrity: owed evidence confirmation mismatch",)
+            if not _owed(declarations, rows)
+            else ()
+        ),
+    )
+
+
 def gate_integrity(
     root: Path,
     declarations: tuple[Phase, ...],
     records: tuple[Mutant, ...],
     evidence: RunEvidence | None = None,
+    *,
+    mutant_owners: tuple[tuple[str, int], ...] | CapturedPolicy | None = None,
 ) -> tuple[str, ...]:
-    """Check every declaration and activate executable joins for Done capabilities."""
-    prefixes = _prefixes(root)
+    """Check declarations; callers must independently establish explicit owners."""
+    owners = (
+        mutant_owners.owners
+        if isinstance(mutant_owners, CapturedPolicy)
+        else mutant_owners
+    )
+    prefixes = (
+        _prefixes_from_text(mutant_owners.standards)
+        if isinstance(mutant_owners, CapturedPolicy)
+        else _prefixes(root)
+    )
+    overview = (
+        mutant_owners.overview
+        if isinstance(mutant_owners, CapturedPolicy)
+        else (root / "DEVELOPMENT_PLAN/00-overview.md").read_text(encoding="utf-8")
+    )
+    policy = MutantOwnerPolicy(tuple(sorted(prefixes.items())), owners)
     requirements = frozenset(
         row[0]
         for row in table(
             section(
-                (root / "DEVELOPMENT_PLAN/00-overview.md").read_text(encoding="utf-8"),
+                overview,
                 "Requirements",
             )
         )[1:]
     )
     available = {record.identifier: record for record in records}
     rows: tuple[tuple[Phase, IntegrityRow], ...] = ()
-    bad = False
+    problems = _owner_diagnostics(owners, available)
+    bad = bool(problems)
     declared: set[str] = set()
     for phase in declarations:
         matrix = table(section(phase.text, "Gate Integrity"))
         if not matrix or matrix[0] != INTEGRITY_COLUMNS or len(matrix) == 1:
-            return ("plan.gate-integrity: invalid table",)
+            problems += ("plan.gate-integrity: " + phase.path.name + ": invalid table",)
+            continue
         for cells in matrix[1:]:
             parsed = integrity_row(cells)
             if isinstance(parsed, Err):
-                return ("plan.gate-integrity: " + parsed.error.message,)
+                label = cells[0] if cells else "empty row"
+                problems += (
+                    "plan.gate-integrity: "
+                    + phase.path.name
+                    + ": "
+                    + label
+                    + ": "
+                    + parsed.error.message,
+                )
+                continue
             rows += ((phase, parsed.value),)
+            problems += _row_diagnostics(phase, parsed.value, requirements, policy)
             bad = (
                 bad
                 or parsed.value.requirement not in requirements
                 or any(
-                    not identifier.startswith(prefixes.get(phase.path.name, ()))
+                    not _mutant_owned(phase, identifier, policy)
                     for identifier in parsed.value.mutants
                 )
             )
@@ -263,13 +456,14 @@ def gate_integrity(
             identifiers = mutant_ids(field(sprint.text, "Mutants"))
             declared.update(identifiers)
             bad = bad or any(
-                not identifier.startswith(prefixes.get(phase.path.name, ()))
+                not _mutant_owned(phase, identifier, policy)
                 for identifier in identifiers
             )
             if sprint.tag == "Done":
                 bad = bad or any(
                     identifier not in available for identifier in identifiers
                 )
+    problems += _join_diagnostics(available, declared, declarations, rows)
     bad = bad or not set(available) <= declared or not _owed(declarations, rows)
     for phase, row in rows:
         applicable = field(phase.text, "Status") == "Done" or any(
@@ -277,7 +471,14 @@ def gate_integrity(
         )
         if not applicable:
             continue
-        bad = bad or any(not (root / name).exists() for name in row.oracles)
+        bad = bad or any(
+            not (
+                _captured_oracle_present(root, name, mutant_owners)
+                if isinstance(mutant_owners, CapturedPolicy)
+                else _oracle_present(root, name)
+            )
+            for name in row.oracles
+        )
         bad = bad or any(
             identifier not in available
             or not set(available[identifier].killers) <= set(row.tests)
@@ -285,12 +486,20 @@ def gate_integrity(
         )
         if evidence is not None:
             bad = bad or not _executed(row, evidence)
-    return ("plan.gate-integrity: declaration or execution join",) if bad else ()
+    return (
+        *problems,
+        *(("plan.gate-integrity: declaration or execution join",) if bad else ()),
+    )
 
 
-def evidence_rows(root: Path, declarations: tuple[Phase, ...]) -> tuple[str, ...]:
+def evidence_rows(
+    root: Path,
+    declarations: tuple[Phase, ...],
+    *,
+    observed_digest: Result[str, EvidenceError] | None = None,
+) -> tuple[str, ...]:
     """Validate terminal rows against the covered tree, lane and literal gate."""
-    current = digest(root)
+    current = digest(root) if observed_digest is None else observed_digest
     if isinstance(current, Err):
         return ("plan.evidence-rows: " + current.error.message,)
     problems: tuple[str, ...] = ()
@@ -298,6 +507,14 @@ def evidence_rows(root: Path, declarations: tuple[Phase, ...]) -> tuple[str, ...
         if field(phase.text, "Gate kind") != "host-acceptance":
             continue
         row = field(phase.text, "Gate evidence")
+        covers = field(phase.text, "Evidence covers")
+        if covers == "phase input closure and verified prerequisite receipts":
+            if row != "none recorded" or field(phase.text, "Status") not in {
+                "Planned",
+                "Active",
+            }:
+                problems += ("plan.evidence-rows: " + phase.path.name,)
+            continue
         fields = tuple(part.strip() for part in row.split(" ; "))
         valid = row == "none recorded" and field(phase.text, "Status") != "Done"
         if len(fields) == EVIDENCE_FIELDS:
@@ -336,11 +553,24 @@ def lanes(
     """Validate vocabulary before execution, then enforce current Done lanes."""
     raw = lane_declarations(declarations)
     if states is not None:
-        return refusals(raw, states)
+        current = tuple(
+            declaration
+            for declaration in raw
+            if not isinstance(parse_phase_lane(declaration.lane), Err)
+        )
+        legacy = tuple(declaration for declaration in raw if declaration not in current)
+        return (
+            *(
+                "plan.lanes: current phase receipts unavailable for " + declaration.name
+                for declaration in current
+                if declaration.status == "Done"
+            ),
+            *refusals(legacy, states),
+        )
     return tuple(
         "plan.lanes: " + declaration.name
         for declaration in raw
-        if isinstance(parse_lane(declaration.lane), Err)
+        if isinstance(parse_phase_lane(declaration.lane), Err)
     )
 
 
@@ -357,9 +587,49 @@ def applicability(
     )
 
 
-def subjects(root: Path, declarations: tuple[Phase, ...]) -> tuple[Subject, ...]:
+def _captured_subject_paths(
+    root: Path, policy: CapturedPolicy, base: str, suffix: str, *, recursive: bool
+) -> tuple[str, ...]:
+    """Select observed files without rereading or traversing the checkout."""
+    if policy.regular_files is None:
+        return ()
+    directory = PurePosixPath(base)
+    return tuple(
+        str(root / name)
+        for name in sorted(policy.regular_files | policy.symlinks)
+        if (path := PurePosixPath(name)).suffix == suffix
+        and path.is_relative_to(directory)
+        and (recursive or path.parent == directory)
+        and (base != "DEVELOPMENT_PLAN" or path.name.startswith("phase-"))
+    )
+
+
+def subjects(
+    root: Path,
+    declarations: tuple[Phase, ...],
+    *,
+    captured: CapturedPolicy | None = None,
+) -> tuple[Subject, ...]:
     """Discover each introduced class and retain missing future subjects explicitly."""
     owners = {phase.number: field(phase.text, "Status") for phase in declarations}
+    captured_groups = (
+        ("documentation", 0, "documents", ".md", True),
+        ("plan", 0, "DEVELOPMENT_PLAN", ".md", False),
+        ("oracles", 0, "tests/oracles", ".toml", False),
+        ("mutants", 1, "tests/mutants", ".toml", False),
+        ("Haskell source", 3, "src/agentctl/haskell", ".hs", True),
+    )
+    if captured is not None and captured.regular_files is not None:
+        return tuple(
+            Subject(
+                name,
+                owners.get(owner, "unknown"),
+                _captured_subject_paths(
+                    root, captured, base, suffix, recursive=recursive
+                ),
+            )
+            for name, owner, base, suffix, recursive in captured_groups
+        )
     groups = (
         ("documentation", 0, tuple((root / "documents").rglob("*.md"))),
         ("plan", 0, tuple((root / "DEVELOPMENT_PLAN").glob("phase-*.md"))),
@@ -373,31 +643,65 @@ def subjects(root: Path, declarations: tuple[Phase, ...]) -> tuple[Subject, ...]
     )
 
 
-def non_vacuous(root: Path, declarations: tuple[Phase, ...]) -> tuple[str, ...]:
+def non_vacuous(
+    root: Path,
+    declarations: tuple[Phase, ...],
+    *,
+    captured: CapturedPolicy | None = None,
+) -> tuple[str, ...]:
     """Require nonempty owned subject classes, including Haskell when introduced."""
     return tuple(
         "validator.non-vacuous: " + subject.name
-        for subject in subjects(root, declarations)
+        for subject in subjects(root, declarations, captured=captured)
         if isinstance(applicability(subject.owner, subject.paths), Err)
     )
 
 
-def inapplicable(root: Path, declarations: tuple[Phase, ...]) -> tuple[str, ...]:
+def inapplicable(
+    root: Path,
+    declarations: tuple[Phase, ...],
+    *,
+    captured: CapturedPolicy | None = None,
+) -> tuple[str, ...]:
     """Name absent Planned inputs without reporting an unimplemented check as passed."""
     return tuple(
         subject.name
-        for subject in subjects(root, declarations)
+        for subject in subjects(root, declarations, captured=captured)
         if applicability(subject.owner, subject.paths) == Ok("not-applicable")
     )
 
 
-def static(root: Path, records: tuple[Mutant, ...]) -> tuple[str, ...]:
+def static(
+    root: Path,
+    records: tuple[Mutant, ...],
+    *,
+    mutant_owners: tuple[tuple[str, int], ...] | CapturedPolicy | None = None,
+    observed_phases: tuple[Phase, ...] | None = None,
+) -> tuple[str, ...]:
     """Run introduced closure checks that do not depend on this run's outcomes."""
-    declarations = phases(root)
+    declarations = phases(root) if observed_phases is None else observed_phases
     return (
-        *cited_paths(root, declarations),
-        *gate_integrity(root, declarations, records),
-        *evidence_rows(root, declarations),
+        *cited_paths(
+            root,
+            declarations,
+            captured=mutant_owners
+            if isinstance(mutant_owners, CapturedPolicy)
+            else None,
+        ),
+        *gate_integrity(root, declarations, records, mutant_owners=mutant_owners),
+        *evidence_rows(
+            root,
+            declarations,
+            observed_digest=mutant_owners.covered_digest
+            if isinstance(mutant_owners, CapturedPolicy)
+            else None,
+        ),
         *lanes(declarations),
-        *non_vacuous(root, declarations),
+        *non_vacuous(
+            root,
+            declarations,
+            captured=mutant_owners
+            if isinstance(mutant_owners, CapturedPolicy)
+            else None,
+        ),
     )

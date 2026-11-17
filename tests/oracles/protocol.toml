@@ -61,3 +61,21 @@ quote = "the user shouldn't need to call the haskell binary directly"
 provenance = "decision:D-52"
 input = { line = '' }
 expected = { error = "invalid-case" }
+
+[[case]]
+id = "protocol.handshake.consent-v2"
+amends = "protocol.handshake"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-52"
+input = { line = '{"subject":"handshake"}' }
+expected = { protocol = 2, commands = ["claude", "codex", "list", "status", "attach", "stop", "adopt", "watch", "unwatch", "pause", "resume-watch", "logs", "supervisor"] }
+
+[[case]]
+id = "protocol.handoff.consent-v2"
+amends = "protocol.handoff.current"
+requirement = "R6"
+quote = "the user shouldn't need to call the haskell binary directly"
+provenance = "decision:D-52"
+input = { line = '{"subject":"handoff","version":"2"}' }
+expected = true

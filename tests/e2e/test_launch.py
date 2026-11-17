@@ -10,12 +10,17 @@ from pathlib import Path
 import pytest
 
 from agentctl.process import Output
-from tests.harness.launch import observe_mux, prepare
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
+from tests.harness.launch import await_exit, observe_mux, prepare
 from tests.harness.oracle import Store, assert_oracle, freeze, read_homes
 from tests.harness.oracle import load as load_oracle
 from tests.harness.passthrough import warm
-from tests.harness.terminal import attached_seed, await_client, await_exit, terminal
-from tests.harness.tmux import PrivateMux, pane_identifier
+from tests.harness.terminal import attached_seed, terminal
+from tests.harness.tmux import PrivateMux, await_client, pane_identifier
+from tests.harness.tmux_fixtures import mux_server as _mux_server_fixture
+
+haskell_build = _haskell_build_fixture
+mux_server = _mux_server_fixture
 
 FORWARDED = ("x;", "#{pane_id}", "$(id)", "", "one\ntwo", "λ日")
 FLAGS = {

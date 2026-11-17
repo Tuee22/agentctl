@@ -14,6 +14,9 @@ from agentctl.process import Output
 from agentctl.result import Err, Ok
 from tests.harness.bootstrap import context, pins
 from tests.harness.haskell import copy_project
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
+
+haskell_build = _haskell_build_fixture
 
 pytestmark = pytest.mark.evidence("real")
 

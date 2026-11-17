@@ -1,4 +1,22 @@
 [[mutant]]
+id = "M-build-native-source-census-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/haskell.py"
+search = "            if len(paths) != len(set(paths)) or any(\n                path not in files for _node, path in parsed.value\n            ):\n"
+replace = "            if False:\n"
+killers = ["tests/unit/test_haskell_gate.py::test_native_source_record_joins_guarded_files"]
+reason = "uncensused native case source was accepted"
+
+[[mutant]]
+id = "M-build-native-report-comparison-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/haskell.py"
+search = "    matched = _compare_native_report(directory, native.value, nonce)\n"
+replace = "    matched = Ok(None)\n"
+killers = ["tests/unit/test_haskell_gate.py::test_failed_native_cases_are_retained_without_passing"]
+reason = "native report mismatch was accepted"
+
+[[mutant]]
 id = "M-build-drop-werror"
 operator = "delete"
 target = "src/agentctl/haskell/agentctl-core.cabal"
@@ -60,12 +78,3 @@ search = "answers = map answer"
 replace = "answers = map answer . drop 1"
 killers = ["tests/integration/test_eval_executable.py::test_every_case_answered"]
 reason = "eval skipped or reordered a case"
-
-[[mutant]]
-id = "M-build-wheel-excludes-haskell"
-operator = "delete"
-target = "pyproject.toml"
-search = "[tool.hatch.build.targets.wheel.force-include]"
-replace = "[tool.hatch.build.targets.wheel]\nexclude = [\"src/agentctl/haskell\"]\n\n[tool.hatch.build.targets.wheel.force-include]"
-killers = ["tests/integration/test_haskell_legs.py::test_wheel_ships_haskell_sources"]
-reason = "wheel excludes Haskell checkout sources"

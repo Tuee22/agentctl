@@ -36,7 +36,10 @@ def test_subprocess_import_outside_process_module() -> None:
         "__import__('subprocess')",
     ):
         _reject("src.one-process-module", source)
-        assert python_source(source, "src/agentctl/process.py") == ()
+        assert python_source(source, "src/agentctl/foundation_process.py") == ()
+        assert python_source(source, "src/agentctl/process.py") == (
+            "src.one-process-module: src/agentctl/process.py",
+        )
     assert (
         python_source("from agentctl.process import run\nrun(['echo'])", SUBJECT) == ()
     )
@@ -289,17 +292,17 @@ def test_coverage_exception_scope() -> None:
     for path, line, definition in (
         (
             "src/agentctl/check/preconditions.py",
-            127,
+            126,
             "def _file_lock(handle: IO[str], *, unlock: bool) -> None:",
         ),
         (
-            "src/agentctl/process.py",
-            125,
+            "src/agentctl/foundation_process_identity.py",
+            44,
             "def _posix_alive(pid: int) -> Result[bool, SpawnError]:",
         ),
         (
-            "src/agentctl/process.py",
-            136,
+            "src/agentctl/foundation_process_identity.py",
+            55,
             "def _windows_alive(pid: int) -> Result[bool, SpawnError]:",
         ),
     ):

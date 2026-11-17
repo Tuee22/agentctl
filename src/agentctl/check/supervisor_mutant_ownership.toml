@@ -1,0 +1,162 @@
+# Partial explicit claims; other corpus records remain unresolved.
+version = 1
+
+[[claims]]
+identifier = "M-super-pause-recorded-as-watched"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_watch_values.py::test_watch_transitions_oracle", path = "tests/unit/test_watch_values.py" }]
+
+[[claims]]
+identifier = "M-super-watch-accepts-foreign"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_watch_values.py::test_watch_transitions_oracle", path = "tests/unit/test_watch_values.py" }]
+
+[[claims]]
+identifier = "M-super-unwatch-kills"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_watch_values.py::test_watch_transitions_oracle", path = "tests/unit/test_watch_values.py" }]
+
+[[claims]]
+identifier = "M-super-enter-in-literal"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_command_plan_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-stop-kills-watched"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_command_plan_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-respawn-on-exit"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_command_plan_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-escalation-sends-model"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_command_plan_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-guard-ignores-change"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_send_guard_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-paused-target-stepped"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_poll_step_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-deadline-ignored"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_poll_step_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-notify-stderr-only"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_poll_step_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-log-skips-repeat"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_poll_records_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-log-drops-result"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_poll_records_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-logs-prefix-match"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_logs_selection_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-log-ignores-truncated-tail"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_log_decoding_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-log-accepts-extra-fields"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_log_decoding_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-commit-aborted-send"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_delivery_commit_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-super-failure-keeps-send-pending"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_supervisor_values.py::test_delivery_commit_oracle", path = "tests/unit/test_supervisor_values.py" }]
+
+[[claims]]
+identifier = "M-backoff-uncapped"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_backoff.py::test_delays_and_escalations_match_oracle", path = "tests/unit/test_backoff.py" }, { node = "haskell:agentctl-core-test/Backoff/grows-to-cap", path = "src/agentctl/haskell/test/RecoveryTests.hs" }]
+
+[[claims]]
+identifier = "M-backoff-no-jitter"
+owner = 8
+killer_sources = [{ node = "haskell:agentctl-core-test/Backoff/seed-determines-delays", path = "src/agentctl/haskell/test/RecoveryTests.hs" }]
+
+[[claims]]
+identifier = "M-backoff-jitter-unbounded"
+owner = 8
+killer_sources = [{ node = "haskell:agentctl-core-test/Backoff/within-bounds", path = "src/agentctl/haskell/test/RecoveryTests.hs" }]
+
+[[claims]]
+identifier = "M-backoff-notify-never-escalates"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_backoff.py::test_delays_and_escalations_match_oracle", path = "tests/unit/test_backoff.py" }]
+
+[[claims]]
+identifier = "M-backoff-attempt-not-advanced"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_recovery_transitions.py::test_backoff_deadlines_match_oracle", path = "tests/unit/test_recovery_transitions.py" }]
+
+[[claims]]
+identifier = "M-backoff-nonfinite-jitter-accepted"
+owner = 8
+killer_sources = [{ node = "haskell:agentctl-core-test/Backoff/within-bounds", path = "src/agentctl/haskell/test/RecoveryTests.hs" }]
+
+[[claims]]
+identifier = "M-machine-skip-confirm-idle"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle", path = "tests/unit/test_recovery_transitions.py" }]
+
+[[claims]]
+identifier = "M-machine-skip-verify"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle", path = "tests/unit/test_recovery_transitions.py" }]
+
+[[claims]]
+identifier = "M-machine-send-on-partial-input"
+owner = 8
+killer_sources = [{ node = "haskell:agentctl-core-test/Machine/never-send-unsafe", path = "src/agentctl/haskell/test/RecoveryTests.hs" }]
+
+[[claims]]
+identifier = "M-machine-send-during-working"
+owner = 8
+killer_sources = [{ node = "haskell:agentctl-core-test/Machine/never-send-unsafe", path = "src/agentctl/haskell/test/RecoveryTests.hs" }]
+
+[[claims]]
+identifier = "M-machine-send-in-dialog"
+owner = 8
+killer_sources = [{ node = "haskell:agentctl-core-test/Machine/never-send-unsafe", path = "src/agentctl/haskell/test/RecoveryTests.hs" }]
+
+[[claims]]
+identifier = "M-machine-refire-handled-fingerprint"
+owner = 8
+killer_sources = [{ node = "haskell:agentctl-core-test/Machine/one-send-per-fingerprint", path = "src/agentctl/haskell/test/RecoveryTests.hs" }]
+
+[[claims]]
+identifier = "M-machine-unchanged-is-success"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle", path = "tests/unit/test_recovery_transitions.py" }, { node = "haskell:agentctl-core-test/Machine/verify-needs-change", path = "src/agentctl/haskell/test/RecoveryTests.hs" }]
+
+[[claims]]
+identifier = "M-machine-retry-terminal-class"
+owner = 8
+killer_sources = [{ node = "tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle", path = "tests/unit/test_recovery_transitions.py" }]

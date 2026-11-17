@@ -11,57 +11,9 @@ from pathlib import Path
 from agentctl.bootstrap import build
 from agentctl.process import Output
 from agentctl.result import Ok
+from tests.harness.isolation import isolated_environment
 from tests.harness.nonce import fresh
 from tests.harness.tmux import object_value, validate_record
-
-SYSTEM_KEYS = frozenset(
-    {
-        "PATH",
-        "PATHEXT",
-        "SYSTEMROOT",
-        "SystemRoot",
-        "WINDIR",
-        "COMSPEC",
-        "TEMP",
-        "TMP",
-        "TMPDIR",
-        "LD_LIBRARY_PATH",
-        "DYLD_LIBRARY_PATH",
-    }
-)
-
-
-def isolated_environment(
-    directory: Path, original: Mapping[str, str]
-) -> dict[str, str]:
-    """Expose no auth variables, project settings, user files or OS credential store."""
-    directory.mkdir(mode=0o700, parents=True, exist_ok=True)
-    home = directory / "home"
-    home.mkdir(mode=0o700)
-    claude = directory / "claude"
-    claude.mkdir(mode=0o700)
-    codex = directory / "codex"
-    codex.mkdir(mode=0o700)
-    (codex / "config.toml").write_text(
-        'cli_auth_credentials_store = "file"\n', encoding="utf-8"
-    )
-    return {
-        **{key: value for key, value in original.items() if key in SYSTEM_KEYS},
-        "HOME": str(home),
-        "USERPROFILE": str(home),
-        "APPDATA": str(directory / "appdata"),
-        "LOCALAPPDATA": str(directory / "localappdata"),
-        "CLAUDE_CONFIG_DIR": str(claude),
-        "CODEX_HOME": str(codex),
-        "DISABLE_AUTOUPDATER": "1",
-        "PSMUX_DATA_DIR": str(directory / "psmux"),
-        "PSMUX_NO_WARM": "1",
-        "TMUX_TMPDIR": str(directory),
-        **{
-            f"XDG_{kind}_HOME": str(directory / kind.lower())
-            for kind in ("CACHE", "CONFIG", "DATA", "STATE")
-        },
-    }
 
 
 def native_agent(name: str, family: str, environment: Mapping[str, str]) -> Path:

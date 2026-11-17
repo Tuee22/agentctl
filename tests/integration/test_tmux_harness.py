@@ -5,8 +5,13 @@ from pathlib import Path
 
 import pytest
 
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.nonce import fresh
 from tests.harness.tmux import PrivateMux, private_mux, server_pid
+from tests.harness.tmux_fixtures import mux_server as _mux_server_fixture
+
+haskell_build = _haskell_build_fixture
+mux_server = _mux_server_fixture
 
 pytestmark = pytest.mark.evidence("real")
 RECORDED_PID = 123

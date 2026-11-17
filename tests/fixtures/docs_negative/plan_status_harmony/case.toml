@@ -1,4 +1,4 @@
 rule = "plan.status_harmony"
 path = "DEVELOPMENT_PLAN/README.md"
-search = "| 14 | [Windows and psmux acceptance](phase-14-windows-psmux-acceptance.md) | Active |"
+search = "| 14 | [Release evidence and closure](phase-14-release-evidence-and-closure.md) | Planned |"
 replace = ""

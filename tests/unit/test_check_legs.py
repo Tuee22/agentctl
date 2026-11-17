@@ -2,27 +2,38 @@
 """Independent leg rows, environment scrubbing and complete verdicts."""
 
 import tomllib
+from importlib import import_module
 from pathlib import Path
 
 import pytest
 
-from agentctl.bootstrap import build
-from agentctl.bootstrap.style import StyleTools
-from agentctl.bootstrap.toolchain import Toolchain
 from agentctl.check.legs import cabal_legs, python_legs, style_legs, targets, verdict
-from agentctl.check.steps import environment, inapplicable_message, pipeline
-from agentctl.result import Err, Ok
-from tests.harness.bootstrap import context
+from agentctl.foundation import Err, Ok
+from agentctl.foundation_style_values import StyleTools
 
 pytestmark = pytest.mark.evidence("value")
 
 
 def test_planned_owner_diagnostic() -> None:
     """A Planned capability has an explicit ceiling while a complete target has none."""
+    inapplicable_message = import_module("agentctl.check.steps").inapplicable_message
     assert inapplicable_message(("Haskell source",)) == (
         "validators: not applicable: Haskell source (owner Planned)\n"
     )
     assert inapplicable_message(()) == ""
+
+
+def test_later_readiness_retains_overall_failure() -> None:
+    """An unmet later prerequisite remains visible after independent validation."""
+    readiness_result = import_module("agentctl.check.steps").readiness_result
+    earlier_failure = 7
+    assert readiness_result(0, ()) == 0
+    assert readiness_result(0, ("toolchain unavailable",)) == 1, (
+        "later readiness failure was dropped"
+    )
+    assert (
+        readiness_result(earlier_failure, ("toolchain unavailable",)) == earlier_failure
+    )
 
 
 def _strings(value: object) -> dict[str, str]:
@@ -34,8 +45,8 @@ def _strings(value: object) -> dict[str, str]:
     return {str(key): str(item) for key, item in value.items()}
 
 
-def test_leg_table_matches_oracle(root: Path, tmp_path: Path) -> None:
-    """Require every argv token and controlled environment setting."""
+def test_python_leg_table_matches_oracle(root: Path) -> None:
+    """Compare the Python leg table without loading native bootstrap code."""
     oracle = tomllib.loads(
         (root / "tests/oracles/check_legs.toml").read_text(encoding="utf-8")
     )
@@ -55,6 +66,20 @@ def test_leg_table_matches_oracle(root: Path, tmp_path: Path) -> None:
         }
         for leg in legs
     ] == expected, "leg table differs from oracle"
+    assert legs[-1].name == "pytest"
+    assert legs[-1].after_failure
+    assert all(not leg.after_failure for leg in legs[:-1])
+
+
+def test_leg_table_matches_oracle(root: Path, tmp_path: Path) -> None:
+    """Require every argv token and controlled environment setting."""
+    test_python_leg_table_matches_oracle(root)
+    build = import_module("agentctl.bootstrap.build")
+    toolchain = import_module("agentctl.bootstrap.toolchain")
+    context = import_module("tests.harness.bootstrap").context
+    oracle = tomllib.loads(
+        (root / "tests/oracles/check_legs.toml").read_text(encoding="utf-8")
+    )
     native = cabal_legs("<cabal>", "<ghc>", Path("<build>"))
     assert [{"name": leg.name, "arguments": list(leg.argv)} for leg in native] == [
         row["expected"]
@@ -66,7 +91,7 @@ def test_leg_table_matches_oracle(root: Path, tmp_path: Path) -> None:
         Path("<project>"),
         Path("<build>"),
         context(tmp_path / "native"),
-        Toolchain("<ghc>", "<cabal>"),
+        toolchain.Toolchain("<ghc>", "<cabal>"),
     )
     assert ("<cabal>", *build.arguments(value, "build", "all")) == native[0].argv, (
         "Cabal build flags differ from oracle"
@@ -76,6 +101,16 @@ def test_leg_table_matches_oracle(root: Path, tmp_path: Path) -> None:
         *build.arguments(value, "test", "all"),
         "--test-show-details=direct",
     ) == native[1].argv
+    test_environment_matches_oracle(root, tmp_path)
+
+
+def test_environment_matches_oracle(root: Path, tmp_path: Path) -> None:
+    """Check environment filtering against the original independent rows."""
+    environment = import_module("agentctl.check.steps").environment
+    oracle = tomllib.loads(
+        (root / "tests/oracles/check_legs.toml").read_text(encoding="utf-8")
+    )
+    amended = {row.get("amends") for row in oracle["case"]}
     inherited = {
         "PATH": "/bin",
         "HOME": "/home/example",
@@ -132,6 +167,7 @@ def test_failing_leg_fails_check() -> None:
 
 def test_full_leg_set_matches_oracle(root: Path) -> None:
     """Both the actual pipeline and each executable leg retain all eight oracle rows."""
+    pipeline = import_module("agentctl.check.steps").pipeline
     rows = tomllib.loads(
         (root / "tests/oracles/check_legs.toml").read_text(encoding="utf-8")
     )["case"]
@@ -159,6 +195,7 @@ def test_full_leg_set_matches_oracle(root: Path) -> None:
         for step in actual
         if step.name not in {"toolchain-ensure", "binary-identity"}
     ] == expected_order, "full leg set differs from oracle"
+    amended = {row.get("amends") for row in rows}
     expected = {
         row["expected"]["name"]: row["expected"]["arguments"]
         for row in rows
@@ -166,9 +203,11 @@ def test_full_leg_set_matches_oracle(root: Path) -> None:
         in {
             "legs.haskell.fourmolu",
             "legs.haskell.hlint",
+            "legs.haskell.hlint.bootstrap",
             "legs.haskell.cabal-build",
             "legs.haskell.cabal-test",
         }
+        and row["id"] not in amended
     }
     for leg in (*native, *legs[-3:-1]):
         assert list(leg.argv) == expected[leg.name], (

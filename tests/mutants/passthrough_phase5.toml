@@ -1,0 +1,8 @@
+[[mutant]]
+id = "M-launch-argv-on-mux-line"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"
+search = "Process.runCommand (multiplexer runtime) command (commandContext runtime)"
+replace = "case command of Command.Create {} -> let invocation = Process.commandInvocation (Mux.muxKind (multiplexer runtime)) (Mux.muxExecutable (multiplexer runtime)) command (commandContext runtime) in Process.run (invocation {Process.arguments = Process.arguments invocation ++ requestArguments (request runtime)}); _ -> Process.runCommand (multiplexer runtime) command (commandContext runtime)"
+killers = ["tests/e2e/test_passthrough_argv.py::test_through_stack_rows[claude]", "tests/e2e/test_passthrough_argv.py::test_through_stack_rows[codex]"]
+reason = "agent argv reached multiplexer command line"

@@ -28,7 +28,7 @@ No retained old acceptance row qualifies the revised contracts.
 | D-92 | Strict functional doctrine and project-owned controls apply to all Python, including gate/tests/stubs. Existing incompatible shapes are migrations, never conformance evidence or exemptions. | D-29 source discipline and concept-note engineering interpretations where weaker | [Python discipline and gate integrity](phase-1-python-discipline-and-gate-integrity.md) |
 | D-93 | One complete gate produces independent input-closed phase/lane verdicts; later-only failures and input changes do not poison earlier complete evidence. Shared corruption invalidates consumers. | D-03 and global-verdict/whole-tree-only phase closure | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
 | D-94 | Each phase requires Linux and at most one additional native family. Native Windows and Darwin observations are independently earned; final Linux aggregation reads current receipts. | Whole-checkout lane requirements that couple foreign hosts | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
-| D-95 | Dedicated right-sized Debian WSL2, complete Linux dependencies and a verified bind mount of the live host checkout can supply Linux evidence. No commit, copy or global WSL disruption is permitted. | Generic isolated-WSL preparation without resource/source identity obligations | [Linux live and clean acceptance](phase-12-linux-live-and-clean-acceptance.md) |
+| D-95 | Dedicated right-sized Debian Hyper-V, complete Linux dependencies and a verified bind mount of the live host checkout can supply Linux evidence. No commit, copy or disruption to other projects is permitted. This supersedes the original WSL2 route at the user's direction; its executable controls remain migration inputs until equivalent controls exist. | Shared WSL preparation without resource/source identity obligations | [Linux live and clean acceptance](phase-12-linux-live-and-clean-acceptance.md) |
 | D-96 | Coherent observations and concrete server-ordered conditional literal+Enter submission precede automatic input. Missing targets, changing activity and ambiguous outcomes fail closed; ordinary repeated captures establish no atomicity. | Stable-cursor snapshot and separate-send assumptions | [Pane observation and classification](phase-7-pane-observation-and-classification.md) |
 
 ## Originating Request
@@ -160,7 +160,7 @@ verified tool fact, recorded with its version and source in
 | D-28 | The dev tools are the `dev` extra, not a dependency group. | `tool:` pipx has no PEP 735 dependency-group support | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
 | D-29 | Python is at least 3.12. The pins are click 8.5.0, ruff 0.17.3, ty 0.0.95 and pytest 9.2.0, with coverage pinned in Sprint 0.2. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
 | D-30 | ty runs with `all = "error"`, `respect-type-ignore-comments = false`, error-on-warning, `--python sys.executable` and an isolated config home. | `tool:` ty has no strict switch, merges a user-level config file, and does not discover a pipx venv on its own | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
-| D-31 | ruff runs with `select = ["ALL"]`, ignoring the formatter conflicts D203, D213 and COM812. S603 and S606 are allowed only in `src/agentctl/process.py`. | `tool:` ruff's formatter conflicts with D203, D213 and COM812 when every rule is selected | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+| D-31 | ruff runs with `select = ["ALL"]`, ignoring the formatter conflicts D203, D213 and COM812. S603 and S606 are allowed only in `src/agentctl/foundation_process.py`. | `tool:` ruff's formatter conflicts with D203, D213 and COM812 when every rule is selected | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
 | D-32 | pytest runs with `strict = true` and `filterwarnings = ["error"]`. The final tool configs are co-designed in Sprint 0.2 by running the pinned tools, then frozen by `tests/oracles/lint_config.toml`. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
 | D-33 | `agentctl check` takes no arguments, runs from a scrubbed environment allowlist, and fails if any step or leg fails or does not run. The warm-run budget is about 15 minutes. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
 | D-34 | check and its children run with `PYTHONPYCACHEPREFIX` under the run dir, so the write-guard excludes only `.git`. | `decision:planner` | [Python discipline and gate integrity](phase-1-python-discipline-and-gate-integrity.md) |
@@ -218,6 +218,31 @@ verified tool fact, recorded with its version and source in
 | D-86 | The compiled client relay waits only for the forwarded client, preserving the genuine backend server's lifetime. The Windows trampoline waits for its direct program child; detached sessions created from inside a pane do not extend that wait. Bounded queries retain process-tree ownership. Native Windows observer input is polled for readiness so cancellation and stop-file completion require no additional terminal input. | `decision:planner` | [Debian tmux and multiplexer](phase-4-debian-tmux-and-multiplexer.md) |
 | D-87 | Internal Python tool processes use UTF-8 mode and UTF-8 standard streams on every host. Gate-owned argv and environment paths use forward-slash spelling, preserving the portable command grammar independently of the native path separator. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
 | D-88 | The gate preserves the published `CODEX_SQLITE_HOME` runtime location alongside `CODEX_HOME`. A native client can retain its existing configuration and authentication while placing SQLite state on a native filesystem. Unknown Codex-prefixed environment controls remain excluded, and isolated probes retain their private location allowlist. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+| D-89 | Amends the pytest invocation in D-33: collection errors do not prevent other collected modules from executing. Every failed collector is recorded and remains a gate failure; later ownership attribution may scope its effect only when independently established. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+| D-90 | Preserve the original `M-evidence-nonce-unchecked`, `M-legs-drop-pytest` and `M-plugin-orphan-blind` records while recording content-bound search amendments for the revised gate implementation. The defect, target, named killer and failure reason remain unchanged; each amended mutant must still die against a passing baseline. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+
+| D-91 | Preserve the original `M-phase-mutant-owner-reassigned` record with a content-bound search amendment that selects the complete mutant ownership join after the partial-claim check introduced the same comparison. The target, defect, killer and reason are unchanged. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+| D-92 | Preserve the original `M-phase-captured-oracle-ignored` record with a content-bound search amendment after contained oracle links moved to captured census evidence. The amended defect still rereads regular oracle files, and its target, killer and reason remain unchanged. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+
+| D-97 | Move `M-evidence-startup-bytecode` unchanged to the bootstrap-owned corpus file, retaining its exact protected record and named killer. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+
+| D-98 | Move `M-boot-windows-arm64-allowed` unchanged to a governance-owned corpus file, preserving its protected record and current killer until the lower-phase fixture is separated. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+
+| D-99 | Move `M-cache-identity-step-dropped` unchanged to a governance-owned corpus file, preserving its protected record and killer while the shared gate dependencies remain under migration. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+
+| D-100 | Move `M-mux-socket-length-unchecked`, `M-mux-native-exec-scope-unchecked`, `M-mux-native-suppressions-unchecked`, `M-mux-native-test-branches-unchecked`, `M-mux-foreign-exec-owner-unchecked` unchanged to governance-owned corpus files; retain every protected record and killer while shared test dependencies remain under migration. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+
+| D-101 | Move `M-style-drop-hlint`, `M-style-fourmolu-inplace` unchanged to a governance-owned corpus file, preserving both protected records and killers until shared gate and native-style dependencies are separated. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+
+| D-102 | Move `M-boot-recipe-stage-a-root`, `M-boot-step-not-run` unchanged to the clean-recipe and governance corpus files, preserving protected records and killers while later dependencies remain under migration. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+
+| D-103 | Move `M-build-wheel-excludes-haskell` unchanged to a governance-owned corpus file, preserving its protected record and packaging killer while later test dependencies remain under migration. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+
+| D-104 | Move `M-classify-status-other-agent` unchanged to the observation-owned corpus file, preserving its protected record and existing killer. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+
+| D-105 | Move `M-capture-locale-decoding`, `M-capture-no-join`, `M-launch-cwd-on-mux-line`, `M-mux-name-allows-double-underscore`, `M-mux-name-constructor-exported`, `M-mux-remain-session-unqualified`, `M-mux-render-psmux-alias`, `M-launch-argv-on-mux-line`, `M-sessions-stop-prefix-target`, `M-sessions-stop-kill-server` unchanged into files matching their target owners. Preserve every original killer and leave cross-phase test dependencies open. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+
+| D-106 | Move the sole process boundary into the shared foundation and amend `M-guard-process-allowlist-wide` to target the new path while retaining the original record, killer and refusal scope. | `decision:planner` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
 
 ## Design Justification
 
@@ -262,11 +287,12 @@ every current native receipt and an empty ledger.
 
 ### Dedicated Linux validation on Windows
 
-A dedicated Debian WSL2 environment supplies Linux evidence without requiring a committed transfer. Its actual
-CPU/memory/workload limits, VHD/free capacity, Linux tools and bind-mounted host source are verified. Global
-WSL VM settings are not per-distro resource limits; use supported measured workload controls and do not disturb
-other distributions. Keep build/cache/state on Linux storage and measure the bind-mounted source's filesystem
-semantics honestly. WSL cannot establish a native Windows or Darwin result.
+A dedicated Debian Hyper-V VM supplies Linux evidence without requiring a committed transfer. Its actual
+CPU/memory/workload limits, VHD/free capacity, Linux tools and bind-mounted host source are verified. Use
+measured VM and workload controls and do not disturb other projects. Keep build/cache/state on dedicated Linux
+storage and measure the bind-mounted source's filesystem semantics honestly. The guest cannot establish a
+native Windows or Darwin result. Existing WSL-specific controls remain required migration inputs until
+equivalent Hyper-V controls are implemented and validated.
 
 ## Rejected Alternatives
 
@@ -332,7 +358,7 @@ checked once, before the note is deleted, and no phase can re-check it afterward
 | CN-35 | Packaging and development | "explicitly include Haskell sources" | adapted | [binary_build.md](../documents/engineering/binary_build.md) | The Haskell sources are package data under `src/agentctl/haskell/`, so ordinary hatchling selection includes them and no force-include rule exists (D-23). |
 | CN-36 | Packaging and development | "CI must test the *built source distribution*, not just imports from the checkout." | deferred-to-phase | [Linux live and clean acceptance](phase-12-linux-live-and-clean-acceptance.md) | Stage A installs a copied tree without `--editable`, so a built wheel, not the checkout, provisions the toolchain and builds the binary. |
 | CN-37 | Strict typing | "Fully annotate public functions, returns, callbacks, and important interfaces." | adopted | [code_standards.md](../documents/engineering/code_standards.md) | All six bullets; ty with every rule an error and ignore comments disrespected, plus ruff `select = ["ALL"]`, enforce their mechanical part. |
-| CN-38 | Functional style | "Prefer pure functions from immutable values to immutable values." | adopted | [code_standards.md](../documents/engineering/code_standards.md) | All six bullets; side effects live in I/O adapters, and `src/agentctl/process.py` is the only module that spawns. |
+| CN-38 | Functional style | "Prefer pure functions from immutable values to immutable values." | adopted | [code_standards.md](../documents/engineering/code_standards.md) | All six bullets; side effects live in I/O adapters, and `src/agentctl/foundation_process.py` is the only module that spawns. |
 | CN-39 | Result types, not expected exceptions | "Use a small typed local result abstraction rather than adding a dependency" | adapted | [code_standards.md](../documents/engineering/code_standards.md) | `src/agentctl/result.py` holds `Ok` and `Err` in Python 3.12 type-parameter syntax, and each module declares its own error union; narrow catching at I/O boundaries and the CLI's conversion of a `Result` into an exit code are adopted. |
 | CN-40 | Testing and quality gates | "Integration tests: mocked ghcup/Cabal subprocesses" | adapted | [testing.md](../documents/engineering/testing.md) | Pure tests become the `value` class; a mocked subject is never evidence, so integration tests use the real pinned tools in test-owned scopes, the spawn audit as observer, and constructed PATHs for missing tools; the security bullet becomes argv-injection rows through the whole stack and a wrong SHA-256 that installs nothing. |
 | CN-41 | Testing and quality gates | "Packaging tests: build sdist/wheel; install using pipx/uv in a clean environment; verify bundled Haskell sources." | deferred-to-phase | [Linux live and clean acceptance](phase-12-linux-live-and-clean-acceptance.md) | Stage A's clean container installs with pipx alone and builds from the bundled sources. |

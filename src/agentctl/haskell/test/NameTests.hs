@@ -7,7 +7,8 @@ import Control.Monad (forM_, replicateM)
 import Data.Either (isRight)
 import qualified Data.Text as Text
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, testCase)
+import Test.Tasty.HUnit (assertBool)
+import TestSource (testCase)
 
 tests :: [TestTree]
 tests = [testGroup "Name" [testCase "always-valid" alwaysValid]]

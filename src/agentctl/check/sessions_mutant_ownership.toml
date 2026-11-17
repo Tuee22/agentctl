@@ -1,0 +1,22 @@
+# Partial explicit claims; other corpus records remain unresolved.
+version = 1
+
+[[claims]]
+identifier = "M-adopt-stop-kills"
+owner = 6
+killer_sources = [{ node = "tests/unit/test_adopt_values.py::test_adopt_rows_match_oracle", path = "tests/unit/test_adopt_values.py" }, { node = "tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership", path = "tests/e2e/test_adopt.py" }]
+
+[[claims]]
+identifier = "M-adopt-no-socket-revalidation"
+owner = 6
+killer_sources = [{ node = "tests/unit/test_adopt_values.py::test_adopt_rows_match_oracle", path = "tests/unit/test_adopt_values.py" }, { node = "tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership", path = "tests/e2e/test_adopt.py" }]
+
+[[claims]]
+identifier = "M-adopt-no-pid-revalidation"
+owner = 6
+killer_sources = [{ node = "tests/unit/test_adopt_values.py::test_adopt_rows_match_oracle", path = "tests/unit/test_adopt_values.py" }, { node = "tests/e2e/test_adopt.py::test_stale_entry_after_server_restart", path = "tests/e2e/test_adopt.py" }]
+
+[[claims]]
+identifier = "M-adopt-sets-session-options"
+owner = 6
+killer_sources = [{ node = "tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership", path = "tests/e2e/test_adopt.py" }]

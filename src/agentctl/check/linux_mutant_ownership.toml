@@ -1,0 +1,6 @@
+version = 1
+
+[[claims]]
+identifier = "M-boot-recipe-stage-a-root"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle", path = "tests/unit/test_clean_host_recipe.py" }]

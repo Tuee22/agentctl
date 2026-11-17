@@ -17,6 +17,13 @@ evidence. Shared collection/nonce/write-guard/ownership/containment failures inv
 Focused tools help development but close no work. Never add skips, expected failures, suppressions or alternate
 workflow runners, hide legacy source, weaken an oracle/mutant or rewrite ownership to launder a failure.
 
+Use targeted tests and checks during development, choosing the smallest meaningful coverage for each change.
+Avoid lengthy full-suite or full-gate reruns for small incremental edits. Run broader validation when changes
+affect shared behavior or when targeted results leave relevant uncertainty, and reserve the complete
+`agentctl check` for significant validation milestones, including phase closure. Once appropriate checks pass,
+repeat or broaden them only when subsequent changes, failures or unresolved concerns justify it. Targeted
+checks do not replace the complete passing gate and prerequisites required to close a phase.
+
 Follow [code standards](documents/engineering/code_standards.md). Python is minimal bootstrap/transport and
 developer-gate infrastructure, with strict functional doctrine: typed immutable values, single assignment,
 total pure calculations, structural parsing and explicit effects. Migration includes checker/tests/stubs.
@@ -28,27 +35,28 @@ acceptance prerequisites. Never call the core executable or cabal directly; the 
 those invocations. Source/backend preparation is application-owned work outside ordinary checks and tests.
 Check never prompts; tests never run real package managers, sudo, installers, login or answered dialogs.
 
-On a Windows machine, Linux validation may run in WSL2 only under all of these conditions:
+On a Windows machine, Linux validation runs in a dedicated agentctl Debian Hyper-V VM under all of these conditions:
 
-- Use a dedicated agentctl Debian WSL2 instance, not a user's existing development distro. Observe its identity,
-  WSL version, actual CPU/memory/commit and VHD/free-storage capacity. Choose and verify numerical workload
-  CPU/memory/swap and storage budgets from measured build/test peaks with explicit host headroom.
+- Create or use a dedicated agentctl VM, not another project's VM. Observe its identity, Linux kernel,
+  host capacity and actual VM CPU, memory, swap and VHD/free-storage capacity. Choose and verify numerical
+  budgets from measured build/test peaks with explicit host headroom. Enforce and verify VM-local CPU and
+  memory limits and dedicated storage boundaries so workloads cannot consume another project's allocation.
 - Install all required Linux dependencies in that dedicated instance, including pipx, the editable dev extra,
   native build tools, tmux and any agents required by the selected lane. Host preparation is separate from
   tests; the application still never installs agent CLIs.
-- Bind mount the live local Windows agentctl repository into the Linux workspace. A separate clone, copy,
+- Expose the live local Windows agentctl repository to the VM and bind mount it into the Linux workspace.
+  A separate clone, copy,
   archive, rsync mirror or commit-based transfer cannot substitute. Prove the mount/source identity and
   bidirectional fresh nonce visibility, including unstaged/untracked state, then remove owned sentinels
   before the write-guard snapshot.
 - Keep Linux build/cache/toolchain/temp/state on dedicated Linux storage and verify the source mount's
   permissions, locks, case and symlink behavior. Use the same actual source tree, and never run Windows and
-  WSL checks concurrently while that tree can change.
-- Follow [the validation runbook](documents/operations/validation_runbook.md). Global `.wslconfig` limits are
-  shared VM controls, not per-distro CPU/RAM isolation; use verified workload-local controls without changing
-  other distributions, default distro settings or global shutdown. If capacity, limits or mount semantics
-  cannot be proven, report the Linux route unmet.
+  VM checks concurrently while that tree can change.
+- Follow applicable non-WSL-specific requirements in the [validation runbook](documents/operations/validation_runbook.md).
+  Do not change other VMs, their allocations or existing sessions. If capacity, isolation, limits or mount
+  semantics cannot be proven, report the Linux route unmet.
 
-WSL2 evidence is Linux evidence only. It never establishes native Windows or macOS behavior. Each phase
+Hyper-V guest evidence is Linux evidence only. It never establishes native Windows or macOS behavior. Each phase
 requires Linux and at most one of those native families. Never substitute another kernel or manual attestation.
 
 Agents may prepare/install/configure dependencies and agents in their dedicated validation instance. They may

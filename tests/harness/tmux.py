@@ -6,17 +6,22 @@ import os
 import secrets
 import shutil
 import time
-from collections.abc import Generator, Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from tempfile import TemporaryDirectory
-
-import pytest
+from typing import Protocol
 
 from agentctl.bootstrap import build
-from agentctl.check.lanes import HostFacts
-from agentctl.process import Child, Output, alive, run, start, stop
+from agentctl.process import (
+    Child,
+    Output,
+    process_birth,
+    registered_alive,
+    run,
+    start,
+    stop,
+)
 from agentctl.result import Ok
 from tests.harness.nonce import fresh
 
@@ -100,7 +105,7 @@ class PrivateMux:
     endpoint: Path
     server: Child | None = None
     actors: list[Actor] = field(default_factory=list)
-    registered: set[int] = field(default_factory=set)
+    registered: dict[int, int | None] = field(default_factory=dict)
     releases: dict[int, Path] = field(default_factory=dict)
 
     def open(self) -> None:
@@ -127,10 +132,27 @@ class PrivateMux:
         """Put native server identity in the gate's own observer registry."""
         observers = self.run_directory / "observers"
         observers.mkdir(exist_ok=True)
-        (observers / f"{self.nonce}.{pid}.json").write_text(
-            json.dumps({"nonce": self.nonce, "pid": pid}), encoding="utf-8"
+        match self.family:
+            case "Windows":
+                birth = process_birth("Windows", pid)
+            case "Linux":
+                birth = process_birth("Linux", pid)
+            case _:
+                birth = Ok(None)
+        assert isinstance(birth, Ok), birth
+        previous = self.registered.get(pid)
+        assert previous is None or birth.value in {None, previous}, (
+            "observer PID was reused during registration"
         )
-        self.registered.add(pid)
+        identity = previous if previous is not None else birth.value
+        (observers / f"{self.nonce}.{pid}.json").write_text(
+            json.dumps(
+                {"nonce": self.nonce, "pid": pid}
+                | ({"birth": identity} if identity is not None else {})
+            ),
+            encoding="utf-8",
+        )
+        self.registered[pid] = identity
 
     def register_observer(self, pid: int, release: Path | None = None) -> None:
         """Own an independently observed native pid until this server is reaped."""
@@ -384,10 +406,10 @@ class PrivateMux:
             release.write_text("stop", encoding="utf-8")
         for pid in self.releases:
             deadline = time.monotonic() + WAIT_SECONDS
-            state = alive(family, pid)
+            state = registered_alive(family, pid, self.registered[pid])
             while state == Ok(value=True) and time.monotonic() < deadline:
                 time.sleep(POLL_SECONDS)
-                state = alive(family, pid)
+                state = registered_alive(family, pid, self.registered[pid])
 
     def close(self) -> None:
         """Stop fake actors before ending and reaping the owned server."""
@@ -417,10 +439,10 @@ class PrivateMux:
             assert family in {"Linux", "Darwin", "Windows"}
             for pid in self.registered:
                 deadline = time.monotonic() + WAIT_SECONDS
-                state = alive(family, pid)
+                state = registered_alive(family, pid, self.registered[pid])
                 while state == Ok(value=True) and time.monotonic() < deadline:
                     time.sleep(POLL_SECONDS)
-                    state = alive(family, pid)
+                    state = registered_alive(family, pid, self.registered[pid])
                 assert state == Ok(value=False), (
                     "owned observer survived server teardown"
                 )
@@ -481,14 +503,52 @@ def private_mux(
         mux.close()
 
 
-@pytest.fixture
-def mux_server(
-    haskell_build: build.BuildContext, record_host: HostFacts
-) -> Iterator[PrivateMux]:
-    """Keep focused and gate runs equally private while using the gate registry."""
-    manifest = os.environ.get("AGENTCTL_CHECK_MANIFEST")
-    nonce = fresh(os.environ.get("AGENTCTL_CHECK_NONCE", "focused"))
-    with TemporaryDirectory(prefix="agentctl-mux-") as temporary:
-        directory = Path(temporary) if manifest is None else Path(manifest).parent
-        with private_mux(haskell_build, record_host.family, directory, nonce) as mux:
-            yield mux
+class CapturablePane(Protocol):
+    """A terminal that can supply diagnostics when attachment fails."""
+
+    def capture(self) -> str:
+        """Return the pane screen."""
+        ...
+
+
+CLIENT_FIELDS = 2
+
+
+def clients(mux: PrivateMux, session: str | None = None) -> tuple[tuple[int, str], ...]:
+    """Read genuine attached client identities and sessions from this owned server."""
+    target = ("-t", "=" + session) if session is not None else ()
+    output = mux.raw("list-clients", *target, "-F", "#{client_pid}|#{session_name}")
+    assert output.code == 0, output.stderr
+    rows = []
+    for line in output.stdout.splitlines():
+        fields = line.split("|")
+        assert len(fields) == CLIENT_FIELDS, line
+        rows.append((int(fields[0]), fields[1]))
+    return tuple(rows)
+
+
+def await_client(
+    mux: PrivateMux,
+    driver: CapturablePane,
+    session: str,
+    *,
+    reason: str = "terminal handover",
+) -> tuple[int, str]:
+    """Require one actual client on the target before the terminal deadline."""
+    deadline = time.monotonic() + WAIT_SECONDS
+    present = mux.raw("has-session", "-t", "=" + session)
+    while present.code == 1 and time.monotonic() < deadline:
+        time.sleep(0.01)
+        present = mux.raw("has-session", "-t", "=" + session)
+    assert present.code == 0, reason + ": no target session: " + driver.capture()
+    observed = clients(mux, session)
+    while (
+        len(observed) != 1 or observed[0][1] != session
+    ) and time.monotonic() < deadline:
+        time.sleep(0.01)
+        observed = clients(mux, session)
+    assert len(observed) == 1, (
+        reason + ": did not attach exactly one client: " + driver.capture()
+    )
+    assert observed[0][1] == session, reason + ": selected another session"
+    return observed[0]

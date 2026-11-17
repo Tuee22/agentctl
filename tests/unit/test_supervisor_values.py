@@ -8,7 +8,10 @@ import pytest
 
 from agentctl.bootstrap import build
 from tests.harness.evaluate import compare_subject
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.oracle import Store, load, read_homes
+
+haskell_build = _haskell_build_fixture
 
 pytestmark = pytest.mark.evidence("value")
 

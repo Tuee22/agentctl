@@ -9,10 +9,15 @@ import pytest
 
 from agentctl.bootstrap import build
 from agentctl.result import Ok
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.launch import LaunchCase, prepare
 from tests.harness.screens import ScreenClass, normalized, read
 from tests.harness.sessions import rows
 from tests.harness.tmux import PrivateMux
+from tests.harness.tmux_fixtures import mux_server as _mux_server_fixture
+
+haskell_build = _haskell_build_fixture
+mux_server = _mux_server_fixture
 
 pytestmark = pytest.mark.evidence("observer")
 REASON = "status screen differs from current fixture"

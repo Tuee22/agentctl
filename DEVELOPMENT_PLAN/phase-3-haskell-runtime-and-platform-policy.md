@@ -45,7 +45,7 @@ Native effects and runtime host facts supplies its complete owned contract throu
 
 #### Deliverables
 
-Introduce tests/integration/test_owned_resources.py, including portable policy and actual host-specific cleanup branches later consumed by native acceptance. Gather immutable runtime facts in Haskell, including exact Debian identity from os-release. One process runner accepts absolute executables, literal argv, explicit environment and deadlines, drains bytes and preserves UTF-8/exit outcomes. Typed native filesystem/liveness operations expose no arbitrary global kill.
+Introduce tests/integration/test_owned_resources.py, including portable policy and actual host-specific cleanup branches later consumed by native acceptance. Provide independent native process and decoding controls before later mux and capture tests, preserving their named mutants and observations. Gather immutable runtime facts in Haskell, including exact Debian identity from os-release. One process runner accepts absolute executables, literal argv, explicit environment and deadlines, drains bytes and preserves UTF-8/exit outcomes. Typed native filesystem/liveness operations expose no arbitrary global kill.
 
 #### Validation
 

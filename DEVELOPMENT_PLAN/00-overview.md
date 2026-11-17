@@ -76,7 +76,7 @@ A Planned test/resource is an implementation obligation, not a claim that a file
 | R22 | Haskell owns runtime dependency policy, source acquisition, toolchain/backend preparation, qualification, sessions and recovery; Python owns only the prerequisite bootstrap/transport and developer gate. | `as much logic as possible should be in haskell not python` | [Sprint 3.1](phase-3-haskell-runtime-and-platform-policy.md) | value; real; observer | `documents/architecture/python_haskell_boundary.md` | `tests/oracles/runtime_provisioning.toml` |
 | R23 | On native Windows Haskell idempotently provisions private Rust/Cargo and native linker/SDK requirements, fetches pinned source and patches, and builds/publishes its private psmux artifact. | `including idemmpotently installing any rust dependencies` | [Sprint 9.3](phase-9-windows-toolchain-and-psmux-build.md) | value; real; observer | `documents/engineering/toolchain_bootstrap.md` | `tests/oracles/backend_profiles.toml` |
 | R24 | The exact psmux client/server artifacts meet memory/backpressure, control-event, coherent capture, exact-target and guarded-input contracts through independent native tests. | `consider both how agentctl will interact with psmux` | [Sprint 10.2](phase-10-windows-backend-qualification.md) | value; real; observer | `documents/architecture/multiplexer_adapter.md` | `tests/oracles/backend_profiles.toml` |
-| R25 | Windows-host Linux validation uses a dedicated right-sized Debian WSL2 instance with all Linux dependencies and a verified bind mount of the same host checkout; no commit/copy bridge supplies evidence. | `a dedicated wsl2 instance for agentctl is used` | [Sprint 12.1](phase-12-linux-live-and-clean-acceptance.md) | value; real; observer | `documents/operations/validation_runbook.md` | `tests/oracles/host_lanes.toml` |
+| R25 | Windows-host Linux validation uses a dedicated right-sized Debian Hyper-V VM with all Linux dependencies and a verified bind mount of the same host checkout; no commit/copy bridge supplies evidence. | `a dedicated wsl2 instance for agentctl is used` | [Sprint 12.1](phase-12-linux-live-and-clean-acceptance.md) | value; real; observer | `documents/operations/validation_runbook.md` | `tests/oracles/host_lanes.toml` |
 | R26 | Every phase is additive, independently closable from its own prerequisites and requires Linux plus at most one native foreign hardware family. | `incomplete later phases should not prevent earlier phases from being validated` | [Sprint 0.1](phase-0-governance-and-phase-evidence.md) | value; real; observer | `documents/engineering/quality_gate.md` | `tests/oracles/phase_ownership.toml` |
 
 ## Phase Responsibilities
@@ -95,7 +95,7 @@ A Planned test/resource is an implementation obligation, not a claim that a file
 | [Windows toolchain and psmux build](phase-9-windows-toolchain-and-psmux-build.md) | Haskell prepares native Windows build dependencies and compiles pinned psmux sources locally | linux-windows | self-verifying |
 | [Windows backend qualification](phase-10-windows-backend-qualification.md) | Qualify the exact native candidate for attached-client memory behavior, capture correctness, exact identity and guarded input | linux-windows | self-verifying |
 | [Windows application acceptance](phase-11-windows-application-acceptance.md) | Native Windows acceptance of the shared application, private psmux artifact and registered resources | linux-windows | host-acceptance |
-| [Linux live and clean acceptance](phase-12-linux-live-and-clean-acceptance.md) | Debian clean-host and logged-in agent acceptance, with dedicated WSL2 permitted for Linux evidence on a Windows host | linux-live-clean | host-acceptance |
+| [Linux live and clean acceptance](phase-12-linux-live-and-clean-acceptance.md) | Debian clean-host and logged-in agent acceptance, with dedicated Hyper-V Linux validation on a Windows host | linux-live-clean | host-acceptance |
 | [macOS acceptance](phase-13-macos-acceptance.md) | The additive Darwin implementation and native acceptance of bootstrap, process/filesystem semantics and the common tmux backend contract | linux-macos | self-verifying |
 | [Release evidence and closure](phase-14-release-evidence-and-closure.md) | Whole-product closure joins current independent native receipts and requires an empty migration ledger | linux | host-acceptance |
 
@@ -112,9 +112,9 @@ A later phase cannot add a retroactive closure obligation. All cross-platform in
 types and safety predicates are introduced before their platform implementations. Evidence input closures
 include shared contracts automatically; foreign implementation bytes do not enter an unrelated Linux phase.
 
-## Hardware and WSL2
+## Hardware and Hyper-V
 
-Linux validation from Windows uses a dedicated Debian WSL2 instance, measured CPU/memory/storage budgets and a
+Linux validation from Windows uses a dedicated Debian Hyper-V VM, measured CPU/memory/storage budgets and a
 verified bind mount of this live Windows checkout. Install all Linux dependencies, including pipx and the dev
 extra, and keep build/temp/toolchain state on private Linux storage. A copy, detached checkout or new commit is
 not synchronization. Bind-mount semantic controls, mount receipts and bidirectional pre-gate nonce markers

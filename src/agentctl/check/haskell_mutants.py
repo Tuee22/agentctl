@@ -6,9 +6,9 @@ from pathlib import Path
 
 from agentctl.bootstrap import build
 from agentctl.check.haskell import compile_all, listed, report
-from agentctl.hostfacts import HostContext
-from agentctl.process import Output
-from agentctl.result import Err, Ok, Result
+from agentctl.foundation import Err, Ok, Result
+from agentctl.foundation_host import HostContext
+from agentctl.foundation_process_values import Output
 
 
 def killer(

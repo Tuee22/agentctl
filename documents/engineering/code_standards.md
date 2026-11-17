@@ -145,7 +145,7 @@ checks, and a documentation change supplies no source-conformance evidence.
 
 **Spawns only in `process.py`, and other effects at the edge.**
 
-- Every spawn and exec goes through `src/agentctl/process.py`, the only module that imports `subprocess` or calls
+- Every spawn and exec goes through `src/agentctl/foundation_process.py`, the only module that imports `subprocess` or calls
   an `os.exec*`, `os.spawn*`, `os.posix_spawn` or `os.system` function (`src.one-process-module`), and the only one
   where ruff allows S603 and S606.
 - An argv is an immutable sequence of separate argument values. The process adapter materializes the native

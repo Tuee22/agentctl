@@ -34,7 +34,7 @@ This phase needs Linux only. The declared tests are executable contracts; an abs
 
 **Status**: Planned
 **Implementation**: `src/agentctl/haskell/src/AgentCtl/Recovery/`, `tests/oracles/recovery_transitions.toml`, `tests/oracles/backoff.toml`
-**Validation tests**: `tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle`, `haskell:agentctl-core-test/Machine/never-send-unsafe`
+**Validation tests**: `tests/unit/test_recovery_transitions.py::test_every_cell_matches_oracle`, `haskell:agentctl-core-test/Machine/never-send-unsafe`, `tests/unit/test_backoff.py::test_delays_and_escalations_match_oracle`
 **Mutants**: `M-machine-send-during-work`, `M-backoff-unbounded`, `M-machine-stale-fingerprint`
 **Closes**: R18, R18.3, R18.4, R19
 **Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/reference/cli_reference.md`, `documents/engineering/testing.md`
@@ -61,7 +61,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `src/agentctl/haskell/src/AgentCtl/Supervisor/`, `src/agentctl/haskell/app/ScriptedAgent.hs`, `tests/e2e/test_supervisor_scenarios.py`
-**Validation tests**: `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`, `tests/e2e/test_supervisor_run.py::test_sends_once_after_initial_delay`, `tests/integration/test_guarded_submit.py::test_unknown_delivery_never_retries_blindly`, `tests/e2e/test_supervisor_log.py::test_records_match_schema`
+**Validation tests**: `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`, `tests/e2e/test_supervisor_run.py::test_sends_once_after_initial_delay`, `tests/integration/test_guarded_submit.py::test_unknown_delivery_never_retries_blindly`, `tests/e2e/test_supervisor_log.py::test_records_match_schema`, `tests/e2e/test_scripted_fake.py::test_scripted_agent_records_every_byte`, `tests/e2e/test_watch_commands.py::test_concurrent_watch_updates_preserve_entries`, `tests/live/test_live_supervision.py::test_live_watch_sends_nothing`, `tests/unit/test_supervisor_values.py::test_command_plan_oracle`, `tests/unit/test_watch_values.py::test_watch_transitions_oracle`
 **Mutants**: `M-supervisor-stop-kills-session`, `M-delivery-uncertain-repeated`, `M-log-observation-omitted`
 **Closes**: R17, R18.5, R18.6
 **Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/reference/cli_reference.md`, `documents/engineering/testing.md`

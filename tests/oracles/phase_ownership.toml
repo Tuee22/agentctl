@@ -1,0 +1,47 @@
+[[case]]
+id = "phase.hardware.linux"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { subject = "hardware-budget", linux = true, windows = false, macos = false }
+expected = true
+
+[[case]]
+id = "phase.hardware.windows"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { subject = "hardware-budget", linux = true, windows = true, macos = false }
+expected = true
+
+[[case]]
+id = "phase.hardware.macos"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { subject = "hardware-budget", linux = true, windows = false, macos = true }
+expected = true
+
+[[case]]
+id = "phase.hardware.both-foreign"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { subject = "hardware-budget", linux = true, windows = true, macos = true }
+expected = false
+
+[[case]]
+id = "phase.hardware.no-linux"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { subject = "hardware-budget", linux = false, windows = true, macos = false }
+expected = false
+
+[[case]]
+id = "phase.hardware.none"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { subject = "hardware-budget", linux = false, windows = false, macos = false }
+expected = false

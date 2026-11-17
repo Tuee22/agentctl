@@ -1,0 +1,112 @@
+# Partial explicit claims; other corpus records remain unresolved.
+version = 1
+
+[[claims]]
+identifier = "M-argv-flags-after-dashdash"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle", path = "tests/unit/test_launch_argv.py" }]
+
+[[claims]]
+identifier = "M-argv-keep-yolo"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle", path = "tests/unit/test_launch_argv.py" }]
+
+[[claims]]
+identifier = "M-argv-dedupe-past-dashdash"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle", path = "tests/unit/test_launch_argv.py" }]
+
+[[claims]]
+identifier = "M-argv-drop-no-daemon"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_agent_table.py::test_agent_table_matches_oracle", path = "tests/unit/test_agent_table.py" }]
+
+[[claims]]
+identifier = "M-argv-misspell-skip-permissions"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle", path = "tests/unit/test_launch_argv.py" }]
+
+[[claims]]
+identifier = "M-argv-recovery-slash-command"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_agent_table.py::test_agent_table_matches_oracle", path = "tests/unit/test_agent_table.py" }]
+
+[[claims]]
+identifier = "M-auth-exit2-as-logged-out"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_auth_status.py::test_classify_auth_matches_oracle", path = "tests/unit/test_auth_status.py" }]
+
+[[claims]]
+identifier = "M-auth-timeout-as-logged-in"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_auth_status.py::test_classify_auth_matches_oracle", path = "tests/unit/test_auth_status.py" }]
+
+[[claims]]
+identifier = "M-auth-remedy-wrong-command"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_auth_status.py::test_remedy_names_the_command_to_type", path = "tests/unit/test_auth_status.py" }]
+
+[[claims]]
+identifier = "M-auth-pass-setup-token"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_auth_status.py::test_login_shaped_args_refused", path = "tests/unit/test_auth_status.py" }]
+
+[[claims]]
+identifier = "M-auth-probe-drops-env"
+owner = 5
+killer_sources = [{ node = "tests/integration/test_agent_auth_probe.py::test_probe_sees_caller_environment", path = "tests/integration/test_agent_auth_probe.py" }]
+
+[[claims]]
+identifier = "M-preflight-auth-before-mux"
+owner = 5
+killer_sources = [{ node = "tests/integration/test_preflight.py::test_order_mux_then_agent_then_auth", path = "tests/integration/test_preflight.py" }]
+
+[[claims]]
+identifier = "M-preflight-skip-auth"
+owner = 5
+killer_sources = [{ node = "tests/integration/test_preflight.py::test_order_mux_then_agent_then_auth", path = "tests/integration/test_preflight.py" }]
+
+[[claims]]
+identifier = "M-preflight-export-ready-constructor"
+owner = 5
+killer_sources = [{ node = "tests/integration/test_ready_opaque.py::test_ready_constructor_is_not_exported", path = "tests/integration/test_ready_opaque.py" }]
+
+[[claims]]
+identifier = "M-preflight-accept-cmd-shim"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_agent_resolution.py::test_resolution_matches_oracle", path = "tests/unit/test_agent_resolution.py" }]
+
+[[claims]]
+identifier = "M-preflight-relative-agent-path"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_agent_resolution.py::test_resolution_matches_oracle", path = "tests/unit/test_agent_resolution.py" }]
+
+[[claims]]
+identifier = "M-preflight-allow-logged-out"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_preflight.py::test_failure_warnings_match_oracle", path = "tests/unit/test_preflight.py" }]
+
+[[claims]]
+identifier = "M-name-no-collapse"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_session_names.py::test_session_names_match_oracle", path = "tests/unit/test_session_names.py" }]
+
+[[claims]]
+identifier = "M-name-hash-basename"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_session_names.py::test_session_names_match_oracle", path = "tests/unit/test_session_names.py" }]
+
+[[claims]]
+identifier = "M-name-posix-case-fold"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_session_names.py::test_session_names_match_oracle", path = "tests/unit/test_session_names.py" }]
+
+[[claims]]
+identifier = "M-name-plain-for-foreign"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_session_names.py::test_decision_rows_match_oracle", path = "tests/unit/test_session_names.py" }]
+
+[[claims]]
+identifier = "M-name-keep-underscore-runs"
+owner = 5
+killer_sources = [{ node = "haskell:agentctl-core-test/Name/always-valid", path = "src/agentctl/haskell/test/NameTests.hs" }]

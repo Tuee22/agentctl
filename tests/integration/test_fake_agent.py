@@ -9,8 +9,11 @@ import pytest
 from agentctl.bootstrap import build
 from agentctl.process import finish, stop
 from agentctl.result import Ok
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.nonce import fresh
 from tests.harness.tmux import object_value, validate_record
+
+haskell_build = _haskell_build_fixture
 
 pytestmark = pytest.mark.evidence("observer")
 EXIT_STATUS = 3

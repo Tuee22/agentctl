@@ -17,6 +17,7 @@ from tests.harness.nonce import fresh
 from tests.harness.tmux import PrivateMux, object_value, server_pid, validate_record
 
 STARTUP_SECONDS = 2
+TERMINAL_WAIT_SECONDS = 10
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,6 +51,16 @@ class NativePane:
         output = self.mux.raw("capture-pane", "-p", "-t", self.pane, "-S", "-100")
         assert output.code == 0, output.stderr
         return output.stdout
+
+
+def await_exit(pane: NativePane) -> None:
+    """Require a terminal driver to finish within the normal native-query deadline."""
+    deadline = time.monotonic() + TERMINAL_WAIT_SECONDS
+    dead = pane.dead()
+    while not dead and time.monotonic() < deadline:
+        time.sleep(0.01)
+        dead = pane.dead()
+    assert dead, "terminal driver did not finish: " + pane.capture()
 
 
 @dataclass(frozen=True, slots=True)

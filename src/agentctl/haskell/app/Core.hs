@@ -2,6 +2,7 @@
 module Main (main) where
 
 import qualified AgentCtl.Agent as Agent
+import AgentCtl.Bootstrap.Protocol (parseConsent)
 import qualified AgentCtl.Launch as Launch
 import qualified AgentCtl.Mux as Mux
 import qualified AgentCtl.Mux.Command as Command
@@ -17,6 +18,7 @@ import qualified AgentCtl.Supervisor.Watch as Watch
 import Data.Aeson (encode)
 import qualified Data.ByteString.Lazy.Char8 as Bytes
 import Data.List (isPrefixOf)
+import Data.Maybe (isNothing)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import qualified Options.Applicative as Options
@@ -30,6 +32,7 @@ data Operation = Session Sessions.Operation | Logs Text.Text | Supervise Supervi
 main :: IO ()
 main = do
   supplied <- lookupEnv "AGENTCTL_PROTOCOL_VERSION"
+  consent <- lookupEnv "AGENTCTL_ASSUME_YES"
   arguments <- getArgs
   case arguments of
     ["pane-exec", path] -> do
@@ -39,6 +42,9 @@ main = do
         Right 0 -> exitSuccess
         Right status -> exitWith (ExitFailure status)
     _ | not (validHandoff supplied) -> do
+      hPutStrLn stderr "Run agentctl to manage terminal agents."
+      exitFailure
+    _ | isNothing (parseConsent consent) -> do
       hPutStrLn stderr "Run agentctl to manage terminal agents."
       exitFailure
     ["--handshake"] -> Bytes.putStrLn (encode handshake)

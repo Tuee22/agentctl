@@ -1,0 +1,79 @@
+[[case]]
+id = "closure.citation.present"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "citation", present = true }
+expected = true
+
+[[case]]
+id = "closure.citation.missing"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "citation", present = false }
+expected = false
+
+[[case]]
+id = "closure.path.present"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "path", present = true }
+expected = true
+
+[[case]]
+id = "closure.path.missing"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "path", present = false }
+expected = false
+
+[[case]]
+id = "closure.digest.current"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "digest", current = true }
+expected = true
+
+[[case]]
+id = "closure.digest.stale"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "digest", current = false }
+expected = false
+
+[[case]]
+id = "closure.active.empty"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "target", status = "Active", present = false }
+expected = false
+
+[[case]]
+id = "closure.done.present"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "target", status = "Done", present = true }
+expected = true
+
+[[case]]
+id = "closure.done.empty"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "target", status = "Done", present = false }
+expected = false
+
+[[case]]
+id = "closure.planned.empty"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "target", status = "Planned", present = false }
+expected = true

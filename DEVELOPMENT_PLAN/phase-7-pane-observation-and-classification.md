@@ -20,7 +20,7 @@ This phase needs Linux only. The declared tests are executable contracts; an abs
 | Requirement | Oracle | Observer | Mutants | Tests |
 |---|---|---|---|---|
 | R18.1 — Coherent terminal observation and normalization | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | `M-capture-no-join`, `M-capture-locale-decoding`, `M-snapshot-mixed-content` | `tests/integration/test_capture_real.py::test_capture_roundtrip_on_private_server`, `tests/integration/test_snapshot_identity.py::test_same_cursor_content_change_is_detected` |
-| R18.1 — Per-agent classifiers and fingerprint laws | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | `M-classify-dialog-loses-precedence`, `M-fingerprint-surrounding-output` | `tests/unit/test_screen_classes.py::test_fixtures_classify_as_their_directory`, `tests/unit/test_screen_classes.py::test_precedence_pairs`, `haskell:agentctl-core-test/Fingerprint/stable-under-redraw` |
+| R18.1 — Per-agent classifiers and fingerprint laws | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | `M-classify-dialog-loses-precedence`, `M-fingerprint-surrounding-output`, `M-classify-status-other-agent` | `tests/unit/test_screen_classes.py::test_fixtures_classify_as_their_directory`, `tests/unit/test_screen_classes.py::test_precedence_pairs`, `tests/e2e/test_status_screen.py::test_screen_column_uses_the_agents_classifier`, `haskell:agentctl-core-test/Fingerprint/stable-under-redraw` |
 | R18.2 — Concrete guarded-submission capability | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | `M-submit-stale-revision`, `M-submit-active-pane-fallback`, `M-submit-split-literal-enter` | `tests/integration/test_guarded_submit.py::test_changed_input_or_output_refuses`, `tests/integration/test_guarded_submit.py::test_missing_target_never_falls_back`, `tests/integration/test_guarded_submit.py::test_literal_and_enter_are_one_submission` |
 
 ## Not Proven By This Gate
@@ -63,8 +63,8 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `src/agentctl/haskell/src/AgentCtl/Observe/Classify/`, `src/agentctl/haskell/src/AgentCtl/Observe/Fingerprint.hs`, `tests/fixtures/screens/`
-**Validation tests**: `tests/unit/test_screen_classes.py::test_fixtures_classify_as_their_directory`, `tests/unit/test_screen_classes.py::test_precedence_pairs`, `haskell:agentctl-core-test/Fingerprint/stable-under-redraw`
-**Mutants**: `M-classify-dialog-loses-precedence`, `M-fingerprint-surrounding-output`
+**Validation tests**: `tests/unit/test_screen_classes.py::test_fixtures_classify_as_their_directory`, `tests/unit/test_screen_classes.py::test_precedence_pairs`, `haskell:agentctl-core-test/Fingerprint/stable-under-redraw`, `tests/e2e/test_status_screen.py::test_screen_column_uses_the_agents_classifier`, `tests/governance/test_screen_fixtures.py::test_every_fixture_has_provenance`
+**Mutants**: `M-classify-dialog-loses-precedence`, `M-fingerprint-surrounding-output`, `M-classify-status-other-agent`
 **Closes**: R18.1
 **Docs to update**: `documents/architecture/supervisor_contract.md`, `documents/architecture/multiplexer_adapter.md`, `documents/engineering/testing.md`
 

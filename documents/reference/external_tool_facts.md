@@ -341,13 +341,14 @@ is a candidate; artifact/source/patch identities and actual behavioral receipts 
 
 ## WSL2 Validation and Resource Controls
 
-These are documented interfaces, not claims about this workstation's installed WSL version or effective
-resource limits. The runbook requires actual capability observations before using them.
+These are documented interfaces and explicitly identified local observations, not proof of a current
+workstation's effective resource limits. The runbook requires actual capability observations before using them.
 
 | Fact | Version | Verified | Source |
 |---|---|---|---|
 | `wsl.conf` controls a distribution's settings; `.wslconfig` controls the shared WSL2 VM, including global RAM/processor settings. A dedicated distro name alone does not establish independent VM resource limits. | WSL2 documented configuration interface | 2026-11-12 | `https://learn.microsoft.com/en-us/windows/wsl/wsl-config` |
 | WSL exposes distribution/version listing and import/version selection. The default install can select Ubuntu, so Debian and version 2 must be selected/observed explicitly. | WSL documented command interface | 2026-11-12 | `https://learn.microsoft.com/en-us/windows/wsl/basic-commands` |
+| `WSL_UTF8=1` requests UTF-8 output; on the Windows validation host the verbose listing then had no UTF-16 NUL padding. | WSL 3.0.5.0 | 2026-11-15 | `https://github.com/microsoft/WSL/blob/master/diagnostics/collect-wsl-logs.ps1` (`WSL_UTF8`); local `wsl.exe --list --verbose` with and without the variable |
 | Each WSL2 distribution has an ext4 VHD; its configured maximum, allocated host bytes and filesystem available space are different observations. | WSL2 documented VHD storage interface | 2026-11-12 | `https://learn.microsoft.com/en-us/windows/wsl/disk-space` |
 | Windows files can be accessed through mounted drive paths such as `/mnt/c`; cross-filesystem performance and case/permission behavior differ from a Linux-native filesystem. | WSL documented filesystem interface | 2026-11-12 | `https://learn.microsoft.com/en-us/windows/wsl/filesystems` |
 | `mount --bind olddir newdir` exposes an existing tree at another path; mount inspection and bidirectional source observations are needed to establish the intended checkout binding. | Linux mount interface, source documentation | 2026-11-12 | `https://man7.org/linux/man-pages/man8/mount.8.html` |

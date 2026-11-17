@@ -11,9 +11,14 @@ import pytest
 
 from agentctl.bootstrap import build
 from agentctl.result import Ok
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.launch import observe_mux, prepare
 from tests.harness.screens import normalized
 from tests.harness.tmux import PrivateMux, object_value
+from tests.harness.tmux_fixtures import mux_server as _mux_server_fixture
+
+haskell_build = _haskell_build_fixture
+mux_server = _mux_server_fixture
 
 REASON = "native capture differs from independently normalized fixture"
 WAIT_SECONDS = 10

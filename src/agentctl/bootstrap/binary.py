@@ -15,6 +15,8 @@ from agentctl.hostfacts import HostContext
 from agentctl.process import run
 from agentctl.result import Err, Ok, Result
 
+PROTOCOL_VERSION = 2
+
 
 @dataclass(frozen=True, slots=True)
 class Request:
@@ -73,15 +75,14 @@ def check_context(
 
 
 def handshake(value: object) -> bool:
-    """Accept only the current wire version and a nonempty, unique command list."""
+    """Accept only the current wire version and a unique command list."""
     if not isinstance(value, dict) or set(value) != {"protocol", "commands"}:
         return False
     protocol, commands = value["protocol"], value["commands"]
     return (
         type(protocol) is int
-        and protocol == 1
+        and protocol == PROTOCOL_VERSION
         and isinstance(commands, list)
-        and bool(commands)
         and all(isinstance(command, str) and bool(command) for command in commands)
         and len(set(commands)) == len(commands)
     )
@@ -94,7 +95,11 @@ def verify_handshake(
     result = run(
         [str(binary), "--handshake"],
         cwd=context.project,
-        env={**build.environment(context), "AGENTCTL_PROTOCOL_VERSION": "1"},
+        env={
+            **build.environment(context),
+            "AGENTCTL_PROTOCOL_VERSION": "2",
+            "AGENTCTL_ASSUME_YES": "false",
+        },
         timeout=10,
     )
     if isinstance(result, Err):
@@ -104,7 +109,7 @@ def verify_handshake(
     except json.JSONDecodeError as exc:
         return Err(build.BuildError(f"Invalid core handshake: {exc}"))
     if result.value.code or not handshake(answer):
-        return Err(build.BuildError("Core handshake does not match protocol 1"))
+        return Err(build.BuildError("Core handshake does not match protocol 2"))
     return Ok(None)
 
 

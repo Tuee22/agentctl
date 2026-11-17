@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from agentctl.result import Err, Ok, Result
+from agentctl.foundation import Err, Ok, Result
 
 type Lane = Literal[
     "any-host",
@@ -17,6 +17,7 @@ type Lane = Literal[
     "macos",
     "windows-psmux",
 ]
+type PhaseLane = Literal["linux", "linux-windows", "linux-macos", "linux-live-clean"]
 LANES: tuple[Lane, ...] = (
     "any-host",
     "mux-host",
@@ -107,11 +108,24 @@ def parse_host(value: object, nonce: str) -> Result[HostFacts, LaneError]:
     )
 
 
+def _unique_host_fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    """Reject duplicate fields at every level of a host observation."""
+    result = dict(pairs)
+    if len(result) != len(pairs):
+        message = "duplicate host observation field"
+        raise ValueError(message)
+    return result
+
+
 def read_host(path: Path, nonce: str) -> Result[HostFacts, LaneError]:
     """Read the harness observation without inferring unimplemented capabilities."""
     try:
-        value: object = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        if path.is_symlink():
+            return Err(LaneError("host observation is a symlink"))
+        value: object = json.loads(
+            path.read_text(encoding="utf-8"), object_pairs_hook=_unique_host_fields
+        )
+    except (OSError, UnicodeError, ValueError) as exc:
         return Err(LaneError(str(exc)))
     return parse_host(value, nonce)
 
@@ -129,6 +143,13 @@ def parse_lane(value: str) -> Result[Lane, LaneError]:
     }:
         return Ok(value)
     return Err(LaneError("unknown host lane: " + value))
+
+
+def parse_phase_lane(value: str) -> Result[PhaseLane, LaneError]:
+    """Parse the plan's closed cross-host receipt vocabulary."""
+    if value in {"linux", "linux-windows", "linux-macos", "linux-live-clean"}:
+        return Ok(value)
+    return Err(LaneError("unknown phase lane: " + value))
 
 
 def architecture(family: str, observed: str) -> str:

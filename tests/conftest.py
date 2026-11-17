@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-pytest_plugins = ("tests.harness.tmux", "tests.harness.host", "tests.harness.haskell")
+pytest_plugins = ("tests.harness.host", "tests.harness.workspace")
 
 
 @pytest.fixture(scope="session")

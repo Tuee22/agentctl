@@ -33,8 +33,8 @@ This phase needs Linux only. The declared tests are executable contracts; an abs
 ### Sprint 6.1: Managed session commands and durable identity [Planned]
 
 **Status**: Planned
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Sessions.hs`, `src/agentctl/haskell/src/AgentCtl/Session/Identity.hs`
-**Validation tests**: `tests/e2e/test_sessions.py::test_list_shows_only_managed`, `tests/e2e/test_sessions.py::test_stop_never_prefix_matches`, `tests/e2e/test_sessions.py::test_status_defaults_to_current_folder`
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Sessions.hs`, `src/agentctl/haskell/src/AgentCtl/Session/Identity.hs`, `tests/harness/sessions.py`, `tests/harness/screens.py`
+**Validation tests**: `tests/e2e/test_sessions.py::test_list_shows_only_managed`, `tests/e2e/test_sessions.py::test_stop_never_prefix_matches`, `tests/e2e/test_sessions.py::test_status_defaults_to_current_folder`, `tests/unit/test_sessions_values.py::test_list_rows_match_oracle`
 **Mutants**: `M-session-stale-instance-accepted`, `M-session-stop-prefix`
 **Closes**: R16
 **Docs to update**: `documents/architecture/sessions_and_ownership.md`, `documents/reference/files_and_state.md`, `documents/reference/cli_reference.md`
@@ -45,7 +45,7 @@ Managed session commands and durable identity supplies its complete owned contra
 
 #### Deliverables
 
-Implement list/status/attach/stop with exact targeting, immutable instance records and command-specific prerequisites. Discoverability includes the registry/namespace and server provenance, never only a numeric pane id. State files publish atomically while held lock files retain their inode.
+Implement list/status/attach/stop with exact targeting, immutable instance records and command-specific prerequisites. Separate session observation from later screen-classification helpers and prove it remains usable. Preserve the stale-capture mutant and its status observation while separating that test from the later classifier. Discoverability includes the registry/namespace and server provenance, never only a numeric pane id. State files publish atomically while held lock files retain their inode.
 
 #### Validation
 
@@ -61,7 +61,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `src/agentctl/haskell/src/AgentCtl/Adopt.hs`, `src/agentctl/haskell/src/AgentCtl/Paths.hs`
-**Validation tests**: `tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership`, `tests/e2e/test_adopt.py::test_stale_entry_after_server_restart`
+**Validation tests**: `tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership`, `tests/e2e/test_adopt.py::test_stale_entry_after_server_restart`, `tests/unit/test_adopt_values.py::test_adopt_rows_match_oracle`
 **Mutants**: `M-adopt-stop-kills-target`
 **Closes**: R17.1
 **Docs to update**: `documents/architecture/sessions_and_ownership.md`, `documents/reference/files_and_state.md`, `documents/reference/cli_reference.md`

@@ -19,12 +19,13 @@ pytestmark = pytest.mark.evidence("value")
 def _tree(directory: Path) -> cache.Source:
     """Create a tiny independent source tree with code and non-code inputs."""
     project = directory / "project"
-    for name in ("app", "src", "test"):
+    for name in ("app", "bootstrap-src", "src", "test"):
         (project / name).mkdir(parents=True)
     for name, body in {
         "agentctl-core.cabal": "name: independent\n",
         "cabal.project": "packages: .\n",
         "app/Core.hs": "main = pure ()\n",
+        "bootstrap-src/Protocol.hs": "protocol = 1\n",
         "src/Kernel.hs": "answer = 7\n",
         "test/Main.hs": "main = pure ()\n",
         "app/data.txt": "ordinary data\n",
@@ -43,7 +44,7 @@ def _expected(source: cache.Source) -> str:
         source.project / "agentctl-core.cabal",
         source.project / "cabal.project",
     ]
-    for name in ("app", "src", "test"):
+    for name in ("app", "bootstrap-src", "src", "test"):
         selected.extend(
             path for path in (source.project / name).rglob("*") if path.is_file()
         )
@@ -96,6 +97,27 @@ def test_oracle_rows(root: Path, tmp_path: Path) -> None:
     assert layout.value.binary.name == "agentctl-core.exe"
 
 
+def test_foundation_changes_binary_digest(tmp_path: Path) -> None:
+    """Changes in the independent protocol component invalidate cached binaries."""
+    foundation = _tree(tmp_path / "foundation")
+    before = cache.digest(foundation)
+    (foundation.project / "bootstrap-src/Protocol.hs").write_text(
+        "protocol = 2\n", encoding="utf-8"
+    )
+    after = cache.digest(foundation)
+    assert isinstance(before, Ok)
+    assert isinstance(after, Ok)
+    assert after != before, "bootstrap source change did not change binary digest"
+    assert after == Ok(_expected(foundation)), "binary digest differs from rule"
+
+
+def test_old_protocol_handshake_is_rejected() -> None:
+    """A pre-consent core cannot be published under the current handoff contract."""
+    assert not binary.handshake({"protocol": 1, "commands": ["claude"]}), (
+        "old protocol handshake was accepted"
+    )
+
+
 def test_inventory_and_protocol_boundaries(tmp_path: Path) -> None:
     """Incomplete sources, unmodelled kinds and malformed handshakes are refused."""
     source = _tree(tmp_path)
@@ -130,17 +152,19 @@ def test_inventory_and_protocol_boundaries(tmp_path: Path) -> None:
         assert cache.platform(pins(), family, machine) == Ok(expected)
     assert isinstance(cache.platform(pins(), "Other", "x86_64"), Err)
     assert isinstance(cache.platform(pins(), "Linux", "s390x"), Err)
-    assert binary.handshake({"protocol": 1, "commands": ["claude"]})
+    assert binary.handshake({"protocol": 2, "commands": ["claude"]})
+    assert binary.handshake({"protocol": 2, "commands": []}), (
+        "bootstrap handshake rejected an empty command list"
+    )
     for value in (
         None,
         {},
         {"protocol": True, "commands": ["claude"]},
-        {"protocol": 2, "commands": ["claude"]},
-        {"protocol": 1, "commands": []},
-        {"protocol": 1, "commands": ["claude", "claude"]},
-        {"protocol": 1, "commands": [1]},
-        {"protocol": 1, "commands": [{}]},
-        {"protocol": 1, "commands": [""]},
-        {"protocol": 1, "commands": "claude"},
+        {"protocol": 1, "commands": ["claude"]},
+        {"protocol": 2, "commands": ["claude", "claude"]},
+        {"protocol": 2, "commands": [1]},
+        {"protocol": 2, "commands": [{}]},
+        {"protocol": 2, "commands": [""]},
+        {"protocol": 2, "commands": "claude"},
     ):
         assert not binary.handshake(value)

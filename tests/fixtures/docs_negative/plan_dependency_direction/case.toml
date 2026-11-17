@@ -1,4 +1,4 @@
 rule = "plan.dependency_direction"
-path = "DEVELOPMENT_PLAN/phase-9-recovery-state-machine.md"
-search = "**Depends on**:"
-replace = "**Depends on**: [Phase 10 — Recovery supervisor](phase-10-supervisor.md)\n**Invalid**:"
+path = "DEVELOPMENT_PLAN/phase-9-windows-toolchain-and-psmux-build.md"
+search = "**Depends on**: [Phase 8 — Recovery and supervisor](phase-8-recovery-and-supervisor.md)"
+replace = "**Depends on**: [Phase 10 — Windows backend qualification](phase-10-windows-backend-qualification.md)"

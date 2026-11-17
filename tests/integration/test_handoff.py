@@ -15,10 +15,15 @@ from agentctl import process
 from agentctl.bootstrap import handoff
 from agentctl.cli import PassRequest, dispatch
 from agentctl.result import Err, Ok
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.launch import prepare
 from tests.harness.nonce import fresh
 from tests.harness.passthrough import warm
 from tests.harness.tmux import PrivateMux
+from tests.harness.tmux_fixtures import mux_server as _mux_server_fixture
+
+haskell_build = _haskell_build_fixture
+mux_server = _mux_server_fixture
 
 EXIT_STATUS = 3
 

@@ -11,6 +11,8 @@ installed. Focused tools assist diagnosis but establish no phase closure. This p
 contract; current command output must demonstrate its implementation before its new evidence can be used.
 The [plan standards](../../DEVELOPMENT_PLAN/development_plan_standards.md) own status and receipt grammar.
 
+Mutant row relocation uses `tests/mutant_relocations.toml` when needed. The ratchet compares every baseline and current corpus row, requires exact content hashes and documented decisions, and keeps amendments with their original records. A relocation does not establish execution or closure evidence.
+
 ## Check Steps
 
 The gate constructs one complete filesystem census of source, tests, support, stubs, oracles, mutants and
@@ -38,6 +40,18 @@ ownership, moved refs, changed source, stale receipts or uncontained children in
 verdict. An unrelated later product failure does not invalidate an earlier complete phase verdict.
 
 An independently attributable later module syntax/import/collection failure is reported against that owner while independent earlier modules still collect and execute. Its uncollected expected nodes remain unmet, never skipped or silently omitted. Required own-module collection and exact collected/executed equality remain mandatory for a closing scope. Shared or ambiguous collection failures invalidate every affected verdict; a collector must prove this isolation with executable negative controls.
+
+The current pytest leg continues after collection errors and records failed collector node IDs in its manifest. Until owner attribution is implemented, a recorded collection error invalidates the whole run; the continuation alone does not establish a phase verdict.
+
+The pytest leg attempts its coverage followups even when pytest fails, retaining the primary failure and reporting any failed followup. A followup whose own prerequisite fails is not run.
+
+The current toolchain and style readiness steps refuse missing prepared tools without installing them. Native gate builds require a previously prepared matching private index and use offline Cabal arguments. Those checks do not establish that all native dependencies or backends were prepared successfully.
+
+The current write guard snapshots the Git index path reported by Git and, when present, its bytes alongside refs and checkout files. A changed index fails the guard comparison; this observation does not itself establish a phase verdict.
+
+The constructed receipt-join controls require each declared native family, matching logical input and prerequisite identities, lane-specific native identities, and the required test, mutant and coverage sets. These pure controls do not authenticate observations or issue receipts; the gate must still connect them to current native evidence.
+
+Mutant source migrations retain each original record and append an amendment in the same corpus file. The loader binds both record versions by their canonical content hashes, checks a decision naming the mutant, and preserves its target, operator, killers and reason. The ratchet protects both original and amendment; the amended defect still requires its passing baseline and named kill.
 
 The overall exit code reports checkout health. Phase closure consumes the gate's complete passing verdict for
 that phase and its required lanes; it does not require an overall pass from unimplemented later phases.

@@ -12,7 +12,10 @@ from agentctl.check.lanes import HostFacts
 from agentctl.process import run
 from agentctl.result import Ok
 from tests.harness.agents import AuthProbe, isolated_environment, native_agent, probe
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.nonce import fresh
+
+haskell_build = _haskell_build_fixture
 
 pytestmark = pytest.mark.evidence("real")
 UNKNOWN_FLAG_EXIT = 2

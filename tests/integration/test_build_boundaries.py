@@ -10,6 +10,9 @@ from agentctl.bootstrap import build
 from agentctl.check import haskell
 from agentctl.result import Err, Ok
 from tests.harness.bootstrap import context, native_tools
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
+
+haskell_build = _haskell_build_fixture
 
 pytestmark = pytest.mark.evidence("real")
 

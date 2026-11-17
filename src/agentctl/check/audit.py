@@ -9,7 +9,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import ClassVar
 
-from agentctl.result import Err, Ok, Result
+from agentctl.foundation import Err, Ok, Result
+from agentctl.foundation_process_identity import process_birth
 
 EVENTS = frozenset(
     {"subprocess.Popen", "os.exec", "os.system", "os.posix_spawn", "os.spawn"}
@@ -159,9 +160,25 @@ def _register(path: Path, nonce: str, pid: int) -> None:
     """Register each actor pid once, including exec actors created by a fork."""
     registry = path.with_name(path.stem + f".{pid}.json")
     if not registry.exists():
+        match sys.platform:
+            case "win32":
+                identity = process_birth("Windows", pid)
+            case "linux":
+                identity = process_birth("Linux", pid)
+            case _:
+                identity = Ok(None)
+        if isinstance(identity, Err):
+            raise OSError(identity.error.message)
+        if sys.platform in {"win32", "linux"} and identity.value is None:
+            message = "observer process identity unavailable"
+            raise OSError(message)
         descriptor = os.open(registry, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
-            json.dump({"nonce": nonce, "pid": pid}, stream)
+            json.dump(
+                {"nonce": nonce, "pid": pid}
+                | ({"birth": identity.value} if identity.value is not None else {}),
+                stream,
+            )
 
 
 @dataclass(frozen=True, slots=True)

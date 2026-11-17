@@ -103,10 +103,10 @@ def test_failed_build_keeps_previous(root: Path, tmp_path: Path) -> None:
     assert isinstance(binary.ensure(value), Ok)
     before = _snapshot(value.data / "bin")
     entries = set((value.data / "bin").iterdir())
-    module = value.project / "src/AgentCtl/Protocol.hs"
+    module = value.project / "bootstrap-src/AgentCtl/Bootstrap/Protocol.hs"
     module.write_text(
         module.read_text(encoding="utf-8").replace(
-            "protocolVersion = 1", 'protocolVersion = "broken"'
+            "protocolVersion = 2", 'protocolVersion = "broken"'
         ),
         encoding="utf-8",
     )
@@ -137,7 +137,7 @@ def test_handshake_mismatch_rejected(root: Path, tmp_path: Path) -> None:
     module.write_text(
         module.read_text(encoding="utf-8").replace(
             "handshake = Handshake protocolVersion commandList",
-            "handshake = Handshake 2 commandList",
+            "handshake = Handshake 1 commandList",
         ),
         encoding="utf-8",
     )

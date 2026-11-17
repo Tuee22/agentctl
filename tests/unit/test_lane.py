@@ -16,12 +16,49 @@ from agentctl.check.lanes import (
     evidence_lines,
     parse_host,
     parse_lane,
+    parse_phase_lane,
     read_host,
     refusals,
 )
 from agentctl.result import Err, Ok
+from tests.harness.oracle import Object, Store, load_scoped
 
 pytestmark = pytest.mark.evidence("value")
+
+
+def test_lane_evidence_oracle(root: Path) -> None:
+    """Independent cases govern lane refusal and emission after failure."""
+    store = load_scoped(root / "tests/oracles/lane_evidence.toml", root)
+    assert isinstance(store, Store)
+    assert store.effective
+    base = HostFacts(family="Linux", architecture="x86_64", checkout=True, git=True)
+    for row in store.effective:
+        assert isinstance(row.inputs, Object)
+        values = dict(row.inputs.items)
+        assert isinstance(row.expected, bool)
+        if values["subject"] == "refusal":
+            status, mux = values["status"], values["mux"]
+            assert isinstance(status, str)
+            assert isinstance(mux, bool)
+            declaration = Declaration("mux", status, "self-verifying", "mux-host")
+            result = bool(refusals((declaration,), evaluate(replace(base, mux=mux))))
+        else:
+            assert values["subject"] == "evidence"
+            code = values["code"]
+            assert isinstance(code, int)
+            assert not isinstance(code, bool)
+            result = bool(
+                evidence_lines(code, evaluate(base), "2026-11-02", "a" * 64, "host")
+            )
+        assert result == row.expected
+
+
+def test_phase_lane_vocabulary() -> None:
+    """Plan lanes require Linux and cannot combine both foreign families."""
+    for name in ("linux", "linux-windows", "linux-macos", "linux-live-clean"):
+        assert parse_phase_lane(name) == Ok(name)
+    for name in ("any-host", "windows", "linux-windows-macos", "", "Linux"):
+        assert isinstance(parse_phase_lane(name), Err)
 
 
 def test_refusal_when_done_lane_unmet() -> None:
@@ -123,7 +160,9 @@ def test_lane_vocabulary_and_predicates() -> None:
         assert not any(state.met for state in evaluate(replace(facts, git=False)))
 
 
-def test_host_observation_schema(tmp_path: Path) -> None:
+def test_host_observation_schema(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Missing, mistyped or stale facts cannot qualify a lane."""
     facts = {
         "family": "Linux",
@@ -155,3 +194,23 @@ def test_host_observation_schema(tmp_path: Path) -> None:
     assert isinstance(read_host(path, "current"), Err)
     path.write_text(json.dumps(value), encoding="utf-8")
     assert read_host(path, "current") == Ok(expected)
+    path.write_text(
+        json.dumps(value).replace(
+            '"nonce": "current"', '"nonce": "old", "nonce": "current"'
+        ),
+        encoding="utf-8",
+    )
+    assert isinstance(read_host(path, "current"), Err), (
+        "duplicate host nonce was accepted"
+    )
+    path.write_text(
+        json.dumps(value).replace('"mux": false', '"mux": true, "mux": false'),
+        encoding="utf-8",
+    )
+    assert isinstance(read_host(path, "current"), Err), (
+        "duplicate host fact was accepted"
+    )
+    path.write_text(json.dumps(value), encoding="utf-8")
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "is_symlink", lambda subject: subject == path)
+        assert isinstance(read_host(path, "current"), Err), "host symlink was accepted"

@@ -71,15 +71,6 @@ killers = ["tests/e2e/test_launch.py::test_creates_named_session_with_flags_last
 reason = "launched argv differs from required argument assembly"
 
 [[mutant]]
-id = "M-launch-cwd-on-mux-line"
-operator = "replace-literal"
-target = "src/agentctl/haskell/src/AgentCtl/Process.hs"
-search = "(Command.arguments (renderCommand kind command))"
-replace = "(case command of Command.Create {} -> take 1 (Command.arguments (renderCommand kind command)) ++ [\"-c\", workingDirectory context] ++ drop 1 (Command.arguments (renderCommand kind command)); _ -> Command.arguments (renderCommand kind command))"
-killers = ["tests/unit/test_mux_values.py::test_invocation_cwd_stays_off_argv", "tests/e2e/test_launch.py::test_hostile_folder_name_runs_nothing"]
-reason = "native invocation moved caller data onto mux argv"
-
-[[mutant]]
 id = "M-launch-exit-zero-on-failure"
 operator = "replace-literal"
 target = "src/agentctl/haskell/src/AgentCtl/Launch.hs"

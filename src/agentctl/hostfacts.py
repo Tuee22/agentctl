@@ -2,19 +2,23 @@
 """Immutable host observations and environment-aware ghcup discovery."""
 
 import os
-import platform
 import shlex
-import sys
 import tomllib
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Literal, Protocol, runtime_checkable
+from typing import Literal
 
+from agentctl import foundation_host
 from agentctl.bootstrap.pins import Architecture, Pins, Version, asset_for, version
 from agentctl.paths import Family
 from agentctl.process import Output, SpawnError, run
 from agentctl.result import Err, Ok, Result
+
+HostContext = foundation_host.HostContext
+PosixIdentity = foundation_host.PosixIdentity
+current = foundation_host.current
+effective_root = foundation_host.effective_root
 
 MAX_RELEASE_DIGITS = 9
 
@@ -64,60 +68,10 @@ class Distribution:
 
 
 @dataclass(frozen=True, slots=True)
-class HostContext:
-    """Read-only system inputs captured once before bootstrap observation."""
-
-    family: str
-    machine: str
-    home: Path
-    cache: Path
-    cwd: Path
-    environment: tuple[tuple[str, str], ...]
-    is_root: bool
-    interactive: bool
-    assume_yes: bool
-    os_release: Path = Path("/etc/os-release")
-
-
-@dataclass(frozen=True, slots=True)
 class FactsError:
     """A malformed record or unsupported host with an actionable diagnosis."""
 
     message: str
-
-
-@runtime_checkable
-class PosixIdentity(Protocol):
-    """The optional standard-library effective-uid observation."""
-
-    def geteuid(self) -> int:
-        """Return the effective user id without invoking another process."""
-        ...
-
-
-def effective_root(family: str, identity: object) -> bool:
-    """Observe Unix privilege while treating Windows as having no sudo action."""
-    return (
-        family != "Windows"
-        and isinstance(identity, PosixIdentity)
-        and identity.geteuid() == 0
-    )
-
-
-def current(cache: Path, *, assume_yes: bool = False) -> HostContext:
-    """Capture native identity and terminal facts without spawning uname."""
-    family = platform.system()
-    return HostContext(
-        family,
-        platform.machine(),
-        Path.home(),
-        cache,
-        Path.cwd(),
-        tuple(os.environ.items()),
-        effective_root(family, os),
-        sys.stdin.isatty() and sys.stderr.isatty(),
-        assume_yes,
-    )
 
 
 @dataclass(frozen=True, slots=True)

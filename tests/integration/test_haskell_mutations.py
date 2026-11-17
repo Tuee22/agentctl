@@ -15,7 +15,10 @@ from agentctl.check.mutants import Mutant, Operator, exercise, scratch
 from agentctl.process import Output, run
 from agentctl.result import Err, Ok
 from tests.harness.bootstrap import context
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.nonce import fresh
+
+haskell_build = _haskell_build_fixture
 
 NODE = "haskell:agentctl-core-test/Handshake/protocol-fields"
 
@@ -82,13 +85,13 @@ def test_native_mutation_failures_never_count_as_kills(
     assert isinstance(
         haskell_mutants.selected_case(missing, NODE, tmp_path / "missing.xml"), Err
     )
-    target = tree / "src/agentctl/haskell/src/AgentCtl/Protocol.hs"
+    target = tree / "src/agentctl/haskell/bootstrap-src/AgentCtl/Bootstrap/Protocol.hs"
     original = target.read_bytes()
     record = Mutant(
         "M-build-compile-control",
         Operator.REPLACE_LITERAL,
-        "src/agentctl/haskell/src/AgentCtl/Protocol.hs",
-        "protocolVersion = 1",
+        "src/agentctl/haskell/bootstrap-src/AgentCtl/Bootstrap/Protocol.hs",
+        "protocolVersion = 2",
         "protocolVersion = invalid.syntax",
         (NODE,),
         "handshake command list differs",

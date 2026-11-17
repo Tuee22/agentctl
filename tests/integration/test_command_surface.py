@@ -12,6 +12,9 @@ import pytest
 from agentctl.bootstrap import build
 from agentctl.cli import cli
 from agentctl.result import Ok
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
+
+haskell_build = _haskell_build_fixture
 
 pytestmark = pytest.mark.evidence("real")
 CELL_COUNT = 4

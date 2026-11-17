@@ -9,7 +9,7 @@ import pytest
 
 from agentctl.bootstrap import build
 from agentctl.check import haskell
-from agentctl.check.evidence import RunEvidence
+from agentctl.check.evidence import Entry, RunEvidence
 from agentctl.result import Err, Ok
 from tests.harness.bootstrap import context
 
@@ -47,6 +47,48 @@ def test_closed_components_and_listings(root: Path, tmp_path: Path) -> None:
     assert isinstance(haskell.declared(tmp_path), Err)
     (tmp_path / "agentctl-core.cabal").write_bytes(b"\xff")
     assert isinstance(haskell.declared(tmp_path), Err)
+
+
+def test_native_source_listing_requires_exact_cases() -> None:
+    """Missing, duplicate and escaping source identities cannot be joined."""
+    listing = "agentctl-core-test.Handshake.protocol-fields\ttest/Main.hs\n"
+    expected = frozenset({NODE})
+    assert haskell.source_listing(listing, expected) == Ok(
+        ((NODE, "src/agentctl/haskell/test/Main.hs"),)
+    )
+    for invalid in (
+        "",
+        listing + listing,
+        listing.replace("test/Main.hs", "../Main.hs"),
+        listing.replace("test/Main.hs", "/test/Main.hs"),
+        listing.replace("test/Main.hs", "test/Other.txt"),
+        listing.replace("protocol-fields", "other"),
+    ):
+        assert isinstance(haskell.source_listing(invalid, expected), Err), (
+            "invalid native case source was accepted"
+        )
+
+
+def test_native_source_record_joins_guarded_files(tmp_path: Path) -> None:
+    """Stale, duplicated or uncensused native source claims cannot be joined."""
+    source = "src/agentctl/haskell/test/Main.hs"
+    entries = (Entry(source, "file", (b"source",)),)
+    path = tmp_path / "haskell-sources.json"
+    record = {"nonce": "fresh", "sources": [[NODE, source]]}
+    path.write_text(json.dumps(record), encoding="utf-8")
+    assert haskell.read_sources(tmp_path, "fresh", frozenset({NODE}), entries) == Ok(
+        ((NODE, source),)
+    )
+    assert isinstance(
+        haskell.read_sources(tmp_path, "stale", frozenset({NODE}), entries), Err
+    )
+    assert isinstance(
+        haskell.read_sources(tmp_path, "fresh", frozenset({NODE}), ()), Err
+    ), "uncensused native case source was accepted"
+    path.write_text('{"nonce":"fresh","nonce":"fresh","sources":[]}', encoding="utf-8")
+    assert isinstance(
+        haskell.read_sources(tmp_path, "fresh", frozenset({NODE}), entries), Err
+    )
 
 
 def test_xml_requires_actual_nonempty_cases() -> None:
@@ -117,6 +159,8 @@ def test_native_evidence_must_be_fresh_and_complete(tmp_path: Path) -> None:
         "classes": {NODE: "value"},
     }
     path = tmp_path / "haskell-manifest.json"
+    report = tmp_path / "tasty.xml"
+    report.write_text(XML, encoding="utf-8")
     path.write_text(json.dumps(record), encoding="utf-8")
     combined = haskell.combined(tmp_path, python, "fresh")
     assert isinstance(combined, Ok)
@@ -144,7 +188,50 @@ def test_native_evidence_must_be_fresh_and_complete(tmp_path: Path) -> None:
             "classes": {real_node: evidence_class},
         }
         path.write_text(json.dumps(real_record), encoding="utf-8")
+        report.write_text(XML.replace("Handshake", "MuxReal"), encoding="utf-8")
         assert isinstance(haskell.combined(tmp_path, python, "fresh"), Ok) is accepted
+
+
+def test_failed_native_cases_are_retained_without_passing(tmp_path: Path) -> None:
+    """A later case failure stays observable but cannot become passing evidence."""
+    other = "haskell:agentctl-core-test/Other/later"
+    xml = (
+        '<testsuites tests="2"><testsuite>'
+        '<testcase classname="agentctl-core-test.Handshake" name="protocol-fields"/>'
+        '<testcase classname="agentctl-core-test.Other" name="later">'
+        "<failure>named defect</failure></testcase></testsuite></testsuites>"
+    )
+    expected = frozenset({NODE, other})
+    report = tmp_path / "tasty.xml"
+    report.write_text(xml, encoding="utf-8")
+    assert isinstance(haskell.record_report(report, expected, "fresh"), Err)
+    observed = haskell.native_observation(tmp_path, "fresh")
+    assert isinstance(observed, Ok), "native failure observations were discarded"
+    assert observed.value.collected == expected
+    assert observed.value.executed == expected
+    assert observed.value.passed == frozenset({NODE})
+    assert observed.value.forbidden == ("failed: " + other,)
+    report.write_text(
+        xml.replace("<failure>named defect</failure>", ""), encoding="utf-8"
+    )
+    assert isinstance(haskell.native_observation(tmp_path, "fresh"), Err), (
+        "native report mismatch was accepted"
+    )
+    report.write_text(xml, encoding="utf-8")
+    assert isinstance(haskell.native_evidence(tmp_path, "fresh"), Err)
+    assert isinstance(haskell.native_observation(tmp_path, "stale"), Err)
+    assert isinstance(haskell.observe_report(xml, frozenset({NODE}), "fresh"), Err)
+    report.write_text(XML, encoding="utf-8")
+    assert isinstance(
+        haskell.record_report(
+            report, frozenset({NODE}), "fresh", command_succeeded=False
+        ),
+        Err,
+    ), "failed native command was accepted"
+    command_failure = haskell.native_observation(tmp_path, "fresh")
+    assert isinstance(command_failure, Ok)
+    assert command_failure.value.forbidden == ("native-command-failed",)
+    assert isinstance(haskell.native_evidence(tmp_path, "fresh"), Err)
 
 
 def test_index_pin_and_owned_environment(tmp_path: Path) -> None:

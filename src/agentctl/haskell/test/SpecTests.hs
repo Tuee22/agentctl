@@ -19,7 +19,8 @@ import System.FilePath ((</>))
 import System.IO (hClose, hSetFileSize, openBinaryTempFile)
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
+import Test.Tasty.HUnit (assertBool, assertFailure, (@?=))
+import TestSource (testCase)
 
 tests :: [TestTree]
 tests =

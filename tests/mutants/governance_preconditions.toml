@@ -1,0 +1,19 @@
+[[mutant]]
+id = "M-boot-windows-arm64-allowed"
+operator = "short-circuit"
+target = "src/agentctl/check/preconditions.py"
+search = "if asset_for(pins, facts.family, facts.architecture) is None:"
+replace = "if False:"
+killers = ["tests/unit/test_preconditions.py::test_toolchain_preconditions"]
+reason = "toolchain preconditions differ"
+
+
+[[mutant]]
+id = "M-mux-socket-length-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/preconditions.py"
+search = "if len(str(path).encode(\"utf-8\")) <= SOCKET_PATH_LIMIT"
+replace = "if True"
+killers = ["tests/unit/test_preconditions.py::test_socket_path_length"]
+reason = "socket length was not checked"
+

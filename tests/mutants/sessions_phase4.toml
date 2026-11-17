@@ -1,0 +1,18 @@
+[[mutant]]
+id = "M-sessions-stop-prefix-target"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Mux/Tmux.hs"
+search = 'Kill name -> ["kill-session", "-t", exact (sessionNameText name)]'
+replace = 'Kill name -> ["kill-session", "-t", text (sessionNameText name)]'
+killers = ["tests/unit/test_sessions_values.py::test_stop_plan_matches_oracle", "tests/e2e/test_sessions.py::test_stop_never_prefix_matches"]
+reason = "session stop plan differs from ownership oracle"
+
+[[mutant]]
+id = "M-sessions-stop-kill-server"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Mux/Tmux.hs"
+search = 'Kill name -> ["kill-session", "-t", exact (sessionNameText name)]'
+replace = 'Kill _ -> ["kill-server"]'
+killers = ["tests/unit/test_sessions_values.py::test_stop_plan_matches_oracle", "tests/e2e/test_sessions.py::test_stop_kills_only_the_named_managed_session"]
+reason = "session stop plan differs from ownership oracle"
+

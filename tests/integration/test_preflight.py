@@ -11,9 +11,12 @@ import pytest
 from agentctl.bootstrap import build
 from agentctl.check.lanes import HostFacts
 from tests.harness.agents import preflight, preflight_scope
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.host import observe_agents
 from tests.harness.nonce import fresh
 from tests.harness.tmux import object_value
+
+haskell_build = _haskell_build_fixture
 
 
 @pytest.mark.evidence("observer")

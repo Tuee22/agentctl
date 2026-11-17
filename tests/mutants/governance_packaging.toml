@@ -1,0 +1,8 @@
+[[mutant]]
+id = "M-build-wheel-excludes-haskell"
+operator = "delete"
+target = "pyproject.toml"
+search = "[tool.hatch.build.targets.wheel.force-include]"
+replace = "[tool.hatch.build.targets.wheel]\nexclude = [\"src/agentctl/haskell\"]\n\n[tool.hatch.build.targets.wheel.force-include]"
+killers = ["tests/integration/test_haskell_legs.py::test_wheel_ships_haskell_sources"]
+reason = "wheel excludes Haskell checkout sources"

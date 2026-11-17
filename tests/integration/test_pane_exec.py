@@ -13,9 +13,13 @@ from agentctl.bootstrap import build
 from agentctl.check.lanes import HostFacts
 from agentctl.process import finish, run, stop
 from agentctl.result import Err, Ok
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
+
+haskell_build = _haskell_build_fixture
 
 pytestmark = pytest.mark.evidence("real")
 EXIT_STATUS = 3
+PROTOCOL_VERSION = 2
 SPEC_WAIT_SECONDS = 30
 SPEC_WAIT_TOLERANCE = 1
 SPEC_WAIT_TIMEOUT = 45
@@ -198,7 +202,7 @@ def test_background_binary_errors(
         assert isinstance(completed, Ok), completed
         stdout, stderr = completed.value.stdout, completed.value.stderr
         assert child.value.handle.returncode == 0, stderr
-        assert json.loads(stdout)["protocol"] == 1
+        assert json.loads(stdout)["protocol"] == PROTOCOL_VERSION
         assert not stderr
     finally:
         assert isinstance(stop(child.value), Ok)

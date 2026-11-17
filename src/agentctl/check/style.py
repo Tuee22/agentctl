@@ -12,9 +12,9 @@ from agentctl.bootstrap import build
 from agentctl.bootstrap import style as cache
 from agentctl.bootstrap.pins import PinError, Pins
 from agentctl.check.legs import style_legs
-from agentctl.hostfacts import HostContext
-from agentctl.process import run
-from agentctl.result import Err, Ok, Result
+from agentctl.foundation import Err, Ok, Result
+from agentctl.foundation_host import HostContext
+from agentctl.foundation_process import run
 
 FOURMOLU_KEYS = frozenset(
     {
@@ -98,10 +98,10 @@ def configuration(project: Path) -> Result[None, build.BuildError]:
 
 
 def targets(project: Path) -> Result[tuple[str, ...], build.BuildError]:
-    """Walk all three Haskell source directories, including ignored source files."""
+    """Walk all Haskell source directories, including ignored source files."""
     files = tuple(
         str(path)
-        for directory in ("app", "src", "test")
+        for directory in ("app", "bootstrap-src", "src", "test")
         for path in sorted((project / directory).rglob("*.hs"))
     )
     return (
@@ -120,7 +120,7 @@ class StyleStep:
 
 
 def run_step(step: StyleStep) -> int:
-    """Validate owned inputs, prepare the pins and propagate the actual tool status."""
+    """Validate prepared pinned tools and propagate the actual tool status."""
     ready = preparation(step)
     if isinstance(ready, Err):
         click.echo(ready.error.message, err=True)
@@ -157,12 +157,8 @@ def preparation(
     context = build.BuildContext(
         step.project, step.host.cache / "build/check", step.host, tools.value
     )
-    native = (
-        build.ensure_style_tools(context, pins.value)
-        if step.name == "fourmolu"
-        else build.verify_style_tools(
-            context, pins.value, cache.directory(step.host.cache, pins.value)
-        )
+    native = build.verify_style_tools(
+        context, pins.value, cache.directory(step.host.cache, pins.value)
     )
     return (
         native if isinstance(native, Err) else Ok((context, native.value, files.value))

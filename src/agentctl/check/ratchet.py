@@ -1,17 +1,19 @@
 # Copyright (c) 2026 agentctl contributors.
 """Append-only governance data compared with the user's read-only HEAD."""
 
+import hashlib
 import json
 import os
 import re
 import shutil
+import stat
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from agentctl.process import Output, run
-from agentctl.result import Err, Ok, Result
+from agentctl.foundation import Err, Ok, Result
+from agentctl.foundation_process import Output, run
 
 type ConfigValue = str | bool | int | float | tuple[str, ...]
 
@@ -29,6 +31,180 @@ class RowFact:
 
     identifier: str
     contents: str
+
+
+@dataclass(frozen=True, slots=True)
+class RowRelocation:
+    """A content-bound proposal to move one protected mutant row."""
+
+    identifier: str
+    source: str
+    destination: str
+    sha256: str
+    provenance: str
+
+
+def relocation_problems(
+    before: tuple[tuple[str, RowFact], ...],
+    after: tuple[tuple[str, RowFact], ...],
+    moves: tuple[RowRelocation, ...],
+    rationale: str,
+) -> tuple[str, ...]:
+    """Check exact cross-file retention; this alone does not change the ratchet.
+
+    The caller must independently establish the complete baseline and current
+    file censuses and apply this alongside all other protected-data checks.
+    """
+    before_ids = tuple(row.identifier for _path, row in before)
+    after_ids = tuple(row.identifier for _path, row in after)
+    move_ids = tuple(move.identifier for move in moves)
+    if (
+        len(before_ids) != len(set(before_ids))
+        or len(after_ids) != len(set(after_ids))
+        or len(move_ids) != len(set(move_ids))
+    ):
+        return ("ambiguous protected mutant rows or relocations",)
+    prior = {row.identifier: (path, row) for path, row in before}
+    current = {row.identifier: (path, row) for path, row in after}
+    proposed = {move.identifier: move for move in moves}
+    problems: tuple[str, ...] = ()
+    for identifier, (source, row) in prior.items():
+        found = current.get(identifier)
+        move = proposed.get(identifier)
+        if found == (source, row) and move is None:
+            continue
+        if move is None or found is None:
+            problems += ("missing or unapproved relocation: " + identifier,)
+            continue
+        destination, observed = found
+        valid_paths = all(
+            re.fullmatch(r"tests/mutants/[a-z0-9_-]+\.toml", path) is not None
+            for path in (source, destination)
+        )
+        decision = re.fullmatch(r"decision:(D-\d+)", move.provenance)
+        anchored = (
+            decision is not None
+            and re.search(
+                r"^\| "
+                + re.escape(decision[1])
+                + r" \|[^\n]*`"
+                + re.escape(identifier.removeprefix("amendment:"))
+                + r"`",
+                rationale,
+                re.MULTILINE,
+            )
+            is not None
+        )
+        if (
+            not valid_paths
+            or source == destination
+            or (move.source, move.destination) != (source, destination)
+            or observed != row
+            or hashlib.sha256(row.contents.encode("utf-8")).hexdigest() != move.sha256
+            or not anchored
+        ):
+            problems += ("invalid relocation: " + identifier,)
+    problems += tuple(
+        "unknown relocation: " + identifier
+        for identifier in move_ids
+        if identifier not in prior
+    )
+    return problems + _amendment_locations(prior, current)
+
+
+def _amendment_locations(
+    prior: dict[str, tuple[str, RowFact]], current: dict[str, tuple[str, RowFact]]
+) -> tuple[str, ...]:
+    """Keep every old and newly added amendment beside its record."""
+    problems: tuple[str, ...] = ()
+    for identifier in prior:
+        if identifier.startswith("amendment:"):
+            original = identifier.removeprefix("amendment:")
+            if (
+                original not in prior
+                or original not in current
+                or identifier not in current
+            ):
+                problems += ("orphan amendment: " + identifier,)
+            elif (
+                prior[identifier][0] != prior[original][0]
+                or current[identifier][0] != current[original][0]
+            ):
+                problems += ("separated amendment: " + identifier,)
+    for identifier in current:
+        if identifier.startswith("amendment:") and identifier not in prior:
+            original = identifier.removeprefix("amendment:")
+            if original not in current:
+                problems += ("orphan amendment: " + identifier,)
+            elif current[identifier][0] != current[original][0]:
+                problems += ("separated amendment: " + identifier,)
+    return problems
+
+
+@dataclass(frozen=True, slots=True)
+class MutantAmendment:
+    """An explicit binding between two protected mutant record versions."""
+
+    identifier: str
+    before_sha256: str
+    after_sha256: str
+
+
+def mutant_amendment_matches(
+    before: RowFact, after: RowFact, amendment: MutantAmendment
+) -> bool:
+    """Check exact record hashes and preserve the defect's protected identity.
+
+    A matching amendment is not a mutation kill or authority to bypass the
+    append-only ratchet. The caller must separately validate its provenance and
+    execute the named baseline and mutant controls.
+    """
+    if (
+        before.identifier != after.identifier
+        or before.identifier != amendment.identifier
+        or hashlib.sha256(before.contents.encode("utf-8")).hexdigest()
+        != amendment.before_sha256
+        or hashlib.sha256(after.contents.encode("utf-8")).hexdigest()
+        != amendment.after_sha256
+    ):
+        return False
+    try:
+        previous = json.loads(before.contents)
+        current = json.loads(after.contents)
+    except json.JSONDecodeError:
+        return False
+    if not isinstance(previous, dict) or not isinstance(current, dict):
+        return False
+    fields = {"id", "operator", "target", "search", "replace", "killers", "reason"}
+    search, replacement = current.get("search"), current.get("replace")
+    if (
+        not isinstance(search, str)
+        or not search
+        or not isinstance(replacement, str)
+        or not isinstance(previous.get("search"), str)
+        or not previous["search"]
+        or not isinstance(previous.get("replace"), str)
+        or previous["search"] == previous["replace"]
+        or not all(
+            isinstance(current.get(name), str) and bool(current[name])
+            for name in ("id", "operator", "target", "reason")
+        )
+        or not isinstance(current.get("killers"), list)
+        or not current["killers"]
+        or not all(isinstance(item, str) and item for item in current["killers"])
+    ):
+        return False
+    return bool(
+        set(previous) == fields
+        and set(current) == fields
+        and previous.get("id") == before.identifier
+        and current.get("id") == after.identifier
+        and all(
+            previous[name] == current[name]
+            for name in ("id", "operator", "target", "killers", "reason")
+        )
+        and search != replacement
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,7 +248,12 @@ def rows(
         return Err(RatchetError(str(exc)))
     key = "case" if kind == "oracle" else "mutant"
     values = document.get(key)
-    if set(document) != {key} or not isinstance(values, list) or not values:
+    allowed = {key, "amendment"} if kind == "mutant" else {key}
+    if (
+        not {key} <= set(document) <= allowed
+        or not isinstance(values, list)
+        or not values
+    ):
         return Err(RatchetError("malformed protected row document"))
     parsed: tuple[RowFact, ...] = ()
     for value in values:
@@ -80,6 +261,26 @@ def rows(
         if isinstance(row, Err):
             return row
         parsed += (row.value,)
+    return _amendment_rows(parsed, document.get("amendment"))
+
+
+def _amendment_rows(
+    parsed: tuple[RowFact, ...], amendments: object
+) -> Result[tuple[RowFact, ...], RatchetError]:
+    """Include appended amendments in the protected record census."""
+    if amendments is None:
+        return _unique(parsed)
+    if not isinstance(amendments, list) or not amendments:
+        return Err(RatchetError("malformed protected amendments"))
+    for value in amendments:
+        amendment = _row(value)
+        if isinstance(amendment, Err):
+            return amendment
+        parsed += (
+            RowFact(
+                "amendment:" + amendment.value.identifier, amendment.value.contents
+            ),
+        )
     return _unique(parsed)
 
 
@@ -303,6 +504,135 @@ def _compare_rows(
     )
 
 
+def _relocations(root: Path) -> Result[tuple[RowRelocation, ...] | None, RatchetError]:
+    """Read explicit relocation proposals without following a symlink."""
+    path = root / "tests/mutant_relocations.toml"
+    try:
+        mode = path.lstat().st_mode
+        if not stat.S_ISREG(mode):
+            return Err(RatchetError("relocation manifest is not a regular file"))
+        document = tomllib.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return Ok(None)
+    except (OSError, UnicodeError, tomllib.TOMLDecodeError) as exc:
+        return Err(RatchetError(str(exc)))
+    values = document.get("relocation")
+    if set(document) != {"relocation"} or not isinstance(values, list) or not values:
+        return Err(RatchetError("invalid relocation manifest"))
+    records: tuple[RowRelocation, ...] = ()
+    for value in values:
+        match value:
+            case {
+                "id": str() as identifier,
+                "source": str() as source,
+                "destination": str() as destination,
+                "sha256": str() as digest,
+                "provenance": str() as provenance,
+                **extra,
+            } if not extra:
+                records += (
+                    RowRelocation(identifier, source, destination, digest, provenance),
+                )
+            case _:
+                return Err(RatchetError("invalid relocation record"))
+    return Ok(records)
+
+
+def _mutant_rows(
+    root: Path, revision: str, filenames: tuple[str, ...]
+) -> Result[tuple[tuple[str, RowFact], ...], RatchetError]:
+    """Read all protected mutant rows from the selected read-only baseline."""
+    result: tuple[tuple[str, RowFact], ...] = ()
+    for filename in filenames:
+        content = _git(root, ("show", f"{revision}:{filename}"))
+        if isinstance(content, Err):
+            return content
+        if content.value.code:
+            return Err(RatchetError("cannot read baseline " + filename))
+        parsed = rows(content.value.stdout, "mutant")
+        if isinstance(parsed, Err):
+            return parsed
+        result += tuple((filename, row) for row in parsed.value)
+    return Ok(result)
+
+
+def _current_mutant_rows(
+    root: Path,
+) -> Result[tuple[tuple[str, RowFact], ...], RatchetError]:
+    """Read every live corpus TOML entry without following symlinks."""
+    try:
+        with os.scandir(root / "tests/mutants") as directory:
+            paths = tuple(
+                sorted(
+                    Path(entry.path)
+                    for entry in directory
+                    if entry.name.endswith(".toml")
+                )
+            )
+        result: tuple[tuple[str, RowFact], ...] = ()
+        for path in paths:
+            if not stat.S_ISREG(path.lstat().st_mode):
+                return Err(RatchetError("mutant corpus entry is not a regular file"))
+            parsed = rows(path.read_text(encoding="utf-8"), "mutant")
+            if isinstance(parsed, Err):
+                return parsed
+            result += tuple(
+                (path.relative_to(root).as_posix(), row) for row in parsed.value
+            )
+        return Ok(result)
+    except (OSError, UnicodeError) as exc:
+        return Err(RatchetError(str(exc)))
+
+
+def _compare_relocations(
+    root: Path,
+    revision: str,
+    filenames: tuple[str, ...],
+    moves: tuple[RowRelocation, ...],
+) -> Result[None, RatchetError]:
+    """Compare complete baseline and live corpora with documented exact moves."""
+    baseline = _mutant_rows(root, revision, filenames)
+    current = _current_mutant_rows(root)
+    if isinstance(baseline, Err):
+        return baseline
+    if isinstance(current, Err):
+        return current
+    path = root / "DEVELOPMENT_PLAN/rationale.md"
+    try:
+        if not stat.S_ISREG(path.lstat().st_mode):
+            return Err(RatchetError("relocation rationale is not a regular file"))
+        rationale = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        return Err(RatchetError(str(exc)))
+    problems = relocation_problems(baseline.value, current.value, moves, rationale)
+    return Err(RatchetError("; ".join(problems))) if problems else Ok(None)
+
+
+def _compare_files(
+    root: Path, revision: str, names: tuple[str, ...]
+) -> Result[None, RatchetError]:
+    """Apply relocations and retain all other protected-file comparisons."""
+    relocations = _relocations(root)
+    if isinstance(relocations, Err):
+        return relocations
+    mutant_files = tuple(
+        filename
+        for filename in names
+        if filename.startswith("tests/mutants/") and filename.endswith(".toml")
+    )
+    if relocations.value is not None:
+        moved = _compare_relocations(root, revision, mutant_files, relocations.value)
+        if isinstance(moved, Err):
+            return moved
+    for filename in names:
+        if relocations.value is not None and filename in mutant_files:
+            continue
+        compared = _compare_file(root, revision, filename)
+        if isinstance(compared, Err):
+            return compared
+    return Ok(None)
+
+
 def check(root: Path) -> Result[str, RatchetError]:
     """Ratchet existing governance data against HEAD, reporting its baseline."""
     revision = head(root)
@@ -329,9 +659,6 @@ def check(root: Path) -> Result[str, RatchetError]:
         return files
     if files.value.code:
         return Err(RatchetError("cannot list baseline files"))
-    for filename in files.value.stdout.split("\0"):
-        if filename:
-            compared = _compare_file(root, revision.value, filename)
-            if isinstance(compared, Err):
-                return compared
-    return Ok(revision.value)
+    names = tuple(filename for filename in files.value.stdout.split("\0") if filename)
+    compared = _compare_files(root, revision.value, names)
+    return compared if isinstance(compared, Err) else Ok(revision.value)

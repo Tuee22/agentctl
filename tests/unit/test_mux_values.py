@@ -9,8 +9,11 @@ import pytest
 
 from agentctl.bootstrap import build
 from agentctl.result import Ok
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.oracle import Store, assert_oracle, read_homes
 from tests.harness.oracle import load as oracle_load
+
+haskell_build = _haskell_build_fixture
 
 pytestmark = pytest.mark.evidence("value")
 

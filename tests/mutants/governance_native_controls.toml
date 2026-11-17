@@ -1,0 +1,36 @@
+[[mutant]]
+id = "M-mux-native-exec-scope-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/validator/source.py"
+search = "or relative != NATIVE_PROCESS"
+replace = "or False"
+killers = ["tests/governance/test_source_guards.py::test_native_process_boundary"]
+reason = "native exec scope was bypassed"
+
+[[mutant]]
+id = "M-mux-native-suppressions-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/validator/source.py"
+search = "(\"src.suppression-ban\", suppression),"
+replace = "(\"src.suppression-ban\", False),"
+killers = ["tests/governance/test_source_guards.py::test_native_controls_and_walk"]
+reason = "native warning suppression was admitted"
+
+[[mutant]]
+id = "M-mux-native-test-branches-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/validator/source.py"
+search = "(\"src.no-test-branches\", test_branch),"
+replace = "(\"src.no-test-branches\", False),"
+killers = ["tests/governance/test_source_guards.py::test_native_controls_and_walk"]
+reason = "native test branch was admitted"
+
+[[mutant]]
+id = "M-mux-foreign-exec-owner-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/validator/source.py"
+search = "if foreign_exec and not relative.endswith(\"/AgentCtl/Process.hs\"):"
+replace = "if False:"
+killers = ["tests/governance/test_source_guards.py::test_native_process_boundary"]
+reason = "foreign exec binding escaped its owner"
+

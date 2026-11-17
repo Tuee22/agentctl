@@ -19,7 +19,8 @@ import System.IO (hClose, hSetBinaryMode, hSetEncoding, hSetNewlineMode, noNewli
 import System.IO.Temp (withSystemTempDirectory)
 import System.Timeout (timeout)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
+import Test.Tasty.HUnit (assertBool, assertFailure, (@?=))
+import TestSource (testCase)
 
 tests :: [TestTree]
 tests =

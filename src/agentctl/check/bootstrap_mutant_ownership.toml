@@ -1,0 +1,257 @@
+# Partial explicit claims; other corpus records remain unresolved.
+version = 1
+
+[[claims]]
+identifier = "M-boot-transport-fixture-imports-later-mux"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_bootstrap_caller.py::test_early_transport_does_not_import_later_helpers", path = "tests/integration/test_bootstrap_caller.py" }]
+
+[[claims]]
+identifier = "M-boot-caller-imports-later-launch"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_bootstrap_caller.py::test_early_transport_does_not_import_later_helpers", path = "tests/integration/test_bootstrap_caller.py" }]
+
+[[claims]]
+identifier = "M-build-native-source-census-omitted"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_haskell_gate.py::test_native_source_record_joins_guarded_files", path = "tests/unit/test_haskell_gate.py" }]
+
+[[claims]]
+identifier = "M-build-native-report-comparison-omitted"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_haskell_gate.py::test_failed_native_cases_are_retained_without_passing", path = "tests/unit/test_haskell_gate.py" }]
+
+[[claims]]
+identifier = "M-evidence-startup-bytecode"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_python_startup.py::test_startup_precedes_editable_imports", path = "tests/integration/test_python_startup.py" }]
+
+[[claims]]
+identifier = "M-ghcup-overwrite-existing"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_ghcup.py::test_present_ghcup_untouched", path = "tests/integration/test_ghcup.py" }]
+
+[[claims]]
+identifier = "M-ghcup-skip-verify"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_ghcup.py::test_sha_mismatch_refused_no_file", path = "tests/integration/test_ghcup.py" }]
+
+[[claims]]
+identifier = "M-ghcup-nonatomic-write"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_ghcup.py::test_truncated_download_leaves_nothing", path = "tests/integration/test_ghcup.py" }]
+
+[[claims]]
+identifier = "M-ghcup-edits-rc"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_ghcup.py::test_no_rc_file_written", path = "tests/integration/test_ghcup.py" }]
+
+[[claims]]
+identifier = "M-prereq-skip-consent"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_prereqs_consent.py::test_declined_spawns_nothing", path = "tests/integration/test_prereqs_consent.py" }, { node = "tests/unit/test_preconditions.py::test_prerequisite_precondition", path = "tests/unit/test_preconditions.py" }]
+
+[[claims]]
+identifier = "M-prereq-sudo-may-prompt"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_prereqs_consent.py::test_non_tty_refuses_without_assume_yes", path = "tests/integration/test_prereqs_consent.py" }]
+
+[[claims]]
+identifier = "M-prereq-prompt-without-tty"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_prereqs_consent.py::test_non_tty_refuses_without_assume_yes", path = "tests/integration/test_prereqs_consent.py" }]
+
+[[claims]]
+identifier = "M-prereq-gmp-dropped"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_prereqs.py::test_package_sets_match_oracle", path = "tests/unit/test_prereqs.py" }, { node = "tests/integration/test_prereqs_consent.py::test_accepted_runs_exact_argv", path = "tests/integration/test_prereqs_consent.py" }]
+
+[[claims]]
+identifier = "M-prereq-probe-ignores-link"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_prereqs_real.py::test_probe_matches_independent_observer", path = "tests/integration/test_prereqs_real.py" }]
+
+[[claims]]
+identifier = "M-prereq-flag-dropped"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_prereqs_consent.py::test_global_assume_yes_reaches_check", path = "tests/integration/test_prereqs_consent.py" }]
+
+[[claims]]
+identifier = "M-boot-reinstall-present"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_plan.py::test_plan_oracle", path = "tests/unit/test_plan.py" }, { node = "tests/unit/test_plan.py::test_fully_provisioned_plan_is_empty", path = "tests/unit/test_plan.py" }]
+
+[[claims]]
+identifier = "M-boot-replace-old-ghcup"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_plan.py::test_plan_oracle", path = "tests/unit/test_plan.py" }]
+
+[[claims]]
+identifier = "M-boot-cabal-without-no-set"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_plan.py::test_plan_never_sets_default", path = "tests/unit/test_plan.py" }]
+
+[[claims]]
+identifier = "M-boot-ghcup-prefix-ignored"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_hostfacts.py::test_ghcup_discovery_order", path = "tests/unit/test_hostfacts.py" }]
+
+[[claims]]
+identifier = "M-pins-digest-swapped"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_ghcup.py::test_pins_match_oracle", path = "tests/unit/test_ghcup.py" }]
+
+[[claims]]
+identifier = "M-cache-digest-omits-cabal-file"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_digest.py::test_oracle_rows", path = "tests/unit/test_digest.py" }]
+
+[[claims]]
+identifier = "M-cache-digest-includes-style-config"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_digest.py::test_oracle_rows", path = "tests/unit/test_digest.py" }]
+
+[[claims]]
+identifier = "M-cache-hit-ignored"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_build_cache.py::test_second_run_spawns_nothing", path = "tests/integration/test_build_cache.py" }]
+
+[[claims]]
+identifier = "M-cache-nonatomic-publish"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_build_cache.py::test_failed_build_keeps_previous", path = "tests/integration/test_build_cache.py" }]
+
+[[claims]]
+identifier = "M-cache-skip-handshake"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_build_cache.py::test_handshake_mismatch_rejected", path = "tests/integration/test_build_cache.py" }]
+
+[[claims]]
+identifier = "M-cache-identity-unchecked"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_build_cache.py::test_identity_step_rejects_foreign_binary", path = "tests/integration/test_build_cache.py" }]
+
+[[claims]]
+identifier = "M-style-hlint-exit-ignored"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_haskell_style_legs.py::test_hlint_fires", path = "tests/integration/test_haskell_style_legs.py" }]
+
+[[claims]]
+identifier = "M-style-tools-from-path"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_haskell_style_legs.py::test_style_tools_report_pins", path = "tests/integration/test_haskell_style_legs.py" }]
+
+[[claims]]
+identifier = "M-style-reinstall-always"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_haskell_style_legs.py::test_tools_idempotent", path = "tests/integration/test_haskell_style_legs.py" }]
+
+[[claims]]
+identifier = "M-style-hlint-ignore-allowed"
+owner = 2
+killer_sources = [{ node = "tests/governance/test_style_config.py::test_style_configs_have_no_ignores", path = "tests/governance/test_style_config.py" }]
+
+[[claims]]
+identifier = "M-boot-spawn-adds-set"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_toolchain.py::test_argv_never_sets", path = "tests/integration/test_toolchain.py" }]
+
+[[claims]]
+identifier = "M-boot-ghc-from-path"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_toolchain.py::test_whereis_paths_used_verbatim", path = "tests/integration/test_toolchain.py" }]
+
+[[claims]]
+identifier = "M-boot-links-unchecked"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_toolchain.py::test_default_links_unchanged_by_step", path = "tests/integration/test_toolchain.py" }]
+
+[[claims]]
+identifier = "M-boot-ghcup-on-warm-run"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_toolchain.py::test_warm_run_spawns_only_version_checks", path = "tests/integration/test_toolchain.py" }]
+
+[[claims]]
+identifier = "M-build-drop-werror"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_haskell_legs.py::test_werror_fires", path = "tests/integration/test_haskell_legs.py" }]
+
+[[claims]]
+identifier = "M-build-routing-blind"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_haskell_legs.py::test_every_suite_routed", path = "tests/integration/test_haskell_legs.py" }]
+
+[[claims]]
+identifier = "M-build-user-cabal-dir"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_haskell_legs.py::test_user_cabal_config_ignored", path = "tests/integration/test_haskell_legs.py" }]
+
+[[claims]]
+identifier = "M-build-tests-disabled"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_check_legs.py::test_leg_table_matches_oracle", path = "tests/unit/test_check_legs.py" }]
+
+[[claims]]
+identifier = "M-build-handoff-unchecked"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_haskell_legs.py::test_direct_invocation_refused", path = "tests/integration/test_haskell_legs.py" }]
+
+[[claims]]
+identifier = "M-build-handshake-drops-commands"
+owner = 2
+killer_sources = [{ node = "haskell:agentctl-core-test/Handshake/protocol-fields", path = "src/agentctl/haskell/test/Main.hs" }]
+
+[[claims]]
+identifier = "M-build-eval-drops-case"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_eval_executable.py::test_every_case_answered", path = "tests/integration/test_eval_executable.py" }]
+
+[[claims]]
+identifier = "M-boot-handshake-imports-later-terminal"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_bootstrap_caller.py::test_early_transport_does_not_import_later_helpers", path = "tests/integration/test_bootstrap_caller.py" }]
+
+[[claims]]
+identifier = "M-boot-handshake-refuses-empty-commands"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_digest.py::test_inventory_and_protocol_boundaries", path = "tests/unit/test_digest.py" }]
+
+[[claims]]
+identifier = "M-boot-foundation-imports-later-protocol"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_bootstrap_foundation.py::test_bootstrap_protocol_build_is_independent", path = "tests/integration/test_bootstrap_foundation.py" }]
+
+[[claims]]
+identifier = "M-boot-foundation-style-omitted"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_style_tools.py::test_style_identity_and_install_arguments", path = "tests/unit/test_style_tools.py" }]
+
+[[claims]]
+identifier = "M-boot-foundation-digest-omitted"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_digest.py::test_foundation_changes_binary_digest", path = "tests/unit/test_digest.py" }]
+
+[[claims]]
+identifier = "M-boot-native-tail-drops-empty"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_bootstrap_foundation.py::test_bootstrap_native_receiver_preserves_raw_tail", path = "tests/integration/test_bootstrap_foundation.py" }]
+
+[[claims]]
+identifier = "M-boot-native-consent-dropped"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_bootstrap_foundation.py::test_bootstrap_cli_consent_is_separate_from_tail", path = "tests/integration/test_bootstrap_foundation.py" }]
+
+[[claims]]
+identifier = "M-boot-native-consent-forged"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_bootstrap_foundation.py::test_bootstrap_cli_consent_is_separate_from_tail", path = "tests/integration/test_bootstrap_foundation.py" }]
+
+[[claims]]
+identifier = "M-boot-native-consent-not-validated"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_haskell_legs.py::test_direct_invocation_refused", path = "tests/integration/test_haskell_legs.py" }]
+
+[[claims]]
+identifier = "M-boot-old-protocol-accepted"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_digest.py::test_old_protocol_handshake_is_rejected", path = "tests/unit/test_digest.py" }]

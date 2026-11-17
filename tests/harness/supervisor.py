@@ -19,13 +19,13 @@ from tests.harness.launch import (
     LaunchCase,
     NativePane,
     PaneProgram,
+    await_exit,
     native_pane,
     prepare,
 )
 from tests.harness.nonce import fresh
 from tests.harness.oracle import Store, load, read_homes
 from tests.harness.sessions import rows
-from tests.harness.terminal import await_exit
 from tests.harness.tmux import PrivateMux, object_value, private_mux
 
 BYTE_MAXIMUM = 255

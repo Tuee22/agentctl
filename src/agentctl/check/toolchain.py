@@ -10,11 +10,12 @@ from typing import Literal
 
 import click
 
-from agentctl.bootstrap import toolchain
+from agentctl.bootstrap import build
 from agentctl.bootstrap.pins import PinError, Pins
 from agentctl.check.preconditions import ToolchainReadiness, toolchain_preconditions
-from agentctl.hostfacts import HostContext, HostFacts, gather
-from agentctl.result import Err, Result
+from agentctl.foundation import Err, Result
+from agentctl.foundation_host import HostContext
+from agentctl.hostfacts import HostFacts, gather
 
 GIB = 1024**3
 GHC_BUDGET = 10 * GIB
@@ -102,13 +103,22 @@ class EnsureStep:
 
 
 def run_step(step: EnsureStep) -> int:
-    """Run the same guarded provisioning code that first-use commands call."""
+    """Check an already prepared pinned toolchain without provisioning it."""
     pins = step.pins
     if isinstance(pins, Err):
         click.echo(pins.error.message, err=True)
         return 1
-    result = toolchain.checked(step.context, pins.value)
+    recorded = build.recorded_tools(step.context)
+    if isinstance(recorded, Err):
+        click.echo(
+            "toolchain-ensure: prepare the pinned toolchain before check", err=True
+        )
+        return 1
+    result = gather(step.context, pins.value)
     if isinstance(result, Err):
         click.echo(result.error.message, err=True)
+        return 1
+    if result.value.ghc is None or result.value.cabal is None:
+        click.echo("toolchain-ensure: recorded pinned tools are not ready", err=True)
         return 1
     return 0

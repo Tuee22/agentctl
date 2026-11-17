@@ -20,7 +20,10 @@ from agentctl.process import run
 from agentctl.result import Ok
 from tests.harness.bootstrap import pins
 from tests.harness.haskell import copy_project
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.nonce import fresh
+
+haskell_build = _haskell_build_fixture
 
 type Event = tuple[tuple[str, ...], bool]
 
@@ -40,11 +43,11 @@ def test_fourmolu_fires(
     context = copy_project(root, tmp_path)
     step = _step(context, "fourmolu")
     assert run_tools(context.project, tmp_path, "focused", (step,)) == 0
-    module = context.project / "src/AgentCtl/Protocol.hs"
+    module = context.project / "bootstrap-src/AgentCtl/Bootstrap/Protocol.hs"
     original = module.read_text(encoding="utf-8")
-    assert original.count("protocolVersion = 1") == 1
+    assert original.count("protocolVersion = 2") == 1
     module.write_text(
-        original.replace("protocolVersion = 1", "protocolVersion=1"), encoding="utf-8"
+        original.replace("protocolVersion = 2", "protocolVersion=2"), encoding="utf-8"
     )
     defective = module.read_bytes()
     assert style.run_step(step) != 0, "fourmolu accepted misformatted source"
@@ -61,10 +64,10 @@ def test_hlint_fires(
     context = copy_project(root, tmp_path)
     step = _step(context, "hlint")
     assert style.run_step(step) == 0
-    module = context.project / "src/AgentCtl/Protocol.hs"
+    module = context.project / "bootstrap-src/AgentCtl/Bootstrap/Protocol.hs"
     module.write_text(
         module.read_text(encoding="utf-8").replace(
-            "protocolVersion = 1", "protocolVersion = (1)"
+            "protocolVersion = 2", "protocolVersion = (id 2)"
         ),
         encoding="utf-8",
     )

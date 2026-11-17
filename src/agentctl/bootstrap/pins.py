@@ -5,48 +5,12 @@ import re
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
 
-from agentctl.paths import Family
+from agentctl import pin_values
+from agentctl.pin_values import Asset, Pins, Version
 from agentctl.result import Err, Ok, Result
 
-type Architecture = Literal["x86_64", "aarch64", "arm64", "unsupported"]
-
-
-@dataclass(frozen=True, slots=True, order=True)
-class Version:
-    """A numeric version compared by components rather than string order."""
-
-    parts: tuple[int, ...]
-
-    @property
-    def text(self) -> str:
-        """Render the numeric version for an executable argument."""
-        return ".".join(str(part) for part in self.parts)
-
-
-@dataclass(frozen=True, slots=True)
-class Asset:
-    """One supported platform's fixed URL and expected SHA-256."""
-
-    family: Family
-    architecture: Architecture
-    url: str
-    sha256: str
-
-
-@dataclass(frozen=True, slots=True)
-class Pins:
-    """The immutable package-data contract used by all bootstrap decisions."""
-
-    ghc: Version
-    cabal: Version
-    ghcup: Version
-    ghcup_floor: Version
-    assets: tuple[Asset, ...]
-    fourmolu: Version
-    hlint: Version
-    ghc_lib_parser: Version
+type Architecture = pin_values.Architecture
 
 
 @dataclass(frozen=True, slots=True)
@@ -152,13 +116,4 @@ def load(path: Path | None = None) -> Result[Pins, PinError]:
     return parse(data)
 
 
-def asset_for(pins: Pins, family: Family, architecture: Architecture) -> Asset | None:
-    """Select a bindist only for an explicitly supported OS and architecture."""
-    return next(
-        (
-            asset
-            for asset in pins.assets
-            if (asset.family, asset.architecture) == (family, architecture)
-        ),
-        None,
-    )
+asset_for = pin_values.asset_for

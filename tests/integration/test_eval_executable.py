@@ -9,7 +9,10 @@ import pytest
 
 from agentctl.bootstrap import build
 from agentctl.result import Ok
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.oracle import assert_oracle
+
+haskell_build = _haskell_build_fixture
 
 pytestmark = pytest.mark.evidence("value")
 
@@ -19,6 +22,8 @@ def test_every_case_answered(haskell_build: build.BuildContext, root: Path) -> N
     rows = tomllib.loads(
         (root / "tests/oracles/protocol.toml").read_text(encoding="utf-8")
     )["case"]
+    amended = {row.get("amends") for row in rows}
+    rows = [row for row in rows if row["id"] not in amended]
     inputs = [row["input"]["line"] for row in rows]
     expected = [row["expected"] for row in rows]
     result = build.execute_binary(

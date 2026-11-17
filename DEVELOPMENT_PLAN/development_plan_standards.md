@@ -88,7 +88,7 @@ delivery evidence as well as absence controls. No closing phase can retain its o
 ### J. README and Documents Harmony
 
 README is the only cross-phase status table. Every phase appears in both its table and index. Documents cite
-phases by linked title, not ordinal. Root AGENTS and CLAUDE carry consistent WSL2/no-commit policy; CLAUDE imports
+phases by linked title, not ordinal. Root AGENTS and CLAUDE carry consistent Hyper-V/no-commit policy; CLAUDE imports
 the authoritative AGENTS policy. No document asserts that an unimplemented new rule already has enforcement.
 
 ### K. Requirement Anchoring
@@ -139,8 +139,10 @@ Linux plus at most one foreign family. Its lane is one of:
 | linux-macos | Linux receipt plus native Darwin receipt for this input closure | macOS |
 | linux-live-clean | Debian Linux, real two-stage clean preparation and existing authenticated agents | none |
 
-WSL2 can supply Linux only when the dedicated distro, capacities, installed Linux dependencies and same-checkout
-bind mount satisfy [the runbook](../documents/operations/validation_runbook.md). It supplies no Windows/Darwin ABI proof.
+On Windows, a dedicated Debian Hyper-V guest can supply Linux only when its observed capacities, isolation,
+installed Linux dependencies and same-checkout bind mount satisfy [the runbook](../documents/operations/validation_runbook.md).
+Guest evidence supplies no Windows/Darwin ABI proof. Existing WSL-specific observers and tests remain visible
+migration inputs; they do not establish Hyper-V readiness.
 Linux pure/refusal branches of foreign tests execute without skip markers, but do not mint native receipts.
 The native verdict remains unmet until a real native run supplies its required observations.
 
@@ -188,10 +190,10 @@ Teardown waits for actual child/handle release and verifies endpoint/resolved ab
 kill/removal. Never kill by image name or recursively delete a computed/unverified path. Report primary and
 cleanup failures separately and retain diagnostic receipts outside disposable directories.
 
-A Windows agent can create an agentctl-only Debian WSL2 instance with CPU/memory/storage budgets justified by
+A Windows agent can create an agentctl-only Debian Hyper-V VM with CPU/memory/storage budgets justified by
 observed resources and measured peaks, install all needed Linux dependencies, and bind mount the host checkout.
-Workload cgroup limits and VHD capacity must be observed; a distro name alone is not resource isolation.
-Do not edit shared global WSL configuration or shut down other distributions. Credential copies remain private.
+VM and workload limits and VHD capacity must be observed; a VM name alone is not resource isolation.
+Do not alter other VMs or existing sessions. Credential copies remain private.
 Host/guest changes are the same live unstaged/untracked tree, never a commit/copy synchronization scheme.
 Writable bind-mount permissions, locks, case and symlink semantics are tested; unsupported behavior is unmet,
 not a Linux pass silently measured on a different filesystem.
@@ -217,7 +219,7 @@ source suppressions, snapshot-only fake native evidence or prebuilt product/back
 | Observation and guarded recovery | [supervisor](../documents/architecture/supervisor_contract.md) | [Recovery and supervisor](phase-8-recovery-and-supervisor.md) |
 | Gate mechanics and phase verdicts | [quality gate](../documents/engineering/quality_gate.md) | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
 | Evidence, isolation and observers | [testing](../documents/engineering/testing.md) | [Python discipline and gate integrity](phase-1-python-discipline-and-gate-integrity.md) |
-| Native/WSL preparation | [runbook](../documents/operations/validation_runbook.md) | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+| Native/Hyper-V preparation | [runbook](../documents/operations/validation_runbook.md) | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
 
 ## Related
 

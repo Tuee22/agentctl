@@ -2,16 +2,20 @@
 """Real scratch mutation controls and every executable corpus record."""
 
 import json
+import tomllib
 from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
+from agentctl.check.evidence import Entry, source_census
 from agentctl.check.mutants import (
     Mutant,
     MutationError,
     Operator,
+    amend_records,
     baseline,
+    census_corpus,
     corpus,
     exercise,
     killed,
@@ -23,6 +27,59 @@ from agentctl.process import Output
 from agentctl.result import Err, Ok
 
 pytestmark = pytest.mark.evidence("real")
+
+
+def test_guarded_corpus_matches_live_records(root: Path) -> None:
+    """Snapshot parsing retains records and refuses missing provenance."""
+    observed = source_census(root)
+    assert isinstance(observed, Ok)
+    entries = observed.value
+    snapshot = census_corpus(entries)
+    assert isinstance(snapshot, Ok)
+    assert snapshot == corpus(root)
+    assert isinstance(census_corpus((*entries, entries[0])), Err)
+    assert isinstance(
+        census_corpus(
+            tuple(
+                entry
+                for entry in entries
+                if entry.path != "DEVELOPMENT_PLAN/rationale.md"
+            )
+        ),
+        Err,
+    )
+    bad = Entry("tests/mutants/bad.toml", "file", (b"\xff",))
+    assert isinstance(census_corpus((*entries, bad)), Err)
+    unanchored = tuple(
+        Entry(entry.path, "file", (b"no amendment decisions\n",))
+        if entry.path == "DEVELOPMENT_PLAN/rationale.md"
+        else entry
+        for entry in entries
+    )
+    assert isinstance(census_corpus(unanchored), Err), (
+        "unanchored corpus amendment was accepted"
+    )
+
+
+def test_mutant_amendment_refusals(root: Path, tmp_path: Path) -> None:
+    """Only a unique, documented amendment bound to both exact records applies."""
+    document = tomllib.loads(
+        (root / "tests/mutants/evidence.toml").read_text(encoding="utf-8")
+    )
+    original = document["mutant"]
+    amendment = document["amendment"][0]
+    assert isinstance(amend_records(original, [amendment], root), Ok)
+    for changed in (
+        {**amendment, "prior_sha256": "0" * 64},
+        {**amendment, "revised_sha256": "0" * 64},
+        {**amendment, "search": "other"},
+        {**amendment, "provenance": "decision:D-999999"},
+        {**amendment, "id": "M-evidence-unknown"},
+        {**amendment, "extra": "invalid"},
+    ):
+        assert isinstance(amend_records(original, [changed], root), Err)
+    assert isinstance(amend_records(original, [amendment, amendment], root), Err)
+    assert isinstance(amend_records(original, [amendment], tmp_path), Err)
 
 
 def _sample(root: Path) -> Path:
@@ -147,6 +204,15 @@ def test_corpus_killer_rejected() -> None:
         assert isinstance(parse(_record(killers=killers)), Err)
     for target in ("../outside.py", "/outside.py"):
         assert isinstance(parse(_record(target=target)), Err)
+
+
+def test_duplicate_killers_rejected() -> None:
+    """A repeated killer cannot masquerade as two independent controls."""
+    node = "tests/unit/test_subject.py::test_answer"
+    assert isinstance(parse(_record(killers=[node])), Ok)
+    assert isinstance(parse(_record(killers=[node, node])), Err), (
+        "duplicate mutant killers were accepted"
+    )
 
 
 def test_parameter_killers_execute_current_cases(tmp_path: Path) -> None:

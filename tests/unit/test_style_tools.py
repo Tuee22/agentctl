@@ -71,3 +71,9 @@ def test_style_identity_and_install_arguments(root: Path, tmp_path: Path) -> Non
     source.touch()
     (tmp_path / ".gitignore").write_text("*.hs\n", encoding="utf-8")
     assert targets(tmp_path) == Ok((str(source),))
+    foundation = tmp_path / "bootstrap-src/Foundation.hs"
+    foundation.parent.mkdir()
+    foundation.touch()
+    assert targets(tmp_path) == Ok((str(foundation), str(source))), (
+        "bootstrap source was omitted from native style targets"
+    )

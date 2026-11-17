@@ -41,7 +41,7 @@ run [core, kind, trigger, destination, pollSeconds, initialSeconds, maximumSecon
   paths <- either (die . show) pure (Paths.fromEnvironment True environment)
   code <- ignoreControl
   when (code /= 0) (die ("cannot install fixture console handler: " ++ show code))
-  let childEnvironment = ("AGENTCTL_PROTOCOL_VERSION", "1") : filter (\(key, _) -> key `notElem` ["TMUX", "TMUX_PANE", "AGENTCTL_PROTOCOL_VERSION"]) environment
+  let childEnvironment = ("AGENTCTL_PROTOCOL_VERSION", "2") : ("AGENTCTL_ASSUME_YES", "false") : filter (\(key, _) -> key `notElem` ["TMUX", "TMUX_PANE", "AGENTCTL_PROTOCOL_VERSION", "AGENTCTL_ASSUME_YES"]) environment
       arguments = ["supervisor", "run", "--poll-seconds", pollSeconds, "--initial-delay-seconds", initialSeconds, "--max-delay-seconds", maximumSeconds, "--jitter-fraction", "0"]
       child =
         if interrupt

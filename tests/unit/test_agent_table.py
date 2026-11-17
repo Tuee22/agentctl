@@ -7,6 +7,9 @@ import pytest
 
 from agentctl.bootstrap import build
 from tests.harness.evaluate import compare_subject
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
+
+haskell_build = _haskell_build_fixture
 
 pytestmark = pytest.mark.evidence("value")
 

@@ -85,7 +85,8 @@ def run(
     name = distribution.value.name if isinstance(distribution, Ok) else "other"
     environment = {
         **os.environ,
-        "AGENTCTL_PROTOCOL_VERSION": "1",
+        "AGENTCTL_PROTOCOL_VERSION": "2",
+        "AGENTCTL_ASSUME_YES": "true" if assume_yes else "false",
         "AGENTCTL_CACHE_DIR": str(paths.cache),
         "AGENTCTL_DATA_DIR": str(paths.data),
         "AGENTCTL_STATE_DIR": str(paths.state),

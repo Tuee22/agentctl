@@ -1,4 +1,40 @@
 [[mutant]]
+id = "M-boot-handshake-refuses-empty-commands"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/binary.py"
+search = "        and isinstance(commands, list)\n"
+replace = "        and isinstance(commands, list)\n        and bool(commands)\n"
+killers = ["tests/unit/test_digest.py::test_inventory_and_protocol_boundaries"]
+reason = "bootstrap handshake rejected an empty command list"
+
+[[mutant]]
+id = "M-boot-handshake-imports-later-terminal"
+operator = "replace-literal"
+target = "tests/integration/test_passthrough.py"
+search = "from tests.harness.transport_fixture import mux_server as _mux_server_fixture\n"
+replace = "from tests.harness.transport_fixture import mux_server as _mux_server_fixture\nimport tests.harness.terminal\n"
+killers = ["tests/integration/test_bootstrap_caller.py::test_early_transport_does_not_import_later_helpers"]
+reason = "early transport imported later helper"
+
+[[mutant]]
+id = "M-boot-transport-fixture-imports-later-mux"
+operator = "replace-literal"
+target = "tests/harness/transport_fixture.py"
+search = "from tests.harness.nonce import fresh\n"
+replace = "from tests.harness.nonce import fresh\nimport tests.harness.tmux\n"
+killers = ["tests/integration/test_bootstrap_caller.py::test_early_transport_does_not_import_later_helpers"]
+reason = "early transport imported later helper"
+
+[[mutant]]
+id = "M-boot-caller-imports-later-launch"
+operator = "replace-literal"
+target = "tests/harness/bootstrap_caller.py"
+search = "from agentctl.foundation import Family, Ok\n"
+replace = "from agentctl.foundation import Family, Ok\nimport tests.harness.launch\n"
+killers = ["tests/integration/test_bootstrap_caller.py::test_early_transport_does_not_import_later_helpers"]
+reason = "early transport imported later helper"
+
+[[mutant]]
 id = "M-boot-reinstall-present"
 operator = "short-circuit"
 target = "src/agentctl/bootstrap/plan.py"
@@ -35,15 +71,6 @@ killers = ["tests/unit/test_hostfacts.py::test_ghcup_discovery_order"]
 reason = "ghcup prefix was ignored"
 
 [[mutant]]
-id = "M-boot-windows-arm64-allowed"
-operator = "short-circuit"
-target = "src/agentctl/check/preconditions.py"
-search = "if asset_for(pins, facts.family, facts.architecture) is None:"
-replace = "if False:"
-killers = ["tests/unit/test_preconditions.py::test_toolchain_preconditions"]
-reason = "toolchain preconditions differ"
-
-[[mutant]]
 id = "M-pins-digest-swapped"
 operator = "replace-literal"
 target = "src/agentctl/bootstrap/pins.toml"
@@ -63,3 +90,75 @@ url = "https://downloads.haskell.org/~ghcup/0.2.6.2/aarch64-linux-ghcup-0.2.6.2"
 sha256 = "9ed5da5449b48043a0d17e767c05d2ef585e25a639bb934329496c6d2fad9cf8"'''
 killers = ["tests/unit/test_ghcup.py::test_pins_match_oracle"]
 reason = "package pins differ"
+
+[[mutant]]
+id = "M-boot-foundation-imports-later-protocol"
+operator = "replace-literal"
+target = "src/agentctl/haskell/agentctl-core.cabal"
+search = "  hs-source-dirs: bootstrap-src"
+replace = "  hs-source-dirs: bootstrap-src, src\n  other-modules: AgentCtl.Protocol"
+killers = ["tests/integration/test_bootstrap_foundation.py::test_bootstrap_protocol_build_is_independent"]
+reason = "bootstrap protocol depended on later source"
+
+[[mutant]]
+id = "M-boot-foundation-style-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/style.py"
+search = "        for directory in (\"app\", \"bootstrap-src\", \"src\", \"test\")\n"
+replace = "        for directory in (\"app\", \"src\", \"test\")\n"
+killers = ["tests/unit/test_style_tools.py::test_style_identity_and_install_arguments"]
+reason = "bootstrap source was omitted from native style targets"
+
+[[mutant]]
+id = "M-boot-foundation-digest-omitted"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/cache.py"
+search = "    roots = (\"app\", \"bootstrap-src\", \"src\", \"test\")\n"
+replace = "    roots = (\"app\", \"src\", \"test\")\n"
+killers = ["tests/unit/test_digest.py::test_foundation_changes_binary_digest"]
+reason = "bootstrap source change did not change binary digest"
+
+[[mutant]]
+id = "M-boot-native-tail-drops-empty"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/handoff.py"
+search = "    argv = [str(request.executable), *request.arguments]\n"
+replace = "    argv = [str(request.executable), *(argument for argument in request.arguments if argument)]\n"
+killers = ["tests/integration/test_bootstrap_foundation.py::test_bootstrap_native_receiver_preserves_raw_tail"]
+reason = "bootstrap native receiver observed a changed tail"
+
+[[mutant]]
+id = "M-boot-native-consent-dropped"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/handoff.py"
+search = "        \"AGENTCTL_ASSUME_YES\": \"true\" if assume_yes else \"false\",\n"
+replace = "        \"AGENTCTL_ASSUME_YES\": \"false\",\n"
+killers = ["tests/integration/test_bootstrap_foundation.py::test_bootstrap_cli_consent_is_separate_from_tail"]
+reason = "global consent did not reach native receiver separately"
+
+[[mutant]]
+id = "M-boot-native-consent-forged"
+operator = "replace-literal"
+target = "src/agentctl/haskell/bootstrap-src/AgentCtl/Bootstrap/Protocol.hs"
+search = "parseConsent (Just \"false\") = Just False"
+replace = "parseConsent (Just \"false\") = Just True"
+killers = ["tests/integration/test_bootstrap_foundation.py::test_bootstrap_cli_consent_is_separate_from_tail"]
+reason = "global consent did not reach native receiver separately"
+
+[[mutant]]
+id = "M-boot-native-consent-not-validated"
+operator = "replace-literal"
+target = "src/agentctl/haskell/app/Core.hs"
+search = "isNothing (parseConsent consent)"
+replace = "isNothing (parseConsent (Just (maybe \"false\" (const \"false\") consent)))"
+killers = ["tests/integration/test_haskell_legs.py::test_direct_invocation_refused"]
+reason = "core accepted invalid consent"
+
+[[mutant]]
+id = "M-boot-old-protocol-accepted"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/binary.py"
+search = "        and protocol == PROTOCOL_VERSION\n"
+replace = "        and protocol in {1, PROTOCOL_VERSION}\n"
+killers = ["tests/unit/test_digest.py::test_old_protocol_handshake_is_rejected"]
+reason = "old protocol handshake was accepted"

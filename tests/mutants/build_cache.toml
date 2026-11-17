@@ -51,12 +51,3 @@ search = "    if built_hash != published_hash:\n"
 replace = "    if False:\n"
 killers = ["tests/integration/test_build_cache.py::test_identity_step_rejects_foreign_binary"]
 reason = "foreign binary was accepted by identity"
-
-[[mutant]]
-id = "M-cache-identity-step-dropped"
-operator = "delete"
-target = "src/agentctl/check/steps.py"
-search = "        identity.IdentityStep(\n            context,\n            root / \"src/agentctl/haskell\",\n            directories(family, os.environ, Path.home()).data,\n        ),\n"
-replace = ""
-killers = ["tests/unit/test_check_steps.py::test_step_table_equals_oracle"]
-reason = "gate step table differs from oracle"

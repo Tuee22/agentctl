@@ -11,8 +11,13 @@ import pytest
 from agentctl.bootstrap import build
 from agentctl.result import Ok
 from tests.harness.agents import AuthProbe, isolated_environment, native_agent, probe
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.launch import PaneProgram, native_pane
 from tests.harness.tmux import PrivateMux
+from tests.harness.tmux_fixtures import mux_server as _mux_server_fixture
+
+haskell_build = _haskell_build_fixture
+mux_server = _mux_server_fixture
 
 pytestmark = pytest.mark.evidence("real")
 ARGV_REASON = "launched argv differs from required argument assembly"

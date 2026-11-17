@@ -74,7 +74,7 @@ def _walk_failure(error: OSError) -> None:
 def inventory(project: Path) -> tuple[Entry, ...]:
     """Observe every source file and directory without following directory links."""
     paths = (project / "agentctl-core.cabal", project / "cabal.project")
-    roots = ("app", "src", "test")
+    roots = ("app", "bootstrap-src", "src", "test")
     paths += tuple(project / name for name in roots)
     for current, directories, files in os.walk(project, onerror=_walk_failure):
         if Path(current) == project:

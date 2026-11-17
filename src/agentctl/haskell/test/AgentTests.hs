@@ -8,7 +8,8 @@ import Control.Monad (forM_, replicateM)
 import Data.List (isSuffixOf)
 import qualified Data.Text as Text
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, assertEqual, assertFailure, testCase)
+import Test.Tasty.HUnit (assertBool, assertEqual, assertFailure)
+import TestSource (testCase)
 
 tests :: [TestTree]
 tests =

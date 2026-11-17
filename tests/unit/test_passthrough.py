@@ -1,21 +1,66 @@
 # Copyright (c) 2026 agentctl contributors.
 """The real public parser preserves tails up to a nonce-bound, vetoed native spawn."""
 
+import os
 import sys
 import tomllib
 from collections.abc import Sequence
+from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
 
+from agentctl.bootstrap import build
 from agentctl.check.audit import EVENTS, event_arguments
 from agentctl.cli import PASSTHROUGH, cli
 from agentctl.result import Ok
-from tests.harness.launch import prepare
+from tests.harness.bootstrap_caller import CallerRequest, publish
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
+from tests.harness.nonce import fresh
 from tests.harness.oracle import assert_oracle
-from tests.harness.passthrough import WarmCaller, warm
-from tests.harness.tmux import PrivateMux
+
+haskell_build = _haskell_build_fixture
+
+
+@dataclass(frozen=True, slots=True)
+class CallerCase:
+    """The private caller facts used by the spawn observer."""
+
+    environment: tuple[tuple[str, str], ...]
+    folder: Path
+    nonce: str
+
+
+@dataclass(frozen=True, slots=True)
+class Caller:
+    """The publication facts used by the spawn observer."""
+
+    case: CallerCase
+    executable: Path
+
+
+@pytest.fixture
+def caller(root: Path, tmp_path: Path, haskell_build: build.BuildContext) -> Caller:
+    """Publish a private caller without starting an agent or multiplexer."""
+    family = haskell_build.host.family
+    assert family in {"Linux", "Darwin", "Windows"}
+    environment = {
+        **os.environ,
+        "HOME": str(tmp_path),
+        "USERPROFILE": str(tmp_path),
+        "LOCALAPPDATA": str(tmp_path / "local"),
+        "XDG_CACHE_HOME": str(tmp_path / "cache"),
+        "XDG_DATA_HOME": str(tmp_path / "data"),
+        "XDG_STATE_HOME": str(tmp_path / "state"),
+    }
+    published = publish(
+        CallerRequest(root, haskell_build, family, tmp_path, tuple(environment.items()))
+    )
+    nonce = fresh(os.environ.get("AGENTCTL_CHECK_NONCE", "focused"))
+    return Caller(
+        CallerCase(published.environment, tmp_path, nonce), published.executable
+    )
 
 
 def _commands(root: Path) -> list[str]:
@@ -32,10 +77,10 @@ def _commands(root: Path) -> list[str]:
 
 
 def _vetoed(
-    caller: WarmCaller, argv: Sequence[str], monkeypatch: pytest.MonkeyPatch
+    caller: Caller, argv: Sequence[str], monkeypatch: pytest.MonkeyPatch
 ) -> tuple[tuple[str, tuple[str, ...]], ...]:
     """Record every actual spawn boundary and veto it before any child runs."""
-    for key, value in caller.case.environment.items():
+    for key, value in caller.case.environment:
         monkeypatch.setenv(key, value)
     monkeypatch.delenv("TMUX", raising=False)
     monkeypatch.delenv("TMUX_PANE", raising=False)
@@ -73,10 +118,9 @@ def test_passthrough_table_matches_oracle(root: Path) -> None:
 
 @pytest.mark.evidence("observer")
 def test_every_command_but_check_passes_through(
-    root: Path, mux_server: PrivateMux, monkeypatch: pytest.MonkeyPatch
+    root: Path, caller: Caller, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Every declared command reaches a real warm handoff without another spawn."""
-    caller = warm(prepare(mux_server, "claude"))
     assert ["check", *PASSTHROUGH] == _commands(root), (
         "passthrough command table differs"
     )
@@ -90,10 +134,9 @@ def test_every_command_but_check_passes_through(
 
 @pytest.mark.evidence("observer")
 def test_raw_tail_keeps_dashdash_and_help(
-    mux_server: PrivateMux, monkeypatch: pytest.MonkeyPatch
+    caller: Caller, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Preserve separators, empty elements and help tokens through the public parser."""
-    caller = warm(prepare(mux_server, "claude"))
     for arguments in (
         ("claude", "--", "--yolo"),
         ("codex", "--help"),

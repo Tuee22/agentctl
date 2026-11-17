@@ -8,12 +8,15 @@ from pathlib import Path
 
 import pytest
 
-from agentctl.check.evidence import RunEvidence
+from agentctl.check.evidence import Entry, RunEvidence
 from agentctl.check.lanes import HostFacts, evaluate
 from agentctl.check.mutants import Mutant, Operator
+from agentctl.check.ownership import MutantOwnership, OwnershipManifest, bind_mutants
+from agentctl.check.phase_reports import ArtifactOwnership, OwnershipPhase
 from agentctl.check.plan_data import Phase, Sprint
 from agentctl.check.validator import closure
 from agentctl.check.validator.plan import (
+    _invalid_dependency_direction,
     check,
     field,
     section,
@@ -21,11 +24,12 @@ from agentctl.check.validator.plan import (
     validate,
 )
 from agentctl.result import Err, Ok
+from tests.harness.oracle import Object, Store, load_scoped
 from tests.harness.trees import negative_tree
 
 pytestmark = pytest.mark.evidence("value")
 CASE_ID = "tests/unit/test_subject.py::test_subject"
-PHASE_FILE = "phase-0-governance-and-check-skeleton.md"
+PHASE_FILE = "phase-0-governance-and-phase-evidence.md"
 INTEGRITY = (
     "## Gate Integrity\n\n| Requirement | Oracle | Observer | Mutants | Tests |\n"
     "|---|---|---|---|---|\n"
@@ -48,7 +52,7 @@ def test_plan_fileset(root: Path, tmp_path: Path) -> None:
     _controls(root, tmp_path, "fileset")
     tree = negative_tree(root, tmp_path / "missing", "plan_fileset")
     (tree / "DEVELOPMENT_PLAN/extra.md").unlink()
-    (tree / "DEVELOPMENT_PLAN/phase-14-windows-psmux-acceptance.md").unlink()
+    (tree / "DEVELOPMENT_PLAN/phase-14-release-evidence-and-closure.md").unlink()
     assert check(tree, "fileset")
     (tree / "DEVELOPMENT_PLAN/phase-invalid.md").write_text(
         "invalid phase name", encoding="utf-8"
@@ -68,7 +72,7 @@ def test_plan_status_harmony(root: Path, tmp_path: Path) -> None:
     _controls(root, tmp_path, "status-harmony")
     for number, replacement in enumerate(("Active", "unknown", "Planned | extra")):
         tree = negative_tree(root, tmp_path / str(number), "plan_fileset")
-        phase = tree / "DEVELOPMENT_PLAN/phase-14-windows-psmux-acceptance.md"
+        phase = tree / "DEVELOPMENT_PLAN/phase-14-release-evidence-and-closure.md"
         phase.write_text(
             re.sub(
                 r"(?m)^\*\*Status\*\*: .+$",
@@ -87,8 +91,8 @@ def test_plan_status_harmony(root: Path, tmp_path: Path) -> None:
         page.write_text(text, encoding="utf-8")
         assert check(tree, "status-harmony") == ()
         row = (
-            "| 14 | [Windows and psmux acceptance]"
-            "(phase-14-windows-psmux-acceptance.md) | Planned |"
+            "| 14 | [Release evidence and closure]"
+            "(phase-14-release-evidence-and-closure.md) | Planned |"
         )
         page.write_text(
             text.replace(row, row.replace("Planned", replacement)), encoding="utf-8"
@@ -100,7 +104,7 @@ def test_plan_sprint_structure(root: Path, tmp_path: Path) -> None:
     """Join sprint heading tags to their closed body fields."""
     _controls(root, tmp_path, "sprint-structure")
     tree = negative_tree(root, tmp_path / "headings", "plan_fileset")
-    page = tree / "DEVELOPMENT_PLAN/phase-0-governance-and-check-skeleton.md"
+    page = tree / "DEVELOPMENT_PLAN/phase-0-governance-and-phase-evidence.md"
     original = page.read_text(encoding="utf-8")
     for text in (
         original.replace("Sprint 0.1:", "Sprint 0.9:"),
@@ -161,13 +165,32 @@ def test_plan_dependency_direction(root: Path, tmp_path: Path) -> None:
     _controls(root, tmp_path, "dependency-direction")
 
 
+def test_lower_acceptance_dependency(tmp_path: Path) -> None:
+    """A lower host-acceptance phase is a valid prerequisite, never a forward one."""
+    lower = Phase(
+        0,
+        tmp_path / "phase-0-control.md",
+        "**Depends on**: nothing\n**Gate kind**: host-acceptance\n",
+        (),
+    )
+    upper = Phase(
+        1,
+        tmp_path / "phase-1-control.md",
+        "**Depends on**: [Control](phase-0-control.md)\n",
+        (),
+    )
+    assert not _invalid_dependency_direction((lower, upper))
+    forward = replace(lower, text="**Depends on**: [Control](phase-1-control.md)\n")
+    assert _invalid_dependency_direction((forward, upper))
+
+
 def test_plan_requirements_table(root: Path, tmp_path: Path) -> None:
     """Require exact quote anchoring and exactly one closure per requirement."""
     _controls(root, tmp_path, "requirements-table")
     malformed = negative_tree(root, tmp_path / "schema", "plan_fileset")
     for name, search, replacement in (
         ("00-overview.md", "| ID | Requirement |", "| Missing | Requirement |"),
-        ("phase-0-governance-and-check-skeleton.md", "**Closes**:", "**Not closes**:"),
+        ("phase-0-governance-and-phase-evidence.md", "**Closes**:", "**Not closes**:"),
     ):
         page = malformed / "DEVELOPMENT_PLAN" / name
         original = page.read_text(encoding="utf-8")
@@ -175,16 +198,16 @@ def test_plan_requirements_table(root: Path, tmp_path: Path) -> None:
         assert check(malformed, "requirements-table")
         page.write_text(original, encoding="utf-8")
     tree = negative_tree(root, tmp_path / "duplicate", "plan_fileset")
-    page = tree / "DEVELOPMENT_PLAN/phase-0-governance-and-check-skeleton.md"
+    page = tree / "DEVELOPMENT_PLAN/phase-0-governance-and-phase-evidence.md"
     text = page.read_text(encoding="utf-8")
     page.write_text(
-        text.replace("**Closes**: R14.1\n", "**Closes**: R14.1, R2\n"), encoding="utf-8"
+        text.replace("**Closes**: R26\n", "**Closes**: R26, R2\n"), encoding="utf-8"
     )
     assert check(tree, "requirements-table"), (
         "duplicate requirement closure was accepted"
     )
     page.write_text(
-        text.replace("**Closes**: R2\n", "**Closes**: R2, R2\n"),
+        text.replace("**Closes**: R26\n", "**Closes**: R26, R26\n"),
         encoding="utf-8",
     )
     assert check(tree, "requirements-table"), (
@@ -258,6 +281,126 @@ def _execution() -> RunEvidence:
     )
 
 
+def test_explicit_mutant_owner_refusal(tmp_path: Path) -> None:
+    """Explicit ownership cannot fall back to a matching legacy prefix."""
+    _policy(tmp_path)
+    phase = _declaration(tmp_path)
+    record = Mutant(
+        "M-legs-control",
+        Operator.REPLACE_LITERAL,
+        "src/subject.py",
+        "x",
+        "y",
+        (CASE_ID,),
+        "control",
+    )
+    assert (
+        closure.gate_integrity(
+            tmp_path,
+            (phase,),
+            (record,),
+            _execution(),
+            mutant_owners=((record.identifier, 0),),
+        )
+        == ()
+    )
+    assert closure.gate_integrity(
+        tmp_path,
+        (phase,),
+        (record,),
+        _execution(),
+        mutant_owners=((record.identifier, 1),),
+    ), "wrong mutant source owner was accepted"
+    standard = tmp_path / "DEVELOPMENT_PLAN/development_plan_standards.md"
+    overview = tmp_path / "DEVELOPMENT_PLAN/00-overview.md"
+    captured = closure.CapturedPolicy(
+        ((record.identifier, 0),),
+        standard.read_text(encoding="utf-8"),
+        overview.read_text(encoding="utf-8"),
+        frozenset({"tests/oracles/example.toml"}),
+    )
+    overview.write_text("## Requirements\n", encoding="utf-8")
+    assert (
+        closure.gate_integrity(
+            tmp_path, (phase,), (record,), _execution(), mutant_owners=captured
+        )
+        == ()
+    ), "captured requirements were ignored"
+    (tmp_path / "tests/oracles/example.toml").unlink()
+    assert (
+        closure.gate_integrity(
+            tmp_path, (phase,), (record,), _execution(), mutant_owners=captured
+        )
+        == ()
+    ), "captured oracle file was ignored"
+    assert closure.gate_integrity(
+        tmp_path, (phase,), (record,), _execution(), mutant_owners=captured.owners
+    )
+    assert closure.gate_integrity(
+        tmp_path,
+        (phase,),
+        (record,),
+        _execution(),
+        mutant_owners=replace(captured, regular_files=frozenset()),
+    )
+    assert not closure.gate_integrity(
+        tmp_path,
+        (phase,),
+        (record,),
+        _execution(),
+        mutant_owners=replace(
+            captured,
+            regular_files=frozenset(),
+            symlinks=frozenset({"tests/oracles/example.toml"}),
+        ),
+    )
+
+
+def test_source_owners_join_plan_integrity(tmp_path: Path) -> None:
+    """Source-derived mappings feed plan validation after a complete join."""
+    _policy(tmp_path)
+    phase = _declaration(tmp_path)
+    target = "src/subject.py"
+    test_source = CASE_ID.split("::", 1)[0]
+    record = Mutant(
+        "M-legs-control",
+        Operator.REPLACE_LITERAL,
+        target,
+        "x",
+        "y",
+        (CASE_ID,),
+        "control",
+    )
+    manifest = OwnershipManifest(
+        (OwnershipPhase(0, frozenset()),),
+        (
+            ArtifactOwnership(
+                target, 0, frozenset({0}), required=True, capability="source"
+            ),
+            ArtifactOwnership(
+                test_source, 0, frozenset({0}), required=True, capability="test"
+            ),
+        ),
+    )
+    entries = (
+        Entry(target, "file", (b"source",)),
+        Entry(test_source, "file", (b"test",)),
+    )
+    claim = MutantOwnership(record.identifier, 0, ((CASE_ID, test_source),))
+    owners = bind_mutants(manifest, entries, (record,), (claim,))
+    assert isinstance(owners, Ok)
+    assert (
+        closure.gate_integrity(
+            tmp_path, (phase,), (record,), _execution(), mutant_owners=owners.value
+        )
+        == ()
+    )
+    assert isinstance(
+        bind_mutants(manifest, entries, (record,), (replace(claim, owner=1),)), Err
+    )
+    assert isinstance(bind_mutants(manifest, entries[:1], (record,), (claim,)), Err)
+
+
 def test_plan_gate_integrity(tmp_path: Path) -> None:
     """Schema, executable killers, classes and both owed directions are required."""
     _policy(tmp_path)
@@ -272,6 +415,71 @@ def test_plan_gate_integrity(tmp_path: Path) -> None:
         "named control",
     )
     assert closure.gate_integrity(tmp_path, (phase,), (record,), _execution()) == ()
+    explicit = ((record.identifier, 0),)
+    (tmp_path / "DEVELOPMENT_PLAN/development_plan_standards.md").write_text(
+        "No legacy prefix table.\n", encoding="utf-8"
+    )
+    assert (
+        closure.gate_integrity(
+            tmp_path, (phase,), (record,), _execution(), mutant_owners=explicit
+        )
+        == ()
+    )
+    assert closure.gate_integrity(
+        tmp_path, (phase,), (record,), _execution(), mutant_owners=()
+    )
+    assert closure.gate_integrity(
+        tmp_path,
+        (phase,),
+        (record,),
+        _execution(),
+        mutant_owners=(*explicit, *explicit),
+    )
+    assert closure.gate_integrity(
+        tmp_path,
+        (phase,),
+        (record,),
+        _execution(),
+        mutant_owners=((record.identifier, 1),),
+    )
+    (tmp_path / "DEVELOPMENT_PLAN/development_plan_standards.md").write_text(
+        "| [Governance](" + PHASE_FILE + ") | `M-legs-` |\n", encoding="utf-8"
+    )
+    for name in (
+        "../" + tmp_path.name + "/tests/oracles/example.toml",
+        "tests/oracles",
+        "tests/../tests/oracles/example.toml",
+    ):
+        invalid = replace(
+            phase, text=phase.text.replace("tests/oracles/example.toml", name)
+        )
+        assert closure.gate_integrity(tmp_path, (invalid,), (record,), _execution())
+    malformed = replace(
+        phase,
+        text=phase.text.replace("value: pure control", "value")
+        + INTEGRITY.split("|---|---|---|---|---|\n", 1)[1]
+        .replace("R20 — known control", "R20 — second control")
+        .replace("value: pure control", "value"),
+    )
+    errors = closure.gate_integrity(tmp_path, (malformed,), (record,))
+    assert any("known control" in error for error in errors)
+    assert any("second control" in error for error in errors)
+    unknown = replace(phase, text=phase.text.replace("R20 —", "R99 —"))
+    assert any(
+        "undeclared requirement R99" in error
+        for error in closure.gate_integrity(tmp_path, (unknown,), (record,))
+    )
+    assert any(
+        "undeclared corpus mutant M-legs-control" in error
+        for error in closure.gate_integrity(tmp_path, (), (record,))
+    )
+    unauthorized = replace(
+        phase, text=phase.text.replace("M-legs-control", "M-other-control")
+    )
+    assert any(
+        "no authorized prefix for M-other-control" in error
+        for error in closure.gate_integrity(tmp_path, (unauthorized,), (record,))
+    )
     assert isinstance(closure.integrity_row(()), Err)
     assert isinstance(
         closure.integrity_row(
@@ -382,6 +590,19 @@ def test_plan_cited_paths(tmp_path: Path) -> None:
     (tmp_path / "src").mkdir()
     (tmp_path / "src/subject.py").write_text("value = 1", encoding="utf-8")
     assert closure.cited_paths(tmp_path, (phase,)) == ()
+    captured = closure.CapturedPolicy(
+        None, "", "", frozenset({"src/subject.py"}), directories=frozenset({"src"})
+    )
+    (tmp_path / "src/subject.py").unlink()
+    assert closure.cited_paths(tmp_path, (phase,), captured=captured) == (), (
+        "captured implementation path was ignored"
+    )
+    assert closure.cited_paths(tmp_path, (phase,))
+    directory_phase = replace(
+        phase,
+        sprints=(replace(phase.sprints[0], text="**Implementation**: `src/`\n"),),
+    )
+    assert closure.cited_paths(tmp_path, (directory_phase,), captured=captured) == ()
     for path in (".build/output", "logs/run", "result.log", "../outside", "."):
         altered = replace(
             phase,
@@ -416,6 +637,60 @@ def _covered_tree(root: Path) -> str:
     return hashed.hexdigest()
 
 
+def test_closure_evidence_oracle(root: Path, tmp_path: Path) -> None:
+    """Independent cases require real citations, paths and current evidence."""
+    store = load_scoped(root / "tests/oracles/closure_evidence.toml", root)
+    assert isinstance(store, Store)
+    assert store.effective
+    for index, row in enumerate(store.effective):
+        assert isinstance(row.inputs, Object)
+        assert isinstance(row.expected, bool)
+        values = dict(row.inputs.items)
+        subject = values["subject"]
+        case_root = tmp_path / str(index)
+        case_root.mkdir()
+        phase = _declaration(case_root)
+        if subject == "citation":
+            present = values["present"]
+            assert isinstance(present, bool)
+            execution = (
+                _execution() if present else replace(_execution(), passed=frozenset())
+            )
+            accepted = not closure.cited_ids((phase,), execution)
+        elif subject == "path":
+            present = values["present"]
+            assert isinstance(present, bool)
+            if present:
+                (case_root / "src").mkdir()
+                (case_root / "src/subject.py").write_text("value = 1", encoding="utf-8")
+            accepted = not closure.cited_paths(case_root, (phase,))
+        elif subject == "digest":
+            current = values["current"]
+            assert isinstance(current, bool)
+            digest = _covered_tree(case_root)
+            recorded = digest if current else "0" * 64
+            text = (
+                "**Status**: Done\n**Gate kind**: host-acceptance\n"
+                "**Host lane**: macos\n"
+                "**Evidence covers**: `src/` `tests/` `pyproject.toml`\n"
+                "**Gate evidence**: 2026-11-02 ; macos ; agentctl check ; pass ; tree "
+                + recorded
+                + " ; os=Darwin\n"
+            )
+            accepted = not closure.evidence_rows(
+                case_root, (replace(phase, text=text),)
+            )
+        else:
+            assert subject == "target"
+            status, present = values["status"], values["present"]
+            assert isinstance(status, str)
+            assert isinstance(present, bool)
+            accepted = isinstance(
+                closure.applicability(status, ("subject",) if present else ()), Ok
+            )
+        assert accepted == row.expected
+
+
 def test_plan_evidence_rows(tmp_path: Path) -> None:
     """A current exact lane passes; a covered ignored change stales the row."""
     assert closure.evidence_rows(tmp_path, ())
@@ -441,6 +716,7 @@ def test_plan_evidence_rows(tmp_path: Path) -> None:
     assert closure.evidence_rows(tmp_path, (phase,)), (
         "stale covered digest was accepted"
     )
+    assert closure.evidence_rows(tmp_path, (phase,), observed_digest=Ok(tree)) == ()
     reopened = (
         text.replace("**Status**: Done", "**Status**: Active").split(
             "**Gate evidence**:"
@@ -448,13 +724,39 @@ def test_plan_evidence_rows(tmp_path: Path) -> None:
         + "**Gate evidence**: none recorded\n"
     )
     assert closure.evidence_rows(tmp_path, (replace(phase, text=reopened),)) == ()
+    coverage = "phase input closure and verified prerequisite receipts"
+    current = replace(
+        phase,
+        text=(
+            "**Status**: Planned\n**Gate kind**: host-acceptance\n"
+            "**Host lane**: linux\n"
+            f"**Evidence covers**: {coverage}\n"
+            "**Gate evidence**: none recorded\n"
+        ),
+    )
+    assert closure.evidence_rows(tmp_path, (current,)) == ()
+    assert closure.evidence_rows(
+        tmp_path,
+        (replace(current, text=current.text.replace("Planned", "Done")),),
+    )
+    assert closure.evidence_rows(
+        tmp_path,
+        (
+            replace(
+                current, text=current.text.replace("none recorded", "invented receipt")
+            ),
+        ),
+    )
 
 
 def test_plan_lanes(tmp_path: Path) -> None:
     """Closed header vocabulary and Done requirements use observed lane facts."""
     phase = _declaration(tmp_path)
     facts = HostFacts(family="Linux", architecture="x86_64", checkout=True, git=True)
-    assert closure.lanes((phase,)) == ()
+    assert (
+        closure.lanes((replace(phase, text=phase.text.replace("any-host", "linux")),))
+        == ()
+    )
     assert closure.lanes((phase,), evaluate(facts)) == ()
     assert closure.lanes(
         (replace(phase, text=phase.text.replace("any-host", "mux-host")),),
@@ -463,6 +765,15 @@ def test_plan_lanes(tmp_path: Path) -> None:
     assert closure.lanes(
         (replace(phase, text=phase.text.replace("any-host", "invented")),)
     )
+    assert closure.lanes((phase,))
+    current = replace(phase, text=phase.text.replace("any-host", "linux"))
+    assert closure.lanes((current,), evaluate(facts)) == (
+        "plan.lanes: current phase receipts unavailable for " + current.path.name,
+    )
+    planned = replace(
+        current, text=current.text.replace("**Status**: Done", "**Status**: Planned")
+    )
+    assert closure.lanes((planned,), evaluate(facts)) == ()
 
 
 def test_validator_non_vacuous(tmp_path: Path) -> None:
@@ -480,3 +791,20 @@ def test_validator_non_vacuous(tmp_path: Path) -> None:
     directory.mkdir(parents=True)
     (directory / "Example.hs").write_text("module Example where\n", encoding="utf-8")
     assert closure.inapplicable(tmp_path, (future,)) == ()
+    absent = closure.CapturedPolicy(
+        None, "", "", frozenset({"DEVELOPMENT_PLAN/README.md"})
+    )
+    assert closure.inapplicable(tmp_path, (future,), captured=absent) == (
+        "Haskell source",
+    ), "captured subject census was ignored"
+    assert not next(
+        subject.paths
+        for subject in closure.subjects(tmp_path, (future,), captured=absent)
+        if subject.name == "plan"
+    )
+    present = replace(
+        absent, regular_files=frozenset({"src/agentctl/haskell/Example.hs"})
+    )
+    (directory / "Example.hs").unlink()
+    assert closure.inapplicable(tmp_path, (future,), captured=present) == ()
+    assert closure.inapplicable(tmp_path, (future,)) == ("Haskell source",)

@@ -8,20 +8,7 @@ module AgentCtl.Protocol
   )
 where
 
-import Data.Aeson (ToJSON (toJSON), object, (.=))
-
-data Handshake = Handshake
-  { handshakeProtocol :: Int,
-    handshakeCommands :: [String]
-  }
-  deriving (Eq, Show)
-
-instance ToJSON Handshake where
-  toJSON (Handshake version commands) =
-    object ["protocol" .= version, "commands" .= commands]
-
-protocolVersion :: Int
-protocolVersion = 1
+import AgentCtl.Bootstrap.Protocol (Handshake (..), protocolVersion)
 
 commandList :: [String]
 commandList =

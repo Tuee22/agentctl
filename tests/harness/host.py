@@ -8,7 +8,7 @@ import platform
 import re
 import shutil
 import tomllib
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from dataclasses import asdict
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -16,12 +16,12 @@ from tempfile import TemporaryDirectory
 import pytest
 
 import agentctl
-from agentctl.check.lanes import HostFacts
+from agentctl.check.lanes import HostFacts, read_host
 from agentctl.paths import directories
 from agentctl.process import run
 from agentctl.result import Ok
-from tests.harness.agents import isolated_environment
-from tests.harness.bootstrap_origin import capture, state_directory
+from tests.harness import isolation
+from tests.harness.isolation import isolated_environment
 
 
 def live_folder(family: str, environment: Mapping[str, str]) -> Path:
@@ -63,11 +63,6 @@ def observe_authentication(
     return statuses == [0, 0]
 
 
-def bootstrap_before(directory: Path, nonce: str) -> None:
-    """Capture raw filesystem provenance before the gate's provisioning step."""
-    capture(directory, nonce, platform.system(), os.environ, Path.home())
-
-
 def observe_xcode(family: str, directory: Path, environment: Mapping[str, str]) -> bool:
     """Qualify Darwin only when the native Command Line Tools probe succeeds."""
     executable = shutil.which("xcode-select", path=environment.get("PATH", ""))
@@ -80,7 +75,7 @@ def observe_xcode(family: str, directory: Path, environment: Mapping[str, str]) 
 def clean_recipe() -> bool:
     """Recognise Docker's marker and the recipe's independent Stage A observation."""
     initial = (
-        state_directory(platform.system(), os.environ, Path.home())
+        isolation.state_directory(platform.system(), os.environ, Path.home())
         / "clean-host-stage-a/bootstrap-host.json"
     )
     if not Path("/.dockerenv").is_file() or not initial.is_file():
@@ -261,7 +256,9 @@ def observe(root: Path, nonce: str, destination: Path) -> HostFacts:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def record_host(root: Path, tmp_path_factory: pytest.TempPathFactory) -> HostFacts:
+def record_host(
+    root: Path, tmp_path_factory: pytest.TempPathFactory
+) -> Iterator[HostFacts]:
     """Keep the whole-suite observation under its own run identity and storage."""
     nonce = os.environ.get("AGENTCTL_CHECK_NONCE", "focused")
     manifest = os.environ.get("AGENTCTL_CHECK_MANIFEST")
@@ -270,4 +267,9 @@ def record_host(root: Path, tmp_path_factory: pytest.TempPathFactory) -> HostFac
         if manifest is not None
         else tmp_path_factory.mktemp("host")
     )
-    return observe(root, nonce, directory / "host.json")
+    destination = directory / "host.json"
+    facts = observe(root, nonce, destination)
+    yield facts
+    current = read_host(destination, nonce)
+    assert isinstance(current, Ok), "host observation changed during test execution"
+    assert current.value == facts, "host observation changed during test execution"

@@ -1,15 +1,15 @@
 # Copyright (c) 2026 agentctl contributors.
 """Current-run binary identity as an explicit gate step after Cabal build."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Literal
 
 import click
 
-from agentctl.bootstrap import binary
-from agentctl.hostfacts import HostContext
-from agentctl.result import Err
+from agentctl.bootstrap import binary, build
+from agentctl.foundation import Err
+from agentctl.foundation_host import HostContext
 
 
 @dataclass(frozen=True, slots=True)
@@ -28,7 +28,12 @@ def run_step(step: IdentityStep) -> int:
     if isinstance(context, Err):
         click.echo(context.error.message, err=True)
         return 1
-    identity = binary.identify(context.value, step.data)
+    offline = replace(context.value, options=("--offline",), prepared_index_only=True)
+    indexed = build.verify_prepared_index(offline)
+    if isinstance(indexed, Err):
+        click.echo(indexed.error.message, err=True)
+        return 1
+    identity = binary.identify(offline, step.data)
     if isinstance(identity, Err):
         click.echo(identity.error.message, err=True)
         return 1

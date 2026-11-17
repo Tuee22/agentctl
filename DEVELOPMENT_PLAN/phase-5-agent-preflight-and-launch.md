@@ -34,7 +34,7 @@ This phase needs Linux only. The declared tests are executable contracts; an abs
 
 **Status**: Planned
 **Implementation**: `src/agentctl/haskell/src/AgentCtl/Agent/`, `src/agentctl/haskell/src/AgentCtl/Preflight.hs`
-**Validation tests**: `tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle`, `tests/integration/test_agent_auth_probe.py::test_auth_probe_is_status_only`, `tests/integration/test_agent_install_refusal.py::test_missing_requested_agent_has_no_install_effects`
+**Validation tests**: `tests/unit/test_launch_argv.py::test_launch_argv_matches_oracle`, `tests/integration/test_agent_auth_probe.py::test_auth_probe_is_status_only`, `tests/integration/test_agent_install_refusal.py::test_missing_requested_agent_has_no_install_effects`, `tests/integration/test_agent_argv_real.py::test_final_argv_accepted_logged_out`, `tests/integration/test_preflight.py::test_order_mux_then_agent_then_auth`, `tests/integration/test_ready_opaque.py::test_ready_constructor_is_not_exported`, `tests/unit/test_agent_resolution.py::test_resolution_matches_oracle`, `tests/unit/test_agent_table.py::test_agent_table_matches_oracle`, `tests/unit/test_auth_status.py::test_classify_auth_matches_oracle`, `tests/unit/test_preflight.py::test_failure_warnings_match_oracle`
 **Mutants**: `M-agent-auto-install`, `M-argv-mandatory-flags-first`, `M-auth-login-spawn`
 **Closes**: R9, R10, R11, R12.2, R13
 **Docs to update**: `documents/architecture/launch_contract.md`, `documents/architecture/python_haskell_boundary.md`, `documents/operations/installation.md`
@@ -60,8 +60,8 @@ The whole sprint.
 ### Sprint 5.2: Named launch, reattach and startup failure [Planned]
 
 **Status**: Planned
-**Implementation**: `src/agentctl/haskell/src/AgentCtl/Launch.hs`, `src/agentctl/haskell/src/AgentCtl/Session/Name.hs`
-**Validation tests**: `tests/e2e/test_launch.py::test_rerun_reattaches_without_preflight`, `tests/e2e/test_launch.py::test_instant_exit_relays_output_and_leaves_nothing`, `tests/e2e/test_passthrough_argv.py::test_through_stack_rows`
+**Implementation**: `src/agentctl/haskell/src/AgentCtl/Launch.hs`, `src/agentctl/haskell/src/AgentCtl/Session/Name.hs`, `tests/harness/live.py`, `tests/harness/sessions.py`
+**Validation tests**: `tests/e2e/test_launch.py::test_rerun_reattaches_without_preflight`, `tests/e2e/test_launch.py::test_instant_exit_relays_output_and_leaves_nothing`, `tests/e2e/test_passthrough_argv.py::test_through_stack_rows`, `tests/integration/test_mux_resolution.py::test_session_name_constructor_is_private`, `tests/unit/test_launch_plan.py::test_launch_plan_matches_oracle`, `tests/unit/test_session_names.py::test_session_names_match_oracle`
 **Mutants**: `M-launch-folder-collision`, `M-launch-preflight-bypassed`, `M-launch-failure-leaks-session`
 **Closes**: R7, R8, R12
 **Docs to update**: `documents/architecture/launch_contract.md`, `documents/architecture/python_haskell_boundary.md`, `documents/operations/installation.md`
@@ -72,7 +72,7 @@ Named launch, reattach and startup failure supplies its complete owned contract 
 
 #### Deliverables
 
-Deliver the launch observer with generation/acknowledgment marker publication and closed handles, extending the already usable base mux observer. Derive canonical folder+agent names, disambiguate collisions and reattach without repeating unnecessary readiness work. A checked Ready capability authorizes creation; failed creation leaves no managed session. Startup exit reports actual child status and output.
+Deliver the launch observer with generation/acknowledgment marker publication and closed handles, extending the already usable base mux observer. Separate live launch observation from later session helpers and prove it remains usable. Derive canonical folder+agent names, disambiguate collisions and reattach without repeating unnecessary readiness work. A checked Ready capability authorizes creation; failed creation leaves no managed session. Startup exit reports actual child status and output.
 
 #### Validation
 

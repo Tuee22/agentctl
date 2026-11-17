@@ -108,7 +108,7 @@ exception: its authority is the owned private spec described by
 
 ## The Python Spawn Set
 
-Every Python process operation goes through `src/agentctl/process.py`. The permitted families are the core
+Every Python process operation goes through `src/agentctl/foundation_process.py`. The permitted families are the core
 handoff/handshake, the Haskell bootstrap toolchain and its necessary native probes, and the development gate's
 declared tools and read-only evidence observers. There is no Python Rust, Cargo, psmux, tmux, Claude, Codex or
 runtime package-manager execution path.

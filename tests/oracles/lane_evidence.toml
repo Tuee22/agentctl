@@ -1,0 +1,39 @@
+[[case]]
+id = "lane.done.unmet"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "refusal", status = "Done", mux = false }
+expected = true
+
+[[case]]
+id = "lane.done.met"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "refusal", status = "Done", mux = true }
+expected = false
+
+[[case]]
+id = "lane.planned.unmet"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "refusal", status = "Planned", mux = false }
+expected = false
+
+[[case]]
+id = "lane.pass.evidence"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "evidence", code = 0 }
+expected = true
+
+[[case]]
+id = "lane.failed.no-evidence"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { subject = "evidence", code = 1 }
+expected = false

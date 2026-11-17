@@ -16,6 +16,65 @@ from agentctl.result import Ok
 pytestmark = pytest.mark.evidence("real")
 
 
+def test_cold_gate_tool_checks_do_not_install(root: Path, tmp_path: Path) -> None:
+    """A cold gate refuses before any process or network preparation effect."""
+    program = (
+        "import sys\n"
+        "from pathlib import Path\n"
+        "from agentctl.bootstrap import build\n"
+        "from agentctl.bootstrap.toolchain import Toolchain, record\n"
+        "from agentctl.check.haskell import HaskellStep, run_step as haskell\n"
+        "from agentctl.check.identity import IdentityStep, run_step as identity\n"
+        "from agentctl.check.style import StyleStep, run_step as style\n"
+        "from agentctl.check.toolchain import EnsureStep, run_step as toolchain\n"
+        "from agentctl.result import Err, Ok\n"
+        "from tests.harness.bootstrap import context, pins\n"
+        "host = context(Path(sys.argv[1]))\n"
+        "project = Path(sys.argv[2]) / 'src/agentctl/haskell'\n"
+        "def audit(event, args):\n"
+        "    if event in ('subprocess.Popen', 'socket.connect'):\n"
+        "        raise RuntimeError('unexpected preparation effect: ' + event)\n"
+        "sys.addaudithook(audit)\n"
+        "assert toolchain(EnsureStep(host, Ok(pins()))) == 1\n"
+        "assert style(StyleStep('fourmolu', host, project, Ok(pins()))) == 1\n"
+        "assert style(StyleStep('hlint', host, project, Ok(pins()))) == 1\n"
+        "assert not host.cache.exists()\n"
+        "native = build.BuildContext(project, host.cache / 'build', host, "
+        "Toolchain('/missing/ghc', '/missing/cabal'), "
+        "options=('--offline',), prepared_index_only=True)\n"
+        "assert isinstance(build.compile_target(native, 'all'), Err)\n"
+        "assert not host.cache.exists()\n"
+        "assert '--offline' in build.arguments(native, 'build', 'all')\n"
+        "index = host.cache / 'cabal/packages/hackage.haskell.org/01-index.tar'\n"
+        "index.parent.mkdir(parents=True)\n"
+        "index.write_bytes(b'fixture')\n"
+        "(host.cache / 'cabal/config').write_text('fixture')\n"
+        "receipt = host.cache / 'cabal/agentctl-index-state'\n"
+        "state = build.index_state(project)\n"
+        "assert isinstance(state, Ok)\n"
+        "receipt.write_text(state.value)\n"
+        "assert build.verify_prepared_index(native) == Ok(None)\n"
+        "receipt.write_text('stale')\n"
+        "assert isinstance(build.verify_prepared_index(native), Err)\n"
+        "tools = Toolchain(str(Path(sys.executable).resolve()), "
+        "str(Path(sys.executable).resolve()))\n"
+        "assert record(tools, host.cache) == Ok(tools)\n"
+        "assert haskell(HaskellStep('cabal-build', host, project), "
+        "host.cache / 'reports', 'nonce') == 1\n"
+        "assert haskell(HaskellStep('cabal-test', host, project), "
+        "host.cache / 'reports', 'nonce') == 1\n"
+        "assert identity(IdentityStep(host, project, host.cache / 'data')) == 1\n"
+    )
+    result = run(
+        [sys.executable, "-c", program, str(tmp_path / "private"), str(root)],
+        cwd=root,
+        env=os.environ,
+    )
+    assert isinstance(result, Ok)
+    assert result.value.code == 0, result.value.stderr
+    assert "prepare the pinned toolchain before check" in result.value.stderr
+
+
 def _probe(
     root: Path, temporary: Path, tool: str, fixture: str, *, valid: bool
 ) -> Output:

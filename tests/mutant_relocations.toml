@@ -1,0 +1,167 @@
+[[relocation]]
+id = "M-evidence-startup-bytecode"
+source = "tests/mutants/evidence.toml"
+destination = "tests/mutants/bootstrap_startup.toml"
+sha256 = "0734580d08e77eb6c5047c5585bc7330c987b4a70616479fd1034976de403cd5"
+provenance = "decision:D-97"
+
+[[relocation]]
+id = "M-boot-windows-arm64-allowed"
+source = "tests/mutants/bootstrap_plan.toml"
+destination = "tests/mutants/governance_preconditions.toml"
+sha256 = "facf492106d84bbf1490e61032d76016eb584dc3749c3036b4c27dd6f262971f"
+provenance = "decision:D-98"
+
+[[relocation]]
+id = "M-cache-identity-step-dropped"
+source = "tests/mutants/build_cache.toml"
+destination = "tests/mutants/governance_identity.toml"
+sha256 = "6bb3156a0b17743a20045d38fb992e0b09dee184f89fbd5c2f1a9cb66fddea2c"
+provenance = "decision:D-99"
+
+[[relocation]]
+id = "M-mux-socket-length-unchecked"
+source = "tests/mutants/mux.toml"
+destination = "tests/mutants/governance_preconditions.toml"
+sha256 = "0d4535096ae51db07c9826a14981c3a6e56df6875b8bfbaf0aa651e42d5225e1"
+provenance = "decision:D-100"
+
+[[relocation]]
+id = "M-mux-native-exec-scope-unchecked"
+source = "tests/mutants/mux.toml"
+destination = "tests/mutants/governance_native_controls.toml"
+sha256 = "c13ae10a7ee396a40b578e2cca99d66ac9995abf624f4754bf858f77ef5f332a"
+provenance = "decision:D-100"
+
+[[relocation]]
+id = "M-mux-native-suppressions-unchecked"
+source = "tests/mutants/mux.toml"
+destination = "tests/mutants/governance_native_controls.toml"
+sha256 = "391c813d7a91c40ea0695382d2da494d7458da11c748069c95052bcc1395faaa"
+provenance = "decision:D-100"
+
+[[relocation]]
+id = "M-mux-native-test-branches-unchecked"
+source = "tests/mutants/mux.toml"
+destination = "tests/mutants/governance_native_controls.toml"
+sha256 = "081977b4ccbe00d8f06bcddb12f932865de31af946c095b23c88646a48eb912c"
+provenance = "decision:D-100"
+
+[[relocation]]
+id = "M-mux-foreign-exec-owner-unchecked"
+source = "tests/mutants/mux.toml"
+destination = "tests/mutants/governance_native_controls.toml"
+sha256 = "954cea50b4cbbee3b16cb7310ee8c4221be72baf6342e7e9146e4d91a89eabf1"
+provenance = "decision:D-100"
+
+[[relocation]]
+id = "M-style-drop-hlint"
+source = "tests/mutants/style_legs.toml"
+destination = "tests/mutants/governance_style.toml"
+sha256 = "71c3e88179e46783e8290795319d9188828c842a4062d188f7271b7722b98bc5"
+provenance = "decision:D-101"
+
+[[relocation]]
+id = "M-style-fourmolu-inplace"
+source = "tests/mutants/style_legs.toml"
+destination = "tests/mutants/governance_style.toml"
+sha256 = "c095aa5d101d47bfa4e2117e5ea8822dd2d77ad0f94d335d961495f16dcf54b4"
+provenance = "decision:D-101"
+
+[[relocation]]
+id = "M-boot-recipe-stage-a-root"
+source = "tests/mutants/toolchain.toml"
+destination = "tests/mutants/linux_clean_recipe.toml"
+sha256 = "79c78f7b307bc5fab53b2ebfc2956b6cd9b9e68785340211e3779fe0519e22ed"
+provenance = "decision:D-102"
+
+[[relocation]]
+id = "M-boot-step-not-run"
+source = "tests/mutants/toolchain.toml"
+destination = "tests/mutants/governance_toolchain.toml"
+sha256 = "589e21f1ac6cad53ebdc0a4cbec3ce7285b5b1472afed145e4f970f912e31d32"
+provenance = "decision:D-102"
+
+[[relocation]]
+id = "M-build-wheel-excludes-haskell"
+source = "tests/mutants/haskell_build.toml"
+destination = "tests/mutants/governance_packaging.toml"
+sha256 = "1f119b7fdd5276a2984e4ec579730c80a32ad1addba78d0a797720f6353e3722"
+provenance = "decision:D-103"
+
+[[relocation]]
+id = "M-classify-status-other-agent"
+source = "tests/mutants/classify_status.toml"
+destination = "tests/mutants/observation_status.toml"
+sha256 = "8f5166314649ae9a13740bde58755ebcbf7a52245c78112b65904c3539adb9fb"
+provenance = "decision:D-104"
+
+[[relocation]]
+id = "M-capture-locale-decoding"
+source = "tests/mutants/capture.toml"
+destination = "tests/mutants/capture_phase3.toml"
+sha256 = "9cb0b6cde2830eab79b5b95d2dce12fab28713a57ceceed16bad53259ffabff9"
+provenance = "decision:D-105"
+
+[[relocation]]
+id = "M-capture-no-join"
+source = "tests/mutants/capture.toml"
+destination = "tests/mutants/capture_phase4.toml"
+sha256 = "984478cdb891f41376a906d48c90927d9fa665e40d6e4ed6faa2a972cf038d48"
+provenance = "decision:D-105"
+
+[[relocation]]
+id = "M-launch-cwd-on-mux-line"
+source = "tests/mutants/launch.toml"
+destination = "tests/mutants/launch_phase3.toml"
+sha256 = "0e54536d3175f54cc461edbf8212575b882cb3b0e3d6c58c0e6300f47ce1844a"
+provenance = "decision:D-105"
+
+[[relocation]]
+id = "M-mux-name-allows-double-underscore"
+source = "tests/mutants/mux.toml"
+destination = "tests/mutants/mux_phase5.toml"
+sha256 = "ff00dc838cc1fb5af9c7a9b4f1e3486950be2b6fb911e24b6db5161b16d91dae"
+provenance = "decision:D-105"
+
+[[relocation]]
+id = "M-mux-name-constructor-exported"
+source = "tests/mutants/mux.toml"
+destination = "tests/mutants/mux_phase5.toml"
+sha256 = "79bb2b5b90c4b60fcb19b361d20a9ac8e3d9b507f0ed75d2247f8639f45f488f"
+provenance = "decision:D-105"
+
+[[relocation]]
+id = "M-mux-remain-session-unqualified"
+source = "tests/mutants/mux.toml"
+destination = "tests/mutants/mux_phase10.toml"
+sha256 = "18c8abba9914919dea773a9ecec98e2a835237339e0fe73180ab2b05ec90a40b"
+provenance = "decision:D-105"
+
+[[relocation]]
+id = "M-mux-render-psmux-alias"
+source = "tests/mutants/mux.toml"
+destination = "tests/mutants/mux_phase10.toml"
+sha256 = "3ea7663e3ffa9fa5e15b0cebcb9c6c3745711f286d4912ede9b6d9db534c2b63"
+provenance = "decision:D-105"
+
+[[relocation]]
+id = "M-launch-argv-on-mux-line"
+source = "tests/mutants/passthrough.toml"
+destination = "tests/mutants/passthrough_phase5.toml"
+sha256 = "73aa4ce1dd179b9fe8884c242eae11de23cf6f4afc294402a6fd8159c32896cd"
+provenance = "decision:D-105"
+
+[[relocation]]
+id = "M-sessions-stop-prefix-target"
+source = "tests/mutants/sessions.toml"
+destination = "tests/mutants/sessions_phase4.toml"
+sha256 = "4b63f7facc0a78ac2c3cd93aa68c076cc91543505d883404a41c78d82be662b2"
+provenance = "decision:D-105"
+
+[[relocation]]
+id = "M-sessions-stop-kill-server"
+source = "tests/mutants/sessions.toml"
+destination = "tests/mutants/sessions_phase4.toml"
+sha256 = "503ee605f498fff9adc3856167ce02373347611c9a0785b31bdd1e2544c1f4cc"
+provenance = "decision:D-105"

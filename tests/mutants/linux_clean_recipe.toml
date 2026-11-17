@@ -1,0 +1,9 @@
+[[mutant]]
+id = "M-boot-recipe-stage-a-root"
+operator = "replace-literal"
+target = "tests/lanes/clean-host.Dockerfile"
+search = "USER agentctl\nWORKDIR /work/agentctl"
+replace = "USER root\nWORKDIR /work/agentctl"
+killers = ["tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle"]
+reason = "clean-host recipe differs"
+

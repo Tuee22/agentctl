@@ -26,15 +26,6 @@ killers = ["tests/unit/test_mux_values.py::test_process_tree_policy_oracle"]
 reason = "multiplexer process ownership differs from oracle"
 
 [[mutant]]
-id = "M-mux-remain-session-unqualified"
-operator = "replace-literal"
-target = "src/agentctl/haskell/src/AgentCtl/Mux/Psmux.hs"
-search = "target name pane = \"=\" ++ Text.unpack (sessionNameText name) ++ \":\" ++ Text.unpack (paneId pane)"
-replace = "target name pane = Text.unpack (Text.take 0 (sessionNameText name) <> paneId pane)"
-killers = ["tests/unit/test_mux_values.py::test_render_oracle"]
-reason = "multiplexer command differs from oracle"
-
-[[mutant]]
 id = "M-mux-letter-suffix-refused"
 operator = "replace-literal"
 target = "src/agentctl/haskell/src/AgentCtl/Mux.hs"
@@ -62,33 +53,6 @@ killers = ["tests/unit/test_mux_values.py::test_remedy_oracle"]
 reason = "multiplexer remedy differs from oracle"
 
 [[mutant]]
-id = "M-mux-name-allows-double-underscore"
-operator = "delete"
-target = "src/agentctl/haskell/src/AgentCtl/Session/Name.hs"
-search = "      || \"__\" `Text.isInfixOf` name\n"
-replace = ""
-killers = ["tests/unit/test_mux_values.py::test_session_name_oracle"]
-reason = "session name acceptance differs from oracle"
-
-[[mutant]]
-id = "M-mux-socket-length-unchecked"
-operator = "short-circuit"
-target = "src/agentctl/check/preconditions.py"
-search = "if len(str(path).encode(\"utf-8\")) <= SOCKET_PATH_LIMIT"
-replace = "if True"
-killers = ["tests/unit/test_preconditions.py::test_socket_path_length"]
-reason = "socket length was not checked"
-
-[[mutant]]
-id = "M-mux-name-constructor-exported"
-operator = "widen"
-target = "src/agentctl/haskell/src/AgentCtl/Session/Name.hs"
-search = "  ( SessionName,\n"
-replace = "  ( SessionName (..),\n"
-killers = ["tests/integration/test_mux_resolution.py::test_session_name_constructor_is_private"]
-reason = "SessionName constructor escaped"
-
-[[mutant]]
 id = "M-mux-bare-target"
 operator = "replace-literal"
 target = "src/agentctl/haskell/src/AgentCtl/Mux/Tmux.hs"
@@ -103,15 +67,6 @@ operator = "replace-literal"
 target = "src/agentctl/haskell/src/AgentCtl/Mux/Tmux.hs"
 search = "binary, \"pane-exec\", spec]"
 replace = "unwords [binary, \"pane-exec\", spec]]"
-killers = ["tests/unit/test_mux_values.py::test_render_oracle"]
-reason = "multiplexer command differs from oracle"
-
-[[mutant]]
-id = "M-mux-render-psmux-alias"
-operator = "replace-literal"
-target = "src/agentctl/haskell/src/AgentCtl/Mux/Psmux.hs"
-search = "executable = \"psmux.exe\""
-replace = "executable = \"tmux.exe\""
 killers = ["tests/unit/test_mux_values.py::test_render_oracle"]
 reason = "multiplexer command differs from oracle"
 
@@ -168,42 +123,6 @@ search = "<*> fields .: \"env\""
 replace = "<*> (Map.filter (const False) <$> fields .: \"env\")"
 killers = ["tests/integration/test_pane_exec.py::test_spec_deleted_and_status_propagated"]
 reason = "pane environment differs from spec"
-
-[[mutant]]
-id = "M-mux-native-exec-scope-unchecked"
-operator = "short-circuit"
-target = "src/agentctl/check/validator/source.py"
-search = "or relative != NATIVE_PROCESS"
-replace = "or False"
-killers = ["tests/governance/test_source_guards.py::test_native_process_boundary"]
-reason = "native exec scope was bypassed"
-
-[[mutant]]
-id = "M-mux-native-suppressions-unchecked"
-operator = "short-circuit"
-target = "src/agentctl/check/validator/source.py"
-search = "(\"src.suppression-ban\", suppression),"
-replace = "(\"src.suppression-ban\", False),"
-killers = ["tests/governance/test_source_guards.py::test_native_controls_and_walk"]
-reason = "native warning suppression was admitted"
-
-[[mutant]]
-id = "M-mux-native-test-branches-unchecked"
-operator = "short-circuit"
-target = "src/agentctl/check/validator/source.py"
-search = "(\"src.no-test-branches\", test_branch),"
-replace = "(\"src.no-test-branches\", False),"
-killers = ["tests/governance/test_source_guards.py::test_native_controls_and_walk"]
-reason = "native test branch was admitted"
-
-[[mutant]]
-id = "M-mux-foreign-exec-owner-unchecked"
-operator = "short-circuit"
-target = "src/agentctl/check/validator/source.py"
-search = "if foreign_exec and not relative.endswith(\"/AgentCtl/Process.hs\"):"
-replace = "if False:"
-killers = ["tests/governance/test_source_guards.py::test_native_process_boundary"]
-reason = "foreign exec binding escaped its owner"
 
 [[mutant]]
 id = "M-mux-harness-kills-foreign-socket"

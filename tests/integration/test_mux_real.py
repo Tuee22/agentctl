@@ -13,8 +13,13 @@ import pytest
 from agentctl.check.writeguard import containment
 from agentctl.process import alive
 from agentctl.result import Err, Ok
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.launch import observe_mux, prepare
 from tests.harness.tmux import Actor, PrivateMux, pane_identifier
+from tests.harness.tmux_fixtures import mux_server as _mux_server_fixture
+
+haskell_build = _haskell_build_fixture
+mux_server = _mux_server_fixture
 
 WAIT_SECONDS = 10
 EXIT_STATUS = 3

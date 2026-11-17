@@ -1,0 +1,9 @@
+[[mutant]]
+id = "M-capture-no-join"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Mux/Tmux.hs"
+search = 'Capture pane count -> ["capture-pane", "-p", "-J", "-t", text (paneText pane), "-S", "-" ++ show count]'
+replace = 'Capture pane count -> ["capture-pane", "-p", "-t", text (paneText pane), "-S", "-" ++ show count]'
+killers = ["tests/integration/test_capture_real.py::test_capture_roundtrip_on_private_server"]
+reason = "native capture differs from independently normalized fixture"
+

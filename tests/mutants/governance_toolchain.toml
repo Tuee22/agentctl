@@ -1,0 +1,8 @@
+[[mutant]]
+id = "M-boot-step-not-run"
+operator = "short-circuit"
+target = "src/agentctl/check/steps.py"
+search = "run_step(leg)"
+replace = "0"
+killers = ["tests/unit/test_toolchain_gate.py::test_readiness_failures_and_gate_step"]
+reason = "toolchain-ensure was bypassed"

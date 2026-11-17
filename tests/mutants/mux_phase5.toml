@@ -1,0 +1,18 @@
+[[mutant]]
+id = "M-mux-name-allows-double-underscore"
+operator = "delete"
+target = "src/agentctl/haskell/src/AgentCtl/Session/Name.hs"
+search = "      || \"__\" `Text.isInfixOf` name\n"
+replace = ""
+killers = ["tests/unit/test_mux_values.py::test_session_name_oracle"]
+reason = "session name acceptance differs from oracle"
+
+[[mutant]]
+id = "M-mux-name-constructor-exported"
+operator = "widen"
+target = "src/agentctl/haskell/src/AgentCtl/Session/Name.hs"
+search = "  ( SessionName,\n"
+replace = "  ( SessionName (..),\n"
+killers = ["tests/integration/test_mux_resolution.py::test_session_name_constructor_is_private"]
+reason = "SessionName constructor escaped"
+

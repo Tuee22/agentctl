@@ -1,0 +1,2526 @@
+[[mutant]]
+id = "M-phase-readiness-validation-handoff-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            readiness=readiness,\n"
+replace = "            readiness=(),\n"
+killers = ["tests/governance/test_run_evidence.py::test_readiness_reaches_validation"]
+reason = "later readiness was not passed to validation"
+
+[[mutant]]
+id = "M-phase-readiness-capture-handoff-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        entries, declarations, tool_failures.value, captured.readiness\n"
+replace = "        entries, declarations, tool_failures.value, ()\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure"]
+reason = "owned readiness failure was lost in gate handoff"
+
+[[mutant]]
+id = "M-phase-readiness-failure-globalized"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    consumers = frozenset(\n        number for artifact in artifacts for number in artifact.consumers\n    )\n"
+replace = "    consumers = frozenset(phase.number for phase in phases)\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure"]
+reason = "later readiness poisoned earlier gate observation"
+
+[[mutant]]
+id = "M-phase-readiness-prerequisite-owner-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        frozenset({TOOLCHAIN_SOURCE, PREREQUISITE_SOURCE})\n"
+replace = "        frozenset({TOOLCHAIN_SOURCE})\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_toolchain_failure_uses_captured_owner"]
+reason = "readiness without prerequisite ownership was accepted"
+
+[[mutant]]
+id = "M-phase-toolchain-scoped-handoff-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            attribution.scoped,\n"
+replace = "            (),\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure"]
+reason = "owned toolchain failure was lost in gate handoff"
+
+[[mutant]]
+id = "M-phase-toolchain-owner-reassigned"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        or any(item.owner != TOOLCHAIN_OWNER or not item.required for item in artifacts)\n"
+replace = "        or any(not item.required for item in artifacts)\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_toolchain_failure_uses_captured_owner"]
+reason = "reassigned toolchain owner was accepted"
+
+[[mutant]]
+id = "M-phase-toolchain-failure-globalized"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    toolchain_consumers = next(\n        artifact.consumers\n        for artifact in artifacts\n        if artifact.path == TOOLCHAIN_SOURCE\n    )\n"
+replace = "    toolchain_consumers = frozenset(phase.number for phase in phases)\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_toolchain_failure_uses_captured_owner"]
+reason = "later tool failure poisoned earlier phase"
+
+[[mutant]]
+id = "M-phase-toolchain-failure-left-shared"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            failures - {TOOLCHAIN_FAILURE},\n"
+replace = "            failures,\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_toolchain_failure_uses_captured_owner"]
+reason = "owned tool failure remained shared"
+
+[[mutant]]
+id = "M-phase-owned-tool-join-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            | scoped_tools[item.number],\n"
+replace = ",\n"
+killers = ["tests/governance/test_phase_reports.py::test_provisional_observations_join_captured_evidence"]
+reason = "captured owned tool failure was omitted"
+
+[[mutant]]
+id = "M-phase-finalizer-handoff-postcopy-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    checked = verify_finalizer_handoff(retained.value, context.nonce, streams[0])\n"
+replace = "    checked = Ok(None)\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_parent_rejects_postcopy_finalizer_tampering"]
+reason = "post-copy alteration was accepted"
+
+[[mutant]]
+id = "M-phase-finalizer-handoff-ambiguous-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    if len(markers) != 1 or not lines or lines[-1] != markers[0]:\n"
+replace = "    if not markers or not lines or lines[-1] != markers[0]:\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_finalizer_handoff_detects_changed_retained_record"]
+reason = "ambiguous finalizer seal was accepted"
+
+[[mutant]]
+id = "M-phase-finalizer-handoff-digest-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        if hashlib.sha256(first).hexdigest() != digest\n"
+replace = "        if False\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_finalizer_handoff_detects_changed_retained_record"]
+reason = "changed retained finalizer record was accepted"
+
+[[mutant]]
+id = "M-phase-finalizer-handoff-not-emitted"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        click.echo(finalizer_seal(recorded.value))\n"
+replace = "        pass\n"
+killers = ["tests/governance/test_run_evidence.py::test_unverified_phase_prevents_overall_pass"]
+reason = "gate omitted finalizer handoff"
+
+[[mutant]]
+id = "M-phase-finalizer-handoff-not-checked"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        handoff = verify_finalizer_handoff(context.directory, context.nonce, streams[0])\n"
+replace = "        handoff = Ok(None)\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_check_parent_retains_missing_finalizer_handoff"]
+reason = "parent did not retain missing handoff failure"
+
+[[mutant]]
+id = "M-phase-finalizer-record-overwritten"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)\n"
+replace = "        descriptor = os.open(path, os.O_WRONLY | os.O_CREAT, 0o600)\n"
+killers = ["tests/governance/test_run_evidence.py::test_finalizer_record_rejects_replay_and_changes"]
+reason = "finalizer record was overwritten"
+
+[[mutant]]
+id = "M-phase-finalizer-record-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    if isinstance(after, Ok) and after.value == before.value:\n"
+replace = "    if isinstance(after, Ok):\n"
+killers = ["tests/governance/test_run_evidence.py::test_finalizer_record_rejects_replay_and_changes"]
+reason = "finalizer record change was accepted"
+
+[[mutant]]
+id = "M-phase-finalizer-record-veto-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    code = code or record_code\n"
+replace = "    code = code\n"
+killers = ["tests/governance/test_run_evidence.py::test_invalid_finalizer_record_prevents_overall_pass"]
+reason = "invalid finalizer record allowed overall pass"
+
+[[mutant]]
+id = "M-phase-finalizer-record-not-retained"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            \"finalizer-outcomes.json\",\n"
+replace = ""
+killers = ["tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout"]
+reason = "finalizer outcomes were not retained"
+
+[[mutant]]
+id = "M-phase-finalizer-containment-status-lost"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    return Finalization(containment_code, guard_code)\n"
+replace = "    return Finalization(0, guard_code)\n"
+killers = ["tests/integration/test_guard.py::test_finalizer_outcomes"]
+reason = "containment failure was lost"
+
+[[mutant]]
+id = "M-phase-finalizer-guard-status-lost"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    return Finalization(containment_code, guard_code)\n"
+replace = "    return Finalization(containment_code, 0)\n"
+killers = ["tests/integration/test_guard.py::test_finalizer_outcomes"]
+reason = "write guard failure was lost"
+
+[[mutant]]
+id = "M-phase-shared-finalizer-damage-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        \"shared finalizer failed: \" + name for name, code in statuses if code\n"
+replace = "        \"shared finalizer failed: \" + name for name, code in statuses if False\n"
+killers = ["tests/governance/test_phase_reports.py::test_provisional_finalizers_retain_shared_damage"]
+reason = "shared finalizer failure was omitted"
+
+[[mutant]]
+id = "M-phase-incomplete-finalizers-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    if tuple(name for name, _code in statuses) != FINALIZER_NAMES or any(\n"
+replace = "    if any(\n"
+killers = ["tests/governance/test_phase_reports.py::test_provisional_finalizers_retain_shared_damage"]
+reason = "incomplete finalizer observations were accepted"
+
+[[mutant]]
+id = "M-phase-prior-failure-poisons-ratchet"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        ratchet_code = verify_baseline(root, 0)\n"
+replace = "        ratchet_code = verify_baseline(root, readiness_result(validation.code, readiness))\n"
+killers = ["tests/governance/test_run_evidence.py::test_primary_failure_does_not_poison_finalizer_observations"]
+reason = "primary failure poisoned finalizer observations"
+
+[[mutant]]
+id = "M-phase-prior-failure-poisons-guard"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            CheckRun(root, run_dir, nonce, family), before.value, 0\n"
+replace = "            CheckRun(root, run_dir, nonce, family), before.value, code\n"
+killers = ["tests/governance/test_run_evidence.py::test_primary_failure_does_not_poison_finalizer_observations"]
+reason = "primary failure poisoned finalizer observations"
+
+[[mutant]]
+id = "M-phase-provisional-summary-allows-pass"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    return int(observations is not None)\n"
+replace = "    return 0\n"
+killers = ["tests/governance/test_run_evidence.py::test_unverified_phase_prevents_overall_pass"]
+reason = "unverified phases allowed overall pass"
+
+[[mutant]]
+id = "M-phase-provisional-veto-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    code = code or provisional_code\n"
+replace = "    code = code\n"
+killers = ["tests/governance/test_run_evidence.py::test_unverified_phase_prevents_overall_pass"]
+reason = "unverified phases allowed overall pass"
+
+[[mutant]]
+id = "M-phase-provisional-tool-handoff-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        entries, declarations, tool_failures.value, captured.readiness\n"
+replace = "        entries, declarations, frozenset(), captured.readiness\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations"]
+reason = "gate lost captured tool failure"
+
+[[mutant]]
+id = "M-phase-provisional-tool-failure-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "                if code and name not in {\"pytest\", \"cabal-test\"}\n"
+replace = "                if False\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_provisional_tools_preserve_shared_failures"]
+reason = "unattributed tool failure was omitted"
+
+[[mutant]]
+id = "M-phase-provisional-coverage-failure-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            coverage.value\n"
+replace = "            frozenset()\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_provisional_tools_preserve_shared_failures"]
+reason = "coverage failure was omitted"
+
+[[mutant]]
+id = "M-phase-provisional-shared-tool-join-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        captured.shared | frozenset({\"unverified-run\"}),\n"
+replace = "        frozenset({\"unverified-run\"}),\n"
+killers = ["tests/governance/test_phase_reports.py::test_provisional_observations_join_captured_evidence"]
+reason = "captured shared tool failure was omitted"
+
+[[mutant]]
+id = "M-phase-provisional-foreign-census-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    if native_run.value.entries != entries:\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations"]
+reason = "native observation with a foreign census was accepted"
+
+[[mutant]]
+id = "M-phase-provisional-summary-promoted"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "                f\"({len(result.failures)} failures; not a verdict)\"\n"
+replace = "                f\"({len(result.failures)} failures)\"\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations"]
+reason = "provisional phase was presented as a verdict"
+
+[[mutant]]
+id = "M-phase-provisional-evidence-promoted"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        captured.shared | frozenset({\"unverified-run\"}),\n"
+replace = "        captured.shared,\n"
+killers = ["tests/governance/test_phase_reports.py::test_provisional_observations_join_captured_evidence"]
+reason = "provisional observation became a passing receipt"
+
+[[mutant]]
+id = "M-phase-provisional-collection-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            | collection[item.number]\n"
+replace = ""
+killers = ["tests/governance/test_phase_reports.py::test_provisional_observations_join_captured_evidence"]
+reason = "captured collection failure was omitted"
+
+[[mutant]]
+id = "M-phase-provisional-nonce-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    if not captured.nonce or manifest.nonce != captured.nonce:\n"
+replace = "    if not captured.nonce:\n"
+killers = ["tests/governance/test_phase_reports.py::test_provisional_observations_join_captured_evidence"]
+reason = "stale phase observation was accepted"
+
+[[mutant]]
+id = "M-phase-joined-native-failure-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/phase_reports.py"
+search = "                | native[result.number]\n"
+replace = ""
+killers = ["tests/governance/test_phase_reports.py::test_native_and_oracle_failures_join_phase_results"]
+reason = "native failure was omitted"
+
+[[mutant]]
+id = "M-phase-joined-oracle-failure-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/phase_reports.py"
+search = "                | oracle[result.number]\n"
+replace = ""
+killers = ["tests/governance/test_phase_reports.py::test_native_and_oracle_failures_join_phase_results"]
+reason = "oracle failure was omitted"
+
+[[mutant]]
+id = "M-phase-census-original-guard-not-used"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    census = ownership.guarded_census(root, expected=original_tree)\n"
+replace = "    census = ownership.guarded_census(root)\n"
+killers = ["tests/integration/test_guard.py::test_validation_binds_census_to_original_guard"]
+reason = "validation omitted the original census guard"
+
+[[mutant]]
+id = "M-phase-census-link-target-check-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/ownership.py"
+search = "    checked = census_link_targets_match_guard(entries, facts, targets.value)\n"
+replace = "    checked = Ok(None)\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_guarded_census_real_symlink"]
+reason = "forged link target was accepted"
+
+[[mutant]]
+id = "M-phase-census-link-target-digest-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/ownership.py"
+search = "            or target.digest != hashlib.sha256(entry.payloads[1]).hexdigest()\n"
+replace = ""
+killers = ["tests/integration/test_runtime_boundaries.py::test_census_link_target_matches_guard"]
+reason = "changed link target bytes matched original guard"
+
+[[mutant]]
+id = "M-phase-census-original-guard-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/ownership.py"
+search = "            if expected is not None and first != expected:\n"
+replace = "            if False:\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_source_census_matches_write_guard"]
+reason = "changed checkout accepted against original guard"
+
+[[mutant]]
+id = "M-phase-census-original-guard-not-passed"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            original_tree=before.value.tree,\n"
+replace = ""
+killers = ["tests/governance/test_run_evidence.py::test_host_observation_survives_finalizers"]
+reason = "original guard was not passed to source census"
+
+[[mutant]]
+id = "M-phase-scoped-input-placeholder-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/ownership.py"
+search = "                tuple(sorted(encoded)),\n"
+replace = "                tuple(sorted((*encoded, *((artifact.path, b\"\") for artifact in missing)))),\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_missing_phase_inputs_remain_scoped"]
+reason = "missing input disappeared without diagnostic join"
+
+[[mutant]]
+id = "M-phase-scoped-input-absence-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/phase_reports.py"
+search = "        absent = frozenset(\"missing-input:\" + name for name in phase.inputs & missing)\n"
+replace = "        absent = frozenset()\n"
+killers = ["tests/governance/test_phase_reports.py::test_scoped_missing_inputs_preserve_earlier_identity"]
+reason = "missing input was accepted"
+
+[[mutant]]
+id = "M-phase-scoped-input-verdict-globalized"
+operator = "replace-literal"
+target = "src/agentctl/check/phase_reports.py"
+search = "    base = calculate_scoped_inputs(phases, sources, passed, shared_failures)\n"
+replace = "    base = calculate(phases, sources, passed, shared_failures)\n"
+killers = ["tests/governance/test_phase_reports.py::test_collection_failures_reach_phase_verdicts"]
+reason = "missing input globalized phase verdicts"
+
+[[mutant]]
+id = "M-phase-wsl-tree-nonascii-process-refused"
+operator = "delete"
+target = "src/agentctl/check/wsl_tree.py"
+search = "(directory / \"stat\").read_text(encoding=\"utf-8\", errors=\"surrogateescape\")"
+replace = "(directory / \"stat\").read_text(encoding=\"utf-8\")"
+killers = ["tests/integration/test_wsl_tree_observation.py::test_tree_observes_all_owned_descendants"]
+reason = "unrelated process name blocked observation"
+
+[[mutant]]
+id = "M-phase-wsl-cgroup-nonascii-process-refused"
+operator = "delete"
+target = "src/agentctl/check/wsl_cgroup.py"
+search = "(directory / \"stat\").read_text(encoding=\"utf-8\", errors=\"surrogateescape\")"
+replace = "(directory / \"stat\").read_text(encoding=\"utf-8\")"
+killers = ["tests/integration/test_wsl_cgroup_observation.py::test_process_limits_use_every_ancestor"]
+reason = "non-UTF8 process name blocked observation"
+
+[[mutant]]
+id = "M-phase-wsl-guest-status-nonascii-refused"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_cgroup.py"
+search = "        rows = tuple(\n            line.decode(\"ascii\")\n            for line in data.splitlines()\n            if line.startswith(b\"Cpus_allowed_list:\")\n        )\n"
+replace = "        rows = (data.decode(\"ascii\"),)\n"
+killers = ["tests/governance/test_wsl_guest_sample.py::test_guest_memory_and_affinity_refusals"]
+reason = "unrelated process-name bytes blocked affinity"
+
+[[mutant]]
+id = "M-phase-wsl-guest-memory-key-wrong"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_guest_sample.py"
+search = "    available, swap = _field(text, \"MemAvailable\"), _field(text, \"SwapFree\")\n"
+replace = "    available, swap = _field(text, \"MemFree\"), _field(text, \"SwapFree\")\n"
+killers = ["tests/governance/test_wsl_guest_sample.py::test_guest_memory_and_affinity_refusals"]
+reason = "wrong Linux available memory was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-guest-vhd-maximum-unchecked"
+operator = "delete"
+target = "src/agentctl/check/wsl_guest_sample.py"
+search = "        or reading.volume_size > vhd_maximum\n"
+replace = ""
+killers = ["tests/governance/test_wsl_guest_sample.py::test_guest_capacity_requires_consistent_vhd_maximum"]
+reason = "undersized VHD was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-host-commit-subtraction-omitted"
+operator = "delete"
+target = "src/agentctl/check/wsl_host_sample.py"
+search = "        return self.limit - self.committed\n"
+replace = "        return self.limit\n"
+killers = ["tests/governance/test_wsl_host_sample.py::test_host_counter_schema_and_commit_headroom"]
+reason = "commitment was not subtracted"
+
+[[mutant]]
+id = "M-phase-wsl-host-counter-bound-unchecked"
+operator = "delete"
+target = "src/agentctl/check/wsl_host_sample.py"
+search = "            and 0 <= committed <= limit\n"
+replace = ""
+killers = ["tests/governance/test_wsl_host_sample.py::test_host_counter_schema_and_commit_headroom"]
+reason = "invalid commit counters were accepted"
+
+[[mutant]]
+id = "M-phase-wsl-host-volume-identity-ignored"
+operator = "short-circuit"
+target = "src/agentctl/check/wsl_host_sample.py"
+search = "    return first_device > 0 and second_device > 0 and first_device == second_device\n"
+replace = "    return False\n"
+killers = ["tests/governance/test_wsl_host_sample.py::test_host_counter_schema_and_commit_headroom"]
+reason = "shared host volume was not recognized"
+
+[[mutant]]
+id = "M-phase-wsl-monitor-escaped-process-ignored"
+operator = "short-circuit"
+target = "src/agentctl/check/wsl_monitor.py"
+search = "    if (state.seen & live) - owned.value:\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_wsl_monitor.py::test_monitor_detects_reparented_live_child"]
+reason = "live escaped process was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-monitor-interval-unchecked"
+operator = "delete"
+target = "src/agentctl/check/wsl_monitor.py"
+search = "        or sample.monotonic_ns - state.last_ns\n        > budget.sample_seconds * NANOSECONDS_PER_SECOND\n"
+replace = ""
+killers = ["tests/governance/test_wsl_monitor.py::test_monitor_rejects_stale_time_and_unobserved_members"]
+reason = "missed monitor interval was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-monitor-descendant-unchecked"
+operator = "delete"
+target = "src/agentctl/check/wsl_monitor.py"
+search = "    if len(observed) != len(sample.scope) or expected != observed:\n"
+replace = "    if len(observed) != len(sample.scope):\n"
+killers = ["tests/governance/test_wsl_monitor.py::test_monitor_rejects_stale_time_and_unobserved_members"]
+reason = "unobserved descendant was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-monitor-root-reuse-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/wsl_monitor.py"
+search = "    if (state.root_pid, state.root_start) not in owned.value:\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_wsl_monitor.py::test_monitor_rejects_stale_time_and_unobserved_members"]
+reason = "recycled monitor root was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-monitor-budget-change-accepted"
+operator = "delete"
+target = "src/agentctl/check/wsl_monitor.py"
+search = "        or budget != state.budget\n"
+replace = ""
+killers = ["tests/governance/test_wsl_monitor.py::test_monitor_rejects_stale_time_and_unobserved_members"]
+reason = "changed monitor budget was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-monitor-affinity-change-accepted"
+operator = "delete"
+target = "src/agentctl/check/wsl_monitor.py"
+search = "        or allowed_cpus != state.allowed_cpus\n"
+replace = ""
+killers = ["tests/governance/test_wsl_monitor.py::test_monitor_rejects_stale_time_and_unobserved_members"]
+reason = "changed monitor affinity was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-monitor-commit-pressure-ignored"
+operator = "short-circuit"
+target = "src/agentctl/check/wsl_monitor.py"
+search = "            if host.commit_headroom < budget.reserve_commit\n"
+replace = "            if False\n"
+killers = ["tests/governance/test_wsl_monitor.py::test_monitor_reports_live_resource_pressure"]
+reason = "host commit pressure was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-budget-guest-memory-reserve-ignored"
+operator = "delete"
+target = "src/agentctl/check/wsl_budget.py"
+search = "guest.available_memory < budget.memory + budget.reserve_guest_memory"
+replace = "guest.available_memory < budget.memory"
+killers = ["tests/governance/test_wsl_budget.py::test_budget_refuses_capacity_and_peak_gaps"]
+reason = "guest memory reserve was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-tree-invalid-identity-accepted"
+operator = "delete"
+target = "src/agentctl/check/wsl_tree.py"
+search = "        or any(\n            isinstance(item.pid, bool)\n            or isinstance(item.starttime, bool)\n            or item.pid <= 0\n            or item.starttime <= 0\n            for item in observed\n        )\n"
+replace = ""
+killers = ["tests/integration/test_wsl_tree_observation.py::test_tree_observes_all_owned_descendants"]
+reason = "invalid process identity was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-tree-grandchild-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_tree.py"
+search = "    included = next(\n        (after for before, after in pairwise(states) if before == after), frozenset()\n    )\n"
+replace = "    included = frozenset({root}) | frozenset(row.pid for row in rows if row.parent == root)\n"
+killers = ["tests/integration/test_wsl_tree_observation.py::test_tree_observes_all_owned_descendants"]
+reason = "grandchild was omitted"
+
+[[mutant]]
+id = "M-phase-wsl-tree-membership-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/wsl_tree.py"
+search = "    if members.value != frozenset(row.pid for row in first.value):\n"
+replace = "    if False:\n"
+killers = ["tests/integration/test_wsl_tree_observation.py::test_tree_refuses_missing_and_foreign_members"]
+reason = "escaped descendant was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-tree-recycled-pid-ignored"
+operator = "delete"
+target = "src/agentctl/check/wsl_tree.py"
+search = "    if before[0] != after_tree.value or before[1] != after_members.value:\n"
+replace = "    if before[1] != after_members.value:\n"
+killers = ["tests/integration/test_wsl_tree_observation.py::test_tree_refuses_recycled_pid"]
+reason = "recycled process was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-tree-child-limit-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_tree.py"
+search = "        for item in observed\n        for problem in limit_problems(item, budget, allowed_cpus)\n"
+replace = "        for item in observed[:1]\n        for problem in limit_problems(item, budget, allowed_cpus)\n"
+killers = ["tests/integration/test_wsl_tree_observation.py::test_tree_observes_all_owned_descendants"]
+reason = "child limit was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-tree-duplicate-member-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/wsl_tree.py"
+search = "    if len(set(identifiers)) != len(identifiers):\n"
+replace = "    if False:\n"
+killers = ["tests/integration/test_wsl_tree_observation.py::test_tree_refuses_duplicate_cgroup_member"]
+reason = "duplicate cgroup member was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-cgroup-cpu-ancestor-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_cgroup.py"
+search = "min(cpu)"
+replace = "max(cpu)"
+killers = ["tests/integration/test_wsl_cgroup_observation.py::test_process_limits_use_every_ancestor"]
+reason = "tightest CPU quota was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-cgroup-memory-ancestor-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_cgroup.py"
+search = "min(memory)"
+replace = "max(memory)"
+killers = ["tests/integration/test_wsl_cgroup_observation.py::test_process_limits_use_every_ancestor"]
+reason = "ancestor memory limit was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-cgroup-swap-ancestor-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_cgroup.py"
+search = "min(swap)"
+replace = "max(swap)"
+killers = ["tests/integration/test_wsl_cgroup_observation.py::test_process_limits_use_every_ancestor"]
+reason = "ancestor swap limit was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-cgroup-changed-sample-ignored"
+operator = "short-circuit"
+target = "src/agentctl/check/wsl_cgroup.py"
+search = "        if first.value != second.value:\n"
+replace = "        if False:\n"
+killers = ["tests/integration/test_wsl_cgroup_observation.py::test_process_limits_refuse_changed_sample"]
+reason = "changed cgroup sample was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-cgroup-fractional-cpu-rounded"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_cgroup.py"
+search = "observed.cpu_quota > Fraction(budget.cpu_millis, MILLIS_PER_CPU)"
+replace = "int(observed.cpu_quota) > Fraction(budget.cpu_millis, MILLIS_PER_CPU)"
+killers = ["tests/integration/test_wsl_cgroup_observation.py::test_process_limits_use_every_ancestor"]
+reason = "excess CPU quota was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-cgroup-affinity-unchecked"
+operator = "delete"
+target = "src/agentctl/check/wsl_cgroup.py"
+search = "            or not observed.cpus <= allowed_cpus\n"
+replace = ""
+killers = ["tests/integration/test_wsl_cgroup_observation.py::test_process_limits_use_every_ancestor"]
+reason = "excess CPU affinity was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-budget-run-deadline-ignored"
+operator = "delete"
+target = "src/agentctl/check/wsl_budget.py"
+search = "            or budget.run_seconds < peaks.build_seconds + peaks.test_seconds\n"
+replace = ""
+killers = ["tests/governance/test_wsl_budget.py::test_budget_refuses_capacity_and_peak_gaps"]
+reason = "whole-run deadline was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-budget-cpu-reserve-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_budget.py"
+search = "budget.cpu_millis > (host.cpus - budget.reserve_cpus) * MILLIS_PER_CPU"
+replace = "budget.cpu_millis > host.cpus * MILLIS_PER_CPU"
+killers = ["tests/governance/test_wsl_budget.py::test_budget_refuses_capacity_and_peak_gaps"]
+reason = "CPU reserve was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-budget-parallel-memory-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_budget.py"
+search = "peaks.fixed_memory + budget.workers * peaks.worker_memory"
+replace = "peaks.fixed_memory + peaks.worker_memory"
+killers = ["tests/governance/test_wsl_budget.py::test_budget_refuses_capacity_and_peak_gaps"]
+reason = "parallel memory peak was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-budget-commit-reserve-ignored"
+operator = "delete"
+target = "src/agentctl/check/wsl_budget.py"
+search = "budget.memory + budget.swap + budget.reserve_commit"
+replace = "budget.memory + budget.swap"
+killers = ["tests/governance/test_wsl_budget.py::test_budget_refuses_capacity_and_peak_gaps"]
+reason = "commit reserve was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-budget-inode-reserve-ignored"
+operator = "delete"
+target = "src/agentctl/check/wsl_budget.py"
+search = "            or guest.free_inodes < peaks.workload_inodes + budget.reserve_inodes\n"
+replace = ""
+killers = ["tests/governance/test_wsl_budget.py::test_budget_refuses_capacity_and_peak_gaps"]
+reason = "inode reserve was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-budget-monitor-interval-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_budget.py"
+search = "if not budget.sample_seconds < budget.step_seconds <= budget.run_seconds"
+replace = "if not budget.step_seconds <= budget.run_seconds"
+killers = ["tests/governance/test_wsl_budget.py::test_budget_refuses_capacity_and_peak_gaps"]
+reason = "monitor interval was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-budget-shared-volume-ignored"
+operator = "delete"
+target = "src/agentctl/check/wsl_budget.py"
+search = "        + budget.source_writes\n"
+replace = ""
+killers = ["tests/governance/test_wsl_budget.py::test_budget_combines_shared_volume_demands"]
+reason = "shared volume demand was ignored"
+
+[[mutant]]
+id = "M-phase-host-record-change-during-tests-ignored"
+operator = "delete"
+target = "tests/harness/host.py"
+search = "    assert current.value == facts, \"host observation changed during test execution\"\n"
+replace = ""
+killers = ["tests/integration/test_runtime_boundaries.py::test_host_fixture_rejects_mutated_observation"]
+reason = "changed host observation was accepted"
+
+[[mutant]]
+id = "M-phase-host-record-not-captured"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            host = host_observation(run_dir, nonce)\n"
+replace = "            host = None\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_host_observation_captured_before_followup"]
+reason = "host observation was not captured"
+
+[[mutant]]
+id = "M-phase-host-record-finalizer-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    host_after_finalizers = host_observation_unchanged(run_dir, nonce, validation.host)\n"
+replace = "    host_after_finalizers = 0\n"
+killers = ["tests/governance/test_run_evidence.py::test_host_observation_survives_finalizers"]
+reason = "host observation change during finalizers was accepted"
+
+[[mutant]]
+id = "M-phase-host-summary-rereads-file"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    host = (\n        host_observation(context.directory, context.nonce)\n        if original is None\n        else original\n    )\n"
+replace = "    host = host_observation(context.directory, context.nonce)\n"
+killers = ["tests/governance/test_run_evidence.py::test_lane_summary_pipeline_controls"]
+reason = "lane summary replaced captured host facts"
+
+[[mutant]]
+id = "M-phase-wsl-workflow-timeout-not-polled"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_workflow.py"
+search = "        polled = binding_launcher.wait(released, wait_seconds)\n"
+replace = "        polled = Ok(released)\n"
+killers = ["tests/integration/test_binding_launcher.py::test_timeout_reuses_owned_child_and_preserves_failure"]
+reason = "workflow did not poll timed-out child"
+
+[[mutant]]
+id = "M-phase-wsl-workflow-prelaunch-cleanup-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_workflow.py"
+search = "        cleaned = binding_challenge.cancel(context.root, pending.value.request.nonce)\n"
+replace = "        cleaned = Ok(None)\n"
+killers = ["tests/integration/test_binding_workflow.py::test_prelaunch_refusal_removes_only_owned_challenge"]
+reason = "prelaunch challenge was retained"
+
+[[mutant]]
+id = "M-phase-wsl-absence-source-damage-hidden"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_transaction.py"
+search = "        return _absence_failure(pending, matching.error)\n"
+replace = "        return matching\n"
+killers = ["tests/integration/test_binding_transaction.py::test_launched_transaction_retains_live_or_mismatched_peer"]
+reason = "absence failure hid checkout damage"
+
+[[mutant]]
+id = "M-phase-wsl-process-observer-bytecode-enabled"
+operator = "delete"
+target = "src/agentctl/check/binding_wsl.py"
+search = "                PYTHON_NO_BYTECODE,\n"
+replace = ""
+killers = ["tests/governance/test_binding_wsl.py::test_process_response_is_bound_to_active_unit"]
+reason = "process observer bytecode suppression was omitted"
+
+[[mutant]]
+id = "M-phase-wsl-cleanup-recheck-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_transaction.py"
+search = "    current = join_launched(joined.pending, joined.released)\n"
+replace = "    current = Ok(joined)\n"
+killers = ["tests/integration/test_binding_transaction.py::test_launched_transaction_retains_live_or_mismatched_peer"]
+reason = "live joined peer authorized cleanup"
+
+[[mutant]]
+id = "M-phase-wsl-launcher-live-child-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_launcher.py"
+search = "    if started.child.handle.poll() is None:\n"
+replace = "    if False:\n"
+killers = ["tests/integration/test_binding_launcher.py::test_timeout_reuses_owned_child_and_preserves_failure"]
+reason = "live host child was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-transaction-guest-nonce-unchecked"
+operator = "delete"
+target = "src/agentctl/check/binding_transaction.py"
+search = "        or released.observed.guest.request.nonce != pending.request.nonce\n"
+replace = ""
+killers = ["tests/integration/test_binding_transaction.py::test_launched_transaction_retains_live_or_mismatched_peer"]
+reason = "wrong guest nonce was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-launcher-registration-unchecked"
+operator = "delete"
+target = "src/agentctl/check/binding_launcher.py"
+search = "    checked = verify_registration(observed.started, live=True)\n    if isinstance(checked, Err):\n        return checked\n"
+replace = ""
+killers = ["tests/integration/test_binding_launcher.py::test_timeout_reuses_owned_child_and_preserves_failure"]
+reason = "changed host registration was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-launcher-termination-error-hidden"
+operator = "delete"
+target = "src/agentctl/check/binding_launcher.py"
+search = "            \"termination: \" + terminal.error,\n"
+replace = ""
+killers = ["tests/integration/test_binding_launcher.py::test_timeout_reuses_owned_child_and_preserves_failure"]
+reason = "termination failure was lost"
+
+[[mutant]]
+id = "M-phase-wsl-launcher-timeout-hidden"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_launcher.py"
+search = "        else released.failures\n"
+replace = "        else ()\n"
+killers = ["tests/integration/test_binding_launcher.py::test_timeout_reuses_owned_child_and_preserves_failure"]
+reason = "original timeout was lost"
+
+[[mutant]]
+id = "M-phase-wsl-stopped-populated-group-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_stopped.py"
+search = "    return Ok(populated[0] == \"0\")\n"
+replace = "    return Ok(value=True)\n"
+killers = ["tests/integration/test_binding_stopped.py::test_stopped_requires_original_pid_and_cgroup_gone"]
+reason = "populated cgroup was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-termination-repeat-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_wsl.py"
+search = "    after = _terminal_unit(config, unit, previous, call)\n"
+replace = "    after = before\n"
+killers = ["tests/governance/test_binding_wsl.py::test_termination_brackets_original_unit_and_cgroup"]
+reason = "termination observation was not bracketed"
+
+[[mutant]]
+id = "M-phase-wsl-unit-runtime-limit-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_wsl.py"
+search = "        or runtime.value != unit.limits.runtime_seconds * MICROSECONDS_PER_SECOND\n"
+replace = "        or False\n"
+killers = ["tests/governance/test_binding_wsl.py::test_active_unit_status_binds_identity_and_limits"]
+reason = "invalid WSL unit observation was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-unit-stop-limit-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_wsl.py"
+search = "        or stop_timeout.value != STOP_TIMEOUT_SECONDS * MICROSECONDS_PER_SECOND\n"
+replace = "        or False\n"
+killers = ["tests/governance/test_binding_wsl.py::test_active_unit_status_binds_identity_and_limits"]
+reason = "invalid WSL unit observation was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-peer-repeat-observation-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_wsl.py"
+search = "    after = _observe_unit(config, unit, call)\n"
+replace = "    after = before\n"
+killers = ["tests/governance/test_binding_wsl.py::test_observation_brackets_native_process"]
+reason = "unit process observation was not bracketed"
+
+[[mutant]]
+id = "M-phase-wsl-peer-process-executable-unchecked"
+operator = "delete"
+target = "src/agentctl/check/binding_process.py"
+search = "        or sample.executable != sample.interpreter\n"
+replace = ""
+killers = ["tests/governance/test_binding_process.py::test_process_sample_binds_pid_uid_cgroup_and_executable"]
+reason = "wrong binding peer process was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-peer-unit-bracket-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_wsl.py"
+search = "        before != after\n"
+replace = "        False\n"
+killers = ["tests/governance/test_binding_wsl.py::test_process_response_is_bound_to_active_unit"]
+reason = "changed WSL unit identity was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-unit-status-fields-ignored"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_wsl.py"
+search = "        any(fields[name] != value for name, value in expected.items())\n"
+replace = "        False\n"
+killers = ["tests/governance/test_binding_wsl.py::test_active_unit_status_binds_identity_and_limits"]
+reason = "invalid WSL unit observation was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-unit-quota-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_wsl.py"
+search = "        or quota.value != unit.limits.cpu_percent * 10000\n"
+replace = "        or False\n"
+killers = ["tests/governance/test_binding_wsl.py::test_active_unit_status_binds_identity_and_limits"]
+reason = "invalid WSL unit observation was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-peer-unit-control-group-omitted"
+operator = "delete"
+target = "src/agentctl/check/binding_wsl.py"
+search = "        \"--property=KillMode=control-group\",\n"
+replace = ""
+killers = ["tests/governance/test_binding_wsl.py::test_unit_invocation_is_bounded_and_nonce_named"]
+reason = "WSL peer service bound was omitted"
+
+[[mutant]]
+id = "M-phase-binding-exchange-live-peer-cleanup"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_challenge.py"
+search = "    if isinstance(termination, Err) or termination.value is not True:\n"
+replace = "    if False:\n"
+killers = ["tests/integration/test_binding_challenge.py::test_exchange_retains_challenge_until_peer_stops"]
+reason = "active challenge was removed"
+
+[[mutant]]
+id = "M-phase-native-failure-killer-consumer-lost"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = "            (*cited, *killers),\n"
+replace = "            (*cited,),\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_native_failure_joins_captured_owners_and_mutants"]
+reason = "native mutant consumer was lost"
+
+[[mutant]]
+id = "M-phase-native-unclaimed-failure-hidden"
+operator = "delete"
+target = "src/agentctl/check/phase_reports.py"
+search = "                        or by_source[by_case[node]]\n"
+replace = "                        or frozenset()\n"
+killers = ["tests/governance/test_phase_reports.py::test_native_case_failures_follow_declared_consumers"]
+reason = "unclaimed native failure was hidden from source consumers"
+
+[[mutant]]
+id = "M-phase-binding-transaction-live-peer-cleanup"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_transaction.py"
+search = "    if isinstance(stopped, Err) or stopped.value is not True:\n"
+replace = "    if False:\n"
+killers = ["tests/integration/test_binding_transaction.py::test_transaction_retains_challenge_until_peer_stops"]
+reason = "live peer challenge was removed"
+
+[[mutant]]
+id = "M-phase-binding-transaction-git-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_transaction.py"
+search = "            if isinstance(after, Ok) and before.git != after.value.git\n"
+replace = "            if False\n"
+killers = ["tests/integration/test_binding_transaction.py::test_transaction_refuses_changed_git"]
+reason = "changed Git identity was accepted"
+
+[[mutant]]
+id = "M-phase-binding-transaction-source-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_transaction.py"
+search = "            if isinstance(after, Ok) and before.entries != after.value.entries\n"
+replace = "            if False\n"
+killers = ["tests/integration/test_binding_transaction.py::test_transaction_preserves_source_damage"]
+reason = "source boundary damage was lost"
+
+[[mutant]]
+id = "M-phase-binding-transaction-remote-cleanup-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_transaction.py"
+search = "            if isinstance(remote, Ok) and remote.value is not True\n"
+replace = "            if False\n"
+killers = ["tests/integration/test_binding_transaction.py::test_transaction_requires_remote_cleanup"]
+reason = "missing remote cleanup was accepted"
+
+[[mutant]]
+id = "M-phase-binding-transaction-cleanup-error-hidden"
+operator = "delete"
+target = "src/agentctl/check/binding_transaction.py"
+search = "        *((\"cleanup: \" + cleaned.error,) if isinstance(cleaned, Err) else ()),\n"
+replace = ""
+killers = ["tests/integration/test_binding_transaction.py::test_transaction_preserves_failure_and_cleanup"]
+reason = "cleanup failure was lost"
+
+[[mutant]]
+id = "M-phase-wsl-nonutf8-output-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/wsl_registration.py"
+search = "    if \"\\x00\" in output.stdout:\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_wsl_registration.py::test_version_listing_requires_exact_unambiguous_name"]
+reason = "non-UTF-8 WSL output was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-listing-utf8-omitted"
+operator = "delete"
+target = "src/agentctl/check/wsl_registration.py"
+search = "    return {**inherited, \"WSL_UTF8\": \"1\"}\n"
+replace = "    return dict(inherited)\n"
+killers = ["tests/integration/test_wsl_encoding.py::test_wsl_listing_child_requests_utf8"]
+reason = "WSL UTF-8 request was omitted"
+
+[[mutant]]
+id = "M-phase-wsl-live-version-unchecked"
+operator = "delete"
+target = "src/agentctl/check/wsl_registration.py"
+search = "        or listed != WSL2_VERSION\n"
+replace = ""
+killers = ["tests/governance/test_wsl_registration.py::test_registration_requires_exact_owned_wsl2_identity"]
+reason = "WSL1 listing was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-list-ambiguity-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_registration.py"
+search = "    if len(matches) != 1:\n"
+replace = "    if not matches:\n"
+killers = ["tests/governance/test_wsl_registration.py::test_version_listing_requires_exact_unambiguous_name"]
+reason = "ambiguous WSL listing was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-vhd-containment-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/wsl_registration.py"
+search = "        if not directory.is_relative_to(root):\n"
+replace = "        if False:\n"
+killers = ["tests/integration/test_wsl_storage_observation.py::test_storage_observation_requires_contained_vhd"]
+reason = "foreign VHD was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-registration-version-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/wsl_registration.py"
+search = "        actual.version != WSL2_VERSION\n"
+replace = "        False\n"
+killers = ["tests/governance/test_wsl_registration.py::test_registration_requires_exact_owned_wsl2_identity"]
+reason = "WSL1 registration was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-registration-identity-unchecked"
+operator = "delete"
+target = "src/agentctl/check/wsl_registration.py"
+search = "        or actual.identifier != expected.identifier.lower()\n"
+replace = ""
+killers = ["tests/governance/test_wsl_registration.py::test_registration_requires_exact_owned_wsl2_identity"]
+reason = "wrong WSL registration was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-registration-boundary-unchecked"
+operator = "delete"
+target = "src/agentctl/check/wsl_registration.py"
+search = "        if root == base or ntpath.commonpath((root, base)) != root:\n"
+replace = "        if root == base:\n"
+killers = ["tests/governance/test_wsl_registration.py::test_registration_requires_exact_owned_wsl2_identity"]
+reason = "unowned WSL storage was accepted"
+
+[[mutant]]
+id = "M-phase-binding-local-comparison-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_transport.py"
+search = "    if isinstance(comparison, Err):\n"
+replace = "    if False:\n"
+killers = ["tests/integration/test_binding_host.py::test_join_observes_current_local_bytes"]
+reason = "different local inventory was accepted"
+
+[[mutant]]
+id = "M-phase-binding-transport-nonce-unchecked"
+operator = "delete"
+target = "src/agentctl/check/binding_transport.py"
+search = "            if (distribution, source, target, nonce) != (\n                request.distribution,\n                request.source,\n                request.target,\n                request.nonce,\n            ):\n"
+replace = "            if (distribution, source, target) != (\n                request.distribution,\n                request.source,\n                request.target,\n            ):\n"
+killers = ["tests/governance/test_binding_transport.py::test_peer_message_identity_and_evidence"]
+reason = "stale peer message was accepted"
+
+[[mutant]]
+id = "M-phase-binding-transport-mount-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_transport.py"
+search = "    if isinstance(mapping, Err):\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_binding_transport.py::test_peer_message_identity_and_evidence"]
+reason = "wrong peer mount was accepted"
+
+[[mutant]]
+id = "M-phase-binding-transport-inventory-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_transport.py"
+search = "    if isinstance(inventory, Err):\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_binding_transport.py::test_peer_message_identity_and_evidence"]
+reason = "stale peer inventory was accepted"
+
+[[mutant]]
+id = "M-phase-binding-peer-kernel-unchecked"
+operator = "delete"
+target = "src/agentctl/check/binding_peer.py"
+search = "            if family != \"Linux\" or \"microsoft-standard-wsl2\" not in kernel.lower()\n"
+replace = "            if family != \"Linux\"\n"
+killers = ["tests/governance/test_binding_peer.py::test_peer_host_identity_refusals"]
+reason = "non-WSL kernel was accepted"
+
+[[mutant]]
+id = "M-phase-binding-peer-distro-unchecked"
+operator = "delete"
+target = "src/agentctl/check/binding_peer.py"
+search = "            if not requested or distribution != requested\n"
+replace = "            if not requested\n"
+killers = ["tests/governance/test_binding_peer.py::test_peer_host_identity_refusals"]
+reason = "wrong distribution was accepted"
+
+[[mutant]]
+id = "M-phase-binding-peer-debian-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_peer.py"
+search = "        *((\"not Debian\",) if observed != (\"debian\",) else ()),\n"
+replace = "        *((\"not Debian\",) if False else ()),\n"
+killers = ["tests/governance/test_binding_peer.py::test_peer_host_identity_refusals"]
+reason = "non-Debian peer was accepted"
+
+[[mutant]]
+id = "M-phase-binding-inventory-kind-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_inventory.py"
+search = "    if not _valid(local.value) or local.value != other.value:\n"
+replace = "    if not _valid(local.value) or tuple((entry.path, entry.payloads) for entry in local.value) != tuple((entry.path, entry.payloads) for entry in other.value):\n"
+killers = ["tests/integration/test_binding_inventory.py::test_independent_inventory_includes_untracked_and_ignored"]
+reason = "changed inventory was accepted"
+
+[[mutant]]
+id = "M-phase-binding-inventory-change-ignored"
+operator = "delete"
+target = "src/agentctl/check/binding_inventory.py"
+search = "    if not _valid(local.value) or local.value != other.value:\n"
+replace = "    if not _valid(local.value):\n"
+killers = ["tests/integration/test_binding_inventory.py::test_independent_inventory_includes_untracked_and_ignored"]
+reason = "changed inventory was accepted"
+
+[[mutant]]
+id = "M-phase-binding-inventory-nonce-ignored"
+operator = "delete"
+target = "src/agentctl/check/binding_inventory.py"
+search = "        if value[\"nonce\"] != nonce or not isinstance(value[\"entries\"], list):\n"
+replace = "        if not isinstance(value[\"entries\"], list):\n"
+killers = ["tests/integration/test_binding_inventory.py::test_inventory_refuses_stale_and_malformed_data"]
+reason = "stale inventory was accepted"
+
+[[mutant]]
+id = "M-phase-binding-inventory-duplicate-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_inventory.py"
+search = "        and names == tuple(sorted(set(names)))\n"
+replace = "        and names == tuple(sorted(names))\n"
+killers = ["tests/integration/test_binding_inventory.py::test_inventory_refuses_stale_and_malformed_data"]
+reason = "duplicate inventory path was accepted"
+
+[[mutant]]
+id = "M-phase-binding-peer-success-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_challenge.py"
+search = "    completed = finish(root, nonce)\n"
+replace = "    completed = Ok(None)\n"
+killers = ["tests/integration/test_binding_challenge.py::test_exchange_refuses_peer_without_reply"]
+reason = "missing peer response accepted"
+
+[[mutant]]
+id = "M-phase-binding-failure-cleanup-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_challenge.py"
+search = "    if isinstance(response, Err):\n        cleaned = cancel(root, nonce)\n"
+replace = "    if isinstance(response, Err):\n        cleaned = Ok(None)\n"
+killers = ["tests/integration/test_binding_challenge.py::test_exchange_retains_failure_and_cleans_owned_files"]
+reason = "failed exchange retained owned challenge"
+
+[[mutant]]
+id = "M-phase-binding-cleanup-failure-hidden"
+operator = "delete"
+target = "src/agentctl/check/binding_challenge.py"
+search = "            response.error\n            + (\"; cleanup: \" + cleaned.error if isinstance(cleaned, Err) else \"\")\n"
+replace = "            response.error\n"
+killers = ["tests/integration/test_binding_challenge.py::test_exchange_preserves_cleanup_refusal"]
+reason = "cleanup failure was hidden"
+
+[[mutant]]
+id = "M-phase-binding-response-unchecked"
+operator = "delete"
+target = "src/agentctl/check/binding_challenge.py"
+search = "            or second.read_bytes() != (\"linux:\" + nonce).encode()\n"
+replace = ""
+killers = ["tests/integration/test_binding_challenge.py::test_challenge_refuses_changed_bytes"]
+reason = "changed response accepted"
+
+[[mutant]]
+id = "M-phase-binding-challenge-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_challenge.py"
+search = "if challenge.read_bytes() != (\"windows:\" + nonce).encode():"
+replace = "if False:"
+killers = ["tests/integration/test_binding_challenge.py::test_challenge_refuses_changed_bytes"]
+reason = "changed challenge accepted"
+
+[[mutant]]
+id = "M-phase-binding-foreign-entry-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_challenge.py"
+search = "if {entry.name for entry in directory.iterdir()} != {\"windows\", \"linux\"}:"
+replace = "if False:"
+killers = ["tests/integration/test_binding_challenge.py::test_challenge_preserves_unexpected_entries"]
+reason = "foreign entry was accepted"
+
+[[mutant]]
+id = "M-phase-nested-gate-state-leak"
+operator = "delete"
+target = "tests/integration/test_guard.py"
+search = "                if key\n                not in {\n                    \"AGENTCTL_CHECK_NONCE\",\n                    \"AGENTCTL_CHECK_MANIFEST\",\n                    \"AGENTCTL_MUTANT_BUILD\",\n                    \"AGENTCTL_TEST_NATIVE_ROOT\",\n                }\n"
+replace = ""
+killers = ["tests/integration/test_guard.py::test_later_fixture_failure_preserves_governance_collection"]
+reason = "nested fixture touched outer gate state"
+
+[[mutant]]
+id = "M-phase-mux-fixture-global"
+operator = "replace-literal"
+target = "tests/conftest.py"
+search = "pytest_plugins = (\"tests.harness.host\", \"tests.harness.workspace\")"
+replace = "pytest_plugins = (\"tests.harness.host\", \"tests.harness.workspace\", \"tests.harness.tmux_fixtures\")"
+killers = ["tests/integration/test_guard.py::test_later_fixture_failure_preserves_governance_collection"]
+reason = "later fixture blocked governance collection"
+
+[[mutant]]
+id = "M-phase-native-fixture-global"
+operator = "replace-literal"
+target = "tests/conftest.py"
+search = "pytest_plugins = (\"tests.harness.host\", \"tests.harness.workspace\")"
+replace = "pytest_plugins = (\"tests.harness.host\", \"tests.harness.workspace\", \"tests.harness.haskell_fixtures\")"
+killers = ["tests/integration/test_guard.py::test_later_fixture_failure_preserves_governance_collection"]
+reason = "later fixture blocked governance collection"
+
+[[mutant]]
+id = "M-phase-oracle-veto-stops-bootstrap"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            continue\n        click.echo(result.value.stderr, nl=False, err=True)\n"
+replace = "            return 1\n        click.echo(result.value.stderr, nl=False, err=True)\n"
+killers = ["tests/integration/test_guard.py::test_oracle_and_bootstrap_spawn_failures_preserved"]
+reason = "bootstrap observer failure was hidden"
+
+[[mutant]]
+id = "M-phase-host-imports-bootstrap"
+operator = "replace-literal"
+target = "tests/harness/host.py"
+search = "from tests.harness import isolation\n"
+replace = "from tests.harness import bootstrap_origin, isolation\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_host_observer_imports_without_bootstrap_helpers"]
+reason = "host observer imported later bootstrap helpers"
+
+[[mutant]]
+id = "M-phase-host-imports-agent"
+operator = "replace-literal"
+target = "tests/harness/host.py"
+search = "from tests.harness.isolation import isolated_environment\n"
+replace = "from tests.harness.agents import isolated_environment\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_host_observer_imports_without_agent_helpers"]
+reason = "host observer imported later agent helpers"
+
+[[mutant]]
+id = "M-phase-relocation-ratchet-bypassed"
+operator = "delete"
+target = "src/agentctl/check/ratchet.py"
+search = "        if isinstance(moved, Err):\n            return moved\n"
+replace = ""
+killers = ["tests/governance/test_ratchet.py::test_relocations_preserve_committed_rows"]
+reason = "edited relocated record was accepted"
+
+[[mutant]]
+id = "M-phase-unowned-collector-local"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = "                | shared\n"
+replace = ""
+killers = ["tests/governance/test_ownership_manifest.py::test_captured_collection_observations"]
+reason = "unowned collection did not invalidate every consumer"
+
+[[mutant]]
+id = "M-phase-native-diagnostic-omitted"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = "        native = haskell.native_evidence(run_dir, nonce)\n        if isinstance(native, Err):\n            click.echo(\"post-run-verifier: \" + native.error.message, err=True)\n"
+replace = ""
+killers = ["tests/governance/test_run_evidence.py::test_post_run_pipeline_controls"]
+reason = "missing native diagnostic was lost"
+
+[[mutant]]
+id = "M-phase-collection-observation-ignored"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = " or collection_code:\n"
+replace = ":\n"
+killers = ["tests/governance/test_run_evidence.py::test_post_run_pipeline_controls"]
+reason = "missing captured collection ownership was accepted"
+
+[[mutant]]
+id = "M-phase-source-link-git-allowed"
+operator = "delete"
+target = "src/agentctl/check/evidence.py"
+search = " and target.relative_to(root).parts[:1] != (\n        \".git\",\n    )"
+replace = ""
+killers = ["tests/governance/test_run_evidence.py::test_digest_link_bytes_and_errors"]
+reason = "source link accepted unguarded Git metadata"
+
+[[mutant]]
+id = "M-phase-relocation-edit-allowed"
+operator = "delete"
+target = "src/agentctl/check/ratchet.py"
+search = "            or observed != row\n"
+replace = ""
+killers = ["tests/governance/test_ratchet.py::test_mutant_relocation_preserves_all_rows"]
+reason = "a moved protected mutant record could be edited"
+
+[[mutant]]
+id = "M-phase-captured-subjects-ignored"
+operator = "short-circuit"
+target = "src/agentctl/check/validator/closure.py"
+search = "    if captured is not None and captured.regular_files is not None:\n        return tuple(\n            Subject(\n"
+replace = "    if False:\n        return tuple(\n            Subject(\n"
+killers = ["tests/governance/test_plan_validator.py::test_validator_non_vacuous"]
+reason = "captured subject census was ignored"
+
+[[mutant]]
+id = "M-phase-census-test-source-omitted"
+operator = "delete"
+target = "src/agentctl/check/evidence.py"
+search = "        or entry.path.startswith((\"src/\", \"tests/\"))\n"
+replace = "        or entry.path.startswith(\"src/\")\n"
+killers = ["tests/governance/test_run_evidence.py::test_digest_byte_vector_and_currency"]
+reason = "captured test source was omitted"
+
+[[mutant]]
+id = "M-phase-captured-path-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/validator/closure.py"
+search = "            path.as_posix()\n            in captured.regular_files | captured.symlinks | captured.directories\n"
+replace = "            (root / path).exists()\n"
+killers = ["tests/governance/test_plan_validator.py::test_plan_cited_paths"]
+reason = "captured implementation path was ignored"
+
+[[mutant]]
+id = "M-phase-captured-oracle-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/validator/closure.py"
+search = "        name in policy.regular_files\n        or (name in policy.symlinks and _oracle_present(root, name))\n"
+replace = "        _oracle_present(root, name)\n        or (name in policy.symlinks and _oracle_present(root, name))\n"
+killers = ["tests/governance/test_plan_validator.py::test_explicit_mutant_owner_refusal"]
+reason = "captured oracle file was ignored"
+
+[[mutant]]
+id = "M-phase-captured-requirements-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/validator/closure.py"
+search = "        mutant_owners.overview\n        if isinstance(mutant_owners, CapturedPolicy)\n"
+replace = "        (root / \"DEVELOPMENT_PLAN/00-overview.md\").read_text(encoding=\"utf-8\")\n        if isinstance(mutant_owners, CapturedPolicy)\n"
+killers = ["tests/governance/test_plan_validator.py::test_explicit_mutant_owner_refusal"]
+reason = "captured requirements were ignored"
+
+[[mutant]]
+id = "M-phase-census-plan-reread"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            root / path, content.value.replace(\"\\r\\n\", \"\\n\").replace(\"\\r\", \"\\n\")\n"
+replace = "            root / path, (root / path).read_text(encoding=\"utf-8\")\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_census_phase_declarations"]
+reason = "captured phase declaration was ignored"
+
+[[mutant]]
+id = "M-phase-post-run-ownership-unchecked"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = "    if isinstance(verified, Err) or mutant_owners is None or collection_code:\n"
+replace = "    if isinstance(verified, Err) or collection_code:\n"
+killers = ["tests/governance/test_run_evidence.py::test_post_run_pipeline_controls"]
+reason = "post-run accepted missing explicit mutant ownership"
+
+[[mutant]]
+id = "M-phase-optional-claim-blocks-earlier"
+operator = "short-circuit"
+target = "src/agentctl/check/steps.py"
+search = "        if not fragment.required and not any(\n            entry.path == fragment.path for entry in entries\n        ):\n            continue\n        content = _census_text(entries, fragment.path)\n"
+replace = "        content = _census_text(entries, fragment.path)\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_gate_complete_mutant_ownership"]
+reason = "absent optional claim fragment blocked current ownership"
+
+[[mutant]]
+id = "M-phase-verdict-ownership-omitted"
+operator = "delete"
+target = "src/agentctl/check/phase_reports.py"
+search = "                        | ownership_by_phase[result.number]\n"
+replace = ""
+killers = ["tests/governance/test_phase_reports.py::test_scoped_ownership_failures_reach_phase_verdicts"]
+reason = "scoped ownership failure was omitted from verdict"
+
+[[mutant]]
+id = "M-phase-missing-claim-poisons-earlier"
+operator = "replace-literal"
+target = "src/agentctl/check/ownership.py"
+search = "                    artifacts[record.target].owner,\n                    \"missing mutant claim: \" + record.identifier,\n"
+replace = "                    0,\n                    \"missing mutant claim: \" + record.identifier,\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_later_native_mutant_ownership_is_local"]
+reason = "later missing claim poisoned earlier phase"
+
+[[mutant]]
+id = "M-phase-corpus-amendment-unanchored"
+operator = "short-circuit"
+target = "src/agentctl/check/mutants.py"
+search = "        _amend_all(tuple(values), amendments, rationale.value)\n"
+replace = "        Ok(tuple(values))\n"
+killers = ["tests/governance/test_mutants.py::test_guarded_corpus_matches_live_records"]
+reason = "unanchored corpus amendment was accepted"
+
+[[mutant]]
+id = "M-phase-containment-unreadable-accepted"
+operator = "delete"
+target = "src/agentctl/check/writeguard.py"
+search = "        modes: tuple[int, ...] = ()\n        for current, directories, files in os.walk(root, onerror=_walk_error):\n"
+replace = "        modes: tuple[int, ...] = ()\n        for current, directories, files in os.walk(root):\n"
+killers = ["tests/integration/test_guard.py::test_containment_refuses_unreadable_subtree"]
+reason = "unreadable containment subtree was accepted"
+
+[[mutant]]
+id = "M-phase-verdict-mutant-owner-omitted"
+operator = "short-circuit"
+target = "src/agentctl/check/phase_reports.py"
+search = "    if len(collection) == ATTRIBUTED_COLLECTION_FIELDS:\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_phase_reports.py::test_mutation_ownership_reaches_phase_verdicts"]
+reason = "mutation ownership was omitted from verdict"
+
+[[mutant]]
+id = "M-phase-partial-mutant-owner-ignored"
+operator = "delete"
+target = "src/agentctl/check/ownership.py"
+search = "            if target is None\n            or record.target not in files\n            or target.owner != claim.owner\n"
+replace = "            if target is None\n            or record.target not in files\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_mutant_ownership_binds_target_and_killer"]
+reason = "partial claim target owner was ignored"
+
+[[mutant]]
+id = "M-phase-later-readiness-dropped"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = "    return validation or int(bool(readiness))\n"
+replace = "    return validation\n"
+killers = ["tests/unit/test_check_legs.py::test_later_readiness_retains_overall_failure"]
+reason = "later readiness failure was dropped"
+
+[[mutant]]
+id = "M-phase-scoped-tool-anchor-ignored"
+operator = "delete"
+target = "tests/harness/oracle.py"
+search = "            include_tools=\"tool\" in sources,\n"
+replace = "            include_tools=False,\n"
+killers = ["tests/governance/test_oracles.py::test_scoped_oracle_reads_required_anchors"]
+reason = "required tool provenance did not resolve"
+
+[[mutant]]
+id = "M-phase-unowned-source-hidden"
+operator = "delete"
+target = "src/agentctl/check/phase_reports.py"
+search = "    unowned = tuple(sorted(observed - frozenset(paths)))\n"
+replace = "    unowned = ()\n"
+killers = ["tests/governance/test_phase_reports.py::test_ownership_gaps_report_all_paths"]
+reason = "unowned source artifact was omitted"
+
+[[mutant]]
+id = "M-phase-later-mutant-owner-poisons-earlier"
+operator = "widen"
+target = "src/agentctl/check/ownership.py"
+search = "                tuple(error for owner, error in outcomes if owner == phase.number),\n"
+replace = "                tuple(error for _owner, error in outcomes),\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_later_native_mutant_ownership_is_local"]
+reason = "later mutant ownership poisoned earlier phase"
+
+[[mutant]]
+id = "M-phase-unverified-native-killer"
+operator = "delete"
+target = "src/agentctl/check/ownership.py"
+search = "                or not node.startswith(\"tests/\")\n                or node.split(\"::\", 1)[0] != path\n"
+replace = ""
+killers = ["tests/governance/test_ownership_manifest.py::test_mutant_ownership_binds_target_and_killer"]
+reason = "unverified native killer source was accepted"
+
+[[mutant]]
+id = "M-phase-explicit-mutant-owner-ignored"
+operator = "widen"
+target = "src/agentctl/check/validator/closure.py"
+search = "    return (identifier, phase.number) in policy.owners\n"
+replace = "    return any(name == identifier for name, _owner in policy.owners)\n"
+killers = ["tests/governance/test_plan_validator.py::test_explicit_mutant_owner_refusal"]
+reason = "wrong mutant source owner was accepted"
+
+[[mutant]]
+id = "M-phase-duplicate-mutant-killer"
+operator = "delete"
+target = "src/agentctl/check/mutants.py"
+search = "        or len(killers) != len(set(killers))\n"
+replace = ""
+killers = ["tests/governance/test_mutants.py::test_duplicate_killers_rejected"]
+reason = "duplicate mutant killers were accepted"
+
+[[mutant]]
+id = "M-phase-mutant-owner-reassigned"
+operator = "delete"
+target = "src/agentctl/check/ownership.py"
+search = "            or target.owner != claim.owner\n"
+replace = ""
+killers = ["tests/governance/test_ownership_manifest.py::test_mutant_ownership_binds_target_and_killer"]
+reason = "mutant target ownership was reassigned"
+
+[[mutant]]
+id = "M-phase-guard-index-ignored"
+operator = "delete"
+target = "src/agentctl/check/writeguard.py"
+search = "            facts += (_fact(index_path, \"--index\"),)"
+replace = "            pass"
+killers = ["tests/integration/test_guard.py::test_index_change_detected"]
+reason = "index creation was not detected"
+
+[[mutant]]
+id = "M-phase-census-guard-digest-ignored"
+operator = "delete"
+target = "src/agentctl/check/ownership.py"
+search = "            or fact.digest != hashlib.sha256(payload).hexdigest()\n"
+replace = ""
+killers = ["tests/integration/test_runtime_boundaries.py::test_source_census_matches_write_guard"]
+reason = "changed source bytes matched guard"
+
+[[mutant]]
+id = "M-phase-verdict-collection-omitted"
+operator = "delete"
+target = "src/agentctl/check/phase_reports.py"
+search = "                        | collection_by_phase[result.number]\n"
+replace = ""
+killers = ["tests/governance/test_phase_reports.py::test_collection_failures_reach_phase_verdicts"]
+reason = "collection failure was omitted from verdict"
+
+[[mutant]]
+id = "M-phase-bind-root-ignored"
+operator = "delete"
+target = "src/agentctl/check/phase_reports.py"
+search = "                or original_root != PurePosixPath(bound.root)\n"
+replace = ""
+killers = ["tests/governance/test_phase_reports.py::test_bind_mount_mapping"]
+reason = "different mount mapping was accepted"
+
+[[mutant]]
+id = "M-phase-evidence-duplicate-field"
+operator = "delete"
+target = "src/agentctl/check/evidence.py"
+search = ", object_pairs_hook=_unique_fields"
+replace = ""
+killers = ["tests/governance/test_run_evidence.py::test_manifest_duplicate_fields_refused"]
+reason = "duplicate JSON field was accepted"
+
+[[mutant]]
+id = "M-phase-duplicate-collection"
+operator = "delete"
+target = "src/agentctl/check/gate_plugin.py"
+search = "    if len(config.stash[STATE].collected) != len(session.items):\n        _record(config, \"duplicate collected node id\")\n"
+replace = ""
+killers = ["tests/governance/test_gate_plugin.py::test_duplicate_nodes_fail_session"]
+reason = "duplicate collection was not reported"
+
+[[mutant]]
+id = "M-phase-duplicate-execution"
+operator = "delete"
+target = "src/agentctl/check/gate_plugin.py"
+search = "    if item.nodeid in state.executed:\n        _record(item.config, f\"duplicate execution: {item.nodeid}\")\n        state = item.config.stash[STATE]\n"
+replace = ""
+killers = ["tests/governance/test_gate_plugin.py::test_duplicate_nodes_fail_session"]
+reason = "duplicate execution was not reported"
+
+[[mutant]]
+id = "M-phase-hardware-budget"
+operator = "widen"
+target = "src/agentctl/check/phase_reports.py"
+search = "        and not {\"windows\", \"macos\"} <= families\n"
+replace = ""
+killers = ["tests/governance/test_phase_reports.py::test_hardware_budget"]
+reason = "combined foreign families were accepted"
+
+[[mutant]]
+id = "M-phase-shared-failure-ignored"
+operator = "delete"
+target = "src/agentctl/check/phase_reports.py"
+search = "            shared_failures\n            | (phase.checks - passed)"
+replace = "            (phase.checks - passed)"
+killers = ["tests/governance/test_phase_reports.py::test_shared_failure_invalidates_dependents"]
+reason = "shared failure was ignored"
+
+[[mutant]]
+id = "M-phase-later-failure-poisons-earlier"
+operator = "widen"
+target = "src/agentctl/check/phase_reports.py"
+search = "(phase.checks - passed)"
+replace = "(frozenset(check for owner in phases for check in owner.checks) - passed)"
+killers = ["tests/governance/test_phase_reports.py::test_later_failure_preserves_earlier_verdict"]
+reason = "later failure poisoned earlier phase"
+
+[[mutant]]
+id = "M-phase-input-dependency-omitted"
+operator = "delete"
+target = "src/agentctl/check/phase_reports.py"
+search = "            *(\n                value\n                for result in previous\n                for value in (\n                    b\"prerequisite\",\n                    str(result.number).encode(\"ascii\"),\n                    result.identity.encode(\"ascii\"),\n                )\n            ),\n"
+replace = ""
+killers = ["tests/governance/test_phase_reports.py::test_receipt_input_closure"]
+reason = "prerequisite identity was omitted"
+
+[[mutant]]
+id = "M-phase-incomplete-collection"
+operator = "short-circuit"
+target = "src/agentctl/check/phase_reports.py"
+search = "if collected != executed\n            else frozenset[str]()"
+replace = "if False\n            else frozenset[str]()"
+killers = ["tests/governance/test_phase_reports.py::test_complete_collection_without_selection"]
+reason = "incomplete execution was accepted"
+
+[[mutant]]
+id = "M-phase-future-id-gates-earlier"
+operator = "widen"
+target = "src/agentctl/check/phase_reports.py"
+search = "        | observation.forbidden\n"
+replace = "        | observation.forbidden\n        | frozenset(\"future missing\" for scope in scopes for required in scope.required if not any(node == required or node.startswith(required + \"[\") for node in collected))\n"
+killers = ["tests/governance/test_phase_reports.py::test_future_missing_ids_are_owned"]
+reason = "future missing test poisoned earlier phase"
+
+[[mutant]]
+id = "M-phase-preconditions-import-bootstrap-pins"
+operator = "replace-literal"
+target = "src/agentctl/check/preconditions.py"
+search = "from agentctl.pin_values import Architecture, Pins, asset_for\n"
+replace = "from agentctl.bootstrap.pins import Architecture, Pins, asset_for\n"
+killers = ["tests/integration/test_guard.py::test_later_fixture_failure_preserves_governance_collection"]
+reason = "later fixture blocked governance collection"
+
+[[mutant]]
+id = "M-phase-socket-imports-bootstrap-build"
+operator = "replace-literal"
+target = "tests/integration/test_socket_preconditions.py"
+search = "from agentctl.check.preconditions import inspect_socket, socket_path_length\n"
+replace = "from agentctl.bootstrap import build\nfrom agentctl.check.preconditions import inspect_socket, socket_path_length\n"
+killers = ["tests/integration/test_guard.py::test_later_fixture_failure_preserves_governance_collection"]
+reason = "later fixture blocked governance collection"
+
+[[mutant]]
+id = "M-phase-native-source-claim-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/ownership.py"
+search = "                        and sources.get(node) == path\n"
+replace = "                        and True\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_observed_native_mutant_claims_require_exact_source"]
+reason = "unverified native source was accepted"
+
+[[mutant]]
+id = "M-phase-native-source-observation-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    native_source_code = _native_source_join(run_dir, nonce, inputs.source_entries)\n"
+replace = "    native_source_code = 0\n"
+killers = ["tests/governance/test_run_evidence.py::test_post_run_pipeline_controls"]
+reason = "missing native source observation was accepted"
+
+[[mutant]]
+id = "M-phase-native-tool-status-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    native_tool_code = _native_tool_join(run_dir, nonce, inputs.tool_schedule)\n"
+replace = "    native_tool_code = 0\n"
+killers = ["tests/governance/test_run_evidence.py::test_post_run_pipeline_controls"]
+reason = "failed native command was accepted as passing"
+
+[[mutant]]
+id = "M-phase-native-case-failure-hidden"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = "        _native_failure_diagnostics(run_dir, nonce)\n"
+replace = ""
+killers = ["tests/governance/test_run_evidence.py::test_post_run_pipeline_controls"]
+reason = "native case failure was hidden"
+
+[[mutant]]
+id = "M-phase-later-missing-source-poisons-earlier"
+operator = "replace-literal"
+target = "src/agentctl/check/ownership.py"
+search = "        for consumer in sorted(artifact.consumers)\n"
+replace = "        for consumer in (0,)\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_later_native_mutant_ownership_is_local"]
+reason = "missing later source poisoned earlier ownership"
+
+[[mutant]]
+id = "M-phase-linux-process-birth-wrong-field"
+operator = "replace-literal"
+target = "src/agentctl/check/process_identity.py"
+search = "    start_index = 19\n"
+replace = "    start_index = 18\n"
+killers = ["tests/integration/test_guard.py::test_linux_birth_parses_kernel_stat"]
+reason = "Linux process start time differs"
+
+[[mutant]]
+id = "M-phase-observer-birth-reuse-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/writeguard.py"
+search = "    return recorded == actual\n"
+replace = "    return True\n"
+killers = ["tests/integration/test_guard.py::test_process_birth_identifies_reuse"]
+reason = "reused process identity was treated as owned"
+
+[[mutant]]
+id = "M-phase-wsl-utf16-fallback-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_registration.py"
+search = "else (\"utf-16-le\" if b\"\\x00\" in data else \"utf-8-sig\")"
+replace = "else \"utf-8-sig\""
+killers = ["tests/governance/test_wsl_registration.py::test_version_listing_decodes_utf16_without_losing_names"]
+reason = "Unicode WSL listing was rejected"
+
+[[mutant]]
+id = "M-phase-unit-preconditions-bootstrap-import"
+operator = "replace-literal"
+target = "tests/unit/test_preconditions.py"
+search = "from pathlib import Path\n"
+replace = "from pathlib import Path\nfrom agentctl.bootstrap.pins import load\n"
+killers = ["tests/integration/test_guard.py::test_later_fixture_failure_preserves_governance_collection"]
+reason = "later fixture blocked governance collection"
+
+[[mutant]]
+id = "M-phase-unit-preconditions-prerequisites-import"
+operator = "replace-literal"
+target = "tests/unit/test_preconditions.py"
+search = "from pathlib import Path\n"
+replace = "from pathlib import Path\nfrom agentctl.check.prerequisites import PrerequisiteReadiness\n"
+killers = ["tests/integration/test_guard.py::test_later_fixture_failure_preserves_governance_collection"]
+reason = "later fixture blocked governance collection"
+
+[[mutant]]
+id = "M-phase-binding-peer-mount-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_peer.py"
+search = "    if final_mountinfo != mountinfo or final_mapping.value != mapping.value:\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_binding_peer.py::test_peer_refuses_mount_change_during_exchange"]
+reason = "changed peer mount was accepted"
+
+[[mutant]]
+id = "M-phase-binding-wsl-distribution-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_wsl.py"
+search = "        or request.distribution != registration.value.name\n"
+replace = ""
+killers = ["tests/governance/test_binding_wsl.py::test_invocation_binds_registration_and_shell_free_arguments"]
+reason = "wrong WSL distribution was accepted"
+
+[[mutant]]
+id = "M-phase-binding-wsl-cleanup-type-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_wsl.py"
+search = "    if not isinstance(value, bool):\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_binding_wsl.py::test_cleanup_response_is_a_strict_boolean"]
+reason = "invalid cleanup response was accepted"
+
+[[mutant]]
+id = "M-phase-binding-protocol-duplicates-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_protocol.py"
+search = "    if len(value) != len(pairs):\n"
+replace = "    if False:\n"
+killers = ["tests/integration/test_binding_protocol.py::test_protocol_rejects_unrecognized_or_ambiguous_input"]
+reason = "invalid peer request was accepted"
+
+[[mutant]]
+id = "M-phase-binding-peer-cleanup-entry-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_peer.py"
+search = "        directory.value.lstat()\n"
+replace = "        raise FileNotFoundError\n"
+killers = ["tests/integration/test_binding_peer_cleanup.py::test_peer_cleanup_observes_nonce_entry"]
+reason = "remaining file was ignored"
+
+[[mutant]]
+id = "M-phase-wsl-mount-filesystem-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_mount.py"
+search = "        or cgroup.value.filesystem != \"cgroup2\"\n"
+replace = ""
+killers = ["tests/governance/test_wsl_mount.py::test_mount_requires_complete_visible_native_hierarchies"]
+reason = "non-cgroup filesystem was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-mount-root-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_mount.py"
+search = "        or cgroup.value.root != \"/\"\n"
+replace = ""
+killers = ["tests/governance/test_wsl_mount.py::test_mount_requires_complete_visible_native_hierarchies"]
+reason = "partial cgroup hierarchy was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-mount-device-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_mount.py"
+search = "        or cgroup.value.device != f\"{cgroup_device.major}:{cgroup_device.minor}\"\n"
+replace = ""
+killers = ["tests/governance/test_wsl_mount.py::test_mount_requires_complete_visible_native_hierarchies"]
+reason = "mismatched mount device was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-mount-hidepid-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_mount.py"
+search = "    if any(\n"
+replace = "    if False and any(\n"
+killers = ["tests/governance/test_wsl_mount.py::test_mount_requires_complete_visible_native_hierarchies"]
+reason = "hidden process namespace was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-peer-fractional-uid-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_wsl.py"
+search = "    return isinstance(value, int)\n"
+replace = "    return True\n"
+killers = ["tests/governance/test_binding_wsl.py::test_observed_peer_uid_matches_invocation"]
+reason = "non-integer WSL peer uid was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-cleanup-nonce-ignored"
+operator = "delete"
+target = "src/agentctl/check/binding_wsl.py"
+search = "        or decoded.get(\"nonce\") != invocation.request.peer.nonce\n"
+replace = ""
+killers = ["tests/governance/test_binding_wsl.py::test_cleanup_response_is_a_strict_boolean"]
+reason = "invalid cleanup response was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-cleanup-uid-ignored"
+operator = "delete"
+target = "src/agentctl/check/binding_wsl.py"
+search = "        or decoded.get(\"uid\") != invocation.expected_uid\n"
+replace = ""
+killers = ["tests/governance/test_binding_wsl.py::test_cleanup_response_is_a_strict_boolean"]
+reason = "invalid cleanup response was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-cleanup-identity-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_peer.py"
+search = "    if before.value != after.value:\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_binding_peer.py::test_cleanup_identity_is_bracketed"]
+reason = "changed cleanup identity was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-cleanup-uid-not-transported"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_protocol.py"
+search = "                    \"uid\": absent.value[1],\n"
+replace = "                    \"uid\": 1,\n"
+killers = ["tests/integration/test_binding_protocol.py::test_cleanup_response_carries_nonce_and_uid"]
+reason = "cleanup identity was not transported"
+
+[[mutant]]
+id = "M-phase-wsl-peer-uid-mismatch-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_wsl.py"
+search = "        if decoded.value.uid == uid\n"
+replace = "        if True\n"
+killers = ["tests/governance/test_binding_wsl.py::test_observed_peer_uid_matches_invocation"]
+reason = "wrong WSL peer uid was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-peer-invalid-uid-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_wsl.py"
+search = "        or config.uid <= 0\n"
+replace = "        or False\n"
+killers = ["tests/governance/test_binding_wsl.py::test_invocation_binds_registration_and_shell_free_arguments"]
+reason = "invalid WSL peer uid was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-peer-bytecode-enabled"
+operator = "delete"
+target = "src/agentctl/check/binding_wsl.py"
+search = "                \"-B\",\n"
+replace = ""
+killers = ["tests/governance/test_binding_wsl.py::test_invocation_binds_registration_and_shell_free_arguments"]
+reason = "WSL peer bytecode suppression was omitted"
+
+[[mutant]]
+id = "M-phase-wsl-peer-root-accepted"
+operator = "delete"
+target = "src/agentctl/check/binding_wsl.py"
+search = "        or config.user == \"root\"\n"
+replace = ""
+killers = ["tests/governance/test_binding_wsl.py::test_invocation_binds_registration_and_shell_free_arguments"]
+reason = "unsafe WSL peer user was accepted"
+
+[[mutant]]
+id = "M-phase-wsl-peer-user-omitted"
+operator = "delete"
+target = "src/agentctl/check/binding_wsl.py"
+search = "                \"--user\",\n                config.user,\n"
+replace = ""
+killers = ["tests/governance/test_binding_wsl.py::test_invocation_binds_registration_and_shell_free_arguments"]
+reason = "dedicated WSL user was omitted"
+
+[[mutant]]
+id = "M-phase-native-snapshot-not-captured"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            native = _capture_native_step(leg, run_dir, nonce, source_entries) or native\n"
+replace = "            native = None\n"
+killers = ["tests/governance/test_run_evidence.py::test_native_snapshot_captured_before_later_tools"]
+reason = "native evidence was not captured before later tools"
+
+[[mutant]]
+id = "M-phase-native-source-change-ignored"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = "        or before.value.sources != after.value.sources\n"
+replace = ""
+killers = ["tests/governance/test_run_evidence.py::test_native_snapshot_captured_before_later_tools"]
+reason = "changed native source evidence was accepted"
+
+[[mutant]]
+id = "M-phase-native-finalizer-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    code = code or native_after_finalizers\n"
+replace = "    code = code\n"
+killers = ["tests/governance/test_run_evidence.py::test_native_evidence_survives_finalizers"]
+reason = "native evidence change during finalizers was accepted"
+
+[[mutant]]
+id = "M-phase-native-manifest-symlink-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    if (run_dir / \"haskell-manifest.json\").is_symlink():\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_run_evidence.py::test_native_manifest_rejects_symlinks"]
+reason = "native manifest symlink was accepted"
+
+[[mutant]]
+id = "M-phase-pytest-manifest-not-captured"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            pytest = pytest_observation(run_dir, nonce)\n"
+replace = "            pytest = None\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_pytest_manifest_captured_before_followups"]
+reason = "pytest manifest was not captured after the primary command"
+
+[[mutant]]
+id = "M-phase-pytest-manifest-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        or after.value != before.value\n"
+replace = "        or False\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_pytest_manifest_captured_before_followups"]
+reason = "changed pytest manifest was accepted"
+
+[[mutant]]
+id = "M-phase-pytest-manifest-finalizer-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    code = code or pytest_after_finalizers\n"
+replace = "    code = code\n"
+killers = ["tests/governance/test_run_evidence.py::test_pytest_manifest_survives_finalizers"]
+reason = "pytest manifest change during finalizers was accepted"
+
+[[mutant]]
+id = "M-phase-pytest-status-mismatch-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/phase_reports.py"
+search = "    if (codes[0] != 0) != test_damage:\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_phase_reports.py::test_pytest_substeps_separate_test_and_coverage_failures"]
+reason = "inconsistent pytest execution was accepted"
+
+[[mutant]]
+id = "M-phase-pytest-coverage-failure-hidden"
+operator = "replace-literal"
+target = "src/agentctl/check/phase_reports.py"
+search = "                    (\"coverage report failed\",)\n"
+replace = "                    ()\n"
+killers = ["tests/governance/test_phase_reports.py::test_pytest_substeps_separate_test_and_coverage_failures"]
+reason = "coverage failure was not shared"
+
+[[mutant]]
+id = "M-phase-pytest-coverage-veto-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    return int(bool(result.value))\n"
+replace = "    return 0\n"
+killers = ["tests/governance/test_run_evidence.py::test_pytest_leg_reports_shared_coverage_damage"]
+reason = "shared coverage damage was accepted"
+
+[[mutant]]
+id = "M-phase-tool-substep-boolean-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/evidence.py"
+search = "                            isinstance(code, int) and not isinstance(code, bool)\n                            for code in codes\n"
+replace = "                            isinstance(code, int)\n                            for code in codes\n"
+killers = ["tests/governance/test_run_evidence.py::test_tool_substep_record_boundaries"]
+reason = "invalid tool substeps were accepted"
+
+[[mutant]]
+id = "M-phase-tool-substep-status-lost"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        substeps += (code,)\n"
+replace = "        substeps += (0,)\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_tool_substeps_preserve_primary_and_followup"]
+reason = "independent tool substeps were lost"
+
+[[mutant]]
+id = "M-phase-tool-substep-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        or before.value.outcomes != after.value.outcomes\n"
+replace = "        or False\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_tool_outcomes_survive_later_execution"]
+reason = "changed tool substeps were accepted"
+
+[[mutant]]
+id = "M-phase-tool-substep-finalizer-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    code = code or substeps_after_finalizers\n"
+replace = "    code = code\n"
+killers = ["tests/governance/test_run_evidence.py::test_tool_substeps_survive_finalizers"]
+reason = "tool substep change during finalizers was accepted"
+
+[[mutant]]
+id = "M-phase-tool-substeps-not-retained"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            \"tool-substeps.json\",\n"
+replace = ""
+killers = ["tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout"]
+reason = "tool substeps were not retained"
+
+[[mutant]]
+id = "M-phase-tool-outcome-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    if isinstance(after, Err) or after.value != before.value:\n"
+replace = "    if isinstance(after, Err):\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_tool_outcomes_survive_later_execution"]
+reason = "changed tool outcomes were accepted"
+
+[[mutant]]
+id = "M-phase-tool-finalizer-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    code = code or tools_after_finalizers\n"
+replace = "    code = code\n"
+killers = ["tests/governance/test_run_evidence.py::test_tool_outcomes_survive_finalizers"]
+reason = "tool outcome change during finalizers was accepted"
+
+[[mutant]]
+id = "M-phase-missing-input-globalized"
+operator = "replace-literal"
+target = "src/agentctl/check/ownership.py"
+search = "                        for artifact in missing\n                        if phase.number in artifact.consumers\n"
+replace = "                        for artifact in missing\n                        if True\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_missing_phase_inputs_remain_scoped"]
+reason = "later missing input poisoned earlier phase"
+
+[[mutant]]
+id = "M-phase-missing-input-failure-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/ownership.py"
+search = "                        for artifact in missing\n                        if phase.number in artifact.consumers\n"
+replace = "                        for artifact in ()\n                        if phase.number in artifact.consumers\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_missing_phase_inputs_remain_scoped"]
+reason = "missing source was accepted"
+
+[[mutant]]
+id = "M-phase-oracle-detail-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "or after.value != before.value:\n        click.echo(\"oracle details:"
+replace = "or False:\n        click.echo(\"oracle details:"
+killers = ["tests/governance/test_run_evidence.py::test_oracle_detail_record_boundaries"]
+reason = "changed oracle details were accepted"
+
+[[mutant]]
+id = "M-phase-oracle-detail-finalizer-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    code = code or details_after_finalizers\n"
+replace = "    code = code\n"
+killers = ["tests/governance/test_run_evidence.py::test_oracle_details_survive_finalizers"]
+reason = "oracle detail change during finalizers was accepted"
+
+[[mutant]]
+id = "M-phase-oracle-detail-original-lost"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        run_dir, nonce, validation.oracle_details\n"
+replace = "        run_dir, nonce, evidence.read_oracle_details(run_dir / \"oracle-details.json\", nonce)\n"
+killers = ["tests/governance/test_run_evidence.py::test_oracle_details_survive_finalizers"]
+reason = "oracle detail change during finalizers was accepted"
+
+[[mutant]]
+id = "M-phase-oracle-consumer-globalized"
+operator = "replace-literal"
+target = "src/agentctl/check/ownership.py"
+search = "                    if source is None or phase.number in artifacts[source].consumers\n"
+replace = "                    if True\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_oracle_failures_follow_source_consumers"]
+reason = "later oracle failure poisoned earlier phase"
+
+[[mutant]]
+id = "M-phase-oracle-status-disagreement-ignored"
+operator = "delete"
+target = "src/agentctl/check/ownership.py"
+search = "        or (status == 0) != (not details.issues)\n"
+replace = ""
+killers = ["tests/governance/test_ownership_manifest.py::test_oracle_failures_follow_source_consumers"]
+reason = "oracle status disagreement was accepted"
+
+[[mutant]]
+id = "M-phase-oracle-detail-duplicates-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/evidence.py"
+search = "            if len(sources) != len(set(sources)):\n"
+replace = "            if False:\n"
+killers = ["tests/governance/test_run_evidence.py::test_oracle_detail_record_boundaries"]
+reason = "invalid oracle detail record was accepted"
+
+[[mutant]]
+id = "M-phase-oracle-attribution-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    diagnostic = report_oracle_diagnostics(run_dir, nonce, census, oracle_before)\n"
+replace = "    diagnostic = Ok(())\n"
+killers = ["tests/integration/test_guard.py::test_oracle_failure_survives_invalid_corpus"]
+reason = "oracle source attribution was omitted"
+
+[[mutant]]
+id = "M-phase-oracle-file-source-lost"
+operator = "replace-literal"
+target = "tests/harness/oracle.py"
+search = "            sources[0]\n"
+replace = "            None\n"
+killers = ["tests/governance/test_oracles.py::test_tree_reports_missing_later_anchor_locally"]
+reason = "later oracle failure lost its source"
+
+[[mutant]]
+id = "M-phase-oracle-duplicate-localized"
+operator = "replace-literal"
+target = "tests/harness/oracle.py"
+search = "if len(sources) == 1 and \"duplicate row id across files\" not in message"
+replace = "if len(sources) == 1"
+killers = ["tests/governance/test_oracles.py::test_tree_reports_missing_later_anchor_locally"]
+reason = "cross-file duplicate was localized"
+
+[[mutant]]
+id = "M-phase-oracle-details-not-retained"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            \"oracle-details.json\",\n"
+replace = ""
+killers = ["tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout"]
+reason = "oracle evidence was not retained"
+
+[[mutant]]
+id = "M-phase-oracle-original-observation-lost"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        run_dir, nonce, validation.oracle\n"
+replace = "        run_dir, nonce, oracle_observation(run_dir, nonce)\n"
+killers = ["tests/governance/test_run_evidence.py::test_original_oracle_observation_survives_handoff"]
+reason = "original oracle observation was lost"
+
+[[mutant]]
+id = "M-phase-oracle-finalizer-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    code = code or oracle_after_finalizers\n"
+replace = "    code = code\n"
+killers = ["tests/governance/test_run_evidence.py::test_oracle_outcomes_survive_finalizers"]
+reason = "oracle change during finalizers was accepted"
+
+[[mutant]]
+id = "M-phase-oracle-outcomes-tampering-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "or before.value != after.value:"
+replace = "or False:"
+killers = ["tests/governance/test_run_evidence.py::test_oracle_outcomes_survive_later_tools"]
+reason = "changed oracle outcomes were accepted"
+
+[[mutant]]
+id = "M-phase-oracle-outcomes-overwritten"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        with path.open(\"x\", encoding=\"utf-8\") as stream:\n"
+replace = "        with path.open(\"w\", encoding=\"utf-8\") as stream:\n"
+killers = ["tests/integration/test_guard.py::test_oracle_and_bootstrap_spawn_failures_preserved"]
+reason = "existing oracle outcomes were overwritten"
+
+[[mutant]]
+id = "M-phase-oracle-spawn-status-lost"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            outcomes += ((name, 1),)\n"
+replace = "            outcomes += ((name, 0),)\n"
+killers = ["tests/integration/test_guard.py::test_oracle_and_bootstrap_spawn_failures_preserved"]
+reason = "oracle or bootstrap spawn failure was misrecorded"
+
+[[mutant]]
+id = "M-phase-oracle-evidence-not-retained"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            \"oracle-outcomes.json\",\n"
+replace = ""
+killers = ["tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout"]
+reason = "oracle evidence was not retained"
+
+[[mutant]]
+id = "M-phase-host-symlink-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/lanes.py"
+search = "        if path.is_symlink():\n"
+replace = "        if False:\n"
+killers = ["tests/unit/test_lane.py::test_host_observation_schema"]
+reason = "host symlink was accepted"
+
+[[mutant]]
+id = "M-phase-host-duplicate-fields-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/lanes.py"
+search = "object_pairs_hook=_unique_host_fields"
+replace = "object_pairs_hook=None"
+killers = ["tests/unit/test_lane.py::test_host_observation_schema"]
+reason = "duplicate host nonce was accepted"
+
+[[mutant]]
+id = "M-phase-host-observation-not-retained"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            \"host.json\",\n"
+replace = ""
+killers = ["tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout"]
+reason = "host observation was not retained"
+
+[[mutant]]
+id = "M-phase-fixture-failure-localized"
+operator = "replace-literal"
+target = "src/agentctl/check/gate_plugin.py"
+search = "    if report.when != \"call\" and report.failed:\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_gate_plugin.py::test_fixture_failures_remain_shared"]
+reason = "fixture failure did not invalidate all consumers"
+
+[[mutant]]
+id = "M-phase-case-killer-consumer-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/ownership.py"
+search = "        for node in record.killers\n"
+replace = "        for node in ()\n"
+killers = ["tests/governance/test_phase_reports.py::test_shared_module_case_consumers"]
+reason = "mutant killer consumer was omitted"
+
+[[mutant]]
+id = "M-phase-case-failure-global"
+operator = "replace-literal"
+target = "src/agentctl/check/phase_reports.py"
+search = "    return not matching or any(number in phases for phases in matching)\n"
+replace = "    return True\n"
+killers = ["tests/governance/test_phase_reports.py::test_shared_module_case_consumers"]
+reason = "later case failure poisoned earlier phase"
+
+[[mutant]]
+id = "M-phase-case-consumers-join-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            case_consumers=cases.value if isinstance(cases, Ok) else None,\n"
+replace = "            case_consumers=None,\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_captured_shared_case_consumers"]
+reason = "later case failure poisoned earlier phase"
+
+[[mutant]]
+id = "M-phase-provisional-native-evidence-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    if inputs.pending_native and (\n"
+replace = "    if False and (\n"
+killers = ["tests/governance/test_run_evidence.py::test_post_run_pipeline_controls"]
+reason = "provisional native ownership passed without source evidence"
+
+[[mutant]]
+id = "M-phase-scoped-native-observation-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/ownership.py"
+search = "            if native_sources is None\n"
+replace = "            if True\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_later_native_mutant_ownership_is_local"]
+reason = "observed native source was ignored"
+
+[[mutant]]
+id = "M-phase-native-owner-join-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    if expected is None or owners.value != expected:\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_ownership_manifest.py::test_captured_native_mutant_ownership"]
+reason = "different captured owners were accepted"
+
+[[amendment]]
+id = "M-phase-mutant-owner-reassigned"
+prior_sha256 = "9892928179b3b5c0f73c8c93d12f3bd96b74aaacea283b30ae66bf19fefd1c75"
+revised_sha256 = "58ddd0d175c5d3871269f6685bbf07bd11d08ffe623c281af9bf150a9b5377df"
+search = "            or target.owner != claim.owner\n            or len(killers) != len(set(killers))\n"
+replace = "            or len(killers) != len(set(killers))\n"
+provenance = "decision:D-91"
+
+[[amendment]]
+id = "M-phase-captured-oracle-ignored"
+prior_sha256 = "ee6537c05a7bf463b8b2cdf568bd4b4231b9ae91fe80dd7948bae9b5d973d974"
+revised_sha256 = "9809eb3c0d2f67870a2763a78d92f6551e03a6217fd4c7cd75d5b6b5264fb0c3"
+search = "        name in policy.regular_files or name in policy.symlinks\n"
+replace = "        _oracle_present(root, name) or name in policy.symlinks\n"
+provenance = "decision:D-92"
+
+[[mutant]]
+id = "M-phase-provisional-record-overwritten"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL\n"
+replace = "        flags = os.O_WRONLY | os.O_CREAT\n"
+killers = ["tests/governance/test_run_evidence.py::test_provisional_phase_record_is_explicit_and_stable"]
+reason = "provisional phase record was overwritten"
+
+[[mutant]]
+id = "M-phase-provisional-record-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        unchanged = not path.is_symlink() and path.read_bytes() == before.value\n"
+replace = "        unchanged = not path.is_symlink()\n"
+killers = ["tests/governance/test_run_evidence.py::test_provisional_phase_record_is_explicit_and_stable"]
+reason = "provisional phase record change was accepted"
+
+[[mutant]]
+id = "M-phase-provisional-record-passing-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            or \"unverified-run\" not in item.failures\n"
+replace = ""
+killers = ["tests/governance/test_run_evidence.py::test_provisional_phase_record_is_explicit_and_stable"]
+reason = "passing provisional phase was recorded"
+
+[[mutant]]
+id = "M-phase-provisional-record-not-retained"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            \"provisional-phases.json\",\n"
+replace = ""
+killers = ["tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout"]
+reason = "provisional phase record was not retained"
+
+[[mutant]]
+id = "M-phase-provisional-record-veto-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "    code = code or phase_record_code\n"
+replace = "    code = code\n"
+killers = ["tests/governance/test_run_evidence.py::test_invalid_provisional_record_prevents_overall_pass"]
+reason = "invalid provisional phase record allowed overall pass"
+
+[[mutant]]
+id = "M-phase-provisional-handoff-postcopy-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        checked = verify_provisional_handoff(retained.value, context.nonce, streams[0])\n"
+replace = "        checked = Ok(None)\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_parent_rejects_postcopy_provisional_tampering"]
+reason = "post-copy provisional alteration accepted"
+
+[[mutant]]
+id = "M-phase-provisional-handoff-live-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            handoff = verify_provisional_handoff(\n                context.directory, context.nonce, streams[0]\n            )\n"
+replace = "            handoff = Ok(None)\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_parent_rejects_changed_live_provisional_record"]
+reason = "parent accepted changed live provisional record"
+
+[[mutant]]
+id = "M-phase-provisional-handoff-digest-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        if provisional_seal(nonce, contents) == markers[0]\n"
+replace = "        if True\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_parent_rejects_postcopy_provisional_tampering"]
+reason = "post-copy provisional alteration accepted"
+
+[[mutant]]
+id = "M-phase-provisional-handoff-not-emitted"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "            click.echo(provisional_seal(nonce, phase_record.value))\n"
+replace = "            pass\n"
+killers = ["tests/governance/test_run_evidence.py::test_unverified_phase_prevents_overall_pass"]
+reason = "gate omitted provisional handoff"
+
+[[mutant]]
+id = "M-phase-provisional-handoff-ambiguous-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        len(markers) != 1\n        or len(lines) < PROVISIONAL_HANDOFF_LINES\n"
+replace = "        not markers\n        or len(lines) < PROVISIONAL_HANDOFF_LINES\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_parent_rejects_postcopy_provisional_tampering"]
+reason = "ambiguous provisional seal was accepted"
+
+[[mutant]]
+id = "M-phase-provisional-schema-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        parse_provisional_record(nonce, contents)\n"
+replace = "        Ok(None)\n"
+killers = ["tests/governance/test_run_evidence.py::test_provisional_handoff_rejects_invalid_schema"]
+reason = "invalid provisional schema accepted"
+
+[[mutant]]
+id = "M-phase-provisional-canonical-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "        if isinstance(encoded, Ok) and encoded.value == contents\n"
+replace = "        if isinstance(encoded, Ok)\n"
+killers = ["tests/governance/test_run_evidence.py::test_provisional_handoff_rejects_invalid_schema"]
+reason = "duplicate provisional fields accepted"
+
+[[mutant]]
+id = "M-phase-process-values-import-later-adapter"
+operator = "replace-literal"
+target = "src/agentctl/foundation_process_values.py"
+search = "    message: str\n"
+replace = "    message: str\n\nimport agentctl.process\n"
+killers = ["tests/integration/test_runtime_boundaries.py::test_foundation_result_compatibility"]
+reason = "foundation process values depend on later adapter"
+
+[[mutant]]
+id = "M-phase-vhd-zero-virtual-size-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_vhd.py"
+search = "        or virtual <= 0\n"
+replace = "        or virtual < 0\n"
+killers = ["tests/integration/test_wsl_vhd.py::test_vhd_size_requires_complete_values"]
+reason = "zero VHD virtual size was accepted"
+
+[[mutant]]
+id = "M-phase-host-vhd-identity-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_capacity.py"
+search = "        != (after.base, after.vhd, after.device, after.inode)\n"
+replace = "        != (before.base, before.vhd, before.device, before.inode)\n"
+killers = ["tests/governance/test_wsl_capacity.py::test_host_vhd_join_requires_stable_identity_and_conservative_space"]
+reason = "changed VHD identity was accepted"
+
+[[mutant]]
+id = "M-phase-host-vhd-shared-reserve-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_capacity.py"
+search = "        min(host.source_free, vhd_free) if host.shared_volume else host.source_free\n"
+replace = "        host.source_free\n"
+killers = ["tests/governance/test_wsl_capacity.py::test_host_vhd_join_requires_stable_identity_and_conservative_space"]
+reason = "shared volume reserve was overstated"
+
+[[mutant]]
+id = "M-phase-host-vhd-size-validation-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/wsl_capacity.py"
+search = "    checked = wsl_vhd.checked_size(size.virtual, size.physical, size.block, size.sector)\n"
+replace = "    checked = Ok(size)\n"
+killers = ["tests/governance/test_wsl_capacity.py::test_host_vhd_join_requires_stable_identity_and_conservative_space"]
+reason = "invalid VHD size was joined"
+
+[[mutant]]
+id = "M-phase-binding-guest-invalid-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_transport.py"
+search = "    if not wsl_guest_sample.valid_reading(observation.guest):\n"
+replace = "    if False:\n"
+killers = ["tests/governance/test_binding_transport.py::test_peer_message_identity_and_evidence"]
+reason = "invalid guest capacity was accepted"
+
+[[mutant]]
+id = "M-phase-binding-guest-not-carried"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_transport.py"
+search = "            \"guest\": asdict(observation.guest),\n"
+replace = "            \"guest\": {},\n"
+killers = ["tests/governance/test_binding_transport.py::test_peer_message_identity_and_evidence"]
+reason = "guest capacity not carried in peer"

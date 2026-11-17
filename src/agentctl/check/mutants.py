@@ -1,6 +1,7 @@
 # Copyright (c) 2026 agentctl contributors.
 """Exact-once scratch mutations killed only by their named failure reason."""
 
+import json
 import os
 import re
 import shutil
@@ -9,14 +10,16 @@ import tempfile
 import tomllib
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
+from importlib import import_module
+from pathlib import Path, PurePosixPath
 from typing import Literal
 
-from agentctl.check.haskell_mutants import killer as haskell_killer
-from agentctl.hostfacts import current
-from agentctl.paths import directories
-from agentctl.process import Output, run
-from agentctl.result import Err, Ok, Result
+from agentctl.check.evidence import Entry
+from agentctl.check.ratchet import MutantAmendment, RowFact, mutant_amendment_matches
+from agentctl.foundation import Err, Ok, Result
+from agentctl.foundation_host import current
+from agentctl.foundation_paths import directories
+from agentctl.foundation_process import Output, run
 
 
 class Operator(Enum):
@@ -87,6 +90,7 @@ def parse(value: object) -> Result[Mutant, MutationError]:
         not isinstance(killers, list)
         or not killers
         or not all(isinstance(item, str) for item in killers)
+        or len(killers) != len(set(killers))
     ):
         return Err(MutationError("schema", "nonempty killer node ids required"))
     nodes = tuple(str(item) for item in killers)
@@ -129,16 +133,106 @@ def _identity(
 
 def corpus(root: Path) -> Result[tuple[Mutant, ...], MutationError]:
     """Load every executable record, rejecting empty or duplicate corpora."""
+    try:
+        with os.scandir(root / "tests/mutants") as directory:
+            paths = tuple(
+                sorted(
+                    Path(entry.path)
+                    for entry in directory
+                    if entry.name.endswith(".toml")
+                )
+            )
+        if any(path.is_symlink() for path in paths):
+            return Err(MutationError("schema", "mutant corpus entry is a symlink"))
+        entries = tuple(
+            Entry(path.relative_to(root).as_posix(), "file", (path.read_bytes(),))
+            for path in paths
+        )
+        rationale = root / "DEVELOPMENT_PLAN/rationale.md"
+        if rationale.is_symlink():
+            return Err(MutationError("schema", "amendment rationale is a symlink"))
+        if rationale.exists():
+            entries += (
+                Entry(
+                    "DEVELOPMENT_PLAN/rationale.md", "file", (rationale.read_bytes(),)
+                ),
+            )
+    except OSError as exc:
+        return Err(MutationError("schema", str(exc)))
+    return census_corpus(entries)
+
+
+def _census_entry_text(entry: Entry) -> Result[str, MutationError]:
+    """Decode one regular census file without consulting the live tree."""
+    match entry.kind, entry.payloads:
+        case "file", (bytes() as payload,):
+            try:
+                return Ok(payload.decode("utf-8"))
+            except UnicodeError as exc:
+                return Err(MutationError("schema", str(exc)))
+        case _:
+            return Err(MutationError("schema", "census entry is not a regular file"))
+
+
+def _census_rows(
+    entry: Entry, rationale_entries: tuple[Entry, ...]
+) -> Result[tuple[object, ...], MutationError]:
+    """Parse one observed corpus document and apply its observed amendments."""
+    content = _census_entry_text(entry)
+    if isinstance(content, Err):
+        return content
+    try:
+        document = tomllib.loads(content.value)
+    except tomllib.TOMLDecodeError as exc:
+        return Err(MutationError("schema", str(exc)))
+    values = document.get("mutant")
+    amendments = document.get("amendment", [])
+    if (
+        not {"mutant"} <= set(document) <= {"mutant", "amendment"}
+        or not isinstance(values, list)
+        or not values
+        or not isinstance(amendments, list)
+    ):
+        message = (
+            "nonempty mutant rows required"
+            if not isinstance(values, list) or not values
+            else "invalid corpus rows"
+        )
+        return Err(MutationError("schema", message))
+    if not amendments:
+        return Ok(tuple(values))
+    if len(rationale_entries) != 1:
+        return Err(MutationError("schema", "missing amendment rationale"))
+    rationale = _census_entry_text(rationale_entries[0])
+    return (
+        _amend_all(tuple(values), amendments, rationale.value)
+        if isinstance(rationale, Ok)
+        else rationale
+    )
+
+
+def census_corpus(
+    entries: tuple[Entry, ...],
+) -> Result[tuple[Mutant, ...], MutationError]:
+    """Parse corpus records and amendment provenance from one guarded census."""
+    paths = tuple(entry.path for entry in entries)
+    if len(paths) != len(set(paths)):
+        return Err(MutationError("schema", "duplicate census path"))
+    candidates = tuple(
+        entry
+        for entry in entries
+        if PurePosixPath(entry.path).parent == PurePosixPath("tests/mutants")
+        and entry.path.endswith(".toml")
+    )
+    rationale_entries = tuple(
+        entry for entry in entries if entry.path == "DEVELOPMENT_PLAN/rationale.md"
+    )
     records: tuple[Mutant, ...] = ()
-    for path in sorted((root / "tests/mutants").glob("*.toml")):
-        try:
-            document = tomllib.loads(path.read_text(encoding="utf-8"))
-        except (OSError, UnicodeError, tomllib.TOMLDecodeError) as exc:
-            return Err(MutationError("schema", str(exc)))
-        values = document.get("mutant")
-        if set(document) != {"mutant"} or not isinstance(values, list) or not values:
-            return Err(MutationError("schema", "nonempty mutant rows required"))
-        for value in values:
+    for entry in sorted(candidates):
+        revised = _census_rows(entry, rationale_entries)
+        if isinstance(revised, Err):
+            return revised
+        for value in revised.value:
             record = parse(value)
             if isinstance(record, Err):
                 return record
@@ -148,6 +242,100 @@ def corpus(root: Path) -> Result[tuple[Mutant, ...], MutationError]:
                 return Err(MutationError("schema", "duplicate mutant id"))
             records += (record.value,)
     return Ok(records) if records else Err(MutationError("schema", "empty corpus"))
+
+
+def amend_records(
+    values: list[object], amendments: object, root: Path
+) -> Result[tuple[object, ...], MutationError]:
+    """Apply content-bound amendments without changing protected original rows."""
+    if not isinstance(amendments, list):
+        return Err(MutationError("schema", "amendments must be an array"))
+    result: tuple[object, ...] = tuple(values)
+    if not amendments:
+        return Ok(result)
+    try:
+        rationale = (root / "DEVELOPMENT_PLAN/rationale.md").read_text(encoding="utf-8")
+    except OSError as exc:
+        return Err(MutationError("schema", str(exc)))
+    return _amend_all(result, amendments, rationale)
+
+
+def _amend_all(
+    result: tuple[object, ...], amendments: list[object], rationale: str
+) -> Result[tuple[object, ...], MutationError]:
+    """Require unique documented amendments and preserve every original row."""
+    used = frozenset[str]()
+    for amendment in amendments:
+        if (
+            not isinstance(amendment, dict)
+            or set(amendment)
+            != {
+                "id",
+                "prior_sha256",
+                "revised_sha256",
+                "search",
+                "replace",
+                "provenance",
+            }
+            or not all(isinstance(value, str) for value in amendment.values())
+        ):
+            return Err(MutationError("schema", "invalid mutant amendment fields"))
+        identifier = str(amendment["id"])
+        provenance = str(amendment["provenance"])
+        if (
+            identifier in used
+            or not re.fullmatch(r"decision:D-\d+", provenance)
+            or not re.search(
+                r"^\| "
+                + re.escape(provenance.removeprefix("decision:"))
+                + r" \|[^\n]*`"
+                + re.escape(identifier)
+                + r"`",
+                rationale,
+                re.MULTILINE,
+            )
+        ):
+            return Err(
+                MutationError("schema", "duplicate amendment or invalid provenance")
+            )
+        matches = tuple(
+            value
+            for value in result
+            if isinstance(value, dict) and value.get("id") == identifier
+        )
+        if len(matches) != 1:
+            return Err(
+                MutationError(
+                    "schema", "amendment must name exactly one original mutant"
+                )
+            )
+        original = matches[0]
+        validated = parse(original)
+        if isinstance(validated, Err):
+            return validated
+        updated = {
+            **original,
+            "search": amendment["search"],
+            "replace": amendment["replace"],
+        }
+        before = RowFact(
+            identifier,
+            json.dumps(original, sort_keys=True, ensure_ascii=True, allow_nan=False),
+        )
+        after = RowFact(
+            identifier,
+            json.dumps(updated, sort_keys=True, ensure_ascii=True, allow_nan=False),
+        )
+        binding = MutantAmendment(
+            identifier, amendment["prior_sha256"], amendment["revised_sha256"]
+        )
+        if not mutant_amendment_matches(before, after, binding):
+            return Err(
+                MutationError("schema", "mutant amendment content binding mismatch")
+            )
+        result = tuple(updated if value is original else value for value in result)
+        used = used | {identifier}
+    return Ok(result)
 
 
 def scratch(root: Path, destination: Path) -> Result[Path, MutationError]:
@@ -210,7 +398,9 @@ def _killer(tree: Path, node: str, timeout: float) -> Result[Output, MutationErr
         paths = directories(
             "Windows" if os.name == "nt" else "Linux", os.environ, Path.home()
         )
-        output = haskell_killer(tree, node, current(paths.cache))
+        output = import_module("agentctl.check.haskell_mutants").killer(
+            tree, node, current(paths.cache)
+        )
         return (
             Err(MutationError("spawn", output.error.message))
             if isinstance(output, Err)

@@ -298,11 +298,7 @@ def _invalid_dependency_direction(all_phases: tuple[Phase, ...]) -> bool:
             )
             or any(
                 number >= phase.number
-                or not any(
-                    candidate.number == number
-                    and field(candidate.text, "Gate kind") == "self-verifying"
-                    for candidate in all_phases
-                )
+                or not any(candidate.number == number for candidate in all_phases)
                 for number in dependencies
             )
         )

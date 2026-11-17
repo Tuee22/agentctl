@@ -1,0 +1,8 @@
+[[mutant]]
+id = "M-cache-identity-step-dropped"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = "        identity.IdentityStep(\n            context,\n            root / \"src/agentctl/haskell\",\n            directories(family, os.environ, Path.home()).data,\n        ),\n"
+replace = ""
+killers = ["tests/unit/test_check_steps.py::test_step_table_equals_oracle"]
+reason = "gate step table differs from oracle"

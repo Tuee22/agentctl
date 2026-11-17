@@ -1,0 +1,18 @@
+[[mutant]]
+id = "M-mux-remain-session-unqualified"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Mux/Psmux.hs"
+search = "target name pane = \"=\" ++ Text.unpack (sessionNameText name) ++ \":\" ++ Text.unpack (paneId pane)"
+replace = "target name pane = Text.unpack (Text.take 0 (sessionNameText name) <> paneId pane)"
+killers = ["tests/unit/test_mux_values.py::test_render_oracle"]
+reason = "multiplexer command differs from oracle"
+
+[[mutant]]
+id = "M-mux-render-psmux-alias"
+operator = "replace-literal"
+target = "src/agentctl/haskell/src/AgentCtl/Mux/Psmux.hs"
+search = "executable = \"psmux.exe\""
+replace = "executable = \"tmux.exe\""
+killers = ["tests/unit/test_mux_values.py::test_render_oracle"]
+reason = "multiplexer command differs from oracle"
+

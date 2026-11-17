@@ -1,0 +1,18 @@
+[[mutant]]
+id = "M-style-drop-hlint"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = "        style.StyleStep(\"hlint\", context, root / \"src/agentctl/haskell\", pins),\n"
+replace = ""
+killers = ["tests/unit/test_check_legs.py::test_full_leg_set_matches_oracle"]
+reason = "full leg set differs from oracle"
+
+[[mutant]]
+id = "M-style-fourmolu-inplace"
+operator = "replace-literal"
+target = "src/agentctl/check/legs.py"
+search = "\"--mode\", \"check\", *files"
+replace = "\"--mode\", \"inplace\", *files"
+killers = ["tests/integration/test_haskell_style_legs.py::test_fourmolu_fires"]
+reason = "fourmolu accepted misformatted source"
+

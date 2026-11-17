@@ -1,0 +1,9 @@
+[[mutant]]
+id = "M-evidence-startup-bytecode"
+operator = "replace-literal"
+target = "src/agentctl/resources/python-startup.pth"
+search = "sys.dont_write_bytecode = True"
+replace = "sys.dont_write_bytecode = False"
+killers = ["tests/integration/test_python_startup.py::test_startup_precedes_editable_imports"]
+reason = "startup policy differs from frozen oracle"
+

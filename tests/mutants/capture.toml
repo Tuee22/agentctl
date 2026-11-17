@@ -8,29 +8,6 @@ killers = ["tests/integration/test_capture_real.py::test_capture_retries_changed
 reason = "capture accepted changed native cursor snapshots"
 
 [[mutant]]
-id = "M-capture-no-join"
-operator = "replace-literal"
-target = "src/agentctl/haskell/src/AgentCtl/Mux/Tmux.hs"
-search = 'Capture pane count -> ["capture-pane", "-p", "-J", "-t", text (paneText pane), "-S", "-" ++ show count]'
-replace = 'Capture pane count -> ["capture-pane", "-p", "-t", text (paneText pane), "-S", "-" ++ show count]'
-killers = ["tests/integration/test_capture_real.py::test_capture_roundtrip_on_private_server"]
-reason = "native capture differs from independently normalized fixture"
-
-[[mutant]]
-id = "M-capture-locale-decoding"
-operator = "replace-literal"
-target = "src/agentctl/haskell/src/AgentCtl/Process.hs"
-search = '''decodeOutput status outBytes errBytes =
-  case (Text.decodeUtf8' outBytes, Text.decodeUtf8' errBytes) of
-    (Right outText, Right errText) -> Right (Output status outText errText)
-    (Left exception, _) -> Left (InvalidUtf8 (Text.pack (show exception)))
-    (_, Left exception) -> Left (InvalidUtf8 (Text.pack (show exception)))'''
-replace = '''decodeOutput status outBytes errBytes =
-  Right (Output status (Text.decodeLatin1 outBytes) (Text.decodeLatin1 errBytes))'''
-killers = ["tests/integration/test_capture_real.py::test_capture_roundtrip_on_private_server"]
-reason = "native capture differs from independently normalized fixture"
-
-[[mutant]]
 id = "M-capture-normalise-not-idempotent"
 operator = "replace-literal"
 target = "src/agentctl/haskell/src/AgentCtl/Observe/Normalize.hs"

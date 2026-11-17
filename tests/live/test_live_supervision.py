@@ -9,6 +9,7 @@ from agentctl.process import run
 from agentctl.result import Ok
 from tests.e2e.test_adopt import pane_facts
 from tests.harness.agents import native_agent
+from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 from tests.harness.live import (
     assert_live_class,
     caller,
@@ -25,6 +26,10 @@ from tests.harness.supervisor import (
     wait_records,
 )
 from tests.harness.tmux import PrivateMux
+from tests.harness.tmux_fixtures import mux_server as _mux_server_fixture
+
+haskell_build = _haskell_build_fixture
+mux_server = _mux_server_fixture
 
 pytestmark = pytest.mark.evidence("real")
 

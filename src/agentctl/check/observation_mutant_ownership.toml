@@ -1,0 +1,57 @@
+# Partial explicit claims; native source identity remains unverified.
+version = 1
+
+[[claims]]
+identifier = "M-classify-usage-limit-as-overload"
+owner = 7
+killer_sources = [{ node = "tests/unit/test_screen_classes.py::test_fixtures_classify_as_their_directory", path = "tests/unit/test_screen_classes.py" }]
+
+[[claims]]
+identifier = "M-classify-auth-error-as-overload"
+owner = 7
+killer_sources = [{ node = "tests/unit/test_screen_classes.py::test_fixtures_classify_as_their_directory", path = "tests/unit/test_screen_classes.py" }]
+
+[[claims]]
+identifier = "M-classify-context-as-overload"
+owner = 7
+killer_sources = [{ node = "tests/unit/test_screen_classes.py::test_fixtures_classify_as_their_directory", path = "tests/unit/test_screen_classes.py" }]
+
+[[claims]]
+identifier = "M-classify-overload-over-approval"
+owner = 7
+killer_sources = [{ node = "tests/unit/test_screen_classes.py::test_precedence_pairs", path = "tests/unit/test_screen_classes.py" }]
+
+[[claims]]
+identifier = "M-classify-ignore-partial-input"
+owner = 7
+killer_sources = [{ node = "tests/unit/test_screen_classes.py::test_precedence_pairs", path = "tests/unit/test_screen_classes.py" }]
+
+[[claims]]
+identifier = "M-classify-overload-over-working"
+owner = 7
+killer_sources = [{ node = "tests/unit/test_screen_classes.py::test_precedence_pairs", path = "tests/unit/test_screen_classes.py" }]
+
+[[claims]]
+identifier = "M-classify-dead-pane-by-text"
+owner = 7
+killer_sources = [{ node = "haskell:agentctl-core-test/Classify/dead-pane-is-exited", path = "src/agentctl/haskell/test/ObserveTests.hs" }]
+
+[[claims]]
+identifier = "M-classify-placeholder-as-partial"
+owner = 7
+killer_sources = [{ node = "haskell:agentctl-core-test/Classify/placeholder-needs-visual-evidence", path = "src/agentctl/haskell/test/ObserveTests.hs" }]
+
+[[claims]]
+identifier = "M-classify-placeholder-ignores-style"
+owner = 7
+killer_sources = [{ node = "haskell:agentctl-core-test/Classify/placeholder-needs-visual-evidence", path = "src/agentctl/haskell/test/ObserveTests.hs" }]
+
+[[claims]]
+identifier = "M-classify-placeholder-ignores-cursor"
+owner = 7
+killer_sources = [{ node = "haskell:agentctl-core-test/Classify/placeholder-needs-visual-evidence", path = "src/agentctl/haskell/test/ObserveTests.hs" }]
+
+[[claims]]
+identifier = "M-classify-status-other-agent"
+owner = 7
+killer_sources = [{ node = "tests/e2e/test_status_screen.py::test_screen_column_uses_the_agents_classifier", path = "tests/e2e/test_status_screen.py" }]

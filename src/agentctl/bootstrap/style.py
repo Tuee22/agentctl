@@ -2,18 +2,10 @@
 """Pure style-tool identity, cache paths and compiler-pinned install arguments."""
 
 import hashlib
-from dataclasses import dataclass
 from pathlib import Path
 
 from agentctl.bootstrap.pins import Pins
-
-
-@dataclass(frozen=True, slots=True)
-class StyleTools:
-    """The verified native tools in one atomically published cache directory."""
-
-    fourmolu: Path
-    hlint: Path
+from agentctl.foundation_style_values import StyleTools
 
 
 def digest(pins: Pins) -> str:
