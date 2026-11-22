@@ -1,0 +1,83 @@
+# Sources whose native paths execute only on the named host classes.
+# Each host run measures every undeclared source and the declared sources it can execute.
+version = 1
+
+[[source]]
+path = "src/agentctl/check/binding_launcher.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/binding_wsl.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/hyperv_capacity.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/hyperv_observe.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/hyperv_snapshot.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/hyperv_ssh.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/virtualbox_capacity.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/virtualbox_inventory.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/virtualbox_key_observe.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/virtualbox_listener.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/virtualbox_observe.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/virtualbox_snapshot.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/wsl_capacity.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/wsl_host_sample.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/wsl_registration.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/wsl_vhd.py"
+hosts = ["Windows"]
+
+[[source]]
+path = "src/agentctl/check/binding_peer.py"
+hosts = ["WSL"]
+
+[[source]]
+path = "src/agentctl/check/binding_process.py"
+hosts = ["WSL"]
+
+[[source]]
+path = "src/agentctl/check/binding_stopped.py"
+hosts = ["WSL"]
+
+[[source]]
+path = "src/agentctl/check/virtualbox_bind.py"
+hosts = ["Windows"]

@@ -9,6 +9,7 @@ import qualified MuxFixture
 import qualified MuxTests
 import qualified NameTests
 import qualified ObserveTests
+import qualified ProcessTests
 import qualified RecoveryTests
 import qualified SpecTests
 import qualified SupervisorTests
@@ -23,7 +24,7 @@ main :: IO ()
 main = do
   arguments <- getArgs
   case arguments of
-    "--process-fixture" : remaining -> MuxTests.fixture remaining
+    "--process-fixture" : remaining -> ProcessTests.fixture remaining
     ["--mux-fixture"] -> MuxFixture.run
     ["--agent-fixture"] -> AgentFixture.run
     ["--agentctl-test-sources"] -> mapM_ putStrLn (TestSource.caseSources suite)
@@ -39,6 +40,7 @@ suite =
     "agentctl-core-test"
     ( handshakeTests
         : MuxTests.tests
+        ++ ProcessTests.tests
         ++ SpecTests.tests
         ++ AgentTests.tests
         ++ NameTests.tests

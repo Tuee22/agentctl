@@ -52,10 +52,10 @@ owned fake agents are explicit boundary controls.
 - Test bodies run no package manager, sudo, login or real installer. Cold installation is a separately observed
   preparation action in a disposable environment, followed by the same complete gate.
 
-A Windows workstation may supply Linux runs only through the dedicated WSL2 procedure in the
-[validation runbook](../operations/validation_runbook.md). The source bind mount is shared; Linux dependency
-stores, sockets, homes and build output remain in the dedicated distribution. Windows and Linux checks do not
-write the shared checkout concurrently. WSL evidence stays Linux evidence.
+A Windows workstation may supply Linux runs only through the dedicated Debian VirtualBox procedure in the
+[validation runbook](../operations/validation_runbook.md). The live source bind mount is shared; Linux dependency
+stores, sockets, homes and build output remain on dedicated guest storage. Windows and guest checks do not
+write the shared checkout concurrently. Guest evidence stays Linux evidence.
 
 ## Observers and Nonces
 
@@ -88,6 +88,14 @@ Every declared mutation has a source target, exact change, independent killer an
 Compilation refusal, timeout, failed baseline or an unrelated teardown error does not count as the intended
 runtime kill. Corpus cases retain complete result records and restore scratch targets. Named killer execution
 inside the mutation harness is part of the registered corpus, not an alternative phase-closing runner.
+The runner observes individual baseline and eligible mutation outcomes, including failures from later named
+killers. The pytest observer writes their statuses to a separate run artifact, which the parent retains with the
+report (`tests/governance/test_gate_plugin.py::test_killer_outcomes_are_retained_from_real_execution`,
+`tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout`). The parent joins that artifact to the captured corpus and pytest outcomes and checks its original bytes after
+follow-up commands and finalizers. The parent checks a child-issued digest against both the live report and its
+retained copy. Provisional phase observations retain individual failed killers under their
+declared mutant owner while preserving the aggregate failure. They are not authenticated phase receipts; a failed baseline remains a failure and cannot
+count as a kill.
 
 New discipline controls include accepting twins and mutations demonstrating that each banned spelling or
 escape path changes the expected verdict. Existing oracle rows and committed mutations remain ratcheted

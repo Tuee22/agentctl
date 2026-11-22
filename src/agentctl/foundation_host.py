@@ -57,5 +57,3 @@ def current(cache: Path, *, assume_yes: bool = False) -> HostContext:
         sys.stdin.isatty() and sys.stderr.isatty(),
         assume_yes,
     )
-
-

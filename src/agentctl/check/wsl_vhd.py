@@ -92,8 +92,8 @@ def checked_size(
 def _query(path: Path) -> Result[VhdSize, str]:
     """Open only for information and close the native handle on every path."""
     try:
-        disk = ctypes.WinDLL("virtdisk", use_last_error=True)
-        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        disk = ctypes.CDLL("virtdisk", use_last_error=True)
+        kernel = ctypes.CDLL("kernel32", use_last_error=True)
         disk.OpenVirtualDisk.argtypes = (
             ctypes.POINTER(_Storage),
             ctypes.c_wchar_p,

@@ -101,7 +101,7 @@ def system_powershell() -> Result[Path, str]:
     if platform.system() != "Windows":
         return Err("Hyper-V observation requires Windows")
     try:
-        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel = ctypes.CDLL("kernel32", use_last_error=True)
         function = kernel.GetSystemDirectoryW
         function.argtypes = (ctypes.POINTER(ctypes.c_wchar), ctypes.c_uint32)
         function.restype = ctypes.c_uint32

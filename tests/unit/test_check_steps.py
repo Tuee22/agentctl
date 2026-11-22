@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from agentctl.check.steps import pipeline, step_table
+from agentctl.check.steps import _failure_text, pipeline, step_table
 from tests.harness.oracle import assert_oracle
 
 pytestmark = pytest.mark.evidence("value")
@@ -27,3 +27,15 @@ def test_step_table_equals_oracle(root: Path, tmp_path: Path) -> None:
         expected,
         row_id="gate step table differs from oracle",
     )
+
+
+def test_cleanup_failure_text_keeps_original_message() -> None:
+    """A filename added after raising cannot hide the original cleanup cause."""
+    annotated = OSError("owned cleanup veto")
+    annotated.filename = "/owned/run"
+    assert _failure_text(annotated) == "owned cleanup veto: '/owned/run'"
+    assert _failure_text(OSError(2, "missing", "/owned/run")) == (
+        "[Errno 2] missing: '/owned/run'"
+    )
+    assert _failure_text(OSError("no path")) == "no path"
+    assert _failure_text(RuntimeError("runtime")) == "runtime"

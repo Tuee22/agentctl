@@ -343,11 +343,16 @@ def test_transaction_requires_remote_cleanup(root: Path, tmp_path: Path) -> None
     assert not tuple(tmp_path.glob(".agentctl-binding-*"))
 
 
-@pytest.mark.parametrize("peer_failed", [True, False])
-def test_transaction_retains_challenge_until_peer_stops(
-    tmp_path: Path, *, peer_failed: bool
-) -> None:
+def test_transaction_retains_challenge_until_peer_stops(tmp_path: Path) -> None:
     """Neither a failed exchange nor a response proves peer termination."""
+    for peer_failed in (True, False):
+        case = tmp_path / str(peer_failed)
+        case.mkdir()
+        _transaction_retains_until_peer_stops(case, peer_failed=peer_failed)
+
+
+def _transaction_retains_until_peer_stops(tmp_path: Path, *, peer_failed: bool) -> None:
+    """Run one retention case in its own owned repository."""
     repository(tmp_path, (("untracked", b"content"),))
     requests: list[PeerRequest] = []
     absence_calls: list[PeerRequest] = []

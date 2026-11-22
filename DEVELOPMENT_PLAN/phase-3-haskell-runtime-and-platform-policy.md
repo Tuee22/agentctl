@@ -34,7 +34,7 @@ This phase needs Linux only. The declared tests are executable contracts; an abs
 
 **Status**: Planned
 **Implementation**: `src/agentctl/haskell/src/AgentCtl/Process.hs`, `src/agentctl/haskell/src/AgentCtl/Native.hs`, `src/agentctl/haskell/src/AgentCtl/Host.hs`, `src/agentctl/haskell/src/AgentCtl/Paths.hs`
-**Validation tests**: `haskell:agentctl-core-test/Host/debian-exact-id`, `haskell:agentctl-core-test/Host/unsupported-linux-no-effects`, `haskell:agentctl-core-test/ProcessReal/timeout-cleans-up`
+**Validation tests**: `haskell:agentctl-core-test/Host/debian-exact-id`, `haskell:agentctl-core-test/Host/unsupported-linux-no-effects`, `haskell:agentctl-core-test/ProcessReal/timeout-cleans-up`, `tests/unit/test_mux_values.py::test_version_floor_oracle`, `tests/unit/test_mux_values.py::test_resolution_candidates_oracle`, `tests/unit/test_mux_values.py::test_remedy_oracle`, `tests/unit/test_mux_values.py::test_session_name_oracle`, `tests/unit/test_mux_values.py::test_render_oracle`, `tests/unit/test_mux_values.py::test_process_tree_policy_oracle`, `tests/unit/test_mux_values.py::test_pane_target_oracle`, `tests/unit/test_mux_values.py::test_dead_status_rule_oracle`, `tests/unit/test_mux_values.py::test_spec_acceptance_oracle`, `tests/unit/test_mux_values.py::test_reap_policy_oracle`, `tests/unit/test_mux_values.py::test_invocation_cwd_stays_off_argv`
 **Mutants**: `M-host-accepts-id-like`, `M-process-second-spawner`
 **Closes**: R22
 **Docs to update**: `documents/architecture/python_haskell_boundary.md`, `documents/engineering/toolchain_bootstrap.md`, `documents/engineering/code_standards.md`

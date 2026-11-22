@@ -1,0 +1,12 @@
+# Partial explicit claims; other corpus records remain unresolved.
+version = 1
+
+[[claims]]
+identifier = "M-mux-remain-session-unqualified"
+owner = 10
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_render_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-render-psmux-alias"
+owner = 10
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_render_oracle", path = "tests/unit/test_mux_values.py" }]

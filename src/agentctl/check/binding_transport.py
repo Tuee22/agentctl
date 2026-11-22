@@ -104,6 +104,11 @@ def _guest(value: object) -> Result[wsl_guest_sample.GuestReading, str]:
             return Err("invalid binding peer guest fields")
 
 
+def decode_guest_reading(value: object) -> Result[wsl_guest_sample.GuestReading, str]:
+    """Decode the shared Linux guest-capacity wire value without attesting it."""
+    return _guest(value)
+
+
 def decode(text: str, request: PeerRequest) -> Result[PeerObservation, str]:
     """Reject stale, malformed or inconsistent peer messages for this request."""
     try:

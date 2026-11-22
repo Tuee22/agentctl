@@ -95,7 +95,7 @@ A Planned test/resource is an implementation obligation, not a claim that a file
 | [Windows toolchain and psmux build](phase-9-windows-toolchain-and-psmux-build.md) | Haskell prepares native Windows build dependencies and compiles pinned psmux sources locally | linux-windows | self-verifying |
 | [Windows backend qualification](phase-10-windows-backend-qualification.md) | Qualify the exact native candidate for attached-client memory behavior, capture correctness, exact identity and guarded input | linux-windows | self-verifying |
 | [Windows application acceptance](phase-11-windows-application-acceptance.md) | Native Windows acceptance of the shared application, private psmux artifact and registered resources | linux-windows | host-acceptance |
-| [Linux live and clean acceptance](phase-12-linux-live-and-clean-acceptance.md) | Debian clean-host and logged-in agent acceptance, with dedicated Hyper-V Linux validation on a Windows host | linux-live-clean | host-acceptance |
+| [Linux live and clean acceptance](phase-12-linux-live-and-clean-acceptance.md) | Debian clean-host and logged-in agent acceptance, with dedicated VirtualBox Linux validation on a Windows host | linux-live-clean | host-acceptance |
 | [macOS acceptance](phase-13-macos-acceptance.md) | The additive Darwin implementation and native acceptance of bootstrap, process/filesystem semantics and the common tmux backend contract | linux-macos | self-verifying |
 | [Release evidence and closure](phase-14-release-evidence-and-closure.md) | Whole-product closure joins current independent native receipts and requires an empty migration ledger | linux | host-acceptance |
 
@@ -112,9 +112,9 @@ A later phase cannot add a retroactive closure obligation. All cross-platform in
 types and safety predicates are introduced before their platform implementations. Evidence input closures
 include shared contracts automatically; foreign implementation bytes do not enter an unrelated Linux phase.
 
-## Hardware and Hyper-V
+## Hardware and VirtualBox
 
-Linux validation from Windows uses a dedicated Debian Hyper-V VM, measured CPU/memory/storage budgets and a
+Linux validation from Windows uses a dedicated Debian VirtualBox VM, observed capacity with host headroom and a
 verified bind mount of this live Windows checkout. Install all Linux dependencies, including pipx and the dev
 extra, and keep build/temp/toolchain state on private Linux storage. A copy, detached checkout or new commit is
 not synchronization. Bind-mount semantic controls, mount receipts and bidirectional pre-gate nonce markers

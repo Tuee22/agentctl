@@ -10,7 +10,14 @@ from pathlib import Path
 
 import pytest
 
-from agentctl.check.binding_challenge import answer, begin, cancel, exchange, finish
+from agentctl.check.binding_challenge import (
+    answer,
+    begin,
+    cancel,
+    challenge_directory,
+    exchange,
+    finish,
+)
 from agentctl.process import Child, process_birth, run, start, stop
 from agentctl.result import Err, Ok, Result
 
@@ -55,6 +62,43 @@ def test_challenge_refuses_changed_bytes(tmp_path: Path) -> None:
     assert second.read_bytes() == b"altered"
 
 
+def test_challenge_refuses_linked_source_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A source-root junction or symlink cannot select another checkout root."""
+    source = tmp_path / "source"
+    alias = tmp_path / "alias"
+    source.mkdir()
+    with monkeypatch.context() as control:
+        control.setattr(Path, "is_junction", lambda path: path == source)
+        assert isinstance(challenge_directory(source, "a" * 32), Err), (
+            "junction binding source was accepted"
+        )
+    if platform.system() == "Windows":
+        command = Path(os.environ["SYSTEMROOT"]) / "System32" / "cmd.exe"
+        created = run(
+            [str(command), "/c", "mklink", "/J", str(alias), str(source)],
+            cwd=tmp_path,
+            env=os.environ,
+        )
+        assert isinstance(created, Ok), created
+        assert created.value.code == 0, created.value.stderr
+        assert alias.is_junction(), "junction creation did not produce a junction"
+    else:
+        alias.symlink_to(source, target_is_directory=True)
+        assert alias.is_symlink()
+    try:
+        assert isinstance(challenge_directory(alias, "a" * 32), Err), (
+            "linked binding source was accepted"
+        )
+        assert not tuple(source.iterdir()), "linked source was modified"
+    finally:
+        if alias.is_junction():
+            alias.rmdir()
+        elif alias.is_symlink():
+            alias.unlink()
+
+
 def test_challenge_preserves_unexpected_entries(tmp_path: Path) -> None:
     """An unexpected file prevents cleanup and is never treated as owned."""
     nonce = secrets.token_hex(16)
@@ -67,6 +111,38 @@ def test_challenge_preserves_unexpected_entries(tmp_path: Path) -> None:
     assert extra.read_bytes() == b"not owned"
     assert (directory / "windows").is_file(), "foreign entry was accepted"
     assert (directory / "linux").is_file(), "foreign entry was accepted"
+
+
+def test_challenge_refuses_hardlinked_sentinels(tmp_path: Path) -> None:
+    """A matching file linked outside the challenge is neither accepted nor removed."""
+    nonce = secrets.token_hex(16)
+    directory = tmp_path / (".agentctl-binding-" + nonce)
+    outside = tmp_path / "outside"
+    assert begin(tmp_path, nonce) == Ok(None)
+    first = directory / "windows"
+    os.link(first, outside)
+    assert isinstance(answer(tmp_path, nonce), Err), "hardlinked challenge accepted"
+    assert isinstance(cancel(tmp_path, nonce), Err), "hardlinked cleanup accepted"
+    assert first.exists()
+    assert outside.read_bytes() == ("windows:" + nonce).encode()
+    outside.unlink()
+    assert answer(tmp_path, nonce) == Ok(None)
+    os.link(first, outside)
+    assert isinstance(finish(tmp_path, nonce), Err), "hardlinked first sentinel removed"
+    assert first.exists()
+    assert (directory / "linux").exists()
+    outside.unlink()
+    second = directory / "linux"
+    os.link(second, outside)
+    assert isinstance(finish(tmp_path, nonce), Err), "hardlinked response accepted"
+    assert isinstance(cancel(tmp_path, nonce), Err), (
+        "hardlinked second cleanup accepted"
+    )
+    assert first.exists()
+    assert second.exists()
+    assert outside.read_bytes() == ("linux:" + nonce).encode()
+    outside.unlink()
+    assert finish(tmp_path, nonce) == Ok(None)
 
 
 def test_exchange_uses_separate_process(root: Path, tmp_path: Path) -> None:
@@ -149,11 +225,16 @@ def test_exchange_preserves_cleanup_refusal(tmp_path: Path) -> None:
     assert (directory / "foreign").read_bytes() == b"not owned"
 
 
-@pytest.mark.parametrize("peer_failed", [True, False])
-def test_exchange_retains_challenge_until_peer_stops(
-    tmp_path: Path, *, peer_failed: bool
-) -> None:
+def test_exchange_retains_challenge_until_peer_stops(tmp_path: Path) -> None:
     """A timeout or response is insufficient evidence to remove the challenge."""
+    for peer_failed in (True, False):
+        case = tmp_path / str(peer_failed)
+        case.mkdir()
+        _exchange_retains_until_peer_stops(case, peer_failed=peer_failed)
+
+
+def _exchange_retains_until_peer_stops(tmp_path: Path, *, peer_failed: bool) -> None:
+    """Run one retention case in its own owned source root."""
     nonces: list[str] = []
 
     def peer(nonce: str) -> Result[None, str]:

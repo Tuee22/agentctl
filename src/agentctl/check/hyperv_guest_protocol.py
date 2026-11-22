@@ -5,12 +5,25 @@ import json
 import re
 import sys
 from dataclasses import asdict
+from typing import Literal
 
-from agentctl.check import hyperv_guest
+from agentctl.check import hyperv_guest, virtualbox_guest
 from agentctl.check.hyperv_guest import GuestIdentity
 from agentctl.foundation import Err, Ok, Result
 
 MAX_RESPONSE = 16384
+type GuestFamily = Literal["hyperv", "virtualbox"]
+
+
+def _problems(identity: GuestIdentity, family: GuestFamily) -> tuple[str, ...]:
+    """Select the named guest policy without treating a value as host proof."""
+    match family:
+        case "hyperv":
+            return hyperv_guest.problems(identity)
+        case "virtualbox":
+            return virtualbox_guest.problems(identity)
+        case _:
+            return ("invalid guest family",)
 
 
 def _fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
@@ -22,10 +35,14 @@ def _fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
     return result
 
 
-def encode(nonce: str, identity: GuestIdentity) -> Result[str, str]:
+def encode(
+    nonce: str, identity: GuestIdentity, *, guest_family: GuestFamily = "hyperv"
+) -> Result[str, str]:
     """Encode a nonce-bound observation without attesting to the peer's identity."""
-    if re.fullmatch(r"[0-9a-f]{32}", nonce) is None or hyperv_guest.problems(identity):
-        return Err("invalid Hyper-V guest identity or nonce")
+    if re.fullmatch(r"[0-9a-f]{32}", nonce) is None or _problems(
+        identity, guest_family
+    ):
+        return Err("invalid guest identity or nonce")
     return Ok(
         json.dumps(
             {"nonce": nonce, "identity": asdict(identity)},
@@ -35,7 +52,9 @@ def encode(nonce: str, identity: GuestIdentity) -> Result[str, str]:
     )
 
 
-def decode(text: str, nonce: str) -> Result[GuestIdentity, str]:
+def decode(
+    text: str, nonce: str, *, guest_family: GuestFamily = "hyperv"
+) -> Result[GuestIdentity, str]:
     """Reject stale, oversized, ambiguous or invalid guest identity responses."""
     if len(text) > MAX_RESPONSE or re.fullmatch(r"[0-9a-f]{32}", nonce) is None:
         return Err("invalid guest identity response or nonce")
@@ -67,12 +86,12 @@ def decode(text: str, nonce: str) -> Result[GuestIdentity, str]:
                 family, kernel, vendor, product, release, machine_id, uid
             )
             return (
-                Err("invalid Hyper-V guest identity")
-                if hyperv_guest.problems(identity)
+                Err("invalid guest identity")
+                if _problems(identity, guest_family)
                 else Ok(identity)
             )
         case _:
-            return Err("invalid Hyper-V guest response fields")
+            return Err("invalid guest response fields")
 
 
 def main() -> int:

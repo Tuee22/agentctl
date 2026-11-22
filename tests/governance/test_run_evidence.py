@@ -14,10 +14,11 @@ from typing import Literal, Protocol, runtime_checkable
 
 import pytest
 
-from agentctl.check import steps
+from agentctl.check import mutant_report, steps
 from agentctl.check.evidence import (
     Entry,
     LegEvidence,
+    RunEvidence,
     ToolSubsteps,
     digest,
     digest_census,
@@ -54,6 +55,120 @@ from tests.harness.oracle import Object, Store, load_scoped
 
 pytestmark = pytest.mark.evidence("value")
 NODE = "tests/unit/test_example.py::test_one"
+
+
+def test_mutant_report_joins_corpus_and_pytest_results() -> None:
+    """Exact killer identities and aggregate status must match captured inputs."""
+    first = "tests/unit/test_subject.py::test_first"
+    second = "tests/unit/test_subject.py::test_second"
+    record = Mutant(
+        "M-test-one",
+        Operator.DELETE,
+        "src/sample.py",
+        "a",
+        "b",
+        (first, second),
+        "named defect",
+    )
+    node = mutant_report.PREFIX + record.identifier + "]"
+    observation = RunEvidence(
+        "current", frozenset({node}), frozenset({node}), frozenset(), (), ()
+    )
+    payload = {
+        "nonce": "current",
+        "records": [
+            {
+                "identifier": record.identifier,
+                "error": "",
+                "killers": [
+                    {
+                        "node": first,
+                        "baseline": "failed:baseline",
+                        "mutation": "not-run",
+                    },
+                    {"node": second, "baseline": "passed", "mutation": "killed"},
+                ],
+            }
+        ],
+    }
+    raw = json.dumps(payload).encode()
+    result = mutant_report.decode(raw, "current")
+    assert isinstance(result, Ok), result
+    assert mutant_report.validate(result.value, (record,), observation) == result
+    scoped = mutant_report.failure_scopes(
+        result.value, (record,), observation, ((record.identifier, 1),), (0, 1)
+    )
+    assert isinstance(scoped, Ok), scoped
+    failures = dict(scoped.value)
+    assert not failures[0], "later mutant killer poisoned earlier phase"
+    assert any(first in message for message in failures[1]), (
+        "failed mutant killer was not attributed"
+    )
+    assert not any(second in message for message in failures[1]), (
+        "successful mutant killer was reported as failed"
+    )
+    assert isinstance(
+        mutant_report.failure_scopes(result.value, (record,), observation, (), (0, 1)),
+        Err,
+    ), "incomplete killer ownership was accepted"
+    assert isinstance(
+        mutant_report.validate(
+            result.value, (replace(record, killers=(second, first)),), observation
+        ),
+        Err,
+    ), "wrong killer identities accepted"
+    assert isinstance(
+        mutant_report.validate(
+            result.value, (record,), replace(observation, passed=frozenset({node}))
+        ),
+        Err,
+    ), "wrong aggregate mutant status accepted"
+    assert isinstance(
+        mutant_report.validate(
+            result.value, (record,), replace(observation, executed=frozenset())
+        ),
+        Err,
+    ), "unexecuted mutant record accepted"
+    assert isinstance(mutant_report.decode(raw, "stale"), Err)
+    for bad in (
+        raw.replace(b'"nonce": "current"', b'"nonce": "current", "nonce": "current"'),
+        raw.replace(b'"failed:baseline"', b'"passed"'),
+        raw.replace(b'"not-run"', b'"killed"'),
+        raw.replace(b'"killed"', b'"invented"'),
+    ):
+        assert isinstance(mutant_report.decode(bad, "current"), Err), (
+            "invalid mutant report accepted"
+        )
+
+
+def test_mutant_report_scopes_execution_errors() -> None:
+    """A failed mutation setup is retained for its owner without inventing kills."""
+    killer = "tests/unit/test_subject.py::test_first"
+    record = Mutant(
+        "M-error", Operator.DELETE, "src/sample.py", "a", "b", (killer,), "x"
+    )
+    node = mutant_report.PREFIX + record.identifier + "]"
+    observation = RunEvidence(
+        "current", frozenset({node}), frozenset({node}), frozenset(), (), ()
+    )
+    payload = json.dumps(
+        {
+            "nonce": "current",
+            "records": [
+                {"identifier": record.identifier, "error": "copy", "killers": []}
+            ],
+        }
+    ).encode()
+    report = mutant_report.decode(payload, "current")
+    assert isinstance(report, Ok), report
+    result = mutant_report.failure_scopes(
+        report.value, (record,), observation, ((record.identifier, 1),), (0, 1)
+    )
+    assert isinstance(result, Ok), result
+    assert not dict(result.value)[0]
+    assert dict(result.value)[1] == frozenset({"M-error: copy"}), (
+        "mutation setup failure was lost"
+    )
 
 
 def test_tool_record_identity_and_completeness(tmp_path: Path) -> None:
@@ -370,6 +485,23 @@ def _plant_provisional_record(
     return code
 
 
+def _killer_control(tmp_path: Path) -> Result[mutant_report.Report, str]:
+    """Create and capture the original per-killer file for a finalizer control."""
+    path = tmp_path / "mutant-killers.json"
+    path.write_text('{"nonce":"current","records":[]}', encoding="utf-8")
+    return mutant_report.read(path, "current")
+
+
+def _change_killer_control(
+    tmp_path: Path, _context: object, _before: object, code: int
+) -> int:
+    """Change report bytes after the original observation."""
+    (tmp_path / "mutant-killers.json").write_text(
+        '{ "nonce":"current","records":[]}', encoding="utf-8"
+    )
+    return code
+
+
 def _oracle_finalizer_control(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -381,6 +513,7 @@ def _oracle_finalizer_control(
         "tools",
         "substeps",
         "pytest",
+        "killers",
         "native",
         "host",
         "provisional",
@@ -441,6 +574,7 @@ def _oracle_finalizer_control(
             steps.pytest_observation(tmp_path, "current"),
             _native_control(tmp_path),
             steps.host_observation(tmp_path, "current"),
+            killers=_killer_control(tmp_path),
         )
 
     def change(_context: object, _before: object, code: int) -> int:
@@ -520,6 +654,7 @@ def _oracle_finalizer_control(
             "tools": change_tools,
             "substeps": change_substeps,
             "pytest": change_pytest,
+            "killers": partial(_change_killer_control, tmp_path),
             "native": partial(_change_finalizer_native, tmp_path),
             "host": partial(_change_finalizer_host, tmp_path),
             "record": partial(_plant_finalizer_record, tmp_path),
@@ -535,6 +670,7 @@ def _oracle_finalizer_control(
         "tools": "tool outcome change during finalizers was accepted",
         "substeps": "tool substep change during finalizers was accepted",
         "pytest": "pytest manifest change during finalizers was accepted",
+        "killers": "mutant report change during finalizers was accepted",
         "native": "native evidence change during finalizers was accepted",
         "host": "host observation change during finalizers was accepted",
         "provisional": "unverified phases allowed overall pass",
@@ -739,6 +875,13 @@ def test_pytest_manifest_survives_finalizers(
 ) -> None:
     """The gate refuses a pytest observation changed during finalizers."""
     _oracle_finalizer_control(tmp_path, monkeypatch, mode="pytest")
+
+
+def test_mutant_report_survives_finalizers(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Changed per-killer evidence cannot survive the final gate check."""
+    _oracle_finalizer_control(tmp_path, monkeypatch, mode="killers")
 
 
 def test_native_evidence_survives_finalizers(

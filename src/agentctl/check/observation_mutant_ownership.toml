@@ -55,3 +55,23 @@ killer_sources = [{ node = "haskell:agentctl-core-test/Classify/placeholder-need
 identifier = "M-classify-status-other-agent"
 owner = 7
 killer_sources = [{ node = "tests/e2e/test_status_screen.py::test_screen_column_uses_the_agents_classifier", path = "tests/e2e/test_status_screen.py" }]
+
+[[claims]]
+identifier = "M-capture-ignore-cursor-change"
+owner = 7
+killer_sources = [{ node = "tests/integration/test_capture_real.py::test_capture_retries_changed_cursor", path = "tests/integration/test_capture_real.py" }]
+
+[[claims]]
+identifier = "M-capture-normalise-not-idempotent"
+owner = 7
+killer_sources = [{ node = "haskell:agentctl-core-test/Normalize/idempotent", path = "src/agentctl/haskell/test/ObserveTests.hs" }]
+
+[[claims]]
+identifier = "M-capture-fingerprint-constant"
+owner = 7
+killer_sources = [{ node = "haskell:agentctl-core-test/Fingerprint/different-error-differs", path = "src/agentctl/haskell/test/ObserveTests.hs" }]
+
+[[claims]]
+identifier = "M-capture-fingerprint-includes-redraw"
+owner = 7
+killer_sources = [{ node = "haskell:agentctl-core-test/Fingerprint/stable-under-redraw", path = "src/agentctl/haskell/test/ObserveTests.hs" }]

@@ -23,8 +23,9 @@ Haskell owns runtime platform policy and multiplexer preparation.
 | Native macOS | Its own qualified native bootstrap/multiplexer path | Install agent CLIs and arrange authentication |
 
 Linux requires exact Debian identity. A Linux machine with APT but another distribution is unsupported rather
-than silently accepted. Windows backend preparation is native; WSL2 can provide a separate Debian validation
-lane but cannot replace native Windows execution. [Validation runbook](validation_runbook.md) defines that setup.
+than silently accepted. Windows backend preparation is native; a dedicated Debian VirtualBox VM can provide
+Linux validation but cannot replace native Windows execution. [Validation runbook](validation_runbook.md) defines
+that setup.
 
 Agentctl never installs claude or codex. A new launch checks its requested executable early and reports the
 missing tool before an expensive backend build. Listing, logs and reattachment require only their actual

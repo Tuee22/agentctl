@@ -29,13 +29,21 @@ def targets(root: Path) -> Result[tuple[str, ...], str]:
 
 
 def coverage_commands(
-    python: str, root: PurePath, run_dir: PurePath
+    python: str,
+    root: PurePath,
+    run_dir: PurePath,
+    foreign: tuple[str, ...] = (),
 ) -> tuple[tuple[str, ...], ...]:
-    """Combine only run-owned data and enforce the full branch-coverage floor."""
+    """Combine run-owned data and enforce the floor over this host's checkout sources.
+
+    Copied trees under the run root are not checkout sources. ``foreign`` names
+    only declared sources this host cannot execute; the default omits nothing.
+    """
     common = (
         f"--rcfile={(root / 'pyproject.toml').as_posix()}",
         f"--data-file={(run_dir / 'coverage').as_posix()}",
     )
+    omitted = ",".join((root / path).as_posix() for path in foreign)
     return (
         (python, "-m", "coverage", "combine", *common, run_dir.as_posix()),
         (
@@ -44,6 +52,8 @@ def coverage_commands(
             "coverage",
             "report",
             *common,
+            f"--include={(root / 'src/agentctl').as_posix()}/*",
+            *((f"--omit={omitted}",) if foreign else ()),
             "--fail-under=100",
             "--show-missing",
         ),
@@ -51,7 +61,11 @@ def coverage_commands(
 
 
 def python_legs(
-    python: str, root: PurePath, files: tuple[str, ...], run_dir: PurePath
+    python: str,
+    root: PurePath,
+    files: tuple[str, ...],
+    run_dir: PurePath,
+    foreign: tuple[str, ...] = (),
 ) -> tuple[Leg, ...]:
     """Build exactly the Python legs introduced by the package skeleton."""
     root = PurePosixPath(root.as_posix())
@@ -124,7 +138,7 @@ def python_legs(
                 "--continue-on-collection-errors",
                 "tests",
             ),
-            coverage_commands(python, root, run_dir),
+            coverage_commands(python, root, run_dir, foreign),
             after_failure=True,
         ),
     )

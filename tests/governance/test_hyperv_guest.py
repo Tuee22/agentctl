@@ -35,3 +35,6 @@ def test_guest_identity_refuses_foreign_and_ambiguous_hosts() -> None:
     assert effective_uid("Uid:\t1000\t1001\t1000\t1000\n") == Ok(1001)
     assert isinstance(effective_uid("Uid:\t1000\n"), Err)
     assert isinstance(effective_uid("Uid: 1 1 1 1\nUid: 2 2 2 2\n"), Err)
+    assert isinstance(effective_uid("Uid: 1 1 1 1\nUid: invalid\n"), Err), (
+        "malformed duplicate guest UID was accepted"
+    )

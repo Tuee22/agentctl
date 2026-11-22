@@ -18,10 +18,12 @@ import click
 from agentctl import foundation_host as hostfacts
 from agentctl.bootstrap.pins import load as load_pins
 from agentctl.check import (
+    coverage_hosts,
     evidence,
     haskell,
     identity,
     lanes,
+    mutant_report,
     ownership,
     phase_reports,
     ratchet,
@@ -29,7 +31,7 @@ from agentctl.check import (
     writeguard,
 )
 from agentctl.check.legs import Leg, python_legs, targets, verdict
-from agentctl.check.mutants import Mutant, census_corpus, corpus
+from agentctl.check.mutants import Mutant, MutationError, census_corpus, corpus
 from agentctl.check.plan_data import Phase, field, phase_text, phases, section, table
 from agentctl.check.preconditions import inspect, inspect_socket, single_run
 from agentctl.check.prerequisites import inspect_prerequisites
@@ -54,6 +56,7 @@ FINALIZER_NAMES = (
     "tool-outcomes",
     "tool-substeps",
     "pytest-manifest",
+    "mutant-killers",
     "native-observation",
     "host-observation",
     "finalizer-record",
@@ -62,6 +65,8 @@ FINALIZER_SEAL = "agentctl-finalizer-v1"
 FINALIZER_SEAL_FIELDS = 3
 PROVISIONAL_SEAL = "agentctl-provisional-v1"
 PROVISIONAL_HANDOFF_LINES = 2
+KILLER_SEAL = "agentctl-mutant-killers-v1"
+KILLER_HANDOFF_LINES = 3
 TOOLCHAIN_OWNER = 2
 TOOLCHAIN_SOURCE = "src/agentctl/check/toolchain.py"
 PREREQUISITE_SOURCE = "src/agentctl/check/prerequisites.py"
@@ -154,6 +159,7 @@ class ValidationOutcome:
     native: Result[NativeSnapshot, str] | None = None
     host: Result[lanes.HostFacts, str] | None = None
     phase_observations: Result[tuple[phase_reports.PhaseResult, ...], str] | None = None
+    killers: Result[mutant_report.Report, str] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -166,6 +172,7 @@ class ToolOutcome:
     pytest: Result[evidence.RunEvidence, str] | None = None
     native: Result[NativeSnapshot, str] | None = None
     host: Result[lanes.HostFacts, str] | None = None
+    killers: Result[mutant_report.Report, str] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -176,6 +183,7 @@ class LegOutcome:
     substeps: tuple[int, ...]
     pytest: Result[evidence.RunEvidence, str] | None = None
     host: Result[lanes.HostFacts, str] | None = None
+    killers: Result[mutant_report.Report, str] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -248,6 +256,7 @@ def _run_leg_observed(root: Path, run_dir: Path, nonce: str, leg: Leg) -> LegOut
     substeps: tuple[int, ...] = ()
     pytest: Result[evidence.RunEvidence, str] | None = None
     host: Result[lanes.HostFacts, str] | None = None
+    killers: Result[mutant_report.Report, str] | None = None
     for index, command in enumerate((leg.argv, *leg.after)):
         result = run(
             list(command),
@@ -266,13 +275,14 @@ def _run_leg_observed(root: Path, run_dir: Path, nonce: str, leg: Leg) -> LegOut
         if leg.name == "pytest" and index == 0:
             pytest = pytest_observation(run_dir, nonce)
             host = host_observation(run_dir, nonce)
+            killers = mutant_report.read(run_dir / "mutant-killers.json", nonce)
         if code:
             if index:
                 click.echo(f"{leg.name}: followup failed with status {code}", err=True)
             primary = primary or code
             if index or not leg.after_failure:
-                return LegOutcome(primary, substeps, pytest, host)
-    return LegOutcome(primary, substeps, pytest, host)
+                return LegOutcome(primary, substeps, pytest, host, killers)
+    return LegOutcome(primary, substeps, pytest, host, killers)
 
 
 def run_leg(root: Path, run_dir: Path, nonce: str, leg: Leg) -> int:
@@ -301,6 +311,7 @@ def _run_tools_observed(
     pytest: Result[evidence.RunEvidence, str] | None = None
     native: Result[NativeSnapshot, str] | None = None
     host: Result[lanes.HostFacts, str] | None = None
+    killers: Result[mutant_report.Report, str] | None = None
     for leg in legs:
         if isinstance(leg, EnsureStep):
             code = run_step(leg)
@@ -317,6 +328,7 @@ def _run_tools_observed(
             substeps += ((leg.name, result.substeps),)
             pytest = result.pytest or pytest
             host = result.host or host
+            killers = result.killers or killers
         outcomes += ((leg.name, code),)
         click.echo(f"{leg.name}: {'pass' if code == 0 else 'FAIL'}")
     try:
@@ -367,6 +379,7 @@ def _run_tools_observed(
         pytest,
         native,
         host,
+        killers,
     )
 
 
@@ -517,6 +530,44 @@ def pytest_manifest_unchanged(
         or after.value != before.value
     ):
         click.echo("pytest observation: missing, stale or changed manifest", err=True)
+        return 1
+    return 0
+
+
+def mutant_killers_unchanged(
+    run_dir: Path, nonce: str, before: Result[mutant_report.Report, str] | None
+) -> int:
+    """Require the original per-killer record bytes to survive later execution."""
+    after = mutant_report.read(run_dir / "mutant-killers.json", nonce)
+    if (
+        before is None
+        or isinstance(before, Err)
+        or isinstance(after, Err)
+        or before.value != after.value
+    ):
+        click.echo("mutant killers: missing, stale or changed report", err=True)
+        return 1
+    return 0
+
+
+def mutant_killers_match(
+    observed: Result[mutant_report.Report, str] | None,
+    records: Result[tuple[Mutant, ...], MutationError],
+    pytest: Result[evidence.RunEvidence, str] | None,
+) -> int:
+    """Join the original report to captured corpus and pytest observations."""
+    if (
+        observed is None
+        or isinstance(observed, Err)
+        or isinstance(records, Err)
+        or pytest is None
+        or isinstance(pytest, Err)
+    ):
+        click.echo("mutant killers: captured inputs unavailable", err=True)
+        return 1
+    result = mutant_report.validate(observed.value, records.value, pytest.value)
+    if isinstance(result, Err):
+        click.echo("mutant killers: " + result.error, err=True)
         return 1
     return 0
 
@@ -674,6 +725,41 @@ def report_oracle_diagnostics(
     return diagnostic
 
 
+COVERAGE_HOSTS = "src/agentctl/check/coverage_hosts.toml"
+
+
+def coverage_sources(root: Path) -> Result[tuple[coverage_hosts.HostSource, ...], str]:
+    """Read the declared host classes for host-confined sources."""
+    try:
+        text = (root / COVERAGE_HOSTS).read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        return Err("cannot read coverage host manifest: " + str(exc))
+    return coverage_hosts.parse(text)
+
+
+def coverage_foreign(root: Path, family: Family) -> tuple[str, ...]:
+    """Omit nothing unless the complete manifest is valid."""
+    declared = coverage_sources(root)
+    return (
+        coverage_hosts.foreign(declared.value, family)
+        if isinstance(declared, Ok)
+        else ()
+    )
+
+
+def coverage_host_problems(
+    root: Path, entries: tuple[evidence.Entry, ...]
+) -> tuple[str, ...]:
+    """Report an invalid manifest or a declared source absent from the census."""
+    declared = coverage_sources(root)
+    if isinstance(declared, Err):
+        return ("validators: coverage hosts: " + declared.error,)
+    absent = coverage_hosts.missing(
+        declared.value, frozenset(entry.path for entry in entries)
+    )
+    return tuple("validators: coverage hosts: missing " + path for path in absent)
+
+
 def pipeline(
     root: Path,
     run_dir: Path,
@@ -686,7 +772,9 @@ def pipeline(
     ...,
 ]:
     """Insert provisioning after ty while retaining every introduced tool leg."""
-    legs = python_legs(sys.executable, root, files, run_dir)
+    legs = python_legs(
+        sys.executable, root, files, run_dir, coverage_foreign(root, family)
+    )
     context = hostfacts.current(
         directories(family, os.environ, Path.home()).cache,
         assume_yes=assume_yes,
@@ -1234,6 +1322,7 @@ def _validate_and_observe(
         *docs(root),
         *plan(root),
         *(test_consumer_problems(root, census.value) if isinstance(census, Ok) else ()),
+        *(coverage_host_problems(root, census.value) if isinstance(census, Ok) else ()),
         *(
             ("validators: phase census: " + observed_phases.error,)
             if isinstance(observed_phases, Err)
@@ -1341,7 +1430,11 @@ def _validate_and_observe(
         planned,
         source_entries=census.value if isinstance(census, Ok) else (),
     )
-    pytest_integrity = report_pytest_leg(run_dir, tools)
+    pytest_integrity, killer_match, killer_integrity = (
+        report_pytest_leg(run_dir, tools),
+        mutant_killers_match(tools.killers, records, tools.pytest),
+        mutant_killers_unchanged(run_dir, nonce, tools.killers),
+    )
     if isinstance(records, Err):
         click.echo("post-run-verifier: mutation corpus unavailable", err=True)
         post_code = 1
@@ -1378,6 +1471,8 @@ def _validate_and_observe(
                 or oracle_code
                 or tools.code
                 or pytest_integrity
+                or killer_match
+                or killer_integrity
                 or post_code
                 or oracle_integrity
                 or details_initial_integrity
@@ -1416,6 +1511,9 @@ def _validate_and_observe(
                 readiness,
             )
         ),
+        Err("mutant killer observation failed")
+        if killer_match or killer_integrity
+        else tools.killers,
     )
 
 
@@ -1745,6 +1843,37 @@ def provisional_work_and_tools(
     )
 
 
+def collection_with_killer_failures(
+    collection: Result[tuple[tuple[int, frozenset[str]], ...], str],
+    captured: ProvisionalCapture,
+    records: tuple[Mutant, ...],
+    owners: tuple[tuple[str, int], ...],
+    pytest_run: evidence.RunEvidence,
+) -> Result[tuple[tuple[int, frozenset[str]], ...], str]:
+    """Add individually observed failures without removing aggregate failures."""
+    if isinstance(collection, Err) or not records:
+        return collection
+    report = captured.tools.killers
+    if report is None or isinstance(report, Err):
+        return Err("captured mutant killer report unavailable")
+    scoped = mutant_report.failure_scopes(
+        report.value,
+        records,
+        pytest_run,
+        owners,
+        tuple(number for number, _failures in collection.value),
+    )
+    if isinstance(scoped, Err):
+        return scoped
+    by_number = dict(scoped.value)
+    return Ok(
+        tuple(
+            (number, failures | by_number[number])
+            for number, failures in collection.value
+        )
+    )
+
+
 def captured_phase_observations(
     captured: ProvisionalCapture,
 ) -> Result[tuple[phase_reports.PhaseResult, ...], str]:
@@ -1792,7 +1921,9 @@ def captured_phase_observations(
             work,
             pytest_run.value,
             captured.nonce,
-            collection,
+            collection_with_killer_failures(
+                collection, captured, records, owners, pytest_run.value
+            ),
             native,
             captured.oracle,
             attribution.shared,
@@ -2040,6 +2171,38 @@ def verify_provisional_handoff(
         parse_provisional_record(nonce, contents)
         if provisional_seal(nonce, contents) == markers[0]
         else Err("provisional handoff digest mismatch")
+    )
+
+
+def killer_seal(nonce: str, report: mutant_report.Report) -> str:
+    """Bind the original per-killer bytes to the child handoff."""
+    return f"{KILLER_SEAL} {nonce} {report.digest}"
+
+
+def verify_killer_handoff(
+    directory: Path, nonce: str, output: str
+) -> Result[None, str]:
+    """Verify the retained report whenever its finalizer claimed success."""
+    finalizers = finalizer_observation(directory, nonce)
+    if isinstance(finalizers, Err):
+        return finalizers
+    if dict(finalizers.value.outcomes)["mutant-killers"]:
+        return Ok(None)
+    lines = output.splitlines()
+    markers = tuple(line for line in lines if line.startswith(KILLER_SEAL + " "))
+    if (
+        len(markers) != 1
+        or len(lines) < KILLER_HANDOFF_LINES
+        or lines[-KILLER_HANDOFF_LINES] != markers[0]
+    ):
+        return Err("missing or ambiguous mutant killer handoff")
+    report = mutant_report.read(directory / "mutant-killers.json", nonce)
+    if isinstance(report, Err):
+        return Err("mutant killer handoff record unavailable: " + report.error)
+    return (
+        Ok(None)
+        if killer_seal(nonce, report.value) == markers[0]
+        else Err("mutant killer handoff digest mismatch")
     )
 
 
@@ -2499,6 +2662,23 @@ def readiness_result(validation: int, readiness: tuple[str, ...]) -> int:
     return validation or int(bool(readiness))
 
 
+def emit_handoff_seals(
+    nonce: str,
+    recorded: Result[evidence.LegEvidence, str],
+    phase_record: Result[bytes, str],
+    killers: Result[mutant_report.Report, str] | None,
+    codes: tuple[int, int, int],
+) -> None:
+    """Emit original observations only after their records remain intact."""
+    record_code, phase_record_code, killer_code = codes
+    if isinstance(recorded, Ok) and not record_code:
+        if isinstance(phase_record, Ok) and not phase_record_code:
+            if isinstance(killers, Ok) and not killer_code:
+                click.echo(killer_seal(nonce, killers.value))
+            click.echo(provisional_seal(nonce, phase_record.value))
+        click.echo(finalizer_seal(recorded.value))
+
+
 def execute(
     root: Path, run_dir: Path, nonce: str, family: Family, *, assume_yes: bool = False
 ) -> int:
@@ -2545,13 +2725,13 @@ def execute(
         run_dir, nonce, validation.substeps
     )
     code = code or substeps_after_finalizers
-    pytest_after_finalizers = pytest_manifest_unchanged(
-        run_dir, nonce, validation.pytest
+    pytest_after_finalizers, killers_after_finalizers, native_after_finalizers = (
+        pytest_manifest_unchanged(run_dir, nonce, validation.pytest),
+        mutant_killers_unchanged(run_dir, nonce, validation.killers),
+        native_snapshot_unchanged(run_dir, nonce, validation.native),
     )
     code = code or pytest_after_finalizers
-    native_after_finalizers = native_snapshot_unchanged(
-        run_dir, nonce, validation.native
-    )
+    code = code or killers_after_finalizers
     code = code or native_after_finalizers
     host_after_finalizers = host_observation_unchanged(run_dir, nonce, validation.host)
     code = code or host_after_finalizers
@@ -2564,6 +2744,7 @@ def execute(
         ("tool-outcomes", tools_after_finalizers),
         ("tool-substeps", substeps_after_finalizers),
         ("pytest-manifest", pytest_after_finalizers),
+        ("mutant-killers", killers_after_finalizers),
         ("native-observation", native_after_finalizers),
         ("host-observation", host_after_finalizers),
     )
@@ -2580,10 +2761,13 @@ def execute(
     provisional_code = report_provisional_phases(observations)
     code = code or provisional_code
     status = summarize(CheckRun(root, run_dir, nonce, family), code, validation.host)
-    if isinstance(recorded, Ok) and not record_code:
-        if isinstance(phase_record, Ok) and not phase_record_code:
-            click.echo(provisional_seal(nonce, phase_record.value))
-        click.echo(finalizer_seal(recorded.value))
+    emit_handoff_seals(
+        nonce,
+        recorded,
+        phase_record,
+        validation.killers,
+        (record_code, phase_record_code, killers_after_finalizers),
+    )
     return status
 
 
@@ -2629,6 +2813,7 @@ def retain_gate_output(
             "oracle-outcomes.json",
             "oracle-details.json",
             "pytest-manifest.json",
+            "mutant-killers.json",
             "haskell-manifest.json",
             "haskell-sources.json",
             "tool-outcomes.json",
@@ -2683,7 +2868,18 @@ def cleanup_run_root(context: CheckRun, temporary_root: Path) -> Result[None, st
         shutil.rmtree(writeguard.filesystem_path(target))
         return Ok(None)
     except (OSError, UnicodeError, RuntimeError) as exc:
-        return Err("temporary cleanup failure: " + str(exc))
+        return Err("temporary cleanup failure: " + _failure_text(exc))
+
+
+def _failure_text(exc: BaseException) -> str:
+    """Keep an exception's own message when a library adds only a filename.
+
+    Linux fd-based tree removal assigns ``filename`` to an arbitrary OSError,
+    whose default rendering then shows only ``[Errno None] None`` and the path.
+    """
+    if isinstance(exc, OSError) and exc.errno is None and exc.filename is not None:
+        return ": ".join((*(str(item) for item in exc.args), repr(exc.filename)))
+    return str(exc)
 
 
 def retain_cleanup_failure(
@@ -2753,6 +2949,8 @@ def retain_verified_gate_output(
     checked = verify_finalizer_handoff(retained.value, context.nonce, streams[0])
     if isinstance(checked, Ok):
         checked = verify_provisional_handoff(retained.value, context.nonce, streams[0])
+    if isinstance(checked, Ok):
+        checked = verify_killer_handoff(retained.value, context.nonce, streams[0])
     if isinstance(checked, Err):
         message = "finalizer handoff: " + checked.error
         saved = retain_handoff_failure(context.root, state, retained.value, message)
@@ -2793,6 +2991,10 @@ def _run_check_child(context: CheckRun, state: Path, *, assume_yes: bool) -> int
         handoff = verify_finalizer_handoff(context.directory, context.nonce, streams[0])
         if isinstance(handoff, Ok):
             handoff = verify_provisional_handoff(
+                context.directory, context.nonce, streams[0]
+            )
+        if isinstance(handoff, Ok):
+            handoff = verify_killer_handoff(
                 context.directory, context.nonce, streams[0]
             )
         if isinstance(handoff, Err):

@@ -14,7 +14,7 @@ import coverage
 import pytest
 
 from agentctl import process
-from agentctl.check import steps
+from agentctl.check import mutant_report, steps
 from agentctl.check.evidence import Entry, read_legs, source_census
 from agentctl.check.legs import Leg
 from agentctl.check.ownership import (
@@ -63,6 +63,28 @@ from agentctl.process import (
 from agentctl.result import Err, Ok
 
 pytestmark = pytest.mark.evidence("real")
+
+
+def test_mutant_report_file_identity(tmp_path: Path) -> None:
+    """Read real report bytes and refuse a hard-linked or changed file."""
+    path = tmp_path / "mutant-killers.json"
+    path.write_text('{"nonce":"current","records":[]}', encoding="utf-8")
+    first = mutant_report.read(path, "current")
+    assert isinstance(first, Ok), first
+    alias = tmp_path / "alias"
+    os.link(path, alias)
+    try:
+        assert isinstance(mutant_report.read(path, "current"), Err), (
+            "hardlinked mutant report accepted"
+        )
+    finally:
+        alias.unlink()
+    path.write_text('{ "nonce":"current","records":[]}', encoding="utf-8")
+    second = mutant_report.read(path, "current")
+    assert isinstance(second, Ok), second
+    assert first.value.digest != second.value.digest, (
+        "changed mutant report bytes ignored"
+    )
 
 
 def test_process_boundary_reexports_foundation_values() -> None:
@@ -893,6 +915,27 @@ def test_pytest_manifest_captured_before_followups(tmp_path: Path) -> None:
     )
 
 
+def test_mutant_report_captured_before_followups(tmp_path: Path) -> None:
+    """Preserve the primary subprocess report before a later command changes it."""
+    report = tmp_path / "mutant-killers.json"
+    writer = (
+        "from pathlib import Path; import sys; "
+        "Path(sys.argv[1]).write_text(sys.argv[2], encoding='utf-8')"
+    )
+    initial = '{"nonce":"fresh","records":[]}'
+    primary = (sys.executable, "-c", writer, str(report), initial)
+    followup = (sys.executable, "-c", writer, str(report), " " + initial)
+    captured = _run_tools_observed(
+        tmp_path, tmp_path, "fresh", (Leg("pytest", primary, (followup,)),)
+    )
+    assert isinstance(captured.killers, Ok), "mutant report was not captured"
+    assert steps.mutant_killers_unchanged(tmp_path, "fresh", captured.killers) == 1, (
+        "changed mutant report was accepted"
+    )
+    report.write_text(initial, encoding="utf-8")
+    assert steps.mutant_killers_unchanged(tmp_path, "fresh", captured.killers) == 0
+
+
 def test_tool_record_change_is_refused(tmp_path: Path) -> None:
     """A real read-boundary alteration cannot convert a failed leg into a pass."""
     script = (
@@ -982,19 +1025,25 @@ def test_parent_rejects_postcopy_finalizer_tampering(tmp_path: Path) -> None:
     """A real audit hook alters only the copied record before parent verification."""
     script = (
         "import os, sys\nfrom pathlib import Path\n"
+        "from agentctl.check import mutant_report\n"
         "from agentctl.check.steps import (CheckRun, FINALIZER_NAMES, finalizer_seal, "
-        "provisional_seal, record_finalizers, record_provisional_phases, "
-        "retain_verified_gate_output)\n"
+        "killer_seal, provisional_seal, record_finalizers, "
+        "record_provisional_phases, retain_verified_gate_output)\n"
         "from agentctl.foundation import Err, Ok\n"
         "base = Path(sys.argv[1]); root = base / 'checkout'; "
         "run_dir = base / 'run'; state = base / 'state'\n"
         "root.mkdir(); run_dir.mkdir()\n"
+        "path = run_dir / 'mutant-killers.json'\n"
+        'path.write_text(\'{"nonce":"abc123","records":[]}\', encoding=\'utf-8\')\n'
+        "killers = mutant_report.read(path, 'abc123')\n"
+        "assert isinstance(killers, Ok), killers\n"
         "record = record_finalizers(run_dir, 'abc123', "
         "tuple((name, 0) for name in FINALIZER_NAMES[:-1]))\n"
         "assert isinstance(record, Ok), record\n"
         "phase = record_provisional_phases(run_dir, 'abc123', Err('missing'))\n"
         "assert isinstance(phase, Ok), phase\n"
-        "output = provisional_seal('abc123', phase.value) + '\\n' + "
+        "output = killer_seal('abc123', killers.value) + '\\n' + "
+        "provisional_seal('abc123', phase.value) + '\\n' + "
         "finalizer_seal(record.value) + '\\n'\n"
         "target = state / 'check-reports' / 'abc123' / 'finalizer-outcomes.json'\n"
         "seen = [False]\n"
@@ -1031,18 +1080,25 @@ def test_parent_rejects_postcopy_provisional_tampering(tmp_path: Path) -> None:
     """The retained provisional bytes remain tied to the child's observations."""
     script = (
         "import sys\nfrom pathlib import Path\n"
+        "from agentctl.check import mutant_report\n"
         "from agentctl.check.steps import (CheckRun, FINALIZER_NAMES, finalizer_seal, "
-        "provisional_seal, record_finalizers, record_provisional_phases, "
-        "retain_verified_gate_output, verify_provisional_handoff)\n"
+        "killer_seal, provisional_seal, record_finalizers, "
+        "record_provisional_phases, retain_verified_gate_output, "
+        "verify_provisional_handoff)\n"
         "from agentctl.foundation import Err, Ok\n"
         "base = Path(sys.argv[1]); root = base / 'checkout'; "
         "run_dir = base / 'run'; state = base / 'state'\n"
         "root.mkdir(); run_dir.mkdir()\n"
+        "path = run_dir / 'mutant-killers.json'\n"
+        'path.write_text(\'{"nonce":"abc123","records":[]}\', encoding=\'utf-8\')\n'
+        "killers = mutant_report.read(path, 'abc123')\n"
         "final = record_finalizers(run_dir, 'abc123', "
         "tuple((name, 0) for name in FINALIZER_NAMES[:-1]))\n"
         "phase = record_provisional_phases(run_dir, 'abc123', Err('missing'))\n"
-        "assert isinstance(final, Ok) and isinstance(phase, Ok)\n"
-        "output = provisional_seal('abc123', phase.value) + '\\n' + "
+        "assert isinstance(killers, Ok) and isinstance(final, Ok) "
+        "and isinstance(phase, Ok)\n"
+        "output = killer_seal('abc123', killers.value) + '\\n' + "
+        "provisional_seal('abc123', phase.value) + '\\n' + "
         "finalizer_seal(final.value) + '\\n'\n"
         "assert verify_provisional_handoff(run_dir, 'abc123', output) == Ok(None)\n"
         "assert isinstance(verify_provisional_handoff(run_dir, 'abc123', "
@@ -1065,6 +1121,66 @@ def test_parent_rejects_postcopy_provisional_tampering(tmp_path: Path) -> None:
         "assert 'provisional handoff digest mismatch' in "
         "(report / 'finalizer-handoff.txt').read_text()\n"
         "assert (report / 'stderr.txt').read_text() == 'primary\\n'\n"
+    )
+    family = platform.system()
+    assert family in {"Linux", "Darwin", "Windows"}
+    child = run(
+        [sys.executable, "-c", script, str(tmp_path), family],
+        cwd=tmp_path,
+        env={
+            **os.environ,
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONPATH": str(Path(__file__).resolve().parents[2] / "src"),
+        },
+    )
+    assert isinstance(child, Ok)
+    assert child.value.code == 0, child.value.stderr
+
+
+def test_parent_rejects_postcopy_mutant_report_tampering(tmp_path: Path) -> None:
+    """A changed retained killer report cannot accompany a passing finalizer."""
+    script = (
+        "import sys\nfrom pathlib import Path\n"
+        "from agentctl.check import mutant_report\n"
+        "from agentctl.check.steps import (CheckRun, FINALIZER_NAMES, finalizer_seal, "
+        "killer_seal, provisional_seal, record_finalizers, record_provisional_phases, "
+        "retain_verified_gate_output, verify_killer_handoff)\n"
+        "from agentctl.foundation import Err, Ok\n"
+        "base = Path(sys.argv[1]); root = base / 'checkout'; "
+        "run_dir = base / 'run'; state = base / 'state'\n"
+        "root.mkdir(); run_dir.mkdir()\n"
+        "path = run_dir / 'mutant-killers.json'\n"
+        'path.write_text(\'{"nonce":"abc123","records":[]}\', encoding=\'utf-8\')\n'
+        "report = mutant_report.read(path, 'abc123')\n"
+        "final = record_finalizers(run_dir, 'abc123', "
+        "tuple((name, 0) for name in FINALIZER_NAMES[:-1]))\n"
+        "phase = record_provisional_phases(run_dir, 'abc123', Err('missing'))\n"
+        "assert isinstance(report, Ok) and isinstance(final, Ok) "
+        "and isinstance(phase, Ok)\n"
+        "output = killer_seal('abc123', report.value) + '\\n' + "
+        "provisional_seal('abc123', phase.value) + '\\n' + "
+        "finalizer_seal(final.value) + '\\n'\n"
+        "assert verify_killer_handoff(run_dir, 'abc123', output) == Ok(None)\n"
+        "assert isinstance(verify_killer_handoff(run_dir, 'abc123', "
+        "output + output), Err)\n"
+        "target = state / 'check-reports' / 'abc123' / 'mutant-killers.json'\n"
+        "trigger = state / 'check-reports' / 'abc123' / 'finalizer-outcomes.json'\n"
+        "seen = [False]\n"
+        "def audit(event, args):\n"
+        "    if (not seen[0] and event == 'open' and str(args[0]) == str(trigger) "
+        "and 'r' in str(args[1]) and target.exists()):\n"
+        "        seen[0] = True\n"
+        "        with target.open('ab') as stream: stream.write(b' ')\n"
+        "sys.addaudithook(audit)\n"
+        "result = retain_verified_gate_output(CheckRun(root, run_dir, 'abc123', "
+        "sys.argv[2]), state, (output, 'primary\\n'), verify_handoff=True)\n"
+        "assert isinstance(result, Err), "
+        "'post-copy mutant report alteration accepted'\n"
+        "assert seen[0], 'mutant report tamper hook did not run'\n"
+        "report_dir = state / 'check-reports' / 'abc123'\n"
+        "assert 'mutant killer handoff digest mismatch' in "
+        "(report_dir / 'finalizer-handoff.txt').read_text()\n"
+        "assert (report_dir / 'stderr.txt').read_text() == 'primary\\n'\n"
     )
     family = platform.system()
     assert family in {"Linux", "Darwin", "Windows"}
@@ -1118,6 +1234,64 @@ def test_parent_rejects_changed_live_provisional_record(
     )
 
 
+def test_parent_rejects_changed_live_mutant_report(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A changed live killer report fails before the parent copies its report."""
+    root, run_dir, state = (tmp_path / name for name in ("checkout", "run", "state"))
+    root.mkdir()
+    run_dir.mkdir()
+    path = run_dir / "mutant-killers.json"
+    path.write_text('{"nonce":"abc123","records":[]}', encoding="utf-8")
+    original = mutant_report.read(path, "abc123")
+    final = steps.record_finalizers(
+        run_dir, "abc123", tuple((name, 0) for name in steps.FINALIZER_NAMES[:-1])
+    )
+    phase = steps.record_provisional_phases(run_dir, "abc123", Err("missing"))
+    assert isinstance(original, Ok)
+    assert isinstance(final, Ok)
+    assert isinstance(phase, Ok)
+    output = "\n".join(
+        (
+            steps.killer_seal("abc123", original.value),
+            steps.provisional_seal("abc123", phase.value),
+            steps.finalizer_seal(final.value),
+            "",
+        )
+    )
+    assert isinstance(
+        steps.verify_killer_handoff(
+            run_dir, "abc123", "\n".join(output.splitlines()[1:])
+        ),
+        Err,
+    ), "missing mutant killer handoff was accepted"
+    path.write_text(' {"nonce":"abc123","records":[]}', encoding="utf-8")
+    monkeypatch.setattr(
+        steps, "run", lambda *_args, **_kwargs: Ok(Output(0, output, ""))
+    )
+    family = platform.system()
+    assert family in {"Linux", "Darwin", "Windows"}
+    assert (
+        _run_check_child(
+            CheckRun(root, run_dir, "abc123", family), state, assume_yes=False
+        )
+        == 1
+    )
+    stderr = (state / "check-reports/abc123/stderr.txt").read_text(encoding="utf-8")
+    assert "mutant killer handoff digest mismatch" in stderr, (
+        "parent accepted changed live mutant report"
+    )
+
+
+def test_failed_mutant_finalizer_preserves_partial_handoff(tmp_path: Path) -> None:
+    """A failed killer finalizer retains its failure without requiring a false seal."""
+    statuses = tuple(
+        (name, int(name == "mutant-killers")) for name in steps.FINALIZER_NAMES[:-1]
+    )
+    assert isinstance(steps.record_finalizers(tmp_path, "abc123", statuses), Ok)
+    assert steps.verify_killer_handoff(tmp_path, "abc123", "") == Ok(None)
+
+
 def test_check_parent_retains_missing_finalizer_handoff(tmp_path: Path) -> None:
     """An early child failure and its missing handoff remain in the report."""
     root, run_dir, state = (tmp_path / name for name in ("checkout", "run", "state"))
@@ -1141,6 +1315,7 @@ def test_gate_reports_are_retained_outside_checkout(tmp_path: Path) -> None:
     root.mkdir()
     run_dir.mkdir()
     (run_dir / "pytest-manifest.json").write_bytes(b"current manifest")
+    (run_dir / "mutant-killers.json").write_bytes(b"killer outcomes")
     (run_dir / "host.json").write_bytes(b"current host")
     (run_dir / "bootstrap-host.json").write_bytes(b"bootstrap host")
     (run_dir / "oracle-outcomes.json").write_bytes(b"oracle outcomes")
@@ -1158,6 +1333,10 @@ def test_gate_reports_are_retained_outside_checkout(tmp_path: Path) -> None:
     ) == "success \u2713\n"
     assert (result.value / "stderr.txt").read_text(encoding="utf-8") == "failure\n"
     assert (result.value / "pytest-manifest.json").read_bytes() == b"current manifest"
+    assert (result.value / "mutant-killers.json").is_file(), (
+        "mutant killer outcomes were not retained"
+    )
+    assert (result.value / "mutant-killers.json").read_bytes() == b"killer outcomes"
     assert (result.value / "host.json").is_file(), "host observation was not retained"
     assert (result.value / "host.json").read_bytes() == b"current host"
     for name, contents in (

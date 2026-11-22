@@ -7,14 +7,34 @@ from pathlib import Path
 
 import pytest
 
-from agentctl.bootstrap import binary, build
-from agentctl.foundation import Ok
+from agentctl.bootstrap import binary, build, handoff
+from agentctl.foundation import Err, Ok
 from agentctl.process import run
 from tests.harness.bootstrap_caller import CallerRequest, publish
 from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 
 haskell_build = _haskell_build_fixture
 pytestmark = pytest.mark.evidence("real")
+
+
+def test_child_transfer_preserves_exit_without_launch(tmp_path: Path) -> None:
+    """A real controlled child returns its status without a launch fixture."""
+    request = handoff.Transfer(
+        handoff.Mode.CHILD,
+        Path(sys.executable),
+        ("-c", "raise SystemExit(3)"),
+        tmp_path,
+        tuple(os.environ.items()),
+    )
+    assert handoff.transfer(request) == Ok(3), "early child handoff changed exit status"
+    missing = handoff.Transfer(
+        handoff.Mode.CHILD,
+        tmp_path / "missing-executable",
+        (),
+        tmp_path,
+        tuple(os.environ.items()),
+    )
+    assert isinstance(handoff.transfer(missing), Err)
 
 
 def test_published_caller_without_launch_fixture(
@@ -41,7 +61,6 @@ def test_published_caller_without_launch_fixture(
     assert dict(caller.environment)["HOME"] == str(tmp_path)
 
 
-@pytest.mark.evidence("real")
 def test_bootstrap_caller_import_without_later_helpers(
     root: Path, tmp_path: Path
 ) -> None:
@@ -60,6 +79,8 @@ def test_bootstrap_caller_import_without_later_helpers(
         "assert callable(caller.publish)\n"
         "import pytest\n"
         "code = pytest.main(['-p', 'no:cacheprovider', "
+        "'tests/integration/test_bootstrap_caller.py::"
+        "test_child_transfer_preserves_exit_without_launch', "
         "'tests/unit/test_passthrough.py::"
         "test_passthrough_table_matches_oracle', "
         "'tests/unit/test_passthrough.py::"

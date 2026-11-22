@@ -45,6 +45,14 @@ The current pytest leg continues after collection errors and records failed coll
 
 The pytest leg attempts its coverage followups even when pytest fails, retaining the primary failure and reporting any failed followup. A followup whose own prerequisite fails is not run.
 
+The coverage report keeps the 100% branch floor and includes only the checkout's `src/agentctl` sources, so copied
+trees under a run root are never reported as checkout code. `src/agentctl/check/coverage_hosts.toml` declares sources
+whose native paths execute only on named host classes (`Windows`, `WSL`, `Linux`, `Darwin`). A host run omits only
+the declared sources foreign to its family; Windows-only observers are therefore measured by the native Windows run,
+and WSL-only legacy guest observers by no current lane until their ledger owner removes them. An unreadable or invalid
+manifest, or a declared source missing from the census, is a validator failure, and the leg then omits nothing
+(`tests/unit/test_coverage_hosts.py`).
+
 The current toolchain and style readiness steps refuse missing prepared tools without installing them. Native gate builds require a previously prepared matching private index and use offline Cabal arguments. Those checks do not establish that all native dependencies or backends were prepared successfully.
 
 The current write guard snapshots the Git index path reported by Git and, when present, its bytes alongside refs and checkout files. A changed index fails the guard comparison; this observation does not itself establish a phase verdict.

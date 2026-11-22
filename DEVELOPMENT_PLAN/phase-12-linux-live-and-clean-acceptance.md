@@ -9,19 +9,19 @@
 **Gate evidence**: none recorded
 **Evidence covers**: phase input closure and verified prerequisite receipts
 
-> **Purpose**: Debian clean-host and logged-in agent acceptance, with dedicated WSL2 permitted for Linux evidence on a Windows host.
+> **Purpose**: Debian clean-host and logged-in agent acceptance, with a dedicated Debian VirtualBox VM for Linux evidence on a Windows host.
 
 ## Phase Objective
 
-Debian clean-host and logged-in agent acceptance, with dedicated WSL2 permitted for Linux evidence on a Windows host. Actual preparation occurs before the noninteractive gate and is bound to its subject; a copied checkout or commit cannot bridge host and guest state.
+Debian clean-host and logged-in agent acceptance, with a dedicated Debian VirtualBox VM for Linux evidence on a Windows host. Actual preparation occurs before the noninteractive gate and is bound to its subject; a copied checkout or commit cannot bridge host and guest state.
 
-This phase needs Debian Linux, its clean-host preparation and authenticated live lane. Dedicated WSL2 can supply Linux evidence under the runbook's binding and capacity rules. The declared tests are executable contracts; an absent required test is unmet evidence, not existing proof. Acceptance-only test implementations belong to the prerequisite owner named in the inventory. Existing incompatible code is inventoried in the deletion ledger. No old implementation or unqualified receipt establishes this revised contract.
+This phase needs Debian Linux, its clean-host preparation and authenticated live lane. The dedicated VirtualBox VM can supply Linux evidence under the runbook's binding and capacity rules. The declared tests are executable contracts; an absent required test is unmet evidence, not existing proof. Acceptance-only test implementations belong to the prerequisite owner named in the inventory. Existing incompatible code is inventoried in the deletion ledger. No old implementation or unqualified receipt establishes this revised contract.
 
 ## Gate Integrity
 
 | Requirement | Oracle | Observer | Mutants | Tests |
 |---|---|---|---|---|
-| R25 — Dedicated WSL2 and checkout binding | `tests/oracles/requirements.toml` | real: independent inputs and nonce-bound native observations | none — native positive/refusing twins | `tests/integration/test_wsl_binding.py::test_shared_checkout_identity`, `tests/integration/test_wsl_binding.py::test_capacity_and_dependency_receipt` |
+| R25 — Dedicated VirtualBox and checkout binding | `tests/oracles/requirements.toml` | real: independent inputs and nonce-bound native observations | none — native positive/refusing twins | `tests/integration/test_virtualbox_binding.py::test_shared_checkout_identity`, `tests/integration/test_virtualbox_binding.py::test_capacity_and_dependency_receipt` |
 | R1 — Two-stage clean Debian bootstrap | `tests/oracles/requirements.toml` | real: independent inputs and nonce-bound native observations | none — native positive/refusing twins | `tests/e2e/test_fresh_bootstrap.py::test_ghcup_digest_matches_pin`, `tests/integration/test_clean_runtime.py::test_pipx_to_haskell_to_apt_tmux` |
 | R1 — Authenticated no-input live acceptance | `tests/oracles/requirements.toml` | real: independent inputs and nonce-bound native observations | none — native positive/refusing twins | `tests/live/test_live_launch.py::test_live_launch`, `tests/live/test_live_classification.py::test_live_screen_classes`, `tests/live/test_live_supervisor.py::test_live_supervisor_never_sends` |
 
@@ -32,33 +32,33 @@ This phase needs Debian Linux, its clean-host preparation and authenticated live
 
 ## Confirms
 
-- Native Debian or the dedicated bound WSL2 instance confirms source-built bootstrap and Haskell APT provisioning; existing logged-in agents supply no-input live observations.
+- Native Debian or the dedicated bound VirtualBox VM confirms source-built bootstrap and Haskell APT provisioning; existing logged-in agents supply no-input live observations.
 - Clean and live receipts have separate explicit predicates; logged-out refusal does not claim authenticated evidence.
 
 ## Sprints
 
-### Sprint 12.1: Dedicated WSL2 and checkout binding [Planned]
+### Sprint 12.1: Dedicated VirtualBox and checkout binding [Planned]
 
 **Status**: Planned
 **Implementation**: none — this sprint records acceptance evidence
-**Validation tests**: `tests/integration/test_wsl_binding.py::test_shared_checkout_identity`, `tests/integration/test_wsl_binding.py::test_capacity_and_dependency_receipt`
+**Validation tests**: `tests/integration/test_virtualbox_binding.py::test_shared_checkout_identity`, `tests/integration/test_virtualbox_binding.py::test_capacity_and_dependency_receipt`
 **Mutants**: none — native positive/refusing twins
 **Closes**: R25
 **Docs to update**: `documents/operations/installation.md`, `documents/operations/validation_runbook.md`, `documents/engineering/testing.md`
 
 #### Objective
 
-Dedicated WSL2 and checkout binding supplies its complete owned contract through the single phase-scoped gate verdict.
+Dedicated VirtualBox and checkout binding supplies its complete owned contract through the single phase-scoped gate verdict.
 
 #### Deliverables
 
-When using Windows, use an agentctl-only Debian WSL2 instance with recorded CPU/memory/disk allocation, measured free capacity and all Linux dependencies. Bind mount the live Windows checkout into its Linux workspace; verify mountinfo, source identity and bidirectional nonce visibility, including uncommitted/untracked state. Native Debian uses its own corresponding host identity.
+When using Windows, use an agentctl-only Debian VirtualBox VM sized with host headroom, observed CPU/memory/swap/disk capacity and all Linux dependencies. Bind mount the live Windows checkout into its Linux workspace; verify mountinfo, source identity and bidirectional nonce visibility, including uncommitted/untracked state. Native Debian uses its own corresponding host identity.
 
 #### Validation
 
-For the WSL2 route require a real bind mount and fail a symlink, copy, stale guest tree or different HEAD/content pairing. Native Debian instead records its direct checkout identity and exercises the WSL policy through constructed facts; it requires no Windows machine. Resource limits must cover measured build/test peak plus explicit headroom without starving Windows; disk/commit insufficiency is an unmet lane. Do not change global WSL settings or shut down unrelated distributions.
+For the VirtualBox route require a real bind mount and fail a symlink, copy, stale guest tree or different HEAD/content pairing. Verify permissions, locks, case and symlink behavior. Native Debian records its direct checkout identity and requires no Windows machine. Observe allocations and available capacity with host headroom; cross-project isolation proof is not a prerequisite. Do not change other VMs or existing sessions.
 
-Required executable evidence: `tests/integration/test_wsl_binding.py::test_shared_checkout_identity`, `tests/integration/test_wsl_binding.py::test_capacity_and_dependency_receipt`. Positive and refusing native controls retain independent expected outputs and actual resource observations.
+Required executable evidence: `tests/integration/test_virtualbox_binding.py::test_shared_checkout_identity`, `tests/integration/test_virtualbox_binding.py::test_capacity_and_dependency_receipt`. The WSL nodes remain migration controls; only the planned VirtualBox nodes can establish the Windows-hosted Linux route. Positive and refusing native controls retain independent expected outputs and actual resource observations.
 
 #### Remaining Work
 
@@ -85,7 +85,7 @@ Stage A records absent toolchains and tmux, installs Python build prerequisites 
 
 Require actual native toolchain/build and tmux preparation receipts bound to source inputs and host, then full owned tests and immutable warm reuse. A fabricated JSON receipt without matching executable/observed state fails; receipt provenance has the documented local-attestation ceiling.
 
-Required executable evidence: `tests/e2e/test_fresh_bootstrap.py::test_ghcup_digest_matches_pin`, `tests/integration/test_clean_runtime.py::test_pipx_to_haskell_to_apt_tmux`. Positive and refusing native controls retain independent expected outputs and actual resource observations.
+Required executable evidence: `tests/e2e/test_fresh_bootstrap.py::test_ghcup_digest_matches_pin`, `tests/integration/test_clean_runtime.py::test_pipx_to_haskell_to_apt_tmux`. The WSL nodes remain migration controls; only the planned VirtualBox nodes can establish the Windows-hosted Linux route. Positive and refusing native controls retain independent expected outputs and actual resource observations.
 
 #### Remaining Work
 
@@ -106,13 +106,13 @@ Authenticated no-input live acceptance supplies its complete owned contract thro
 
 #### Deliverables
 
-Use existing authenticated Linux agents only in the fixed live-acceptance folder with updates disabled and no answered dialogs. Credentials copied to dedicated WSL state retain restricted permissions and leave host originals intact. Logged-out controls remain tested but do not qualify the live lane.
+Use existing authenticated Linux agents only in the fixed live-acceptance folder with updates disabled and no answered dialogs. Credentials copied to dedicated VM state retain restricted permissions and leave host originals intact. Logged-out controls remain tested but do not qualify the live lane.
 
 #### Validation
 
 Observe real agent processes, exact launch configuration and safe classes without sending prompts. A missing authentication/capability remains unmet and cannot become a passing live receipt through a documented fixture or manual confirmation.
 
-Required executable evidence: `tests/live/test_live_launch.py::test_live_launch`, `tests/live/test_live_classification.py::test_live_screen_classes`, `tests/live/test_live_supervisor.py::test_live_supervisor_never_sends`. Positive and refusing native controls retain independent expected outputs and actual resource observations.
+Required executable evidence: `tests/live/test_live_launch.py::test_live_launch`, `tests/live/test_live_classification.py::test_live_screen_classes`, `tests/live/test_live_supervisor.py::test_live_supervisor_never_sends`. The WSL nodes remain migration controls; only the planned VirtualBox nodes can establish the Windows-hosted Linux route. Positive and refusing native controls retain independent expected outputs and actual resource observations.
 
 #### Remaining Work
 

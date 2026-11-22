@@ -139,7 +139,7 @@ they are not repaired by modifying another distribution or global WSL configurat
 ## Related
 
 - [installation.md](installation.md) — user preparation and first use.
-- [validation_runbook.md](validation_runbook.md) — dedicated WSL2/native procedures.
+- [validation_runbook.md](validation_runbook.md) — dedicated VirtualBox and native procedures.
 - [toolchain_bootstrap.md](../engineering/toolchain_bootstrap.md) — consent and typed readiness.
 - [quality_gate.md](../engineering/quality_gate.md) — independent phase/lane verdicts.
 - [sessions_and_ownership.md](../architecture/sessions_and_ownership.md) — managed/adopted authority.

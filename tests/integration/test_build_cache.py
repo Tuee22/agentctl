@@ -161,7 +161,9 @@ def test_identity_step_rejects_foreign_binary(root: Path, tmp_path: Path) -> Non
         result.value.sha256 == hashlib.sha256(published.value.read_bytes()).hexdigest()
     )
     step = identity.IdentityStep(value.host, value.project, value.data)
-    assert run_tools(root, tmp_path / "reports", "focused", (step,)) == 0
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    assert run_tools(root, reports, "focused", (step,)) == 0
     replacement = tmp_path / "foreign"
     replacement.write_bytes(b"owned foreign binary")
     replacement.replace(published.value)

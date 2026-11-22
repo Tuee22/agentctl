@@ -5,13 +5,34 @@ import json
 import os
 import re
 from collections.abc import Generator
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 
 import pytest
 
 from agentctl.check.evidence import EvidenceClass, EvidenceError, classification
-from agentctl.foundation import Err
+from agentctl.check.mutants import KillerExecution, MutationError
+from agentctl.foundation import Err, Ok, Result
+
+MUTANT_PREFIX = "tests/governance/test_mutants.py::test_corpus["
+
+
+@dataclass(frozen=True, slots=True)
+class KillerRecord:
+    """One observed baseline and mutation status without captured process output."""
+
+    node: str
+    baseline: str
+    mutation: str
+
+
+@dataclass(frozen=True, slots=True)
+class MutantRecord:
+    """A declared mutant and its per-killer outcomes, not a phase receipt."""
+
+    identifier: str
+    error: str
+    killers: tuple[KillerRecord, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -24,9 +45,68 @@ class Manifest:
     passed: frozenset[str] = frozenset()
     forbidden: tuple[str, ...] = ()
     classes: tuple[tuple[str, EvidenceClass], ...] = ()
+    killers: tuple[MutantRecord, ...] = ()
 
 
 STATE = pytest.StashKey[Manifest]()
+KILLER_EXECUTION = pytest.StashKey[KillerExecution]()
+
+
+def _status(value: Result[None, MutationError], success: str) -> str:
+    """Record only the typed outcome, without reproducing test output."""
+    match value:
+        case Ok():
+            return success
+        case Err(error):
+            return "failed:" + error.stage
+
+
+def _mutant_record(execution: KillerExecution) -> MutantRecord | None:
+    """Refuse incomplete or inconsistent per-killer execution values."""
+    match execution.outcomes:
+        case Err(error):
+            return MutantRecord(execution.record.identifier, error.stage, ())
+        case Ok(outcomes):
+            if (
+                not execution.record.killers
+                or tuple(item.node for item in outcomes) != execution.record.killers
+                or any(
+                    (item.baseline == Ok(None)) != (item.mutation is not None)
+                    for item in outcomes
+                )
+            ):
+                return None
+            return MutantRecord(
+                execution.record.identifier,
+                "",
+                tuple(
+                    KillerRecord(
+                        item.node,
+                        _status(item.baseline, "passed"),
+                        "not-run"
+                        if item.mutation is None
+                        else _status(item.mutation, "killed"),
+                    )
+                    for item in outcomes
+                ),
+            )
+
+
+def _capture_killer(item: pytest.Item) -> None:
+    """Attach one observed corpus case to the run's independent manifest."""
+    if not item.nodeid.startswith(MUTANT_PREFIX):
+        return
+    execution = item.stash.get(KILLER_EXECUTION, None)
+    record = None if execution is None else _mutant_record(execution)
+    state = item.config.stash[STATE]
+    if (
+        record is None
+        or item.nodeid != MUTANT_PREFIX + record.identifier + "]"
+        or any(existing.identifier == record.identifier for existing in state.killers)
+    ):
+        _record(item.config, "invalid mutant killer observation: " + item.nodeid)
+        return
+    item.config.stash[STATE] = replace(state, killers=(*state.killers, record))
 
 
 def orphan_modules(
@@ -214,6 +294,18 @@ def pytest_runtest_makereport(
 
 
 @pytest.hookimpl(wrapper=True, specname="pytest_runtest_makereport")
+def pytest_killer_outcome(
+    item: pytest.Item, call: pytest.CallInfo[None]
+) -> Generator[None, pytest.TestReport, pytest.TestReport]:
+    """Capture corpus observations without replacing the ordinary report hook."""
+    del call
+    report = yield
+    if report.when == "call":
+        _capture_killer(item)
+    return report
+
+
+@pytest.hookimpl(wrapper=True, specname="pytest_runtest_makereport")
 def pytest_fixture_phase(
     item: pytest.Item, call: pytest.CallInfo[None]
 ) -> Generator[None, pytest.TestReport, pytest.TestReport]:
@@ -255,4 +347,24 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
         if isinstance(reporter, pytest.TerminalReporter):
             reporter.write_line(
                 "gate: incomplete or forbidden session: " + "; ".join(state.forbidden)
+            )
+
+
+@pytest.hookimpl(specname="pytest_sessionfinish")
+def pytest_killer_finish(session: pytest.Session, exitstatus: int) -> None:
+    """Write per-killer observations separately from the ordinary manifest."""
+    del exitstatus
+    state = session.config.stash[STATE]
+    manifest = os.environ.get("AGENTCTL_CHECK_MANIFEST")
+    if manifest is not None and any(
+        node.startswith(MUTANT_PREFIX) for node in state.collected
+    ):
+        path = Path(manifest).parent / "mutant-killers.json"
+        with path.open("x", encoding="utf-8") as stream:
+            json.dump(
+                {
+                    "nonce": state.nonce,
+                    "records": [asdict(item) for item in state.killers],
+                },
+                stream,
             )

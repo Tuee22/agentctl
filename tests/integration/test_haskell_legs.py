@@ -124,6 +124,12 @@ def test_native_case_sources_match_compiled_callsites(
     assert mapped["agentctl-core-test.Backoff.grows-to-cap"].endswith(
         "test/RecoveryTests.hs"
     )
+    assert mapped["agentctl-core-test.ProcessReal.invalid-utf8-is-refused"].endswith(
+        "test/ProcessTests.hs"
+    )
+    assert mapped["agentctl-core-test.MuxReal.host-multiplexer-meets-floor"].endswith(
+        "test/MuxTests.hs"
+    )
     for path in mapped.values():
         assert (haskell_build.project / path).is_file(), path
 

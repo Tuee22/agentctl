@@ -31,6 +31,10 @@ No retained old acceptance row qualifies the revised contracts.
 | D-95 | Dedicated right-sized Debian Hyper-V, complete Linux dependencies and a verified bind mount of the live host checkout can supply Linux evidence. No commit, copy or disruption to other projects is permitted. This supersedes the original WSL2 route at the user's direction; its executable controls remain migration inputs until equivalent controls exist. | Shared WSL preparation without resource/source identity obligations | [Linux live and clean acceptance](phase-12-linux-live-and-clean-acceptance.md) |
 | D-96 | Coherent observations and concrete server-ordered conditional literal+Enter submission precede automatic input. Missing targets, changing activity and ambiguous outcomes fail closed; ordinary repeated captures establish no atomicity. | Stable-cursor snapshot and separate-send assumptions | [Pane observation and classification](phase-7-pane-observation-and-classification.md) |
 
+| D-107 | Windows-hosted Linux validation uses a dedicated agentctl Debian VirtualBox VM with the live checkout mounted and verified, host headroom and recorded capacity. Cross-project isolation proof is not a prerequisite. Existing WSL and Hyper-V controls remain migration inputs. | D-95 and conflicting WSL or Hyper-V route requirements; user instruction: `a dedicated agentctl Debian VirtualBox VM` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+| D-108 | The Windows-hosted source mount must prove source identity, complete byte census agreement, two-way fresh nonce visibility including unstaged and untracked state, ordinary read/write and owned-sentinel cleanup. Its permission-change, lock, case and symlink behavior is observed and recorded as a mount fact, not a Linux qualification prerequisite. Build, cache, toolchain, temporary, state and test roots stay on dedicated Linux storage, and tests needing POSIX filesystem semantics use those roots. A VirtualBox shared folder bind mounted into the guest is an acceptable transport under this rule. | D-107 and the filesystem-semantics qualification clause of AGENTS and standards Q; user instruction: `Amend mount policy` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+| D-109 | Branch coverage remains 100% and is measured per host over the checkout's `src/agentctl` sources only; copied trees under a run root are not checkout sources. `src/agentctl/check/coverage_hosts.toml` declares sources whose native paths execute only on named host classes (`Windows`, `WSL`, `Linux`, `Darwin`); each host run omits only declared sources foreign to it, and an invalid manifest or absent declared source is a validator failure that omits nothing. Windows-only observers are covered by the native Windows run. WSL-only legacy guest observers execute on no current lane; their deletion stays ledger-owned. | D-33 and D-89 coverage report scope; user instruction: `Per-host coverage` | [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) |
+
 ## Originating Request
 
 This block preserves, verbatim, the user's request, the four planning answers and the concept-note
@@ -287,12 +291,12 @@ every current native receipt and an empty ledger.
 
 ### Dedicated Linux validation on Windows
 
-A dedicated Debian Hyper-V VM supplies Linux evidence without requiring a committed transfer. Its actual
-CPU/memory/workload limits, VHD/free capacity, Linux tools and bind-mounted host source are verified. Use
-measured VM and workload controls and do not disturb other projects. Keep build/cache/state on dedicated Linux
-storage and measure the bind-mounted source's filesystem semantics honestly. The guest cannot establish a
-native Windows or Darwin result. Existing WSL-specific controls remain required migration inputs until
-equivalent Hyper-V controls are implemented and validated.
+A dedicated Debian VirtualBox VM supplies Linux evidence without requiring a committed transfer. Observe its
+CPU, memory, swap and virtual disk/free capacity and size it with host headroom. Keep build/cache/state on
+dedicated Linux storage and verify the live bind-mounted source's filesystem semantics. Cross-project isolation
+proof is not a prerequisite. The guest cannot establish a native Windows or Darwin result. Existing WSL- and
+Hyper-V-specific controls remain migration inputs until equivalent VirtualBox controls are implemented and
+validated.
 
 ## Rejected Alternatives
 

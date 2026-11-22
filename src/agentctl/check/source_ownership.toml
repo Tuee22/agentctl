@@ -2,6 +2,125 @@
 version = 1
 
 [[artifacts]]
+path = "src/agentctl/check/virtualbox_guest_capacity.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_virtualbox_guest_capacity.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_capacity.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_virtualbox_capacity.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_inventory.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_virtualbox_inventory.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_snapshot.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_virtualbox_snapshot.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_storage.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_virtualbox_storage.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_process_image.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_observe.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_virtualbox_host.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_guest_protocol.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/integration/test_virtualbox_observe.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_guest.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_virtualbox_guest.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
 path = "src/agentctl/check/hyperv_ssh.py"
 capability = "gate-ownership"
 owner = 0
@@ -650,6 +769,13 @@ consumers = [0]
 required = true
 
 [[artifacts]]
+path = "tests/governance/test_ratchet_refusals.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
 path = "tests/integration/test_spawn_audit.py"
 capability = "governance-tests"
 owner = 0
@@ -724,6 +850,48 @@ path = "src/agentctl/check/gate_plugin.py"
 capability = "gate-ownership"
 owner = 0
 consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/coverage_hosts.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/coverage_hosts.toml"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_steps_integrity.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_steps_census.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_steps_records.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/unit/test_coverage_hosts.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
 required = true
 
 [[artifacts]]
@@ -1897,23 +2065,23 @@ required = true
 
 [[artifacts]]
 path = 'tests/e2e/test_launch.py'
-capability = 'agent-launch-tests'
-owner = 5
-consumers = [5, 11]
+capability = 'native-tests'
+owner = 3
+consumers = [3, 5, 11]
 required = true
 
 [[artifacts]]
 path = 'tests/e2e/test_passthrough_argv.py'
-capability = 'agent-launch-tests'
-owner = 5
-consumers = [5]
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2, 5]
 required = true
 
 [[artifacts]]
 path = 'tests/e2e/test_sessions.py'
-capability = 'sessions-tests'
-owner = 6
-consumers = [6]
+capability = 'mux-tests'
+owner = 4
+consumers = [4, 6]
 required = true
 
 [[artifacts]]
@@ -1960,9 +2128,9 @@ required = true
 
 [[artifacts]]
 path = 'tests/integration/test_capture_real.py'
-capability = 'observation-tests'
-owner = 7
-consumers = [7]
+capability = 'native-tests'
+owner = 3
+consumers = [3, 4, 7]
 required = true
 
 [[artifacts]]
@@ -1981,16 +2149,16 @@ required = true
 
 [[artifacts]]
 path = 'tests/integration/test_haskell_legs.py'
-capability = 'bootstrap-tests'
-owner = 2
-consumers = [2]
+capability = 'governance-tests'
+owner = 0
+consumers = [0, 2]
 required = true
 
 [[artifacts]]
 path = 'tests/integration/test_haskell_style_legs.py'
-capability = 'bootstrap-tests'
-owner = 2
-consumers = [2]
+capability = 'governance-tests'
+owner = 0
+consumers = [0, 2]
 required = true
 
 [[artifacts]]
@@ -2019,6 +2187,27 @@ path = 'tests/integration/test_passthrough.py'
 capability = 'bootstrap-tests'
 owner = 2
 consumers = [2, 5]
+required = true
+
+[[artifacts]]
+path = 'tests/harness/terminal.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2, 5, 6]
+required = true
+
+[[artifacts]]
+path = 'tests/integration/test_command_surface.py'
+capability = 'bootstrap-tests'
+owner = 2
+consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'tests/unit/test_mux_values.py'
+capability = 'native-tests'
+owner = 3
+consumers = [3, 4, 5, 10]
 required = true
 
 [[artifacts]]
@@ -3611,6 +3800,20 @@ consumers = [0]
 required = true
 
 [[artifacts]]
+path = 'src/agentctl/check/native_mutant_ownership.toml'
+capability = 'native-mutants'
+owner = 3
+consumers = [3]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/check/psmux_mutant_ownership.toml'
+capability = 'psmux-mutants'
+owner = 10
+consumers = [10]
+required = true
+
+[[artifacts]]
 path = 'src/agentctl/check/governance_mutant_ownership.toml'
 capability = 'governance-mutants'
 owner = 0
@@ -3706,6 +3909,13 @@ path = 'src/agentctl/haskell/test/Main.hs'
 capability = 'native-build'
 owner = 2
 consumers = [2]
+required = true
+
+[[artifacts]]
+path = 'src/agentctl/haskell/test/ProcessTests.hs'
+capability = 'native-tests'
+owner = 3
+consumers = [3]
 required = true
 
 [[artifacts]]
@@ -4299,9 +4509,9 @@ required = true
 
 [[artifacts]]
 path = "tests/unit/test_toolchain_gate.py"
-capability = "bootstrap-tests"
-owner = 2
-consumers = [2]
+capability = "governance-tests"
+owner = 0
+consumers = [0, 2]
 required = true
 
 [[artifacts]]
@@ -4404,9 +4614,9 @@ required = true
 
 [[artifacts]]
 path = "tests/unit/test_sessions_values.py"
-capability = "session-tests"
-owner = 6
-consumers = [6]
+capability = "mux-tests"
+owner = 4
+consumers = [4, 6]
 required = true
 
 [[artifacts]]
@@ -4516,9 +4726,9 @@ required = true
 
 [[artifacts]]
 path = "tests/e2e/test_status_screen.py"
-capability = "pane-classification-e2e-tests"
-owner = 7
-consumers = [7]
+capability = "sessions-tests"
+owner = 6
+consumers = [6, 7]
 required = true
 
 [[artifacts]]
@@ -4535,15 +4745,29 @@ owner = 8
 consumers = [8]
 required = true
 
-[[artifacts]]
-path = "TMUX_BUG.md"
-capability = "windows-psmux-investigation"
-owner = 10
-consumers = [10]
-required = true
-
 # Planned sources are declared for attribution; their cited tests remain unmet
 # until the files exist and their actual collection and execution are verified.
+[[artifacts]]
+path = "tests/integration/test_virtualbox_binding.py"
+capability = "virtualbox-binding-tests"
+owner = 0
+consumers = [0, 12]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_binding.py"
+capability = "virtualbox-binding-tests"
+owner = 0
+consumers = [0, 12]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_bind.py"
+capability = "virtualbox-binding-tests"
+owner = 0
+consumers = [0, 12]
+required = true
+
 [[artifacts]]
 path = "tests/integration/test_wsl_binding.py"
 capability = "wsl-binding-tests"
@@ -4717,6 +4941,41 @@ path = "src/agentctl/haskell/bootstrap-src/AgentCtl/Bootstrap"
 capability = "native-transport"
 owner = 2
 consumers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/mutant_report.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_sessions.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_key_observe.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_ssh_key.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "src/agentctl/check/virtualbox_listener.py"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 required = true
 
 [[artifacts]]

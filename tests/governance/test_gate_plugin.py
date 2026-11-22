@@ -48,6 +48,171 @@ def _run(pytester: pytest.Pytester, *arguments: str) -> pytest.RunResult:
     )
 
 
+def test_killer_outcomes_are_retained_from_real_execution(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A real nested corpus case publishes its observed baseline and kill."""
+    manifest = _suite(pytester, monkeypatch)
+    case = pytester.path / "tests/governance/test_mutants.py"
+    case.parent.mkdir(parents=True)
+    case.write_text(
+        """import pytest
+from agentctl.check.gate_plugin import KILLER_EXECUTION
+from agentctl.check.mutants import (KillerExecution, Mutant, Operator,
+                                   exercise_observed, killer_verdict)
+from agentctl.foundation import Ok
+pytestmark = pytest.mark.evidence("real")
+@pytest.mark.parametrize("identifier", ["M-test-control"])
+def test_corpus(identifier, request, tmp_path):
+    source = tmp_path / "src"
+    cases = tmp_path / "tests/unit"
+    source.mkdir(parents=True)
+    cases.mkdir(parents=True)
+    (source / "sample.py").write_text("def answer():\\n    return 2\\n")
+    (cases / "test_sample.py").write_text(
+        "from sample import answer\\ndef test_answer():\\n"
+        "    assert answer() == 2, 'named defect'\\n")
+    record = Mutant(identifier, Operator.REPLACE_LITERAL, "src/sample.py",
+                    "return 2", "return 3",
+                    ("tests/unit/test_sample.py::test_answer",), "named defect")
+    observed = exercise_observed(tmp_path, record)
+    request.node.stash[KILLER_EXECUTION] = KillerExecution(record, observed)
+    assert killer_verdict(record, observed) == Ok(None)
+""",
+        encoding="utf-8",
+    )
+    result = _run(pytester)
+    assert result.ret == 0, result.stdout.str() + result.stderr.str()
+    data = json.loads(
+        (manifest.parent / "mutant-killers.json").read_text(encoding="utf-8")
+    )
+    assert data == {
+        "nonce": "nested-nonce",
+        "records": [
+            {
+                "identifier": "M-test-control",
+                "error": "",
+                "killers": [
+                    {
+                        "node": "tests/unit/test_sample.py::test_answer",
+                        "baseline": "passed",
+                        "mutation": "killed",
+                    }
+                ],
+            }
+        ],
+    }, "real killer observations were not retained"
+
+
+def test_incomplete_killer_observation_fails_gate(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A corpus case cannot publish an empty result for a required killer."""
+    _suite(pytester, monkeypatch)
+    case = pytester.path / "tests/governance/test_mutants.py"
+    case.parent.mkdir(parents=True)
+    case.write_text(
+        """import pytest
+from agentctl.check.gate_plugin import KILLER_EXECUTION
+from agentctl.check.mutants import KillerExecution, Mutant, Operator
+from agentctl.foundation import Ok
+pytestmark = pytest.mark.evidence("value")
+@pytest.mark.parametrize("identifier", ["M-test-control"])
+def test_corpus(identifier, request):
+    record = Mutant(identifier, Operator.DELETE, "src/sample.py", "a", "b",
+                    ("tests/unit/test_sample.py::test_answer",), "named defect")
+    request.node.stash[KILLER_EXECUTION] = KillerExecution(record, Ok(()))
+""",
+        encoding="utf-8",
+    )
+    result = _run(pytester)
+    assert result.ret == 1, "invalid killer observation accepted"
+
+
+def test_failed_baseline_is_retained_without_a_mutant_kill(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A failed real baseline does not hide a second, independently killed case."""
+    manifest = _suite(pytester, monkeypatch)
+    case = pytester.path / "tests/governance/test_mutants.py"
+    case.parent.mkdir(parents=True)
+    case.write_text(
+        """import pytest
+from agentctl.check.gate_plugin import KILLER_EXECUTION
+from agentctl.check.mutants import (KillerExecution, Mutant, Operator,
+                                   exercise_observed, killer_verdict)
+from agentctl.foundation import Ok
+pytestmark = pytest.mark.evidence("real")
+@pytest.mark.parametrize("identifier", ["M-test-control"])
+def test_corpus(identifier, request, tmp_path):
+    source = tmp_path / "src"
+    cases = tmp_path / "tests/unit"
+    source.mkdir(parents=True)
+    cases.mkdir(parents=True)
+    (source / "sample.py").write_text("def answer():\\n    return 2\\n")
+    (cases / "test_sample.py").write_text(
+        "from sample import answer\\ndef test_broken():\\n"
+        "    assert False, 'baseline failure'\\ndef test_answer():\\n"
+        "    assert answer() == 2, 'named defect'\\n")
+    record = Mutant(identifier, Operator.REPLACE_LITERAL, "src/sample.py",
+                    "return 2", "return 3",
+                    ("tests/unit/test_sample.py::test_broken",
+                     "tests/unit/test_sample.py::test_answer"), "named defect")
+    observed = exercise_observed(tmp_path, record)
+    request.node.stash[KILLER_EXECUTION] = KillerExecution(record, observed)
+    assert killer_verdict(record, observed) == Ok(None)
+""",
+        encoding="utf-8",
+    )
+    result = _run(pytester)
+    assert result.ret == 1
+    data = json.loads(
+        (manifest.parent / "mutant-killers.json").read_text(encoding="utf-8")
+    )
+    assert data["records"][0]["killers"] == [
+        {
+            "node": "tests/unit/test_sample.py::test_broken",
+            "baseline": "failed:baseline",
+            "mutation": "not-run",
+        },
+        {
+            "node": "tests/unit/test_sample.py::test_answer",
+            "baseline": "passed",
+            "mutation": "killed",
+        },
+    ], "failed baseline or independent kill was hidden"
+
+
+def test_killer_report_refuses_existing_file(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An existing run artifact is never replaced by a new observation."""
+    manifest = _suite(pytester, monkeypatch)
+    report = manifest.parent / "mutant-killers.json"
+    report.write_bytes(b"foreign report")
+    case = pytester.path / "tests/governance/test_mutants.py"
+    case.parent.mkdir(parents=True)
+    case.write_text(
+        """import pytest
+from agentctl.check.gate_plugin import KILLER_EXECUTION
+from agentctl.check.mutants import KillerExecution, KillerOutcome, Mutant, Operator
+from agentctl.foundation import Ok
+pytestmark = pytest.mark.evidence("value")
+@pytest.mark.parametrize("identifier", ["M-test-control"])
+def test_corpus(identifier, request):
+    node = "tests/unit/test_sample.py::test_answer"
+    record = Mutant(identifier, Operator.DELETE, "src/sample.py", "a", "b",
+                    (node,), "named defect")
+    request.node.stash[KILLER_EXECUTION] = KillerExecution(
+        record, Ok((KillerOutcome(node, Ok(None), Ok(None)),)))
+""",
+        encoding="utf-8",
+    )
+    result = _run(pytester)
+    assert result.ret != 0, "existing killer report was overwritten"
+    assert report.read_bytes() == b"foreign report", "foreign killer report changed"
+
+
 def test_skip_fails_session(
     pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
 ) -> None:

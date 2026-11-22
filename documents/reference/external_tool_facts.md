@@ -355,6 +355,36 @@ workstation's effective resource limits. The runbook requires actual capability 
 | cgroup v2 controllers apply hierarchical resource limits to processes and descendants. Available/effective controllers must be observed; declarations alone do not prove enforcement. | Linux cgroup v2 documented interface | 2026-11-12 | `https://docs.kernel.org/admin-guide/cgroup-v2.html` |
 | Systemd scopes/slices support resource-control settings backed by cgroups, including CPU and memory controls; installed version and effective controller support determine availability. | systemd resource-control documentation | 2026-11-12 | `https://www.freedesktop.org/software/systemd/man/devel/systemd.resource-control.html` |
 
+## SSH public-key values
+
+| Fact | Version | Verified | Source |
+|---|---|---|---|
+| SSH Ed25519 public-key blobs contain the algorithm name and a 32-byte public key, encoded as SSH strings. | RFC 8709 and RFC 4253 | 2026-11-17 | `https://www.rfc-editor.org/rfc/rfc8709#section-4`, `https://www.rfc-editor.org/rfc/rfc4253#section-6.6` |
+| OpenSSH known-host records associate host patterns with public keys. | OpenBSD sshd manual | 2026-11-17 | `https://man.openbsd.org/sshd.8#SSH_KNOWN_HOSTS_FILE_FORMAT` |
+| A read-only guest-control command returned the dedicated VM's public host key; it matched the private known-host entry, and a separate strict-key batch SSH command succeeded. | VirtualBox 7.2.22, dedicated Debian guest | 2026-11-17 | Native `VBoxManage guestcontrol` and OpenSSH diagnostic; process, provisioning and file provenance remain unverified |
+| In an owned guest-control probe, host input did not release a guest process waiting on standard input. After timeout, the guest PID was absent while the guest-control session still appeared; only the identified owned session was closed. | VirtualBox 7.2.22, dedicated Debian guest | 2026-11-17 | Owned nonce-tagged guest process, `guestcontrol list processes` and a read-only guest PID query |
+
+## VirtualBox session and TCP listener identity
+
+| Fact | Version | Verified | Source |
+|---|---|---|---|
+| A machine's session PID identifies the session process when its session is locked or unlocking. | VirtualBox SDK 7.2.22 | 2026-11-17 | `https://download.virtualbox.org/virtualbox/7.2.22/SDKRef.pdf` |
+| The TCP connection query exposes local address, local port, listening state and owning process. | Windows NetTCPIP PowerShell module | 2026-11-17 | `https://learn.microsoft.com/en-us/powershell/module/nettcpip/get-nettcpconnection?view=windowsserver2025-ps` |
+
+## VirtualBox VDI metadata
+
+| Fact | Version | Verified | Source |
+|---|---|---|---|
+| The VDI preheader carries a signature and version; the packed version-1 header carries disk size, block geometry and image/parent UUIDs. | VirtualBox `VDICore.h` revision 112403 | 2026-11-17 | `https://github.com/VirtualBox/virtualbox/blob/417ba6a9e038087ac82d940fd26e95308e3cde02/src/VBox/Storage/VDICore.h` |
+| The dedicated running VM's VDI header reported image UUID `20cef611-e035-4fd5-a514-5dcd57efce64` and 107374182400 virtual bytes, matching `VBoxManage showmediuminfo`. Its reported on-disk size was 2 MiB while the host file's logical length was 8105492480 bytes. | VirtualBox 7.2.22 r175245 | 2026-11-17 | Read-only VDI header, `VBoxManage showmediuminfo disk` and Windows file-stat observations on the dedicated VM |
+
+## VirtualBox shared folders
+
+| Fact | Version | Verified | Source |
+|---|---|---|---|
+| Guest symbolic-link creation is disabled by default and has a per-share `SharedFoldersEnableSymlinksCreate` setting. | Oracle VirtualBox User Guide 7.1.12 | 2026-11-17 | `https://download.virtualbox.org/virtualbox/7.1.12/UserManual.pdf`, shared-folder symbolic links |
+| On an isolated Windows-hosted probe, enabling that setting allowed a guest-created relative link to be read on both hosts. A requested guest mode 0640 remained 0666, and a guest exclusive byte-range lock succeeded while a Windows lock covered the same byte. | VirtualBox 7.2.22 r175245 | 2026-11-17 | Dedicated VirtualBox VM and owned probe directory, with the per-share setting enabled; no checkout exported |
+
 ## Related
 
 - [rationale.md](../../DEVELOPMENT_PLAN/rationale.md#decisions) — the `tool:` decisions these rows support.

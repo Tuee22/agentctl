@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pytest
 
+from agentctl.check import mutant_report
 from agentctl.check.evidence import (
     Entry,
     LegEvidence,
@@ -333,6 +334,7 @@ def test_gate_captures_provisional_phase_observations(
         "src/agentctl/check/source_ownership.toml",
         "tests/test_early.py",
         "src/native.hs",
+        "tests/governance/test_mutants.py",
     )
     document = "version = 1\n[[phases]]\nnumber = 0\nprerequisites = []\n"
     for path in paths:
@@ -344,8 +346,13 @@ def test_gate_captures_provisional_phase_observations(
         Entry(paths[0], "file", (document.encode(),)),
         Entry(paths[1], "file", (b"python source",)),
         Entry(paths[2], "file", (b"native source",)),
+        Entry(paths[3], "file", (b"mutation source",)),
     )
     node = paths[1] + "::test_case"
+    record = Mutant(
+        "M-control", Operator.DELETE, "src/native.hs", "a", "", (node,), "x"
+    )
+    mutation_node = mutant_report.PREFIX + record.identifier + "]"
     native_node = "haskell:agentctl-core-test/Example/control"
     phase = phase_text(
         Path("phase-0-example.md"),
@@ -354,7 +361,12 @@ def test_gate_captures_provisional_phase_observations(
     )
     assert phase is not None
     python = RunEvidence(
-        "current", frozenset({node}), frozenset({node}), frozenset({node}), (), ()
+        "current",
+        frozenset({node, mutation_node}),
+        frozenset({node, mutation_node}),
+        frozenset({node, mutation_node}),
+        (),
+        (),
     )
     native = RunEvidence(
         "current",
@@ -371,12 +383,25 @@ def test_gate_captures_provisional_phase_observations(
         Ok(ToolSubsteps("current", (("pytest", (0, 0, 0)),))),
         Ok(python),
         Ok(snapshot),
+        killers=Ok(
+            mutant_report.Report(
+                "current",
+                (
+                    mutant_report.Record(
+                        record.identifier,
+                        "",
+                        (mutant_report.Killer(node, "passed", "killed"),),
+                    ),
+                ),
+                "captured",
+            )
+        ),
     )
     captured = ProvisionalCapture(
         Ok(entries),
         Ok((phase,)),
         tools,
-        ((), ()),
+        ((record,), ((record.identifier, 0),)),
         Ok((OracleScope(0, ()),)),
         "current",
         ("cabal-test", "pytest"),
@@ -385,6 +410,47 @@ def test_gate_captures_provisional_phase_observations(
     result = captured_phase_observations(captured)
     assert isinstance(result, Ok), result
     assert result.value[0].failures == frozenset({"unverified-run"})
+    failed_report = mutant_report.Report(
+        "current",
+        (
+            mutant_report.Record(
+                record.identifier,
+                "",
+                (mutant_report.Killer(node, "failed:baseline", "not-run"),),
+            ),
+        ),
+        "failed",
+    )
+    failed_python = replace(python, passed=frozenset({node}))
+    failed_killer = replace(
+        captured,
+        tools=replace(
+            tools,
+            code=1,
+            evidence=Ok(LegEvidence("current", (("cabal-test", 0), ("pytest", 1)))),
+            substeps=Ok(ToolSubsteps("current", (("pytest", (1, 0, 0)),))),
+            pytest=Ok(failed_python),
+            killers=Ok(failed_report),
+        ),
+    )
+    failed_result = captured_phase_observations(failed_killer)
+    assert isinstance(failed_result, Ok), failed_result
+    assert any("failed:baseline" in item for item in failed_result.value[0].failures), (
+        "individual mutant killer failure was lost from phase observation"
+    )
+    absent_report = replace(
+        failed_killer, tools=replace(failed_killer.tools, killers=None)
+    )
+    assert isinstance(captured_phase_observations(absent_report), Err), (
+        "missing mutant killer report was accepted"
+    )
+    forged_report = replace(failed_report, nonce="stale")
+    invalid_report = replace(
+        failed_killer, tools=replace(failed_killer.tools, killers=Ok(forged_report))
+    )
+    assert isinstance(captured_phase_observations(invalid_report), Err), (
+        "stale mutant killer report was accepted"
+    )
     assert report_provisional_phases(result) == 1, (
         "provisional phase allowed an overall pass"
     )
@@ -803,7 +869,21 @@ def test_legacy_mutant_claim_fragments_match_corpus(root: Path) -> None:
     manifest = _value(read_manifest(root / "src/agentctl/check/source_ownership.toml"))
     owners = {item.path: item.owner for item in manifest.artifacts}
     groups = (
-        ("governance", 0, ("gate", "integrity", "source")),
+        (
+            "governance",
+            0,
+            (
+                "gate",
+                "integrity",
+                "source",
+                "governance_identity",
+                "governance_native_controls",
+                "governance_packaging",
+                "governance_preconditions",
+                "governance_style",
+                "governance_toolchain",
+            ),
+        ),
         (
             "bootstrap",
             2,
@@ -816,13 +896,32 @@ def test_legacy_mutant_claim_fragments_match_corpus(root: Path) -> None:
                 "style_legs",
                 "toolchain",
                 "haskell_build",
+                "passthrough",
             ),
         ),
-        ("linux", 4, ("linux_clean_recipe",)),
-        ("agent", 5, ("argv", "auth", "preflight", "names")),
-        ("sessions", 6, ("adopt",)),
-        ("observation", 7, ("classify", "observation_status")),
+        ("native", 3, ("capture_phase3", "launch_phase3")),
+        (
+            "linux",
+            4,
+            ("linux_clean_recipe", "capture_phase4", "mux", "sessions_phase4"),
+        ),
+        (
+            "agent",
+            5,
+            (
+                "argv",
+                "auth",
+                "preflight",
+                "names",
+                "launch",
+                "mux_phase5",
+                "passthrough_phase5",
+            ),
+        ),
+        ("sessions", 6, ("adopt", "classify_status", "sessions")),
+        ("observation", 7, ("classify", "observation_status", "capture")),
         ("supervisor", 8, ("supervisor", "backoff", "machine")),
+        ("psmux", 10, ("mux_phase10",)),
     )
     for capability, owner, files in groups:
         claim_file = root / f"src/agentctl/check/{capability}_mutant_ownership.toml"
@@ -1046,11 +1145,11 @@ def test_source_manifest_runtime_owners(root: Path) -> None:
         ("tests/integration/test_eval_executable.py", 2),
         ("tests/integration/test_python_startup.py", 2),
         ("tests/unit/test_clean_host_recipe.py", 4),
-        ("tests/e2e/test_status_screen.py", 7),
+        ("tests/e2e/test_status_screen.py", 6),
         ("tests/e2e/test_scripted_fake.py", 8),
         ("tests/e2e/test_watch_commands.py", 8),
         ("src/agentctl/haskell/app/SupervisorFixture.hs", 8),
-        ("TMUX_BUG.md", 10),
+        ("src/agentctl/haskell/src/AgentCtl/Mux/Psmux.hs", 10),
         ("src/agentctl/haskell/test/SupervisorTests.hs", 8),
         ("tests/integration/test_static_legs.py", 0),
         ("tests/conftest.py", 0),
@@ -1063,15 +1162,15 @@ def test_source_manifest_runtime_owners(root: Path) -> None:
         ("tests/unit/test_toolchain.py", 2),
         ("tests/integration/test_fake_agent.py", 4),
         ("tests/integration/test_agent_real.py", 5),
-        ("tests/unit/test_sessions_values.py", 6),
+        ("tests/unit/test_sessions_values.py", 4),
         ("tests/fixtures/static_negative/ruff/valid.py.txt", 0),
         ("tests/fixtures/static_negative/ready_constructed.hs.txt", 5),
         ("tests/governance/test_source_guards.py", 0),
         ("tests/integration/test_ghcup.py", 2),
         ("tests/integration/test_mux_real.py", 4),
-        ("tests/e2e/test_launch.py", 5),
-        ("tests/e2e/test_sessions.py", 6),
-        ("tests/integration/test_capture_real.py", 7),
+        ("tests/e2e/test_launch.py", 3),
+        ("tests/e2e/test_sessions.py", 4),
+        ("tests/integration/test_capture_real.py", 3),
         ("tests/e2e/test_supervisor_run.py", 8),
         ("tests/fixtures/docs_negative/plan_fileset/case.toml", 0),
         ("tests/fixtures/bootstrap/ghcup_actor.py.txt", 2),

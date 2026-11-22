@@ -88,7 +88,7 @@ test-suite agentctl-core-test
   main-is: Main.hs
   c-sources: test/state_fixture.c, test/console_fixture.c
   cc-options: -std=c11 -Wall -Wextra -Werror
-  other-modules: MuxTests, SpecTests, MuxFixture, AgentTests, AgentFixture, NameTests, ObserveTests, RecoveryTests, SupervisorTests, ConsoleFixture, TestSource
+  other-modules: MuxTests, ProcessTests, SpecTests, MuxFixture, AgentTests, AgentFixture, NameTests, ObserveTests, RecoveryTests, SupervisorTests, ConsoleFixture, TestSource
   build-depends: base >=4.21 && <4.22, agentctl-core, tasty >=1.5.4 && <1.6, tasty-hunit >=0.10 && <0.11, tasty-ant-xml ==1.1.9
               , bytestring >=0.12 && <0.13, text >=2.1 && <2.2, directory >=1.3.10 && <1.4, filepath >=1.5.5 && <1.6, temporary >=1.3 && <1.4
               , containers >=0.7 && <0.8, aeson >=2.3.2 && <2.4

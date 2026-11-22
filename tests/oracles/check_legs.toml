@@ -138,3 +138,12 @@ quote = "Also fourmolu + hlint"
 provenance = "decision:D-03"
 input = { "subject" = "check-leg", "scope" = "haskell" }
 expected = { "name" = "hlint", "arguments" = ["<tools>/hlint", "app", "bootstrap-src", "src", "test"] }
+
+[[case]]
+id = "legs.python.pytest.host-coverage"
+amends = "legs.python.pytest.collection-errors"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-109"
+input = { "subject" = "check-leg", "scope" = "python-covered", "order" = 3 }
+expected = { "name" = "pytest", "arguments" = ["<py>", "-m", "coverage", "run", "--rcfile=<root>/pyproject.toml", "--data-file=<run>/coverage", "--branch", "--source=agentctl", "-m", "pytest", "-c", "<root>/pyproject.toml", "--rootdir=<root>", "-p", "no:cacheprovider", "-p", "pytester", "-p", "agentctl.check.gate_plugin", "--continue-on-collection-errors", "tests"], "report_arguments" = ["<py>", "-m", "coverage", "report", "--rcfile=<root>/pyproject.toml", "--data-file=<run>/coverage", "--include=<root>/src/agentctl/*", "--fail-under=100", "--show-missing"] }

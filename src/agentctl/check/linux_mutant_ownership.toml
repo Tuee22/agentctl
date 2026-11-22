@@ -4,3 +4,123 @@ version = 1
 identifier = "M-boot-recipe-stage-a-root"
 owner = 4
 killer_sources = [{ node = "tests/unit/test_clean_host_recipe.py::test_recipe_stages_match_oracle", path = "tests/unit/test_clean_host_recipe.py" }]
+
+[[claims]]
+identifier = "M-capture-no-join"
+owner = 4
+killer_sources = [{ node = "tests/integration/test_capture_real.py::test_capture_roundtrip_on_private_server", path = "tests/integration/test_capture_real.py" }]
+
+[[claims]]
+identifier = "M-mux-floor-3-1"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_version_floor_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-version-banner-unchecked"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_version_floor_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-create-job-retained"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_process_tree_policy_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-letter-suffix-refused"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_version_floor_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-tmux-alias-on-windows"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_resolution_candidates_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-remedy-wrong-os"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_remedy_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-bare-target"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_render_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-shell-joined-command"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_render_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-remain-on-exit-off"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_render_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-psmux-status-from-pane"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_dead_status_rule_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-spec-mode-unchecked"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_spec_acceptance_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-spec-drops-environment"
+owner = 4
+killer_sources = [{ node = "haskell:agentctl-core-test/PaneExec/spec-round-trip", path = "src/agentctl/haskell/test/SpecTests.hs" }]
+
+[[claims]]
+identifier = "M-mux-spec-mode-unchecked-at-boundary"
+owner = 4
+killer_sources = [{ node = "tests/integration/test_pane_exec.py::test_unsafe_spec_refused", path = "tests/integration/test_pane_exec.py" }]
+
+[[claims]]
+identifier = "M-mux-spec-decode-drops-environment"
+owner = 4
+killer_sources = [{ node = "tests/integration/test_pane_exec.py::test_spec_deleted_and_status_propagated", path = "tests/integration/test_pane_exec.py" }]
+
+[[claims]]
+identifier = "M-mux-harness-kills-foreign-socket"
+owner = 4
+killer_sources = [{ node = "tests/integration/test_tmux_harness.py::test_kill_server_refuses_foreign_socket", path = "tests/integration/test_tmux_harness.py" }]
+
+[[claims]]
+identifier = "M-mux-fake-record-drops-nonce"
+owner = 4
+killer_sources = [{ node = "tests/integration/test_fake_agent.py::test_record_carries_nonce", path = "tests/integration/test_fake_agent.py" }]
+
+[[claims]]
+identifier = "M-mux-bare-target-at-boundary"
+owner = 4
+killer_sources = [{ node = "tests/integration/test_mux_real.py::test_exact_target_spares_prefix_sibling", path = "tests/integration/test_mux_real.py" }]
+
+[[claims]]
+identifier = "M-mux-dead-before-status"
+owner = 4
+killer_sources = [{ node = "tests/integration/test_mux_real.py::test_closed_terminal_does_not_publish_exit_status", path = "tests/integration/test_mux_real.py" }]
+
+[[claims]]
+identifier = "M-mux-reap-policy-inverted"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_reap_policy_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-pane-target-unscoped"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_pane_target_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-pane-ambiguity-accepted"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_pane_target_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-sessions-stop-prefix-target"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_sessions_values.py::test_stop_plan_matches_oracle", path = "tests/unit/test_sessions_values.py" }, { node = "tests/e2e/test_sessions.py::test_stop_never_prefix_matches", path = "tests/e2e/test_sessions.py" }]
+
+[[claims]]
+identifier = "M-sessions-stop-kill-server"
+owner = 4
+killer_sources = [{ node = "tests/unit/test_sessions_values.py::test_stop_plan_matches_oracle", path = "tests/unit/test_sessions_values.py" }, { node = "tests/e2e/test_sessions.py::test_stop_kills_only_the_named_managed_session", path = "tests/e2e/test_sessions.py" }]

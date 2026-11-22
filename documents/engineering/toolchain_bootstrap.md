@@ -101,9 +101,9 @@ prepares through the public application and runs `agentctl check`. Windows cold 
 Windows environment with declared installer privilege. Receipts identify actual actions, before/after facts,
 versions and executable hashes; they are not manually asserted pristine-host certificates.
 
-A Windows workstation can supply Linux evidence through a dedicated, resource-budgeted WSL2 Debian instance
+A Windows workstation can supply Linux evidence through a dedicated, resource-budgeted Debian VirtualBox VM
 and a verified bind mount of the same checkout. The [validation runbook](../operations/validation_runbook.md)
-owns that procedure. WSL2 cannot supply native Windows or macOS evidence.
+owns that procedure. The VM cannot supply native Windows or macOS evidence.
 
 ## What Each Step Proves
 

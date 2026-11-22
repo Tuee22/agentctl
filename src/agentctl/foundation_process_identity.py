@@ -5,7 +5,7 @@ import ctypes
 import os
 import sys
 from pathlib import Path
-from typing import Protocol, runtime_checkable
+from typing import NamedTuple, Protocol, runtime_checkable
 
 from agentctl.check.process_identity import linux_birth_stat
 from agentctl.foundation import Err, Family, Ok, Result
@@ -131,6 +131,111 @@ def windows_birth(pid: int) -> Result[int | None, SpawnError]:
         return Ok((creation.high << 32) | creation.low)
     finally:
         kernel.CloseHandle(handle)
+
+
+WAIT_TIMEOUT = 258
+SYNCHRONIZE = 0x00100000
+WINDOWS_PATH_LIMIT = 32768
+
+
+class WindowsProcessImage(NamedTuple):
+    """One live Windows process's observed creation time and image path."""
+
+    pid: int
+    birth: int
+    image: Path
+
+
+def windows_process_image(pid: int) -> Result[WindowsProcessImage, SpawnError]:
+    """Read a live process image and creation time through the same query handle.
+
+    This is an observation of one handle, not proof that the path's current bytes
+    are those mapped into the process or that the process remains live afterward.
+    """
+    if isinstance(pid, bool) or pid <= 0 or sys.platform != "win32":
+        return Err(SpawnError("process image requires a positive Windows PID"))
+    try:
+        kernel = ctypes.CDLL("kernel32", use_last_error=True)
+    except OSError as exc:
+        return Err(SpawnError(str(exc)))
+    kernel.OpenProcess.argtypes = (ctypes.c_uint32, ctypes.c_int, ctypes.c_uint32)
+    kernel.OpenProcess.restype = ctypes.c_void_p
+    kernel.QueryFullProcessImageNameW.argtypes = (
+        ctypes.c_void_p,
+        ctypes.c_uint32,
+        ctypes.POINTER(ctypes.c_wchar),
+        ctypes.POINTER(ctypes.c_uint32),
+    )
+    kernel.QueryFullProcessImageNameW.restype = ctypes.c_int
+    kernel.GetProcessTimes.argtypes = (
+        ctypes.c_void_p,
+        ctypes.POINTER(_FileTime),
+        ctypes.POINTER(_FileTime),
+        ctypes.POINTER(_FileTime),
+        ctypes.POINTER(_FileTime),
+    )
+    kernel.GetProcessTimes.restype = ctypes.c_int
+    kernel.GetExitCodeProcess.argtypes = (
+        ctypes.c_void_p,
+        ctypes.POINTER(ctypes.c_uint32),
+    )
+    kernel.GetExitCodeProcess.restype = ctypes.c_int
+    kernel.WaitForSingleObject.argtypes = (ctypes.c_void_p, ctypes.c_uint32)
+    kernel.WaitForSingleObject.restype = ctypes.c_uint32
+    kernel.CloseHandle.argtypes = (ctypes.c_void_p,)
+    kernel.CloseHandle.restype = ctypes.c_int
+    handle: object = kernel.OpenProcess(PROCESS_QUERY | SYNCHRONIZE, 0, pid)
+    if not isinstance(handle, int):
+        return Err(SpawnError("cannot open process image handle"))
+    try:
+        return _image_from_handle(kernel, handle, pid)
+    finally:
+        kernel.CloseHandle(handle)
+
+
+def _image_from_handle(
+    kernel: ctypes.CDLL, handle: int, pid: int
+) -> Result[WindowsProcessImage, SpawnError]:
+    """Read the path, creation time and liveness from one already-open handle."""
+    creation, exit_time, kernel_time, user_time = (_FileTime() for _ in range(4))
+    buffer = ctypes.create_unicode_buffer(WINDOWS_PATH_LIMIT)
+    length = ctypes.c_uint32(len(buffer))
+    status = ctypes.c_uint32()
+    if not kernel.QueryFullProcessImageNameW(handle, 0, buffer, ctypes.byref(length)):
+        return Err(SpawnError("cannot query process image path"))
+    if not kernel.GetProcessTimes(
+        handle,
+        ctypes.byref(creation),
+        ctypes.byref(exit_time),
+        ctypes.byref(kernel_time),
+        ctypes.byref(user_time),
+    ):
+        return Err(SpawnError("cannot query process image creation time"))
+    if not kernel.GetExitCodeProcess(handle, ctypes.byref(status)):
+        return Err(SpawnError("cannot query process image liveness"))
+    birth = (creation.high << 32) | creation.low
+    image = Path(buffer.value)
+    wait = kernel.WaitForSingleObject(handle, 0)
+    return checked_windows_image(pid, birth, image, status.value, wait)
+
+
+def checked_windows_image(
+    pid: int, birth: int, image: Path, status: int, wait: int
+) -> Result[WindowsProcessImage, SpawnError]:
+    """Validate supplied process-image facts without asserting their provenance."""
+    if (
+        isinstance(pid, bool)
+        or isinstance(birth, bool)
+        or isinstance(status, bool)
+        or isinstance(wait, bool)
+        or pid <= 0
+        or status != STILL_ACTIVE
+        or wait != WAIT_TIMEOUT
+        or birth <= 0
+        or not image.is_absolute()
+    ):
+        return Err(SpawnError("process image is not live or has invalid identity"))
+    return Ok(WindowsProcessImage(pid, birth, image))
 
 
 def linux_birth(pid: int) -> Result[int | None, SpawnError]:

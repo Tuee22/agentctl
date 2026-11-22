@@ -16,9 +16,12 @@ def test_session_name_constructor_is_private(root: Path, tmp_path: Path) -> None
     """A checked-name caller compiles; a constructor caller fails as specified."""
     context = copy_project(root, tmp_path)
     cabal = context.project / "agentctl-core.cabal"
+    original = cabal.read_text(encoding="utf-8")
+    anchor = "exposed-modules: AgentCtl.Protocol, "
+    assert original.count(anchor) == 1
     cabal.write_text(
-        cabal.read_text(encoding="utf-8").replace(
-            "exposed-modules: ", "exposed-modules: AgentCtl.NameWitness, ", 1
+        original.replace(
+            anchor, "exposed-modules: AgentCtl.NameWitness, AgentCtl.Protocol, "
         ),
         encoding="utf-8",
     )

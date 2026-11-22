@@ -1,4 +1,13 @@
 [[mutant]]
+id = "M-boot-early-child-exit-zero"
+operator = "replace-literal"
+target = "src/agentctl/bootstrap/handoff.py"
+search = 'if isinstance(result, Err) else result'
+replace = 'if isinstance(result, Err) else Ok(0)'
+killers = ["tests/integration/test_bootstrap_caller.py::test_child_transfer_preserves_exit_without_launch"]
+reason = "early child handoff changed exit status"
+
+[[mutant]]
 id = "M-boot-handshake-refuses-empty-commands"
 operator = "replace-literal"
 target = "src/agentctl/bootstrap/binary.py"

@@ -11,7 +11,7 @@ import sys
 import sysconfig
 import zipfile
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, mkdtemp
 
 import pytest
 
@@ -531,8 +531,7 @@ def test_later_readiness_does_not_prevent_validation(
     cache = tmp_path / "cache/agentctl"
     cache.mkdir(parents=True)
     (cache / "toolchain-paths.toml").write_text("invalid = [", encoding="utf-8")
-    run_dir = tmp_path / "run"
-    run_dir.mkdir()
+    run_dir = Path(mkdtemp(prefix="r-", dir=os.environ["AGENTCTL_TEST_NATIVE_ROOT"]))
     script = (
         "import sys\nfrom pathlib import Path\n"
         "from agentctl.check.steps import execute\n"

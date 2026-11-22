@@ -2,6 +2,11 @@
 version = 1
 
 [[claims]]
+identifier = "M-boot-early-child-exit-zero"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_bootstrap_caller.py::test_child_transfer_preserves_exit_without_launch", path = "tests/integration/test_bootstrap_caller.py" }]
+
+[[claims]]
 identifier = "M-boot-transport-fixture-imports-later-mux"
 owner = 2
 killer_sources = [{ node = "tests/integration/test_bootstrap_caller.py::test_early_transport_does_not_import_later_helpers", path = "tests/integration/test_bootstrap_caller.py" }]
@@ -255,3 +260,43 @@ killer_sources = [{ node = "tests/integration/test_haskell_legs.py::test_direct_
 identifier = "M-boot-old-protocol-accepted"
 owner = 2
 killer_sources = [{ node = "tests/unit/test_digest.py::test_old_protocol_handshake_is_rejected", path = "tests/unit/test_digest.py" }]
+
+[[claims]]
+identifier = "M-pass-click-parses-tail"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_passthrough.py::test_raw_tail_keeps_dashdash_and_help", path = "tests/unit/test_passthrough.py" }, { node = "tests/e2e/test_passthrough_argv.py::test_through_stack_rows[claude]", path = "tests/e2e/test_passthrough_argv.py" }, { node = "tests/e2e/test_passthrough_argv.py::test_through_stack_rows[codex]", path = "tests/e2e/test_passthrough_argv.py" }]
+
+[[claims]]
+identifier = "M-pass-split-drops-empty"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_passthrough.py::test_raw_tail_keeps_dashdash_and_help", path = "tests/unit/test_passthrough.py" }]
+
+[[claims]]
+identifier = "M-pass-table-drops-command"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_passthrough.py::test_passthrough_table_matches_oracle", path = "tests/unit/test_passthrough.py" }, { node = "tests/unit/test_passthrough.py::test_every_command_but_check_passes_through", path = "tests/unit/test_passthrough.py" }, { node = "tests/integration/test_passthrough.py::test_passthrough_table_equals_binary_commands", path = "tests/integration/test_passthrough.py" }]
+
+[[claims]]
+identifier = "M-pass-binary-runs-without-protocol"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_passthrough.py::test_binary_refuses_direct_run", path = "tests/integration/test_passthrough.py" }]
+
+[[claims]]
+identifier = "M-pass-progname-core"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_passthrough.py::test_usage_text_names_agentctl", path = "tests/integration/test_passthrough.py" }]
+
+[[claims]]
+identifier = "M-pass-rebuild-on-hit"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_passthrough.py::test_warm_passthrough_spawns_only_the_binary", path = "tests/integration/test_passthrough.py" }]
+
+[[claims]]
+identifier = "M-pass-windows-execve"
+owner = 2
+killer_sources = [{ node = "tests/unit/test_handoff.py::test_handoff_mode_by_os_family", path = "tests/unit/test_handoff.py" }]
+
+[[claims]]
+identifier = "M-pass-child-exit-zero"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_handoff.py::test_child_mode_propagates_exit_status", path = "tests/integration/test_handoff.py" }]

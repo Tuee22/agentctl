@@ -27,7 +27,7 @@ def _rows(text: str) -> tuple[tuple[str, str], ...] | None:
     section = text.partition("## Commands\n")[2].split("\n## ", maxsplit=1)[0]
     table = section.lstrip().split("\n\n", maxsplit=1)[0]
     lines = table.splitlines()
-    if not lines or lines[0] != "| Command | Arguments | What it does | Owning phase |":
+    if not lines or lines[0] != "| Command | Arguments | Contract | Owner |":
         return None
     if len(lines) < HEADER_LINES or lines[1] != "|---|---|---|---|":
         return None
@@ -101,8 +101,7 @@ def test_cli_reference_joins_click_and_handshake(
         "CLI reference does not join the live command surface"
     )
     header = (
-        "## Commands\n\n| Command | Arguments | What it does | Owning phase |\n"
-        "|---|---|---|---|\n"
+        "## Commands\n\n| Command | Arguments | Contract | Owner |\n|---|---|---|---|\n"
     )
     check = (
         "| `agentctl check` | none | Check | "

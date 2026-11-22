@@ -110,3 +110,68 @@ killer_sources = [{ node = "tests/unit/test_session_names.py::test_decision_rows
 identifier = "M-name-keep-underscore-runs"
 owner = 5
 killer_sources = [{ node = "haskell:agentctl-core-test/Name/always-valid", path = "src/agentctl/haskell/test/NameTests.hs" }]
+
+[[claims]]
+identifier = "M-launch-keep-session-on-instant-exit"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_launch_plan.py::test_launch_plan_matches_oracle", path = "tests/unit/test_launch_plan.py" }]
+
+[[claims]]
+identifier = "M-launch-warn-into-pane"
+owner = 5
+killer_sources = [{ node = "tests/e2e/test_launch.py::test_instant_exit_relays_output_and_leaves_nothing", path = "tests/e2e/test_launch.py" }]
+
+[[claims]]
+identifier = "M-launch-kill-on-reattach"
+owner = 5
+killer_sources = [{ node = "tests/e2e/test_launch.py::test_rerun_reattaches_without_preflight", path = "tests/e2e/test_launch.py" }]
+
+[[claims]]
+identifier = "M-launch-reattach-dead"
+owner = 5
+killer_sources = [{ node = "tests/e2e/test_launch.py::test_dead_leftover_pane_is_replaced", path = "tests/e2e/test_launch.py" }]
+
+[[claims]]
+identifier = "M-launch-preflight-on-reattach"
+owner = 5
+killer_sources = [{ node = "tests/e2e/test_launch.py::test_rerun_reattaches_without_preflight", path = "tests/e2e/test_launch.py" }]
+
+[[claims]]
+identifier = "M-launch-env-not-caller"
+owner = 5
+killer_sources = [{ node = "tests/e2e/test_launch.py::test_creates_named_session_with_flags_last", path = "tests/e2e/test_launch.py" }]
+
+[[claims]]
+identifier = "M-launch-skip-launch-argv"
+owner = 5
+killer_sources = [{ node = "tests/e2e/test_launch.py::test_creates_named_session_with_flags_last", path = "tests/e2e/test_launch.py" }]
+
+[[claims]]
+identifier = "M-launch-wrong-agent-row"
+owner = 5
+killer_sources = [{ node = "tests/e2e/test_launch.py::test_creates_named_session_with_flags_last", path = "tests/e2e/test_launch.py" }, { node = "tests/integration/test_agent_argv_real.py::test_final_argv_accepted_logged_out", path = "tests/integration/test_agent_argv_real.py" }]
+
+[[claims]]
+identifier = "M-launch-exit-zero-on-failure"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_launch_plan.py::test_launch_plan_matches_oracle", path = "tests/unit/test_launch_plan.py" }]
+
+[[claims]]
+identifier = "M-launch-notty-attaches"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_launch_plan.py::test_launch_plan_matches_oracle", path = "tests/unit/test_launch_plan.py" }]
+
+[[claims]]
+identifier = "M-mux-name-allows-double-underscore"
+owner = 5
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_session_name_oracle", path = "tests/unit/test_mux_values.py" }]
+
+[[claims]]
+identifier = "M-mux-name-constructor-exported"
+owner = 5
+killer_sources = [{ node = "tests/integration/test_mux_resolution.py::test_session_name_constructor_is_private", path = "tests/integration/test_mux_resolution.py" }]
+
+[[claims]]
+identifier = "M-launch-argv-on-mux-line"
+owner = 5
+killer_sources = [{ node = "tests/e2e/test_passthrough_argv.py::test_through_stack_rows[claude]", path = "tests/e2e/test_passthrough_argv.py" }, { node = "tests/e2e/test_passthrough_argv.py::test_through_stack_rows[codex]", path = "tests/e2e/test_passthrough_argv.py" }]

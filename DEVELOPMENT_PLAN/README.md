@@ -52,7 +52,7 @@ owns requirements, architecture and capability dependencies.
    invalidating an earlier complete verdict. Shared integrity failures invalidate all affected consumers.
 5. A phase closes only when all its sprints close and its required lane receipts match current phase input
    identities. Set every completed Remaining Work to `None.` and its row/header to Done together.
-6. Each phase needs Linux and at most one additional native family, Windows or macOS. A dedicated Hyper-V guest
+6. Each phase needs Linux and at most one additional native family, Windows or macOS. A dedicated VirtualBox guest
    provides Linux evidence only, under the [validation runbook](../documents/operations/validation_runbook.md). Missing native
    capability remains unmet; it never becomes a documented-fixture or manual-attestation pass.
 7. A changed contract is rewritten at its owning phase, and its affected prerequisite consumers lose closure
@@ -111,7 +111,7 @@ native receipts. Build/install preparation and publication are separate from non
 | [phase-9-windows-toolchain-and-psmux-build.md](phase-9-windows-toolchain-and-psmux-build.md) | Haskell prepares native Windows build dependencies and compiles pinned psmux sources locally |
 | [phase-10-windows-backend-qualification.md](phase-10-windows-backend-qualification.md) | Qualify the exact native candidate for attached-client memory behavior, capture correctness, exact identity and guarded input |
 | [phase-11-windows-application-acceptance.md](phase-11-windows-application-acceptance.md) | Native Windows acceptance of the shared application, private psmux artifact and registered resources |
-| [phase-12-linux-live-and-clean-acceptance.md](phase-12-linux-live-and-clean-acceptance.md) | Debian clean-host and logged-in agent acceptance; Windows-hosted Linux validation uses dedicated Hyper-V |
+| [phase-12-linux-live-and-clean-acceptance.md](phase-12-linux-live-and-clean-acceptance.md) | Debian clean-host and logged-in agent acceptance; Windows-hosted Linux validation uses dedicated VirtualBox |
 | [phase-13-macos-acceptance.md](phase-13-macos-acceptance.md) | The additive Darwin implementation and native acceptance of bootstrap, process/filesystem semantics and the common tmux backend contract |
 | [phase-14-release-evidence-and-closure.md](phase-14-release-evidence-and-closure.md) | Whole-product closure joins current independent native receipts and requires an empty migration ledger |
 

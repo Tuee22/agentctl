@@ -4,6 +4,7 @@
 import os
 import re
 import secrets
+import stat
 from collections.abc import Callable
 from pathlib import Path
 
@@ -15,8 +16,8 @@ def challenge_directory(root: Path, nonce: str) -> Result[Path, str]:
     if re.fullmatch(r"[0-9a-f]{32}", nonce) is None:
         return Err("invalid binding nonce")
     try:
-        if root.is_symlink():
-            return Err("binding source is a symlink")
+        if root.is_symlink() or root.is_junction():
+            return Err("binding source is a link or junction")
         source = root.resolve(strict=True)
         if not source.is_dir():
             return Err("binding source is not a directory")
@@ -32,6 +33,12 @@ def _write(path: Path, content: bytes) -> None:
         stream.write(content)
 
 
+def _private_sentinel(path: Path) -> bool:
+    """Refuse links and regular files with another name outside the challenge."""
+    observed = path.lstat()
+    return stat.S_ISREG(observed.st_mode) and observed.st_nlink == 1
+
+
 def _existing(root: Path, nonce: str) -> Result[Path, str]:
     """Refuse links and non-directories at an existing challenge boundary."""
     result = challenge_directory(root, nonce)
@@ -39,7 +46,7 @@ def _existing(root: Path, nonce: str) -> Result[Path, str]:
         return result
     directory = result.value
     try:
-        if directory.is_symlink() or not directory.is_dir():
+        if directory.is_symlink() or directory.is_junction() or not directory.is_dir():
             return Err("binding challenge directory unavailable")
         if directory.resolve(strict=True) != directory:
             return Err("binding challenge directory escaped source")
@@ -82,7 +89,7 @@ def answer(root: Path, nonce: str) -> Result[None, str]:
     directory = result.value
     challenge = directory / "windows"
     try:
-        if challenge.is_symlink() or not challenge.is_file():
+        if not _private_sentinel(challenge):
             return Err("binding challenge unavailable")
         if challenge.read_bytes() != ("windows:" + nonce).encode():
             return Err("binding challenge differs")
@@ -102,7 +109,7 @@ def finish(root: Path, nonce: str) -> Result[None, str]:
     try:
         if {entry.name for entry in directory.iterdir()} != {"windows", "linux"}:
             return Err("binding directory contains unexpected entries")
-        if any(path.is_symlink() or not path.is_file() for path in (first, second)):
+        if any(not _private_sentinel(path) for path in (first, second)):
             return Err("binding sentinel is not a regular file")
         if (
             first.read_bytes() != ("windows:" + nonce).encode()
@@ -130,7 +137,7 @@ def cancel(root: Path, nonce: str) -> Result[None, str]:
         entries = tuple(
             (directory / name, (name + ":" + nonce).encode()) for name in sorted(names)
         )
-        if any(path.is_symlink() or not path.is_file() for path, _ in entries):
+        if any(not _private_sentinel(path) for path, _ in entries):
             return Err("binding sentinel is not a regular file")
         if any(path.read_bytes() != content for path, content in entries):
             return Err("binding sentinel bytes differ")

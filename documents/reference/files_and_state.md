@@ -128,7 +128,7 @@ normal, failed and interrupted owned execution without deleting another process'
 ## Live-Test Folder
 
 Real agents start only in `<state>/live-acceptance/` with updating disabled. Ordinary live checks send no input
-and answer no dialog. In a dedicated WSL2 environment, authorized credential copies remain private there while
+and answer no dialog. In a dedicated validation VM, authorized credential copies remain private there while
 the host originals remain intact. Only the dedicated environment's agent configuration can be prepared for
 those tests; no user's existing Linux environment is modified.
 
@@ -148,7 +148,7 @@ is inside the registered allowed roots, never kills by image name, and leaves an
 resources cannot be reaped. A stale directory alone does not prove a live process, and a missing build file
 alone does not prove a server leak. Future runs never reuse test verdicts or mutant kills from old roots.
 
-WSL2 uses ext4-owned build/dependency/state storage with a bind-mounted shared Windows source checkout. Its
+The dedicated Debian VM uses guest-owned build/dependency/state storage with a bind-mounted live Windows source checkout. Its
 binding/resource receipt is created before the write-guard and transient source sentinels are removed before
 validation. [Validation runbook](../operations/validation_runbook.md) owns the exact observed evidence.
 

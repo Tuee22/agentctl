@@ -1,0 +1,12 @@
+# Partial explicit claims; other corpus records remain unresolved.
+version = 1
+
+[[claims]]
+identifier = "M-capture-locale-decoding"
+owner = 3
+killer_sources = [{ node = "tests/integration/test_capture_real.py::test_capture_roundtrip_on_private_server", path = "tests/integration/test_capture_real.py" }]
+
+[[claims]]
+identifier = "M-launch-cwd-on-mux-line"
+owner = 3
+killer_sources = [{ node = "tests/unit/test_mux_values.py::test_invocation_cwd_stays_off_argv", path = "tests/unit/test_mux_values.py" }, { node = "tests/e2e/test_launch.py::test_hostile_folder_name_runs_nothing", path = "tests/e2e/test_launch.py" }]

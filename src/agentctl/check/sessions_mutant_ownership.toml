@@ -20,3 +20,33 @@ killer_sources = [{ node = "tests/unit/test_adopt_values.py::test_adopt_rows_mat
 identifier = "M-adopt-sets-session-options"
 owner = 6
 killer_sources = [{ node = "tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership", path = "tests/e2e/test_adopt.py" }]
+
+[[claims]]
+identifier = "M-classify-status-stale-capture"
+owner = 6
+killer_sources = [{ node = "tests/e2e/test_status_screen.py::test_screen_column_shows_fixture_class", path = "tests/e2e/test_status_screen.py" }]
+
+[[claims]]
+identifier = "M-sessions-list-includes-foreign"
+owner = 6
+killer_sources = [{ node = "tests/unit/test_sessions_values.py::test_list_rows_match_oracle", path = "tests/unit/test_sessions_values.py" }, { node = "tests/e2e/test_sessions.py::test_list_shows_only_managed", path = "tests/e2e/test_sessions.py" }]
+
+[[claims]]
+identifier = "M-sessions-dead-as-alive"
+owner = 6
+killer_sources = [{ node = "tests/unit/test_sessions_values.py::test_list_rows_match_oracle", path = "tests/unit/test_sessions_values.py" }, { node = "tests/e2e/test_sessions.py::test_status_reports_dead_pane", path = "tests/e2e/test_sessions.py" }]
+
+[[claims]]
+identifier = "M-sessions-status-wrong-folder"
+owner = 6
+killer_sources = [{ node = "tests/unit/test_sessions_values.py::test_list_rows_match_oracle", path = "tests/unit/test_sessions_values.py" }, { node = "tests/e2e/test_sessions.py::test_status_defaults_to_current_folder", path = "tests/e2e/test_sessions.py" }]
+
+[[claims]]
+identifier = "M-sessions-stop-kills-foreign"
+owner = 6
+killer_sources = [{ node = "tests/unit/test_sessions_values.py::test_stop_plan_matches_oracle", path = "tests/unit/test_sessions_values.py" }, { node = "tests/e2e/test_sessions.py::test_stop_refuses_foreign_session", path = "tests/e2e/test_sessions.py" }]
+
+[[claims]]
+identifier = "M-sessions-attach-wrong-target"
+owner = 6
+killer_sources = [{ node = "tests/unit/test_sessions_values.py::test_attach_plan_matches_oracle", path = "tests/unit/test_sessions_values.py" }, { node = "tests/e2e/test_sessions.py::test_attach_and_switch_under_pty", path = "tests/e2e/test_sessions.py" }, { node = "tests/e2e/test_sessions.py::test_attach_without_tty_prints_command", path = "tests/e2e/test_sessions.py" }]

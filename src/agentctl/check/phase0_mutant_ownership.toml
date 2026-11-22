@@ -1,6 +1,186 @@
 version = 1
 
 [[claims]]
+identifier = "M-phase-vbox-capacity-guest-request-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_capacity.py::test_guest_capacity_join_refuses_mismatched_or_impossible_values", path = "tests/governance/test_virtualbox_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-capacity-guest-cpus-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_capacity.py::test_guest_capacity_join_refuses_mismatched_or_impossible_values", path = "tests/governance/test_virtualbox_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-capacity-guest-memory-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_capacity.py::test_guest_capacity_join_refuses_mismatched_or_impossible_values", path = "tests/governance/test_virtualbox_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-capacity-guest-storage-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_capacity.py::test_guest_capacity_join_refuses_mismatched_or_impossible_values", path = "tests/governance/test_virtualbox_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-capacity-host-cpus-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_capacity.py::test_guest_capacity_join_refuses_mismatched_or_impossible_values", path = "tests/governance/test_virtualbox_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-guest-capacity-identity-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest_capacity.py::test_capacity_join_rejects_changed_identity", path = "tests/governance/test_virtualbox_guest_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-guest-capacity-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest_capacity.py::test_capacity_protocol_refuses_stale_ambiguous_and_invalid_values", path = "tests/governance/test_virtualbox_guest_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-guest-capacity-encode-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest_capacity.py::test_capacity_protocol_refuses_stale_ambiguous_and_invalid_values", path = "tests/governance/test_virtualbox_guest_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-guest-capacity-decode-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest_capacity.py::test_capacity_protocol_refuses_stale_ambiguous_and_invalid_values", path = "tests/governance/test_virtualbox_guest_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-guest-storage-traversal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest_capacity.py::test_capacity_protocol_refuses_stale_ambiguous_and_invalid_values", path = "tests/governance/test_virtualbox_guest_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-capacity-cpus-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_capacity.py::test_capacity_requires_stable_inventory_and_complete_host_facts", path = "tests/governance/test_virtualbox_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-capacity-memory-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_capacity.py::test_capacity_requires_stable_inventory_and_complete_host_facts", path = "tests/governance/test_virtualbox_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-capacity-inventory-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_capacity.py::test_capacity_requires_stable_inventory_and_complete_host_facts", path = "tests/governance/test_virtualbox_capacity.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-inventory-slot-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_inventory.py::test_inventory_includes_all_disks_and_refuses_ambiguous_slots", path = "tests/governance/test_virtualbox_inventory.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-inventory-unknown-slot-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_inventory.py::test_inventory_includes_all_disks_and_refuses_ambiguous_slots", path = "tests/governance/test_virtualbox_inventory.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-inventory-controller-kind-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_inventory.py::test_inventory_includes_all_disks_and_refuses_ambiguous_slots", path = "tests/governance/test_virtualbox_inventory.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-inventory-slot-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_inventory.py::test_inventory_join_rejects_changed_or_missing_disks", path = "tests/governance/test_virtualbox_inventory.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-attachment-duplicate-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_snapshot.py::test_attachment_refuses_ambiguous_and_invalid_slots", path = "tests/governance/test_virtualbox_snapshot.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-snapshot-vm-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_snapshot.py::test_snapshot_join_refuses_changed_vm_and_foreign_disk", path = "tests/governance/test_virtualbox_snapshot.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-snapshot-disk-uuid-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_snapshot.py::test_snapshot_join_refuses_changed_vm_and_foreign_disk", path = "tests/governance/test_virtualbox_snapshot.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-snapshot-disk-path-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_snapshot.py::test_snapshot_join_refuses_changed_vm_and_foreign_disk", path = "tests/governance/test_virtualbox_snapshot.py" }]
+
+[[claims]]
+identifier = "M-phase-vdi-signature-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_storage.py::test_vdi_header_refuses_invalid_identity_and_capacity", path = "tests/governance/test_virtualbox_storage.py" }]
+
+[[claims]]
+identifier = "M-phase-vdi-parent-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_storage.py::test_vdi_header_refuses_invalid_identity_and_capacity", path = "tests/governance/test_virtualbox_storage.py" }]
+
+[[claims]]
+identifier = "M-phase-vdi-storage-root-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_storage.py::test_vdi_file_observation_checks_owned_root", path = "tests/governance/test_virtualbox_storage.py" }]
+
+[[claims]]
+identifier = "M-phase-virtualbox-child-pid-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_process_image_join_rejects_other_files_and_pids", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-virtualbox-child-image-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_process_image_join_rejects_other_files_and_pids", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-windows-image-wait-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_process_image.py::test_checked_image_refuses_dead_or_ambiguous_values", path = "tests/governance/test_process_image.py" }]
+
+[[claims]]
+identifier = "M-phase-windows-image-dead-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_process_image.py::test_checked_image_refuses_dead_or_ambiguous_values", path = "tests/governance/test_process_image.py" }]
+
+[[claims]]
+identifier = "M-phase-virtualbox-host-count-bound-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_machine_observation_rejects_ambiguity_and_wrong_identity", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-virtualbox-host-uuid-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_machine_observation_rejects_ambiguity_and_wrong_identity", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-virtualbox-host-duplicate-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_machine_observation_rejects_ambiguity_and_wrong_identity", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-virtualbox-decode-family-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest.py::test_guest_protocol_rejects_stale_foreign_and_ambiguous_values", path = "tests/governance/test_virtualbox_guest.py" }]
+
+[[claims]]
+identifier = "M-phase-virtualbox-protocol-family-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest.py::test_guest_protocol_rejects_stale_foreign_and_ambiguous_values", path = "tests/governance/test_virtualbox_guest.py" }]
+
+[[claims]]
+identifier = "M-phase-virtualbox-vendor-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest.py::test_guest_identity_rejects_foreign_and_ambiguous_values", path = "tests/governance/test_virtualbox_guest.py" }]
+
+[[claims]]
+identifier = "M-phase-virtualbox-wsl-kernel-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest.py::test_guest_identity_rejects_foreign_and_ambiguous_values", path = "tests/governance/test_virtualbox_guest.py" }]
+
+[[claims]]
+identifier = "M-phase-guest-uid-malformed-duplicate-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_hyperv_guest.py::test_guest_identity_refuses_foreign_and_ambiguous_hosts", path = "tests/governance/test_hyperv_guest.py" }]
+
+[[claims]]
 identifier = "M-phase-readiness-validation-handoff-ignored"
 owner = 0
 killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_readiness_reaches_validation", path = "tests/governance/test_run_evidence.py" }]
@@ -901,6 +1081,231 @@ owner = 0
 killer_sources = [{ node = "tests/integration/test_binding_challenge.py::test_exchange_preserves_cleanup_refusal", path = "tests/integration/test_binding_challenge.py" }]
 
 [[claims]]
+identifier = "M-phase-binding-hardlink-challenge-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_binding_challenge.py::test_challenge_refuses_hardlinked_sentinels", path = "tests/integration/test_binding_challenge.py" }]
+
+[[claims]]
+identifier = "M-phase-binding-hardlink-response-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_binding_challenge.py::test_challenge_refuses_hardlinked_sentinels", path = "tests/integration/test_binding_challenge.py" }]
+
+[[claims]]
+identifier = "M-phase-binding-hardlink-cleanup-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_binding_challenge.py::test_challenge_refuses_hardlinked_sentinels", path = "tests/integration/test_binding_challenge.py" }]
+
+[[claims]]
+identifier = "M-phase-binding-hardlink-first-sentinel-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_binding_challenge.py::test_challenge_refuses_hardlinked_sentinels", path = "tests/integration/test_binding_challenge.py" }]
+
+[[claims]]
+identifier = "M-phase-binding-hardlink-second-cleanup-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_binding_challenge.py::test_challenge_refuses_hardlinked_sentinels", path = "tests/integration/test_binding_challenge.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-nat-extra-nic-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_nat_route_requires_one_loopback_forward", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-nat-forward-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_nat_route_requires_one_loopback_forward", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-nat-duplicate-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_nat_route_requires_one_loopback_forward", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-nat-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_nat_join_refuses_changed_route_or_vm", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-listener-owner-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_listener_binds_locked_vm_to_loopback_owner", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-listener-session-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_listener_binds_locked_vm_to_loopback_owner", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-listener-unlocked-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_listener_binds_locked_vm_to_loopback_owner", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-listener-reused-pid-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_listener_join_requires_original_process", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-listener-image-pid-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_listener_join_requires_original_process", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-ssh-key-mismatch-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest.py::test_guest_host_key_comparison_refuses_foreign_or_malformed_keys", path = "tests/governance/test_virtualbox_guest.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-ssh-endpoint-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest.py::test_guest_host_key_comparison_refuses_foreign_or_malformed_keys", path = "tests/governance/test_virtualbox_guest.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-ssh-key-prefix-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest.py::test_guest_host_key_comparison_refuses_foreign_or_malformed_keys", path = "tests/governance/test_virtualbox_guest.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-ssh-key-length-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest.py::test_guest_host_key_comparison_refuses_foreign_or_malformed_keys", path = "tests/governance/test_virtualbox_guest.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-ssh-key-algorithm-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_guest.py::test_guest_host_key_comparison_refuses_foreign_or_malformed_keys", path = "tests/governance/test_virtualbox_guest.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-key-file-escape-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_observe.py::test_guest_control_key_files_are_bounded_and_contained", path = "tests/integration/test_virtualbox_observe.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-key-file-hardlink-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_observe.py::test_guest_control_key_files_are_bounded_and_contained", path = "tests/integration/test_virtualbox_observe.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-key-file-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_guest_control_key_join_retains_independent_failures", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-key-listener-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_guest_control_key_join_retains_independent_failures", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-key-followup-failure-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_guest_control_key_join_retains_independent_failures", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-key-stdout-wait-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_observe.py::test_guest_control_key_files_are_bounded_and_contained", path = "tests/integration/test_virtualbox_observe.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-key-stderr-wait-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_observe.py::test_guest_control_key_files_are_bounded_and_contained", path = "tests/integration/test_virtualbox_observe.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-key-guest-nonce-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_observe.py::test_guest_control_key_files_are_bounded_and_contained", path = "tests/integration/test_virtualbox_observe.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-key-invalid-nonce-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_guest_control_key_join_retains_independent_failures", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-session-count-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_guest_control_session_listing_preserves_other_sessions", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-session-duplicate-id-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_guest_control_session_listing_preserves_other_sessions", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-session-foreign-vm-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_guest_control_session_listing_preserves_other_sessions", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-session-failure-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_virtualbox_host.py::test_guest_control_session_listing_preserves_other_sessions", path = "tests/governance/test_virtualbox_host.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-record-overwritten"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_killer_report_refuses_existing_file", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-record-baseline-forged"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_failed_baseline_is_retained_without_a_mutant_kill", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-record-not-captured"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_killer_outcomes_are_retained_from_real_execution", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-record-incomplete-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_incomplete_killer_observation_fails_gate", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-record-not-retained"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-verdict-missing-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_mutants.py::test_killer_verdict_requires_complete_matching_results", path = "tests/governance/test_mutants.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-verdict-unrun-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_mutants.py::test_killer_verdict_requires_complete_matching_results", path = "tests/governance/test_mutants.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-restore-stage-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_mutants.py::test_killer_restoration_failure_retains_primary", path = "tests/governance/test_mutants.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-later-baseline-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_mutants.py::test_all_failed_baselines_remain_visible", path = "tests/governance/test_mutants.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-baseline-failure-counts"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_mutants.py::test_killer_results_preserve_independent_baselines", path = "tests/governance/test_mutants.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-later-result-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_mutants.py::test_killer_results_preserve_independent_baselines", path = "tests/governance/test_mutants.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-baseline-failure-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_mutants.py::test_killer_results_preserve_independent_baselines", path = "tests/governance/test_mutants.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-restore-primary-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_mutants.py::test_killer_restoration_failure_retains_primary", path = "tests/governance/test_mutants.py" }]
+
+[[claims]]
 identifier = "M-phase-binding-response-unchecked"
 owner = 0
 killer_sources = [{ node = "tests/integration/test_binding_challenge.py::test_challenge_refuses_changed_bytes", path = "tests/integration/test_binding_challenge.py" }]
@@ -1434,3 +1839,68 @@ killer_sources = [{ node = "tests/governance/test_binding_transport.py::test_pee
 identifier = "M-phase-binding-guest-not-carried"
 owner = 0
 killer_sources = [{ node = "tests/governance/test_binding_transport.py::test_peer_message_identity_and_evidence", path = "tests/governance/test_binding_transport.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-report-killer-order-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_mutant_report_joins_corpus_and_pytest_results", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-report-execution-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_mutant_report_joins_corpus_and_pytest_results", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-report-finalizer-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_mutant_report_survives_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-report-snapshot-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_mutant_report_captured_before_followups", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-failure-scope-broadened"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_mutant_report_joins_corpus_and_pytest_results", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-failure-scope-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-setup-failure-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_mutant_report_scopes_execution_errors", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-handoff-digest-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_rejects_postcopy_mutant_report_tampering", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-handoff-copy-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_rejects_postcopy_mutant_report_tampering", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-killer-handoff-live-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_rejects_changed_live_mutant_report", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-binding-junction-root-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_binding_challenge.py::test_challenge_refuses_linked_source_root", path = "tests/integration/test_binding_challenge.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-host-omits-all"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_foreign_sources_follow_declared_hosts", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-include-dropped"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_check_legs.py::test_python_leg_table_matches_oracle", path = "tests/unit/test_check_legs.py" }]

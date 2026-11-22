@@ -2517,6 +2517,737 @@ killers = ["tests/governance/test_binding_transport.py::test_peer_message_identi
 reason = "invalid guest capacity was accepted"
 
 [[mutant]]
+id = "M-phase-vbox-capacity-guest-request-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_capacity.py"
+search = 'guest.request != request'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_capacity.py::test_guest_capacity_join_refuses_mismatched_or_impossible_values"]
+reason = "foreign guest request was accepted"
+
+[[mutant]]
+id = "M-phase-vbox-capacity-guest-cpus-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_capacity.py"
+search = 'len(guest.reading.affinity) > first.inventory.vm.cpus'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_capacity.py::test_guest_capacity_join_refuses_mismatched_or_impossible_values"]
+reason = "excess guest CPU affinity was accepted"
+
+[[mutant]]
+id = "M-phase-vbox-capacity-guest-memory-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_capacity.py"
+search = 'guest.reading.available_memory > first.inventory.vm.memory_mib * MIB'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_capacity.py::test_guest_capacity_join_refuses_mismatched_or_impossible_values"]
+reason = "excess guest memory was accepted"
+
+[[mutant]]
+id = "M-phase-vbox-capacity-guest-storage-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_capacity.py"
+search = 'guest.reading.volume_size > sum(capacities)'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_capacity.py::test_guest_capacity_join_refuses_mismatched_or_impossible_values"]
+reason = "excess guest filesystem size was accepted"
+
+[[mutant]]
+id = "M-phase-vbox-capacity-host-cpus-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_capacity.py"
+search = 'first.host.cpus != second.host.cpus'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_capacity.py::test_guest_capacity_join_refuses_mismatched_or_impossible_values"]
+reason = "changed host CPU count was accepted"
+
+[[mutant]]
+id = "M-phase-vbox-guest-capacity-identity-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_guest_capacity.py"
+search = 'or first != second'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_guest_capacity.py::test_capacity_join_rejects_changed_identity"]
+reason = "changed guest identity was accepted"
+
+[[mutant]]
+id = "M-phase-vbox-guest-capacity-nonce-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_guest_capacity.py"
+search = '(nonce, storage) == (request.nonce, request.storage)'
+replace = '(storage,) == (request.storage,)'
+killers = ["tests/governance/test_virtualbox_guest_capacity.py::test_capacity_protocol_refuses_stale_ambiguous_and_invalid_values"]
+reason = "stale guest capacity nonce was accepted"
+
+[[mutant]]
+id = "M-phase-vbox-guest-capacity-encode-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_guest_capacity.py"
+search = '''not guest_sample.valid_reading(
+        observation.reading
+    )'''
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_guest_capacity.py::test_capacity_protocol_refuses_stale_ambiguous_and_invalid_values"]
+reason = "invalid guest capacity was accepted"
+
+[[mutant]]
+id = "M-phase-vbox-guest-capacity-decode-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_guest_capacity.py"
+search = 'or not guest_sample.valid_reading(guest.value)'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_guest_capacity.py::test_capacity_protocol_refuses_stale_ambiguous_and_invalid_values"]
+reason = "invalid guest capacity response accepted"
+
+[[mutant]]
+id = "M-phase-vbox-guest-storage-traversal-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_guest_capacity.py"
+search = 'and ".." not in path.parts'
+replace = 'and True'
+killers = ["tests/governance/test_virtualbox_guest_capacity.py::test_capacity_protocol_refuses_stale_ambiguous_and_invalid_values"]
+reason = "unsafe guest storage path accepted"
+
+[[mutant]]
+id = "M-phase-vbox-capacity-cpus-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_capacity.py"
+search = 'or first.vm.cpus > host.cpus'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_capacity.py::test_capacity_requires_stable_inventory_and_complete_host_facts"]
+reason = "insufficient host CPUs were accepted"
+
+[[mutant]]
+id = "M-phase-vbox-capacity-memory-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_capacity.py"
+search = "        host.available_memory,\n"
+replace = "        1,\n"
+killers = ["tests/governance/test_virtualbox_capacity.py::test_capacity_requires_stable_inventory_and_complete_host_facts"]
+reason = "missing host memory was accepted"
+
+[[mutant]]
+id = "M-phase-vbox-capacity-inventory-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_capacity.py"
+search = 'stable = virtualbox_inventory.join(first, second, name)'
+replace = 'stable = Ok(second)'
+killers = ["tests/governance/test_virtualbox_capacity.py::test_capacity_requires_stable_inventory_and_complete_host_facts"]
+reason = "changed VM inventory was accepted"
+
+[[mutant]]
+id = "M-phase-vbox-inventory-slot-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_inventory.py"
+search = '_port(text, fields, name, port) for port in range(count)'
+replace = '_port(text, fields, name, port) for port in range(min(count, 1))'
+killers = ["tests/governance/test_virtualbox_inventory.py::test_inventory_includes_all_disks_and_refuses_ambiguous_slots"]
+reason = "VirtualBox disk inventory omitted a slot"
+
+[[mutant]]
+id = "M-phase-vbox-inventory-unknown-slot-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_inventory.py"
+search = 'not _recognized_slots(fields, values)'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_inventory.py::test_inventory_includes_all_disks_and_refuses_ambiguous_slots"]
+reason = "invalid VirtualBox inventory accepted"
+
+[[mutant]]
+id = "M-phase-vbox-inventory-controller-kind-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_inventory.py"
+search = 'kind != "IntelAhci"'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_inventory.py::test_inventory_includes_all_disks_and_refuses_ambiguous_slots"]
+reason = "invalid VirtualBox inventory accepted"
+
+[[mutant]]
+id = "M-phase-vbox-inventory-slot-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_inventory.py"
+search = 'first.slots != second.slots'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_inventory.py::test_inventory_join_rejects_changed_or_missing_disks"]
+reason = "changed disk slot accepted"
+
+[[mutant]]
+id = "M-phase-vbox-attachment-duplicate-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_snapshot.py"
+search = 'len(selected) != len(keys)'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_snapshot.py::test_attachment_refuses_ambiguous_and_invalid_slots"]
+reason = "ambiguous VirtualBox attachment accepted"
+
+[[mutant]]
+id = "M-phase-vbox-snapshot-vm-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_snapshot.py"
+search = 'first.vm != second.vm'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_snapshot.py::test_snapshot_join_refuses_changed_vm_and_foreign_disk"]
+reason = "changed VirtualBox VM accepted"
+
+[[mutant]]
+id = "M-phase-vbox-snapshot-disk-uuid-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_snapshot.py"
+search = 'first.disk.header.identifier != first.attachment.identifier'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_snapshot.py::test_snapshot_join_refuses_changed_vm_and_foreign_disk"]
+reason = "foreign VDI UUID accepted"
+
+[[mutant]]
+id = "M-phase-vbox-snapshot-disk-path-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_snapshot.py"
+search = 'if first.disk.path != Path(first.attachment.path).resolve(strict=True):'
+replace = 'if False:'
+killers = ["tests/governance/test_virtualbox_snapshot.py::test_snapshot_join_refuses_changed_vm_and_foreign_disk"]
+reason = "foreign VirtualBox attachment accepted"
+
+[[mutant]]
+id = "M-phase-vdi-signature-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_storage.py"
+search = 'signature != SIGNATURE'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_storage.py::test_vdi_header_refuses_invalid_identity_and_capacity"]
+reason = "invalid VDI header accepted"
+
+[[mutant]]
+id = "M-phase-vdi-parent-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_storage.py"
+search = 'parent.int != 0'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_storage.py::test_vdi_header_refuses_invalid_identity_and_capacity"]
+reason = "invalid VDI header accepted"
+
+[[mutant]]
+id = "M-phase-vdi-storage-root-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_storage.py"
+search = 'not resolved.is_relative_to(boundary)'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_storage.py::test_vdi_file_observation_checks_owned_root"]
+reason = "outside storage root accepted"
+
+[[mutant]]
+id = "M-phase-virtualbox-child-pid-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_observe.py"
+search = 'observed.pid != pid'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_host.py::test_process_image_join_rejects_other_files_and_pids"]
+reason = "foreign child PID accepted"
+
+[[mutant]]
+id = "M-phase-virtualbox-child-image-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_observe.py"
+search = 'return observed.image.samefile(expected.path)'
+replace = 'return True'
+killers = ["tests/governance/test_virtualbox_host.py::test_process_image_join_rejects_other_files_and_pids"]
+reason = "foreign process image accepted"
+
+[[mutant]]
+id = "M-phase-windows-image-wait-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/foundation_process_identity.py"
+search = 'or wait != WAIT_TIMEOUT'
+replace = 'or False'
+killers = ["tests/governance/test_process_image.py::test_checked_image_refuses_dead_or_ambiguous_values"]
+reason = "signaled process image was accepted"
+
+[[mutant]]
+id = "M-phase-windows-image-dead-accepted"
+operator = "replace-literal"
+target = "src/agentctl/foundation_process_identity.py"
+search = 'or status != STILL_ACTIVE'
+replace = 'or False'
+killers = ["tests/governance/test_process_image.py::test_checked_image_refuses_dead_or_ambiguous_values"]
+reason = "terminated process image was accepted"
+
+[[mutant]]
+id = "M-phase-virtualbox-host-count-bound-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_observe.py"
+search = 'len(value) <= MAX_COUNT_DIGITS and '
+replace = ''
+killers = ["tests/governance/test_virtualbox_host.py::test_machine_observation_rejects_ambiguity_and_wrong_identity"]
+reason = "invalid VirtualBox observation accepted"
+
+[[mutant]]
+id = "M-phase-virtualbox-host-uuid-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_observe.py"
+search = 'or observed != expected'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_host.py::test_machine_observation_rejects_ambiguity_and_wrong_identity"]
+reason = "foreign VirtualBox UUID was accepted"
+
+[[mutant]]
+id = "M-phase-virtualbox-host-duplicate-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_observe.py"
+search = 'len(selected) != len(FIELDS)'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_host.py::test_machine_observation_rejects_ambiguity_and_wrong_identity"]
+reason = "duplicate VirtualBox field was accepted"
+
+[[mutant]]
+id = "M-phase-virtualbox-decode-family-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_guest_protocol.py"
+search = 'return decode_guest(text, nonce, guest_family="virtualbox")'
+replace = 'return decode_guest(text, nonce)'
+killers = ["tests/governance/test_virtualbox_guest.py::test_guest_protocol_rejects_stale_foreign_and_ambiguous_values"]
+reason = "VirtualBox protocol failed to decode valid guest facts"
+
+[[mutant]]
+id = "M-phase-virtualbox-protocol-family-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_guest_protocol.py"
+search = 'return encode_guest(nonce, identity, guest_family="virtualbox")'
+replace = 'return encode_guest(nonce, identity)'
+killers = ["tests/governance/test_virtualbox_guest.py::test_guest_protocol_rejects_stale_foreign_and_ambiguous_values"]
+reason = "VirtualBox protocol rejected valid guest facts"
+
+[[mutant]]
+id = "M-phase-virtualbox-vendor-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_guest.py"
+search = 'identity.vendor != "innotek GmbH"'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_guest.py::test_guest_identity_rejects_foreign_and_ambiguous_values"]
+reason = "invalid VirtualBox guest facts were accepted"
+
+[[mutant]]
+id = "M-phase-virtualbox-wsl-kernel-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_guest.py"
+search = 'or "microsoft-standard-wsl2" in identity.kernel.lower()'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_guest.py::test_guest_identity_rejects_foreign_and_ambiguous_values"]
+reason = "invalid VirtualBox guest facts were accepted"
+
+[[mutant]]
+id = "M-phase-guest-uid-malformed-duplicate-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/hyperv_guest.py"
+search = '    lines = tuple(line for line in status.splitlines() if line.startswith("Uid:"))'
+replace = '    lines = tuple(line for line in status.splitlines() if re.fullmatch(r"Uid:[ \t]+[0-9]+[ \t]+[0-9]+[ \t]+[0-9]+[ \t]+[0-9]+[ \t]*", line))'
+killers = ["tests/governance/test_hyperv_guest.py::test_guest_identity_refuses_foreign_and_ambiguous_hosts"]
+reason = "malformed duplicate guest UID was accepted"
+
+[[mutant]]
+id = "M-phase-binding-hardlink-challenge-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_challenge.py"
+search = "if not _private_sentinel(challenge):"
+replace = "if False:"
+killers = ["tests/integration/test_binding_challenge.py::test_challenge_refuses_hardlinked_sentinels"]
+reason = "hardlinked challenge accepted"
+
+[[mutant]]
+id = "M-phase-binding-hardlink-response-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_challenge.py"
+search = "if any(not _private_sentinel(path) for path in (first, second)):"
+replace = "if any(not _private_sentinel(path) for path in (first,)):"
+killers = ["tests/integration/test_binding_challenge.py::test_challenge_refuses_hardlinked_sentinels"]
+reason = "hardlinked response accepted"
+
+[[mutant]]
+id = "M-phase-binding-hardlink-cleanup-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/binding_challenge.py"
+search = "if any(not _private_sentinel(path) for path, _ in entries):"
+replace = "if False:"
+killers = ["tests/integration/test_binding_challenge.py::test_challenge_refuses_hardlinked_sentinels"]
+reason = "hardlinked cleanup accepted"
+
+[[mutant]]
+id = "M-phase-binding-hardlink-first-sentinel-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_challenge.py"
+search = "for path in (first, second)"
+replace = "for path in (second,)"
+killers = ["tests/integration/test_binding_challenge.py::test_challenge_refuses_hardlinked_sentinels"]
+reason = "hardlinked first sentinel removed"
+
+[[mutant]]
+id = "M-phase-binding-hardlink-second-cleanup-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_challenge.py"
+search = "for path, _ in entries):"
+replace = "for path, _ in entries[-1:]):"
+killers = ["tests/integration/test_binding_challenge.py::test_challenge_refuses_hardlinked_sentinels"]
+reason = "hardlinked second cleanup accepted"
+
+[[mutant]]
+id = "M-phase-vbox-nat-extra-nic-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_observe.py"
+search = 'or any(value != "none" for value in others)'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_host.py::test_nat_route_requires_one_loopback_forward"]
+reason = "unsafe VirtualBox NAT accepted"
+
+[[mutant]]
+id = "M-phase-vbox-nat-forward-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_observe.py"
+search = 'or forwarding != rule'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_host.py::test_nat_route_requires_one_loopback_forward"]
+reason = "unsafe VirtualBox NAT accepted"
+
+[[mutant]]
+id = "M-phase-vbox-nat-duplicate-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_observe.py"
+search = 'len(selected) != len(required)'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_host.py::test_nat_route_requires_one_loopback_forward"]
+reason = "unsafe VirtualBox NAT accepted"
+
+[[mutant]]
+id = "M-phase-vbox-nat-change-ignored"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_observe.py"
+search = 'or first != second'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_host.py::test_nat_join_refuses_changed_route_or_vm"]
+reason = "changed NAT route accepted"
+
+[[mutant]]
+id = "M-phase-vbox-listener-owner-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_listener.py"
+search = 'or process1 != owner'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_host.py::test_listener_binds_locked_vm_to_loopback_owner"]
+reason = "invalid VM listener accepted"
+
+[[mutant]]
+id = "M-phase-vbox-listener-session-change-ignored"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_listener.py"
+search = 'or process1 != process2'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_host.py::test_listener_binds_locked_vm_to_loopback_owner"]
+reason = "invalid VM listener accepted"
+
+[[mutant]]
+id = "M-phase-vbox-listener-unlocked-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_listener.py"
+search = 'or state2 != LOCKED'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_host.py::test_listener_binds_locked_vm_to_loopback_owner"]
+reason = "invalid VM listener accepted"
+
+[[mutant]]
+id = "M-phase-vbox-listener-reused-pid-ignored"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_listener.py"
+search = 'first != second'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_host.py::test_listener_join_requires_original_process"]
+reason = "changed listener process accepted"
+
+[[mutant]]
+id = "M-phase-vbox-listener-image-pid-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_listener.py"
+search = 'or first.process.pid != first.listener.pid'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_host.py::test_listener_join_requires_original_process"]
+reason = "foreign listener process accepted"
+
+[[mutant]]
+id = "M-phase-vbox-ssh-key-mismatch-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_ssh_key.py"
+search = 'hmac.compare_digest(first.blob, second.blob)'
+replace = 'True'
+killers = ["tests/governance/test_virtualbox_guest.py::test_guest_host_key_comparison_refuses_foreign_or_malformed_keys"]
+reason = "foreign SSH host key accepted"
+
+[[mutant]]
+id = "M-phase-vbox-ssh-endpoint-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_ssh_key.py"
+search = 'endpoint == f"[127.0.0.1]:{port}"'
+replace = 'True'
+killers = ["tests/governance/test_virtualbox_guest.py::test_guest_host_key_comparison_refuses_foreign_or_malformed_keys"]
+reason = "malformed SSH host key accepted"
+
+[[mutant]]
+id = "M-phase-vbox-ssh-key-prefix-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_ssh_key.py"
+search = 'or not blob.startswith(PREFIX)'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_guest.py::test_guest_host_key_comparison_refuses_foreign_or_malformed_keys"]
+reason = "malformed SSH host key accepted"
+
+[[mutant]]
+id = "M-phase-vbox-ssh-key-length-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_ssh_key.py"
+search = 'or len(blob) != len(PREFIX) + KEY_BYTES'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_guest.py::test_guest_host_key_comparison_refuses_foreign_or_malformed_keys"]
+reason = "malformed SSH host key accepted"
+
+[[mutant]]
+id = "M-phase-vbox-ssh-key-algorithm-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_ssh_key.py"
+search = 'algorithm != ALGORITHM'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_guest.py::test_guest_host_key_comparison_refuses_foreign_or_malformed_keys"]
+reason = "malformed SSH host key accepted"
+
+[[mutant]]
+id = "M-phase-vbox-key-file-escape-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_key_observe.py"
+search = 'or path.parent != root'
+replace = 'or False'
+killers = ["tests/integration/test_virtualbox_observe.py::test_guest_control_key_files_are_bounded_and_contained"]
+reason = "outside password accepted"
+
+[[mutant]]
+id = "M-phase-vbox-key-file-hardlink-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_key_observe.py"
+search = 'or before.st_nlink != 1'
+replace = 'or False'
+killers = ["tests/integration/test_virtualbox_observe.py::test_guest_control_key_files_are_bounded_and_contained"]
+reason = "hardlinked password accepted"
+
+[[mutant]]
+id = "M-phase-vbox-key-file-change-ignored"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_key_observe.py"
+search = 'or before != after'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_host.py::test_guest_control_key_join_retains_independent_failures"]
+reason = "changed key files accepted"
+
+[[mutant]]
+id = "M-phase-vbox-key-listener-change-ignored"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_key_observe.py"
+search = 'first != second'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_host.py::test_guest_control_key_join_retains_independent_failures"]
+reason = "changed key listener accepted"
+
+[[mutant]]
+id = "M-phase-vbox-key-followup-failure-hidden"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_key_observe.py"
+search = '_files_reason(results.files, initial.files)'
+replace = '""'
+killers = ["tests/governance/test_virtualbox_host.py::test_guest_control_key_join_retains_independent_failures"]
+reason = "guest-control failure was hidden"
+
+[[mutant]]
+id = "M-phase-vbox-key-stdout-wait-omitted"
+operator = "delete"
+target = "src/agentctl/check/virtualbox_key_observe.py"
+search = "            \"--wait-stdout\",\n"
+replace = ''
+killers = ["tests/integration/test_virtualbox_observe.py::test_guest_control_key_files_are_bounded_and_contained"]
+reason = "guest stdout wait omitted"
+
+[[mutant]]
+id = "M-phase-vbox-key-stderr-wait-omitted"
+operator = "delete"
+target = "src/agentctl/check/virtualbox_key_observe.py"
+search = "            \"--wait-stderr\",\n"
+replace = ''
+killers = ["tests/integration/test_virtualbox_observe.py::test_guest_control_key_files_are_bounded_and_contained"]
+reason = "guest stderr wait omitted"
+
+[[mutant]]
+id = "M-phase-vbox-key-guest-nonce-omitted"
+operator = "delete"
+target = "src/agentctl/check/virtualbox_key_observe.py"
+search = "            \"--arg0=agentctl-key-\" + nonce,\n"
+replace = ''
+killers = ["tests/integration/test_virtualbox_observe.py::test_guest_control_key_files_are_bounded_and_contained"]
+reason = "guest nonce omitted"
+
+[[mutant]]
+id = "M-phase-vbox-key-invalid-nonce-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_key_observe.py"
+search = 'or re.fullmatch(r"[0-9a-f]{32}", guest.nonce) is None'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_host.py::test_guest_control_key_join_retains_independent_failures"]
+reason = "invalid guest nonce accepted"
+
+[[mutant]]
+id = "M-phase-vbox-session-count-unchecked"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_sessions.py"
+search = 'len(sessions) != int(count)'
+replace = 'False'
+killers = ["tests/governance/test_virtualbox_host.py::test_guest_control_session_listing_preserves_other_sessions"]
+reason = "invalid guest session census accepted"
+
+[[mutant]]
+id = "M-phase-vbox-session-duplicate-id-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/virtualbox_sessions.py"
+search = 'or len({value.identifier for value in sessions}) != len(sessions)'
+replace = 'or False'
+killers = ["tests/governance/test_virtualbox_host.py::test_guest_control_session_listing_preserves_other_sessions"]
+reason = "invalid guest session census accepted"
+
+[[mutant]]
+id = "M-phase-vbox-session-foreign-vm-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_sessions.py"
+search = 'session.name == name'
+replace = 'session.name.startswith("[" + str(host_pid) + "]")'
+killers = ["tests/governance/test_virtualbox_host.py::test_guest_control_session_listing_preserves_other_sessions"]
+reason = "foreign VM session accepted"
+
+[[mutant]]
+id = "M-phase-vbox-session-failure-hidden"
+operator = "replace-literal"
+target = "src/agentctl/check/virtualbox_key_observe.py"
+search = 'return Err(primary + "; " + followup)'
+replace = 'return Err(primary)'
+killers = ["tests/governance/test_virtualbox_host.py::test_guest_control_session_listing_preserves_other_sessions"]
+reason = "session failure hidden"
+
+[[mutant]]
+id = "M-phase-killer-record-overwritten"
+operator = "replace-literal"
+target = "src/agentctl/check/gate_plugin.py"
+search = 'path.open("x", encoding="utf-8")'
+replace = 'path.open("w", encoding="utf-8")'
+killers = ["tests/governance/test_gate_plugin.py::test_killer_report_refuses_existing_file"]
+reason = "existing killer report was overwritten"
+
+[[mutant]]
+id = "M-phase-killer-record-baseline-forged"
+operator = "replace-literal"
+target = "src/agentctl/check/gate_plugin.py"
+search = '_status(item.baseline, "passed")'
+replace = '"passed"'
+killers = ["tests/governance/test_gate_plugin.py::test_failed_baseline_is_retained_without_a_mutant_kill"]
+reason = "failed baseline or independent kill was hidden"
+
+[[mutant]]
+id = "M-phase-killer-record-not-captured"
+operator = "delete"
+target = "src/agentctl/check/gate_plugin.py"
+search = "    if report.when == \"call\":\n        _capture_killer(item)\n"
+replace = ""
+killers = ["tests/governance/test_gate_plugin.py::test_killer_outcomes_are_retained_from_real_execution"]
+reason = "real killer observations were not retained"
+
+[[mutant]]
+id = "M-phase-killer-record-incomplete-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/gate_plugin.py"
+search = 'or tuple(item.node for item in outcomes) != execution.record.killers'
+replace = 'or False'
+killers = ["tests/governance/test_gate_plugin.py::test_incomplete_killer_observation_fails_gate"]
+reason = "invalid killer observation accepted"
+
+[[mutant]]
+id = "M-phase-killer-record-not-retained"
+operator = "delete"
+target = "src/agentctl/check/steps.py"
+search = "            \"mutant-killers.json\",\n"
+replace = ""
+killers = ["tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout"]
+reason = "mutant killer outcomes were not retained"
+
+[[mutant]]
+id = "M-phase-killer-verdict-missing-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/mutants.py"
+search = 'or tuple(item.node for item in detailed) != record.killers'
+replace = 'or False'
+killers = ["tests/governance/test_mutants.py::test_killer_verdict_requires_complete_matching_results"]
+reason = "incomplete killer outcomes accepted"
+
+[[mutant]]
+id = "M-phase-killer-verdict-unrun-accepted"
+operator = "short-circuit"
+target = "src/agentctl/check/mutants.py"
+search = "or any(\n                    _passed(item.baseline) != (item.mutation is not None)\n                    for item in detailed\n                )"
+replace = 'or False'
+killers = ["tests/governance/test_mutants.py::test_killer_verdict_requires_complete_matching_results"]
+reason = "incomplete killer outcomes accepted"
+
+[[mutant]]
+id = "M-phase-killer-restore-stage-hidden"
+operator = "replace-literal"
+target = "src/agentctl/check/mutants.py"
+search = 'failures[0].stage if failures else "patch"'
+replace = '"patch"'
+killers = ["tests/governance/test_mutants.py::test_killer_restoration_failure_retains_primary"]
+reason = "primary failure stage was hidden"
+
+[[mutant]]
+id = "M-phase-killer-later-baseline-hidden"
+operator = "replace-literal"
+target = "src/agentctl/check/mutants.py"
+search = "failures[0].stage, \"\\n\".join(item.message for item in failures)"
+replace = "failures[0].stage, \"\\n\".join(item.message for item in failures[:1])"
+killers = ["tests/governance/test_mutants.py::test_all_failed_baselines_remain_visible"]
+reason = "second baseline was hidden"
+
+[[mutant]]
+id = "M-phase-killer-baseline-failure-counts"
+operator = "short-circuit"
+target = "src/agentctl/check/mutants.py"
+search = 'if _passed(control)'
+replace = 'if True'
+killers = ["tests/governance/test_mutants.py::test_killer_results_preserve_independent_baselines"]
+reason = "failed baseline became a mutant kill"
+
+[[mutant]]
+id = "M-phase-killer-later-result-omitted"
+operator = "short-circuit"
+target = "src/agentctl/check/mutants.py"
+search = 'if _passed(control)'
+replace = 'if _passed(control) and node == record.killers[0]'
+killers = ["tests/governance/test_mutants.py::test_killer_results_preserve_independent_baselines"]
+reason = "independent mutant kill was hidden"
+
+[[mutant]]
+id = "M-phase-killer-baseline-failure-hidden"
+operator = "delete"
+target = "src/agentctl/check/mutants.py"
+search = '            return (error,)'
+replace = '            return ()'
+killers = ["tests/governance/test_mutants.py::test_killer_results_preserve_independent_baselines"]
+reason = "failed baseline was accepted"
+
+[[mutant]]
+id = "M-phase-killer-restore-primary-hidden"
+operator = "replace-literal"
+target = "src/agentctl/check/mutants.py"
+search = '("primary: " + primary + "; " if primary else "")'
+replace = '""'
+killers = ["tests/governance/test_mutants.py::test_killer_restoration_failure_retains_primary"]
+reason = "primary failure was hidden"
+
+[[mutant]]
 id = "M-phase-binding-guest-not-carried"
 operator = "replace-literal"
 target = "src/agentctl/check/binding_transport.py"
@@ -2524,3 +3255,120 @@ search = "            \"guest\": asdict(observation.guest),\n"
 replace = "            \"guest\": {},\n"
 killers = ["tests/governance/test_binding_transport.py::test_peer_message_identity_and_evidence"]
 reason = "guest capacity not carried in peer"
+
+[[mutant]]
+id = "M-phase-killer-report-killer-order-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/mutant_report.py"
+search = "and tuple(killer.node for killer in item.killers)\n            != expected[item.identifier].killers"
+replace = "and False"
+killers = ["tests/governance/test_run_evidence.py::test_mutant_report_joins_corpus_and_pytest_results"]
+reason = "wrong killer identities accepted"
+
+[[mutant]]
+id = "M-phase-killer-report-execution-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/mutant_report.py"
+search = "or executed != actual"
+replace = "or False"
+killers = ["tests/governance/test_run_evidence.py::test_mutant_report_joins_corpus_and_pytest_results"]
+reason = "unexecuted mutant record accepted"
+
+[[mutant]]
+id = "M-phase-killer-report-finalizer-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "code = code or killers_after_finalizers"
+replace = "code = code"
+killers = ["tests/governance/test_run_evidence.py::test_mutant_report_survives_finalizers"]
+reason = "mutant report change during finalizers was accepted"
+
+[[mutant]]
+id = "M-phase-killer-report-snapshot-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "after = mutant_report.read(run_dir / \"mutant-killers.json\", nonce)\n    if (\n        before is None\n        or isinstance(before, Err)\n        or isinstance(after, Err)\n        or before.value != after.value"
+replace = "after = mutant_report.read(run_dir / \"mutant-killers.json\", nonce)\n    if (\n        before is None\n        or isinstance(before, Err)\n        or isinstance(after, Err)\n        or False"
+killers = ["tests/integration/test_runtime_boundaries.py::test_mutant_report_captured_before_followups"]
+reason = "changed mutant report was accepted"
+
+[[mutant]]
+id = "M-phase-killer-failure-scope-broadened"
+operator = "replace-literal"
+target = "src/agentctl/check/mutant_report.py"
+search = "if by_id[item.identifier] == number"
+replace = "if by_id[item.identifier] == number or number == 0"
+killers = ["tests/governance/test_run_evidence.py::test_mutant_report_joins_corpus_and_pytest_results"]
+reason = "later mutant killer poisoned earlier phase"
+
+[[mutant]]
+id = "M-phase-killer-failure-scope-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "(number, failures | by_number[number])"
+replace = "(number, failures)"
+killers = ["tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations"]
+reason = "individual mutant killer failure was lost from phase observation"
+
+[[mutant]]
+id = "M-phase-killer-setup-failure-omitted"
+operator = "replace-literal"
+target = "src/agentctl/check/mutant_report.py"
+search = "if item.error else ()"
+replace = "if False else ()"
+killers = ["tests/governance/test_run_evidence.py::test_mutant_report_scopes_execution_errors"]
+reason = "mutation setup failure was lost"
+
+[[mutant]]
+id = "M-phase-killer-handoff-digest-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "if killer_seal(nonce, report.value) == markers[0]"
+replace = "if True"
+killers = ["tests/integration/test_runtime_boundaries.py::test_parent_rejects_postcopy_mutant_report_tampering"]
+reason = "post-copy mutant report alteration accepted"
+
+[[mutant]]
+id = "M-phase-killer-handoff-copy-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "checked = verify_killer_handoff(retained.value, context.nonce, streams[0])"
+replace = "checked = Ok(None)"
+killers = ["tests/integration/test_runtime_boundaries.py::test_parent_rejects_postcopy_mutant_report_tampering"]
+reason = "post-copy mutant report alteration accepted"
+
+[[mutant]]
+id = "M-phase-killer-handoff-live-unchecked"
+operator = "replace-literal"
+target = "src/agentctl/check/steps.py"
+search = "handoff = verify_killer_handoff(\n                context.directory, context.nonce, streams[0]\n            )"
+replace = "handoff = Ok(None)"
+killers = ["tests/integration/test_runtime_boundaries.py::test_parent_rejects_changed_live_mutant_report"]
+reason = "parent accepted changed live mutant report"
+
+[[mutant]]
+id = "M-phase-binding-junction-root-accepted"
+operator = "replace-literal"
+target = "src/agentctl/check/binding_challenge.py"
+search = "root.is_symlink() or root.is_junction()"
+replace = "root.is_symlink()"
+killers = ["tests/integration/test_binding_challenge.py::test_challenge_refuses_linked_source_root"]
+reason = "junction binding source was accepted"
+
+[[mutant]]
+id = "M-phase-coverage-host-omits-all"
+operator = "replace-literal"
+target = "src/agentctl/check/coverage_hosts.py"
+search = "if family not in source.hosts"
+replace = "if family or source.hosts"
+killers = ["tests/unit/test_coverage_hosts.py::test_foreign_sources_follow_declared_hosts"]
+reason = "declared source omitted on its own host"
+
+[[mutant]]
+id = "M-phase-coverage-include-dropped"
+operator = "replace-literal"
+target = "src/agentctl/check/legs.py"
+search = "            f\"--include={(root / 'src/agentctl').as_posix()}/*\",\n"
+replace = ""
+killers = ["tests/unit/test_check_legs.py::test_python_leg_table_matches_oracle"]
+reason = "leg table differs from oracle"

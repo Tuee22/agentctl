@@ -255,3 +255,58 @@ killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_fires
 identifier = "M-guard-user-config-leak"
 owner = 0
 killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_ignores_user_config", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-cache-identity-step-dropped"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_check_steps.py::test_step_table_equals_oracle", path = "tests/unit/test_check_steps.py" }]
+
+[[claims]]
+identifier = "M-mux-native-exec-scope-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_source_guards.py::test_native_process_boundary", path = "tests/governance/test_source_guards.py" }]
+
+[[claims]]
+identifier = "M-mux-native-suppressions-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_source_guards.py::test_native_controls_and_walk", path = "tests/governance/test_source_guards.py" }]
+
+[[claims]]
+identifier = "M-mux-native-test-branches-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_source_guards.py::test_native_controls_and_walk", path = "tests/governance/test_source_guards.py" }]
+
+[[claims]]
+identifier = "M-mux-foreign-exec-owner-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_source_guards.py::test_native_process_boundary", path = "tests/governance/test_source_guards.py" }]
+
+[[claims]]
+identifier = "M-build-wheel-excludes-haskell"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_haskell_legs.py::test_wheel_ships_haskell_sources", path = "tests/integration/test_haskell_legs.py" }]
+
+[[claims]]
+identifier = "M-boot-windows-arm64-allowed"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_preconditions.py::test_toolchain_preconditions", path = "tests/unit/test_preconditions.py" }]
+
+[[claims]]
+identifier = "M-mux-socket-length-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_preconditions.py::test_socket_path_length", path = "tests/unit/test_preconditions.py" }]
+
+[[claims]]
+identifier = "M-style-drop-hlint"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_check_legs.py::test_full_leg_set_matches_oracle", path = "tests/unit/test_check_legs.py" }]
+
+[[claims]]
+identifier = "M-style-fourmolu-inplace"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_haskell_style_legs.py::test_fourmolu_fires", path = "tests/integration/test_haskell_style_legs.py" }]
+
+[[claims]]
+identifier = "M-boot-step-not-run"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_toolchain_gate.py::test_readiness_failures_and_gate_step", path = "tests/unit/test_toolchain_gate.py" }]

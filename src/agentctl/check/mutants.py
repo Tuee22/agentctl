@@ -63,6 +63,23 @@ class Patch:
     changed: bytes
 
 
+@dataclass(frozen=True, slots=True)
+class KillerOutcome:
+    """One named baseline and its mutation result, when the baseline passed."""
+
+    node: str
+    baseline: Result[None, MutationError]
+    mutation: Result[None, MutationError] | None
+
+
+@dataclass(frozen=True, slots=True)
+class KillerExecution:
+    """The declared mutant and its restored, per-killer execution outcome."""
+
+    record: Mutant
+    outcomes: Result[tuple[KillerOutcome, ...], MutationError]
+
+
 def operator(value: str) -> Result[Operator, MutationError]:
     """Parse the operator rather than guessing an unknown transformation."""
     for member in Operator:
@@ -460,7 +477,14 @@ def _killer(tree: Path, node: str, timeout: float) -> Result[Output, MutationErr
 def exercise(
     tree: Path, record: Mutant, *, timeout: float = 120
 ) -> Result[None, MutationError]:
-    """Baseline every killer, apply one defect and restore on every exit path."""
+    """Run every named killer and retain the complete record's verdict."""
+    return killer_verdict(record, exercise_observed(tree, record, timeout=timeout))
+
+
+def exercise_observed(
+    tree: Path, record: Mutant, *, timeout: float = 120
+) -> Result[tuple[KillerOutcome, ...], MutationError]:
+    """Run named killers and expose their outcomes after scratch restoration."""
     target = tree / record.target
     if not target.resolve().is_relative_to(tree.resolve()):
         return Err(MutationError("patch", "target escapes scratch tree"))
@@ -471,43 +495,153 @@ def exercise(
         )
         if isinstance(changed, Err):
             return changed
-        return _exercise(tree, Patch(target, original, changed.value), record, timeout)
+        return _exercise_killers(
+            tree, Patch(target, original, changed.value), record, timeout
+        )
     except OSError as exc:
         return Err(MutationError("patch", str(exc)))
 
 
-def _exercise(
-    tree: Path, prepared: Patch, record: Mutant, timeout: float
+def killer_verdict(
+    record: Mutant,
+    observed: Result[tuple[KillerOutcome, ...], MutationError],
 ) -> Result[None, MutationError]:
-    """Keep the restoration finalizer around baseline and defective invocations."""
+    """Fail the complete record if any named killer lacks a valid result."""
+    match observed:
+        case Err() as error:
+            return error
+        case Ok(detailed):
+            if (
+                not record.killers
+                or tuple(item.node for item in detailed) != record.killers
+                or any(
+                    _passed(item.baseline) != (item.mutation is not None)
+                    for item in detailed
+                )
+            ):
+                return Err(
+                    MutationError(
+                        "schema", "incomplete or inconsistent killer outcomes"
+                    )
+                )
+            failures = _outcome_failures(detailed)
+            if not failures:
+                return Ok(None)
+            return Err(
+                MutationError(
+                    failures[0].stage, "\n".join(item.message for item in failures)
+                )
+            )
+
+
+def _outcome_failures(outcomes: tuple[KillerOutcome, ...]) -> tuple[MutationError, ...]:
+    """Keep failures in original killer and execution order."""
+    return tuple(
+        error
+        for outcome in outcomes
+        for value in (outcome.baseline, outcome.mutation)
+        for error in _failure(value)
+    )
+
+
+def _failure(value: Result[None, MutationError] | None) -> tuple[MutationError, ...]:
+    """Extract an actual failure without promoting an unrun mutation."""
+    match value:
+        case Err(error):
+            return (error,)
+        case Ok() | None:
+            return ()
+
+
+def _observed_killer(
+    tree: Path, node: str, record: Mutant, timeout: float, *, mutated: bool
+) -> Result[None, MutationError]:
+    """Retain the named process, phase and output for one baseline or mutation."""
+    match _killer(tree, node, timeout):
+        case Err(error):
+            return Err(
+                MutationError(
+                    error.stage, f"{record.identifier}: {node}: {error.message}"
+                )
+            )
+        case Ok(output):
+            verdict = (
+                killed(output, record.reason)
+                if mutated
+                else baseline(output, record.reason)
+            )
+            match verdict:
+                case Err(error):
+                    return Err(
+                        MutationError(
+                            error.stage,
+                            f"{record.identifier}: {node}: {error.message}\n"
+                            f"{output.stdout}\n{output.stderr}",
+                        )
+                    )
+                case Ok():
+                    return Ok(None)
+
+
+def _passed(value: Result[None, MutationError]) -> bool:
+    """Only a passing baseline authorizes its corresponding mutant attempt."""
+    match value:
+        case Ok():
+            return True
+        case Err():
+            return False
+
+
+def _exercise_killers(
+    tree: Path, prepared: Patch, record: Mutant, timeout: float
+) -> Result[tuple[KillerOutcome, ...], MutationError]:
+    """Observe every baseline and mutate only those whose own baseline passed.
+
+    These values are local diagnostic outcomes, not authenticated phase receipts.
+    Restoration is attempted in the original owned scratch tree on every exit.
+    """
     try:
-        for node in record.killers:
-            output = _killer(tree, node, timeout)
-            if isinstance(output, Err):
-                return output
-            verdict = baseline(output.value, record.reason)
-            if isinstance(verdict, Err):
-                return Err(
-                    MutationError(
-                        verdict.error.stage,
-                        f"{record.identifier}: {node}: {verdict.error.message}\n"
-                        f"{output.value.stdout}\n{output.value.stderr}",
-                    )
-                )
-        prepared.target.write_bytes(prepared.changed)
-        for node in record.killers:
-            output = _killer(tree, node, timeout)
-            if isinstance(output, Err):
-                return output
-            verdict = killed(output.value, record.reason)
-            if isinstance(verdict, Err):
-                return Err(
-                    MutationError(
-                        verdict.error.stage,
-                        f"{record.identifier}: {node}: {verdict.error.message}\n"
-                        f"{output.value.stdout}\n{output.value.stderr}",
-                    )
-                )
-        return Ok(None)
-    finally:
+        outcomes = _run_killers(tree, prepared, record, timeout)
+    except BaseException as primary:
+        try:
+            prepared.target.write_bytes(prepared.original)
+        except OSError as cleanup:
+            message = "mutation execution and restoration failed"
+            raise BaseExceptionGroup(message, (primary, cleanup)) from None
+        raise
+    try:
         prepared.target.write_bytes(prepared.original)
+    except OSError as cleanup:
+        failures = _outcome_failures(outcomes)
+        primary = "\n".join(item.message for item in failures)
+        return Err(
+            MutationError(
+                failures[0].stage if failures else "patch",
+                ("primary: " + primary + "; " if primary else "")
+                + "mutation restoration: "
+                + str(cleanup),
+            )
+        )
+    return Ok(outcomes)
+
+
+def _run_killers(
+    tree: Path, prepared: Patch, record: Mutant, timeout: float
+) -> tuple[KillerOutcome, ...]:
+    """Observe every baseline before attempting its eligible mutation."""
+    baselines = tuple(
+        _observed_killer(tree, node, record, timeout, mutated=False)
+        for node in record.killers
+    )
+    if any(_passed(value) for value in baselines):
+        prepared.target.write_bytes(prepared.changed)
+    return tuple(
+        KillerOutcome(
+            node,
+            control,
+            _observed_killer(tree, node, record, timeout, mutated=True)
+            if _passed(control)
+            else None,
+        )
+        for node, control in zip(record.killers, baselines, strict=True)
+    )

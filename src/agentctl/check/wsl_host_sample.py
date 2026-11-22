@@ -8,6 +8,7 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
+from agentctl.check.hyperv_observe import executable_identity, system_powershell
 from agentctl.check.wsl_budget import HostCapacity
 from agentctl.foundation import Err, Ok, Result
 from agentctl.foundation_process import run
@@ -122,16 +123,37 @@ def shared_volume(first_device: int, second_device: int) -> bool:
 
 def _counters(root: Path) -> Result[Counters, str]:
     """Query the native host through a fixed read-only PowerShell invocation."""
-    windows = os.environ.get("SYSTEMROOT", "")
-    executable = Path(windows) / "System32/WindowsPowerShell/v1.0/powershell.exe"
-    if not windows or not executable.is_file():
-        return Err("Windows PowerShell unavailable")
+    executable = system_powershell()
+    if isinstance(executable, Err):
+        return executable
+    before = executable_identity(executable.value)
+    if isinstance(before, Err):
+        return before
     observed = run(
-        [str(executable), "-NoProfile", "-NonInteractive", "-Command", COUNTER_SCRIPT],
+        [
+            str(executable.value),
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            COUNTER_SCRIPT,
+        ],
         cwd=root,
         env=os.environ,
         timeout=30,
     )
+    after = executable_identity(executable.value)
+    if isinstance(after, Err) or after.value != before.value:
+        primary = (
+            observed.error.message
+            if isinstance(observed, Err)
+            else observed.value.stderr
+            if observed.value.code
+            else ""
+        )
+        return Err(
+            ("cannot observe host counters: " + primary + "; " if primary else "")
+            + "host counter executable changed during observation"
+        )
     if isinstance(observed, Err):
         return Err("cannot observe host counters: " + observed.error.message)
     if observed.value.code != 0:

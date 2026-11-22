@@ -16,9 +16,12 @@ def test_ready_constructor_is_not_exported(root: Path, tmp_path: Path) -> None:
     """The real preflight caller compiles while direct construction fails by name."""
     context = copy_project(root, tmp_path)
     cabal = context.project / "agentctl-core.cabal"
+    original = cabal.read_text(encoding="utf-8")
+    anchor = "exposed-modules: AgentCtl.Protocol, "
+    assert original.count(anchor) == 1
     cabal.write_text(
-        cabal.read_text(encoding="utf-8").replace(
-            "exposed-modules: ", "exposed-modules: AgentCtl.ReadyWitness, ", 1
+        original.replace(
+            anchor, "exposed-modules: AgentCtl.ReadyWitness, AgentCtl.Protocol, "
         ),
         encoding="utf-8",
     )

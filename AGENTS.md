@@ -35,12 +35,13 @@ acceptance prerequisites. Never call the core executable or cabal directly; the 
 those invocations. Source/backend preparation is application-owned work outside ordinary checks and tests.
 Check never prompts; tests never run real package managers, sudo, installers, login or answered dialogs.
 
-On a Windows machine, Linux validation runs in a dedicated agentctl Debian Hyper-V VM under all of these conditions:
+On a Windows machine, Linux validation runs in a dedicated agentctl Debian VirtualBox VM under all of these conditions:
 
 - Create or use a dedicated agentctl VM, not another project's VM. Observe its identity, Linux kernel,
-  host capacity and actual VM CPU, memory, swap and VHD/free-storage capacity. Choose and verify numerical
-  budgets from measured build/test peaks with explicit host headroom. Enforce and verify VM-local CPU and
-  memory limits and dedicated storage boundaries so workloads cannot consume another project's allocation.
+  host capacity and VM CPU, memory, swap and virtual disk/free-storage capacity. Size the VM with host
+  headroom and use dedicated storage, aiming to avoid resource contention with other projects. Record
+  allocations and observed usage when practical; proof of cross-project CPU, memory or storage isolation
+  is not a prerequisite for Linux validation.
 - Install all required Linux dependencies in that dedicated instance, including pipx, the editable dev extra,
   native build tools, tmux and any agents required by the selected lane. Host preparation is separate from
   tests; the application still never installs agent CLIs.
@@ -49,14 +50,15 @@ On a Windows machine, Linux validation runs in a dedicated agentctl Debian Hyper
   archive, rsync mirror or commit-based transfer cannot substitute. Prove the mount/source identity and
   bidirectional fresh nonce visibility, including unstaged/untracked state, then remove owned sentinels
   before the write-guard snapshot.
-- Keep Linux build/cache/toolchain/temp/state on dedicated Linux storage and verify the source mount's
-  permissions, locks, case and symlink behavior. Use the same actual source tree, and never run Windows and
-  VM checks concurrently while that tree can change.
+- Keep Linux build/cache/toolchain/temp/state and test roots on dedicated Linux storage. Observe and record
+  the source mount's permission-change, lock, case and symlink behavior; these are mount facts, not Linux
+  qualification prerequisites, and tests needing POSIX filesystem semantics use Linux roots. Use the same
+  actual source tree, and never run Windows and VM checks concurrently while that tree can change.
 - Follow applicable non-WSL-specific requirements in the [validation runbook](documents/operations/validation_runbook.md).
-  Do not change other VMs, their allocations or existing sessions. If capacity, isolation, limits or mount
-  semantics cannot be proven, report the Linux route unmet.
+  Do not change other VMs, their allocations or existing sessions. If source identity, byte census agreement,
+  two-way nonce visibility or sentinel cleanup cannot be verified, report the Linux route unmet.
 
-Hyper-V guest evidence is Linux evidence only. It never establishes native Windows or macOS behavior. Each phase
+VirtualBox guest evidence is Linux evidence only. It never establishes native Windows or macOS behavior. Each phase
 requires Linux and at most one of those native families. Never substitute another kernel or manual attestation.
 
 Agents may prepare/install/configure dependencies and agents in their dedicated validation instance. They may

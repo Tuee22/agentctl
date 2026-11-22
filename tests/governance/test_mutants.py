@@ -2,6 +2,8 @@
 """Real scratch mutation controls and every executable corpus record."""
 
 import json
+import os
+import sys
 import tomllib
 from dataclasses import replace
 from pathlib import Path
@@ -9,7 +11,10 @@ from pathlib import Path
 import pytest
 
 from agentctl.check.evidence import Entry, source_census
+from agentctl.check.gate_plugin import KILLER_EXECUTION
 from agentctl.check.mutants import (
+    KillerExecution,
+    KillerOutcome,
     Mutant,
     MutationError,
     Operator,
@@ -18,12 +23,14 @@ from agentctl.check.mutants import (
     census_corpus,
     corpus,
     exercise,
+    exercise_observed,
     killed,
+    killer_verdict,
     parse,
     patch,
     scratch,
 )
-from agentctl.process import Output
+from agentctl.process import Output, run
 from agentctl.result import Err, Ok
 
 pytestmark = pytest.mark.evidence("real")
@@ -135,9 +142,13 @@ def _records() -> tuple[Mutant, ...]:
 
 
 @pytest.mark.parametrize("record", _records(), ids=lambda record: record.identifier)
-def test_corpus(record: Mutant, mutant_tree: Path) -> None:
+def test_corpus(
+    record: Mutant, mutant_tree: Path, request: pytest.FixtureRequest
+) -> None:
     """Require every declared defect to die only for its recorded reason."""
-    result = exercise(mutant_tree, record)
+    outcomes = exercise_observed(mutant_tree, record)
+    request.node.stash[KILLER_EXECUTION] = KillerExecution(record, outcomes)
+    result = killer_verdict(record, outcomes)
     detail = result.error.message if isinstance(result, Err) else str(result)
     assert result == Ok(None), detail
 
@@ -239,6 +250,146 @@ def test_parameter_killers_execute_current_cases(tmp_path: Path) -> None:
     assert result.error.stage == "baseline"
     assert missing.identifier in result.error.message
     assert missing.killers[0] in result.error.message
+
+
+def test_killer_results_preserve_independent_baselines(tmp_path: Path) -> None:
+    """A failed baseline cannot hide a different killer or become a mutation kill."""
+    tree = _sample(tmp_path)
+    subject = tree / "tests/unit/test_subject.py"
+    subject.write_text(
+        "from sample import answer\n"
+        "def test_broken():\n"
+        "    assert False, 'independent baseline failure'\n"
+        "def test_answer():\n"
+        "    assert answer() == 2, 'named answer defect'\n",
+        encoding="utf-8",
+    )
+    record = _parsed(
+        killers=[
+            "tests/unit/test_subject.py::test_broken",
+            "tests/unit/test_subject.py::test_answer",
+        ]
+    )
+    target = tree / "src/sample.py"
+    original = target.read_bytes()
+    observed = exercise_observed(tree, record, timeout=30)
+    assert isinstance(observed, Ok), observed
+    outcomes = observed.value
+    assert len(outcomes) == len(record.killers)
+    assert outcomes[0].node == record.killers[0]
+    assert isinstance(outcomes[0].baseline, Err)
+    assert outcomes[0].mutation is None, "failed baseline became a mutant kill"
+    assert outcomes[1].node == record.killers[1]
+    assert outcomes[1].baseline == Ok(None), "later baseline was not observed"
+    assert outcomes[1].mutation == Ok(None), "independent mutant kill was hidden"
+    assert target.read_bytes() == original
+    combined = exercise(tree, record)
+    assert isinstance(combined, Err), "failed baseline was accepted"
+    assert combined.error.stage == "baseline"
+    assert record.killers[0] in combined.error.message
+    assert target.read_bytes() == original
+
+
+def test_killer_restoration_failure_retains_primary(root: Path, tmp_path: Path) -> None:
+    """A real restore veto retains the earlier baseline failure and scratch bytes."""
+    tree = _sample(tmp_path)
+    subject = tree / "tests/unit/test_subject.py"
+    subject.write_text(
+        "from sample import answer\n"
+        "def test_broken():\n"
+        "    assert False, 'independent baseline failure'\n"
+        "def test_answer():\n"
+        "    assert answer() == 2, 'named answer defect'\n",
+        encoding="utf-8",
+    )
+    target = tree / "src/sample.py"
+    original = target.read_bytes()
+    program = """import sys
+from pathlib import Path
+from agentctl.check.mutants import Mutant, Operator, exercise
+from agentctl.foundation import Err
+tree = Path(sys.argv[1])
+target = tree / 'src/sample.py'
+original = target.read_bytes()
+state = {'active': True, 'writes': 0}
+def audit(event, arguments):
+    if (state['active'] and event == 'open' and str(arguments[0]) == str(target)
+            and arguments[1] == 'w'):
+        state['writes'] += 1
+        if state['writes'] == 2:
+            raise PermissionError('owned restoration veto')
+sys.addaudithook(audit)
+record = Mutant('M-mutant-control', Operator.REPLACE_LITERAL, 'src/sample.py',
+                'return 2', 'return 3',
+                ('tests/unit/test_subject.py::test_broken',
+                 'tests/unit/test_subject.py::test_answer'), 'named answer defect')
+try:
+    result = exercise(tree, record, timeout=30)
+finally:
+    state['active'] = False
+    target.write_bytes(original)
+assert isinstance(result, Err), 'restoration failure was accepted'
+assert result.error.stage == 'baseline', 'primary failure stage was hidden'
+assert 'test_broken' in result.error.message, 'primary failure was hidden'
+assert 'owned restoration veto' in result.error.message, (
+    'restoration failure was hidden')
+"""
+    observed = run(
+        [sys.executable, "-c", program, str(tree)],
+        cwd=root,
+        env={
+            **os.environ,
+            "PYTHONPATH": os.pathsep.join((str(root / "src"), str(root))),
+            "PYTHONDONTWRITEBYTECODE": "1",
+        },
+        timeout=60,
+    )
+    assert isinstance(observed, Ok), observed
+    assert observed.value.code == 0, observed.value.stderr
+    assert target.read_bytes() == original
+
+
+def test_all_failed_baselines_remain_visible(tmp_path: Path) -> None:
+    """Every failing baseline is reported and no defective source is needed."""
+    tree = _sample(tmp_path)
+    subject = tree / "tests/unit/test_subject.py"
+    subject.write_text(
+        "def test_first():\n    assert False, 'first baseline failure'\n"
+        "def test_second():\n    assert False, 'second baseline failure'\n",
+        encoding="utf-8",
+    )
+    record = _parsed(
+        killers=[
+            "tests/unit/test_subject.py::test_first",
+            "tests/unit/test_subject.py::test_second",
+        ]
+    )
+    target = tree / "src/sample.py"
+    original = target.read_bytes()
+    result = exercise(tree, record)
+    assert isinstance(result, Err)
+    assert result.error.stage == "baseline"
+    assert record.killers[0] in result.error.message, "first baseline was hidden"
+    assert record.killers[1] in result.error.message, "second baseline was hidden"
+    assert target.read_bytes() == original
+
+
+def test_killer_verdict_requires_complete_matching_results() -> None:
+    """Missing, replayed and baseline-inconsistent outcomes cannot pass."""
+    record = _parsed()
+    good = KillerOutcome(record.killers[0], Ok(None), Ok(None))
+    assert killer_verdict(record, Ok((good,))) == Ok(None)
+    failed = Err(MutationError("baseline", "baseline failed"))
+    for outcomes in (
+        (),
+        (good, good),
+        (replace(good, node="tests/unit/test_other.py::test_other"),),
+        (replace(good, mutation=None),),
+        (KillerOutcome(good.node, failed, Ok(None)),),
+    ):
+        assert isinstance(killer_verdict(record, Ok(outcomes)), Err), (
+            "incomplete killer outcomes accepted"
+        )
 
 
 def test_baseline_must_pass() -> None:
