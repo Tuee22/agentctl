@@ -2,6 +2,7 @@
 """Join plan declarations to real paths, current execution and acceptance rows."""
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Literal
@@ -63,6 +64,24 @@ class CapturedPolicy:
     symlinks: frozenset[str] = frozenset()
     directories: frozenset[str] = frozenset()
     covered_digest: Result[str, EvidenceError] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class IntegrityAttribution:
+    """Complete static diagnostics and their independently derived phase failures."""
+
+    diagnostics: tuple[str, ...]
+    phases: tuple[tuple[int, frozenset[str]], ...]
+
+
+@dataclass(frozen=True, slots=True)
+class _IntegrityContext:
+    """Captured inputs shared by every independently attributed row."""
+
+    requirements: frozenset[str]
+    policy: MutantOwnerPolicy
+    available: Mapping[str, Mutant]
+    captured: CapturedPolicy
 
 
 def tokens(value: str) -> tuple[str, ...]:
@@ -266,6 +285,30 @@ def _executed(row: IntegrityRow, evidence: RunEvidence) -> bool:
     )
 
 
+def execution_scopes(
+    declarations: tuple[Phase, ...], records: tuple[Mutant, ...], observed: RunEvidence
+) -> tuple[tuple[int, frozenset[str]], ...]:
+    """Attribute failed applicable execution rows to their owning phase."""
+    available = frozenset(record.identifier for record in records)
+    return tuple(
+        (
+            phase.number,
+            frozenset(
+                "gate integrity execution: " + row.value.requirement
+                for cells in table(section(phase.text, "Gate Integrity"))[1:]
+                for row in (integrity_row(cells),)
+                if isinstance(row, Ok)
+                and (
+                    field(phase.text, "Status") == "Done"
+                    or any(identifier in available for identifier in row.value.mutants)
+                )
+                and not _executed(row.value, observed)
+            ),
+        )
+        for phase in declarations
+    )
+
+
 def _canonical_oracle(name: str) -> bool:
     """Reject aliases and paths outside the checkout on every host."""
     path = PurePosixPath(name)
@@ -385,6 +428,46 @@ def _join_diagnostics(
     )
 
 
+def undeclared_mutant_failures(
+    declarations: tuple[Phase, ...],
+    records: tuple[Mutant, ...],
+    owners: tuple[tuple[str, int], ...],
+) -> Result[tuple[tuple[int, frozenset[str]], ...], str]:
+    """Attribute omitted corpus declarations only with complete source owners."""
+    numbers = tuple(phase.number for phase in declarations)
+    identifiers = tuple(record.identifier for record in records)
+    owner_map = dict(owners)
+    if (
+        not numbers
+        or len(set(numbers)) != len(numbers)
+        or len(set(identifiers)) != len(identifiers)
+        or len(owner_map) != len(owners)
+        or frozenset(owner_map) != frozenset(identifiers)
+        or any(owner not in numbers for owner in owner_map.values())
+    ):
+        return Err("invalid mutant declarations or source owners")
+    declared = frozenset(
+        (identifier, phase.number)
+        for phase in declarations
+        for sprint in phase.sprints
+        for identifier in mutant_ids(field(sprint.text, "Mutants"))
+    )
+    return Ok(
+        tuple(
+            (
+                number,
+                frozenset(
+                    "undeclared corpus mutant: " + identifier
+                    for identifier in identifiers
+                    if (identifier, owner_map[identifier]) not in declared
+                    and owner_map[identifier] == number
+                ),
+            )
+            for number in numbers
+        )
+    )
+
+
 def gate_integrity(
     root: Path,
     declarations: tuple[Phase, ...],
@@ -489,6 +572,260 @@ def gate_integrity(
     return (
         *problems,
         *(("plan.gate-integrity: declaration or execution join",) if bad else ()),
+    )
+
+
+def undeclared_only_integrity(
+    declarations: tuple[Phase, ...],
+    records: tuple[Mutant, ...],
+    captured: CapturedPolicy,
+) -> Result[tuple[str, ...], str]:
+    """Prove the complete static integrity failure consists only of omissions.
+
+    The actual corpus and declarations remain intact. This observation does not
+    authenticate the census or owner mapping and does not issue a phase verdict.
+    """
+    owners = captured.owners
+    if owners is None or captured.regular_files is None:
+        return Err("captured integrity policy unavailable")
+    scoped = undeclared_mutant_failures(declarations, records, owners)
+    if isinstance(scoped, Err):
+        return scoped
+    missing = frozenset(
+        failure.removeprefix("undeclared corpus mutant: ")
+        for _number, failures in scoped.value
+        for failure in failures
+    )
+    if not missing:
+        return Err("no undeclared corpus mutants")
+    parsed_rows = tuple(
+        (phase, tuple(integrity_row(cells) for cells in matrix[1:]))
+        for phase in declarations
+        for matrix in (table(section(phase.text, "Gate Integrity")),)
+        if matrix and matrix[0] == INTEGRITY_COLUMNS and len(matrix) > 1
+    )
+    if len(parsed_rows) != len(declarations) or any(
+        isinstance(row, Err) for _phase, rows in parsed_rows for row in rows
+    ):
+        return Err("invalid integrity tables")
+    rows = tuple(
+        (phase, row.value)
+        for phase, values in parsed_rows
+        for row in values
+        if isinstance(row, Ok)
+    )
+    requirements = frozenset(
+        row[0] for row in table(section(captured.overview, "Requirements"))[1:]
+    )
+    policy = MutantOwnerPolicy((), owners)
+    available = {record.identifier: record for record in records}
+    sprint_valid = all(
+        all(_mutant_owned(phase, identifier, policy) for identifier in identifiers)
+        and (sprint.tag != "Done" or all(item in available for item in identifiers))
+        for phase in declarations
+        for sprint in phase.sprints
+        for identifiers in (mutant_ids(field(sprint.text, "Mutants")),)
+    )
+    rows_valid = all(
+        row.requirement in requirements
+        and all(_mutant_owned(phase, identifier, policy) for identifier in row.mutants)
+        and (
+            not (
+                field(phase.text, "Status") == "Done"
+                or any(identifier in available for identifier in row.mutants)
+            )
+            or (
+                all(
+                    _captured_oracle_present(Path(), name, captured)
+                    for name in row.oracles
+                )
+                and all(
+                    identifier in available
+                    and set(available[identifier].killers) <= set(row.tests)
+                    for identifier in row.mutants
+                )
+            )
+        )
+        for phase, row in rows
+    )
+    expected = (
+        *(
+            "plan.gate-integrity: undeclared corpus mutant " + identifier
+            for identifier in sorted(missing)
+        ),
+        "plan.gate-integrity: declaration or execution join",
+    )
+    actual = gate_integrity(Path(), declarations, records, mutant_owners=captured)
+    return (
+        Ok(expected)
+        if sprint_valid
+        and rows_valid
+        and _owed(declarations, rows)
+        and actual == expected
+        else Err("integrity failure has additional or ambiguous causes")
+    )
+
+
+def _row_integrity_failures(
+    phase: Phase,
+    row: IntegrityRow,
+    context: _IntegrityContext,
+) -> frozenset[str]:
+    """Retain every static defect owned by one valid integrity row."""
+    requirements, policy, available, captured = (
+        context.requirements,
+        context.policy,
+        context.available,
+        context.captured,
+    )
+    applicable = field(phase.text, "Status") == "Done" or any(
+        identifier in available for identifier in row.mutants
+    )
+    return frozenset(
+        (
+            *(
+                ("gate integrity requirement: " + row.requirement,)
+                if row.requirement not in requirements
+                else ()
+            ),
+            *(
+                "gate integrity mutant owner: " + identifier
+                for identifier in row.mutants
+                if not _mutant_owned(phase, identifier, policy)
+            ),
+            *(
+                "gate integrity missing oracle: " + name
+                for name in row.oracles
+                if applicable and not _captured_oracle_present(Path(), name, captured)
+            ),
+            *(
+                "gate integrity missing mutant: " + identifier
+                for identifier in row.mutants
+                if applicable and identifier not in available
+            ),
+            *(
+                "gate integrity killer citation: " + identifier
+                for identifier in row.mutants
+                if applicable
+                and identifier in available
+                and not set(available[identifier].killers) <= set(row.tests)
+            ),
+        )
+    )
+
+
+def _phase_integrity_failures(
+    phase: Phase,
+    rows: tuple[IntegrityRow, ...],
+    context: _IntegrityContext,
+) -> frozenset[str]:
+    """Join row and sprint declarations without discarding individual defects."""
+    row_failures = frozenset(
+        failure
+        for row in rows
+        for failure in _row_integrity_failures(phase, row, context)
+    )
+    sprint_failures = frozenset(
+        failure
+        for sprint in phase.sprints
+        for identifier in mutant_ids(field(sprint.text, "Mutants"))
+        for failure in (
+            *(
+                ("gate integrity mutant owner: " + identifier,)
+                if not _mutant_owned(phase, identifier, context.policy)
+                else ()
+            ),
+            *(
+                ("gate integrity missing mutant: " + identifier,)
+                if sprint.tag == "Done" and identifier not in context.available
+                else ()
+            ),
+        )
+    )
+    return row_failures | sprint_failures
+
+
+def scoped_integrity_failures(
+    declarations: tuple[Phase, ...],
+    records: tuple[Mutant, ...],
+    captured: CapturedPolicy,
+) -> Result[IntegrityAttribution, str]:
+    """Attribute a complete static integrity result without changing the corpus.
+
+    Malformed tables, uncertain ownership or cross-phase owed evidence remain
+    shared. The caller must authenticate the captured inputs and execution.
+    """
+    owners = captured.owners
+    if owners is None or captured.regular_files is None:
+        return Err("captured integrity policy unavailable")
+    missing = undeclared_mutant_failures(declarations, records, owners)
+    if (
+        isinstance(missing, Err)
+        or any(isinstance(phase.number, bool) for phase in declarations)
+        or any(isinstance(owner, bool) for _identifier, owner in owners)
+    ):
+        return Err("invalid integrity ownership")
+    parsed = tuple(
+        (phase, tuple(integrity_row(cells) for cells in matrix[1:]))
+        for phase in declarations
+        for matrix in (table(section(phase.text, "Gate Integrity")),)
+        if matrix and matrix[0] == INTEGRITY_COLUMNS and len(matrix) > 1
+    )
+    if len(parsed) != len(declarations) or any(
+        isinstance(row, Err) for _phase, rows in parsed for row in rows
+    ):
+        return Err("invalid integrity tables")
+    rows = tuple(
+        (phase, row.value)
+        for phase, values in parsed
+        for row in values
+        if isinstance(row, Ok)
+    )
+    if not _owed(declarations, rows):
+        return Err("integrity owed evidence is ambiguous")
+    requirements = frozenset(
+        row[0] for row in table(section(captured.overview, "Requirements"))[1:]
+    )
+    policy = MutantOwnerPolicy((), owners)
+    available = {record.identifier: record for record in records}
+    context = _IntegrityContext(requirements, policy, available, captured)
+    omitted = dict(missing.value)
+    scoped = tuple(
+        (
+            phase.number,
+            omitted[phase.number]
+            | _phase_integrity_failures(
+                phase,
+                tuple(row for owner, row in rows if owner == phase),
+                context,
+            ),
+        )
+        for phase in declarations
+    )
+    declared = {
+        identifier
+        for phase in declarations
+        for sprint in phase.sprints
+        for identifier in mutant_ids(field(sprint.text, "Mutants"))
+    }
+    expected = (
+        *(
+            problem
+            for phase, row in rows
+            for problem in _row_diagnostics(phase, row, requirements, policy)
+        ),
+        *_join_diagnostics(available, declared, declarations, rows),
+        *(
+            ("plan.gate-integrity: declaration or execution join",)
+            if any(failures for _number, failures in scoped)
+            else ()
+        ),
+    )
+    actual = gate_integrity(Path(), declarations, records, mutant_owners=captured)
+    return (
+        Ok(IntegrityAttribution(expected, scoped))
+        if actual == expected
+        else Err("integrity diagnostics and attribution differ")
     )
 
 

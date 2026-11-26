@@ -88,7 +88,7 @@ def relocation_problems(
                 r"^\| "
                 + re.escape(decision[1])
                 + r" \|[^\n]*`"
-                + re.escape(identifier.removeprefix("amendment:"))
+                + re.escape(_amendment_original(identifier))
                 + r"`",
                 rationale,
                 re.MULTILINE,
@@ -112,6 +112,11 @@ def relocation_problems(
     return problems + _amendment_locations(prior, current)
 
 
+def _amendment_original(identifier: str) -> str:
+    """Recover the mutant identity from a protected amendment revision."""
+    return identifier.removeprefix("amendment:").split(":", 1)[0]
+
+
 def _amendment_locations(
     prior: dict[str, tuple[str, RowFact]], current: dict[str, tuple[str, RowFact]]
 ) -> tuple[str, ...]:
@@ -119,7 +124,7 @@ def _amendment_locations(
     problems: tuple[str, ...] = ()
     for identifier in prior:
         if identifier.startswith("amendment:"):
-            original = identifier.removeprefix("amendment:")
+            original = _amendment_original(identifier)
             if (
                 original not in prior
                 or original not in current
@@ -133,7 +138,7 @@ def _amendment_locations(
                 problems += ("separated amendment: " + identifier,)
     for identifier in current:
         if identifier.startswith("amendment:") and identifier not in prior:
-            original = identifier.removeprefix("amendment:")
+            original = _amendment_original(identifier)
             if original not in current:
                 problems += ("orphan amendment: " + identifier,)
             elif current[identifier][0] != current[original][0]:
@@ -276,11 +281,16 @@ def _amendment_rows(
         amendment = _row(value)
         if isinstance(amendment, Err):
             return amendment
-        parsed += (
-            RowFact(
-                "amendment:" + amendment.value.identifier, amendment.value.contents
-            ),
-        )
+        identifier = "amendment:" + amendment.value.identifier
+        if any(row.identifier == identifier for row in parsed):
+            if (
+                not isinstance(value, dict)
+                or not isinstance(value.get("prior_sha256"), str)
+                or re.fullmatch(r"[0-9a-f]{64}", value["prior_sha256"]) is None
+            ):
+                return Err(RatchetError("invalid amendment revision identity"))
+            identifier += ":" + value["prior_sha256"]
+        parsed += (RowFact(identifier, amendment.value.contents),)
     return _unique(parsed)
 
 

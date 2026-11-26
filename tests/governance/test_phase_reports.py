@@ -1,11 +1,13 @@
 # Copyright (c) 2026 agentctl contributors.
 """Independent controls for the phase report calculation."""
 
+import json
 from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
+from agentctl.check import steps
 from agentctl.check.evidence import Entry, LegEvidence, RunEvidence, ToolSubsteps
 from agentctl.check.mutants import Mutant, Operator
 from agentctl.check.ownership import (
@@ -27,6 +29,7 @@ from agentctl.check.phase_reports import (
     NativeFamily,
     OwnershipPhase,
     PhaseInputs,
+    PhaseResult,
     binding_problems,
     calculate,
     calculate_observed,
@@ -48,6 +51,7 @@ from agentctl.check.steps import (
     join_captured_phase_failures,
     provisional_finalizer_failures,
     provisional_phase_observations,
+    verify_phase_prerequisite_failures,
 )
 from agentctl.result import Err, Ok
 from tests.harness.oracle import Object, Store, load_scoped
@@ -58,6 +62,34 @@ PHASES = (
     PhaseInputs(1, frozenset({"later"}), frozenset({"late"}), frozenset({0})),
 )
 SOURCES = (("shared", b"original"), ("later", b"original"))
+
+
+def test_parent_rechecks_cited_test_outcomes() -> None:
+    """A later failed parameter cannot disappear from its owning phase result."""
+    early = "tests/test_early.py::test_case"
+    later = "tests/test_later.py::test_case"
+    phases = (
+        PhaseInputs(0, frozenset({"a"}), frozenset({early}), frozenset()),
+        PhaseInputs(1, frozenset({"b"}), frozenset({later}), frozenset({0})),
+    )
+    nodes = frozenset({early, later + "[good]", later + "[bad]"})
+    evidence = RunEvidence("fresh", nodes, nodes, nodes - {later + "[bad]"}, (), ())
+    results = (
+        PhaseResult(0, "a" * 64, frozenset()),
+        PhaseResult(1, "b" * 64, frozenset({later})),
+    )
+    assert steps.verify_phase_cited_checks(phases, evidence, "fresh", results) == Ok(
+        None
+    )
+    forged = (results[0], replace(results[1], failures=frozenset()))
+    assert isinstance(
+        steps.verify_phase_cited_checks(phases, evidence, "fresh", forged), Err
+    ), "parent accepted omitted cited check failure"
+    assert isinstance(
+        steps.verify_phase_cited_checks(phases, evidence, "stale", results), Err
+    ), "stale cited check nonce accepted"
+
+
 EARLY = "tests/test_early.py::test_control"
 LATE = "tests/test_later.py::test_control"
 SCOPES = (
@@ -131,6 +163,43 @@ def test_native_case_failures_follow_declared_consumers() -> None:
         ), "invalid native evidence was accepted"
 
 
+def test_unexplained_native_failure_follows_all_consumers() -> None:
+    """A native command failure reaches every native consumer and no unrelated phase."""
+    node = "haskell:agentctl-core-test/Mux/late"
+    missing = "haskell:agentctl-core-test/Mux/missing"
+    source = "src/agentctl/haskell/test/MuxTests.hs"
+    observed = RunEvidence(
+        "fresh",
+        frozenset({node}),
+        frozenset({node}),
+        frozenset({node}),
+        ("native-command-failed",),
+        ((node, "value"),),
+    )
+    attribution = NativeAttribution(
+        (0, 1, 2, 3),
+        ((node, source),),
+        ((source, frozenset({1, 2})),),
+        ((1, node), (3, missing)),
+    )
+    result = native_case_failures(observed, "fresh", attribution)
+    assert isinstance(result, Ok), result
+    failures = dict(result.value)
+    assert not failures[0], "later native command failure poisoned unrelated phase"
+    assert "unexplained native command failure" in failures[1]
+    assert "unexplained native command failure" in failures[2], (
+        "native command failure omitted source consumer"
+    )
+    assert "unexplained native command failure" in failures[3], (
+        "native command failure omitted cited consumer"
+    )
+    assert "missing native case: " + missing in failures[3]
+    assert isinstance(
+        native_case_failures(replace(observed, nonce="stale"), "fresh", attribution),
+        Err,
+    ), "stale native command observation was accepted"
+
+
 def test_mountinfo_paths_and_ambiguity() -> None:
     """Kernel escapes and longest-prefix selection cannot hide a bind mount."""
     root_mount_id, source_mount_id = 10, 20
@@ -151,6 +220,7 @@ def test_mountinfo_paths_and_ambiguity() -> None:
     assert isinstance(sibling, Ok)
     assert sibling.value.identifier == root_mount_id
     assert isinstance(containing_mount("/work/../outside", parsed.value), Err)
+    assert isinstance(containing_mount("/outside", (selected.value,)), Err)
     stacked = data + "21 10 0:40 /other /work/source\\040tree rw - 9p C:\\134 rw\n"
     ambiguous = parse_mountinfo(stacked)
     assert isinstance(ambiguous, Ok)
@@ -162,6 +232,8 @@ def test_mountinfo_paths_and_ambiguity() -> None:
         data.replace("source\\040tree", "source\\999tree"),
         "10 1 bad / / rw - ext4 /dev/root rw\n",
         "10 1 8:1 / / rw ext4 /dev/root rw\n",
+        "10 1 8:1 relative / rw - ext4 /dev/root rw\n",
+        "10 1 8:1 / relative rw - ext4 /dev/root rw\n",
     ):
         assert isinstance(parse_mountinfo(invalid), Err)
 
@@ -233,6 +305,138 @@ def test_binding_observation_join() -> None:
     assert "mount mapping" in binding_problems(
         source, source, mounts.value, observation
     )
+
+
+def test_ownership_rejects_boolean_indices() -> None:
+    """Booleans cannot alias phase numbers, dependencies or artifact owners."""
+    false = json.loads("false")
+    phases = (OwnershipPhase(0, frozenset()), OwnershipPhase(1, frozenset({0})))
+    artifact = ArtifactOwnership(
+        "src/shared.py", 0, frozenset({0, 1}), required=True, capability="shared"
+    )
+    assert isinstance(ownership_inputs(phases, (artifact,), (artifact.path,)), Ok)
+    for changed_phases, changed_artifact in (
+        ((replace(phases[0], number=false), phases[1]), artifact),
+        ((phases[0], replace(phases[1], prerequisites=frozenset({false}))), artifact),
+        (phases, replace(artifact, owner=false)),
+        (phases, replace(artifact, consumers=frozenset({false, 1}))),
+    ):
+        assert isinstance(
+            ownership_inputs(changed_phases, (changed_artifact,), (artifact.path,)), Err
+        ), "boolean ownership index was accepted"
+
+
+def test_phase_calculation_rejects_boolean_indices() -> None:
+    """A Boolean cannot stand for a phase identity or prerequisite."""
+    false = json.loads("false")
+    invalid = (
+        (replace(PHASES[0], number=false), PHASES[1]),
+        (PHASES[0], replace(PHASES[1], prerequisites=frozenset({false}))),
+    )
+    for phases in invalid:
+        assert isinstance(
+            calculate(phases, SOURCES, frozenset({"early", "late"}), frozenset()), Err
+        ), "boolean phase index was accepted"
+
+
+def test_native_attribution_rejects_boolean_indices() -> None:
+    """Native observations cannot alias phase numbers through Boolean values."""
+    false = json.loads("false")
+    node = "haskell:agentctl-core-test/Native/case"
+    source = "src/agentctl/haskell/test/Native.hs"
+    nodes = frozenset({node})
+    observed = RunEvidence("fresh", nodes, nodes, nodes, (), ())
+    base = NativeAttribution(
+        (0, 1), ((node, source),), ((source, frozenset({0, 1})),), ((0, node),)
+    )
+    assert isinstance(native_case_failures(observed, "fresh", base), Ok)
+    for invalid in (
+        replace(base, numbers=(false, 1)),
+        replace(base, consumers=((source, frozenset({false, 1})),)),
+        replace(base, citations=((false, node),)),
+    ):
+        assert isinstance(native_case_failures(observed, "fresh", invalid), Err), (
+            "boolean native attribution index was accepted"
+        )
+
+
+def test_collection_rejects_boolean_indices() -> None:
+    """Collection scopes and explicit owners require integer phase numbers."""
+    false = json.loads("false")
+    nodes = frozenset({EARLY, LATE})
+    observed = CollectionObservation(
+        nodes, nodes, nodes, frozenset(), nonce_matches=True, forbidden=frozenset()
+    )
+    assert isinstance(collection_failures(SCOPES, observed), Ok)
+    assert isinstance(
+        collection_failures((replace(SCOPES[0], number=false), SCOPES[1]), observed),
+        Err,
+    ), "boolean collection scope was accepted"
+    consumers = ((EARLY, frozenset({false})), (LATE, frozenset({1})))
+    assert isinstance(
+        collection_failures(SCOPES, observed, case_consumers=consumers), Err
+    ), "boolean case consumer was accepted"
+    first = replace(
+        SCOPES[0], modules=SCOPES[0].modules | {"tests/governance/test_mutants.py"}
+    )
+    assert isinstance(
+        collection_failures(
+            (first, SCOPES[1]), observed, mutation_owners=(("M-test", false),)
+        ),
+        Err,
+    ), "boolean mutant owner was accepted"
+
+
+def test_additional_failures_reject_boolean_indices() -> None:
+    """A malformed phase or observer owner cannot alias an integer phase."""
+    false = json.loads("false")
+    calculated = calculate(PHASES, SOURCES, frozenset({"early", "late"}), frozenset())
+    assert isinstance(calculated, Ok)
+    empty = ((0, frozenset[str]()), (1, frozenset[str]()))
+    observations = AdditionalFailures(empty, empty)
+    assert isinstance(
+        join_additional_failures(PHASES, calculated.value, observations), Ok
+    )
+    for phases, results, facts in (
+        ((replace(PHASES[0], number=false), PHASES[1]), calculated.value, observations),
+        (
+            (PHASES[0], replace(PHASES[1], prerequisites=frozenset({false}))),
+            calculated.value,
+            observations,
+        ),
+        (
+            PHASES,
+            (replace(calculated.value[0], number=false), calculated.value[1]),
+            observations,
+        ),
+        (
+            PHASES,
+            calculated.value,
+            AdditionalFailures(((false, frozenset()), empty[1]), empty),
+        ),
+        (
+            PHASES,
+            calculated.value,
+            AdditionalFailures(empty, ((false, frozenset()), empty[1])),
+        ),
+    ):
+        assert isinstance(join_additional_failures(phases, results, facts), Err), (
+            "boolean additional-failure index was accepted"
+        )
+    nodes = frozenset({EARLY, LATE})
+    observed = CollectionObservation(
+        nodes, nodes, nodes, frozenset(), nonce_matches=True, forbidden=frozenset()
+    )
+    assert isinstance(
+        calculate_observed(
+            PHASES,
+            SOURCES,
+            frozenset({"early", "late"}),
+            frozenset(),
+            (SCOPES, observed, (), ((false, frozenset()), empty[1])),
+        ),
+        Err,
+    ), "boolean scoped ownership failure was accepted"
 
 
 def test_ownership_census_and_prerequisites() -> None:
@@ -723,6 +927,131 @@ def test_provisional_observations_join_captured_evidence() -> None:
     )
 
 
+def test_unverified_marker_does_not_invent_prerequisite_failures() -> None:
+    """Only observed lower-phase failures propagate to dependent phases."""
+    nodes = frozenset({"early", "late"})
+    empty = ((0, frozenset[str]()), (1, frozenset[str]()))
+    captured = ProvisionalPhaseInputs(
+        ScopedPhaseWork(PhaseWork(PHASES, SOURCES), empty),
+        RunEvidence("current", nodes, nodes, nodes, (), ()),
+        "current",
+        Ok(empty),
+        Ok(empty),
+        Ok((OracleScope(0, ()), OracleScope(1, ()))),
+    )
+    clean = provisional_phase_observations(captured)
+    assert isinstance(clean, Ok)
+    assert all(
+        item.failures == frozenset({"unverified-run"}) for item in clean.value
+    ), "unverified marker invented a prerequisite failure"
+    later = provisional_phase_observations(
+        replace(
+            captured, scoped_tools=((0, frozenset()), (1, frozenset({"later failure"})))
+        )
+    )
+    assert isinstance(later, Ok)
+    assert later.value[0].failures == frozenset({"unverified-run"}), (
+        "later owned failure blocked earlier phase"
+    )
+    assert later.value[1].failures == frozenset({"unverified-run", "later failure"})
+    earlier = provisional_phase_observations(
+        replace(
+            captured,
+            scoped_tools=((0, frozenset({"earlier failure"})), (1, frozenset())),
+        )
+    )
+    assert isinstance(earlier, Ok)
+    assert "prerequisite:0" in earlier.value[1].failures, (
+        "observed prerequisite failure was not propagated"
+    )
+    _assert_parent_prerequisite_failures(clean.value, later.value, earlier.value)
+
+
+def _assert_parent_prerequisite_failures(
+    clean: tuple[PhaseResult, ...],
+    later: tuple[PhaseResult, ...],
+    earlier: tuple[PhaseResult, ...],
+) -> None:
+    """Refuse missing or invented prerequisite failures without promoting markers."""
+    clean_phases, later_phases, earlier_phases = clean, later, earlier
+    assert verify_phase_prerequisite_failures(PHASES, clean_phases) == Ok(None), (
+        "parent treated provisional marker as failure"
+    )
+    assert verify_phase_prerequisite_failures(PHASES, later_phases) == Ok(None)
+    assert verify_phase_prerequisite_failures(PHASES, earlier_phases) == Ok(None)
+    omitted = (
+        earlier_phases[0],
+        replace(
+            earlier_phases[1], failures=earlier_phases[1].failures - {"prerequisite:0"}
+        ),
+    )
+    assert isinstance(verify_phase_prerequisite_failures(PHASES, omitted), Err), (
+        "parent accepted missing prerequisite failure"
+    )
+    invented = (
+        clean_phases[0],
+        replace(
+            clean_phases[1], failures=clean_phases[1].failures | {"prerequisite:0"}
+        ),
+    )
+    assert isinstance(verify_phase_prerequisite_failures(PHASES, invented), Err), (
+        "parent accepted invented prerequisite failure"
+    )
+    finalized = tuple(
+        replace(item, failures=item.failures | {"shared finalizer failed: ratchet"})
+        for item in clean_phases
+    )
+    assert verify_phase_prerequisite_failures(PHASES, finalized) == Ok(None), (
+        "shared finalizer invented a prerequisite failure"
+    )
+
+
+def test_provisional_parametrized_citation_requires_every_case() -> None:
+    """A cited test passes only when all its collected variants pass completely."""
+    cited = "tests/test_early.py::test_control"
+    cases = frozenset({cited + "[first]", cited + "[second]"})
+    phases = (replace(PHASES[0], checks=frozenset({cited})), PHASES[1])
+    nodes = cases | {"late"}
+    empty = ((0, frozenset[str]()), (1, frozenset[str]()))
+    captured = ProvisionalPhaseInputs(
+        ScopedPhaseWork(PhaseWork(phases, SOURCES), empty),
+        RunEvidence("current", nodes, nodes, nodes, (), ()),
+        "current",
+        Ok(empty),
+        Ok(empty),
+        Ok((OracleScope(0, ()), OracleScope(1, ()))),
+    )
+    complete = provisional_phase_observations(captured)
+    assert isinstance(complete, Ok)
+    assert cited not in complete.value[0].failures, "passing parameter cases were lost"
+    assert "unverified-run" in complete.value[0].failures
+    for manifest in (
+        replace(captured.manifest, passed=nodes - {cited + "[second]"}),
+        replace(captured.manifest, forbidden=("failed: " + cited + "[second]",)),
+        replace(
+            captured.manifest,
+            collected=frozenset({"late"}),
+            executed=frozenset({"late"}),
+            passed=frozenset({"late"}),
+        ),
+        replace(
+            captured.manifest,
+            collected=frozenset({"late", cited + "_other[first]"}),
+            executed=frozenset({"late", cited + "_other[first]"}),
+            passed=frozenset({"late", cited + "_other[first]"}),
+        ),
+        replace(
+            captured.manifest,
+            collected=nodes | {cited},
+            executed=nodes | {cited},
+            passed=(nodes | {cited}) - {cited + "[second]"},
+        ),
+    ):
+        observed = provisional_phase_observations(replace(captured, manifest=manifest))
+        assert isinstance(observed, Ok)
+        assert cited in observed.value[0].failures, "incomplete parameter cases passed"
+
+
 def test_captured_phase_failures_require_both_observers() -> None:
     """The captured join refuses unavailable sources instead of inventing passes."""
     base = calculate_scoped_inputs(
@@ -811,6 +1140,21 @@ def test_scoped_ownership_failures_reach_phase_verdicts() -> None:
         ),
         Err,
     )
+    for malformed in (
+        (later[0], later[0]),
+        ((0, frozenset({""})), later[1]),
+        ((0, frozenset[str]()), (2, frozenset[str]())),
+    ):
+        assert isinstance(
+            calculate_observed(
+                PHASES,
+                SOURCES,
+                passed,
+                frozenset(),
+                (SCOPES, observation, (), malformed),
+            ),
+            Err,
+        ), "malformed scoped ownership failures were accepted"
 
 
 def test_mutation_ownership_reaches_phase_verdicts() -> None:
@@ -1084,3 +1428,96 @@ def test_receipt_input_closure() -> None:
     assert isinstance(
         calculate(PHASES, (*SOURCES, SOURCES[0]), frozenset(), frozenset()), Err
     )
+
+
+def test_parent_rechecks_prerequisite_failures(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Require both parent paths to preserve actual prerequisite failures."""
+    nonce = "fresh"
+    context = steps.CheckRun(Path("/source"), Path("/run"), nonce, "Linux")
+    final = LegEvidence(nonce, tuple((name, 0) for name in FINALIZER_NAMES[:-1]))
+    work = ScopedPhaseWork(
+        PhaseWork(PHASES, SOURCES), ((0, frozenset()), (1, frozenset()))
+    )
+    observed = (
+        PhaseResult(0, "a" * 64, frozenset({"unverified-run", "earlier failure"})),
+        PhaseResult(1, "b" * 64, frozenset({"unverified-run", "prerequisite:0"})),
+    )
+    forged = (observed[0], replace(observed[1], failures=frozenset({"unverified-run"})))
+    output = steps.finalizer_seal(final)
+    with monkeypatch.context() as patch:
+        patch.setattr(steps, "finalizer_observation", lambda *_args: Ok(final))
+        patch.setattr(
+            steps, "_provisional_values_for_identity", lambda *_args: Ok(observed)
+        )
+        patch.setattr(steps, "_parent_bound_census", lambda *_args: Ok(()))
+        patch.setattr(steps.ownership, "guarded_census", lambda *_args: Ok(()))
+        patch.setattr(steps, "census_phases", lambda *_args: Ok(()))
+        patch.setattr(steps, "scoped_source_inputs", lambda *_args: Ok(work))
+        for name in (
+            "verify_python_commands_handoff",
+            "_verify_provisional_census",
+            "verify_python_plan_handoff",
+            "verify_provisional_input_identities",
+            "verify_tool_results_handoff",
+            "verify_pytest_handoff",
+            "verify_oracle_handoff",
+            "verify_host_handoff",
+            "verify_native_handoff",
+            "verify_ty_handoff",
+            "verify_coverage_text_handoff",
+            "verify_provisional_collection",
+            "verify_provisional_oracle",
+            "verify_provisional_host",
+            "verify_provisional_coverage",
+            "verify_provisional_static",
+            "verify_provisional_source",
+            "verify_provisional_tools",
+            "verify_provisional_validation",
+            "verify_finalizer_handoff",
+            "verify_provisional_handoff",
+            "verify_provisional_finalizers",
+            "verify_killer_handoff",
+            "verify_coverage_handoff",
+            "verify_ruff_handoff",
+            "verify_ruff_format_handoff",
+            "retain_handoff_failure",
+        ):
+            patch.setattr(steps, name, lambda *_args, **_kwargs: Ok(None))
+        assert steps.verify_provisional_prerequisites(
+            context, context.directory, output
+        ) == Ok(None)
+        patch.setattr(steps, "_parent_bound_census", lambda *_args: Err("changed"))
+        assert isinstance(
+            steps.verify_provisional_prerequisites(context, context.directory, output),
+            Err,
+        ), "unbound parent prerequisite census was accepted"
+        patch.setattr(steps, "_parent_bound_census", lambda *_args: Ok(()))
+        patch.setattr(
+            steps, "_provisional_values_for_identity", lambda *_args: Ok(forged)
+        )
+        assert isinstance(
+            steps.verify_provisional_prerequisites(context, context.directory, output),
+            Err,
+        ), "parent accepted missing prerequisite failure"
+        assert isinstance(steps.verify_python_handoffs(context, output), Err), (
+            "live parent accepted missing prerequisite failure"
+        )
+        patch.setattr(
+            steps, "retain_gate_output", lambda *_args, **_kwargs: Ok(context.directory)
+        )
+        patch.setattr(
+            steps,
+            "verify_retained_streams",
+            lambda _directory, _streams, _observed, prior: prior,
+        )
+        patch.setattr(
+            steps,
+            "verify_retained_artifacts",
+            lambda _directory, _observed, prior: prior,
+        )
+        retained = steps.retain_verified_gate_output(
+            context, Path("/state"), (output, ""), verify_handoff=True
+        )
+        assert isinstance(retained, Err), (
+            "retained parent accepted missing prerequisite failure"
+        )

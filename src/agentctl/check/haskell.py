@@ -1,8 +1,11 @@
 # Copyright (c) 2026 agentctl contributors.
 """Closed Cabal components and fresh, fully routed Tasty execution evidence."""
 
+import hashlib
 import json
+import os
 import re
+import stat
 from dataclasses import dataclass, replace
 from io import BytesIO
 from pathlib import Path, PurePosixPath
@@ -311,13 +314,78 @@ def verify_report(
     )
 
 
+def _artifact_identity(info: os.stat_result) -> tuple[int, int, int, int, int]:
+    """Keep stable file identity and modification attributes for one read."""
+    return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+
+def native_artifact_facts(
+    context: build.BuildContext,
+) -> Result[tuple[tuple[str, str, str], ...], build.BuildError]:
+    """Observe stable bytes for the selected native tools and test executable."""
+    located = build.binary(context, "test:agentctl-core-test")
+    if isinstance(located, Err):
+        return located
+    try:
+        test_path = located.value.resolve(strict=True)
+        if not test_path.is_relative_to(context.directory.resolve(strict=True)):
+            return Err(
+                build.BuildError("Native test executable escapes the build root")
+            )
+        paths = (
+            ("ghc", Path(context.tools.ghc).resolve(strict=True)),
+            ("cabal", Path(context.tools.cabal).resolve(strict=True)),
+            ("native-test", test_path),
+        )
+        facts: tuple[tuple[str, str, str], ...] = ()
+        for name, path in paths:
+            before = path.stat()
+            if not stat.S_ISREG(before.st_mode):
+                return Err(build.BuildError("Native artifact is not a regular file"))
+            with path.open("rb") as stream:
+                opened = os.fstat(stream.fileno())
+                digest = hashlib.file_digest(stream, "sha256").hexdigest()
+                closed = os.fstat(stream.fileno())
+            after = path.stat()
+            if any(
+                _artifact_identity(item) != _artifact_identity(before)
+                for item in (opened, closed, after)
+            ):
+                return Err(
+                    build.BuildError("Native artifact changed during inspection")
+                )
+            facts += ((name, path.as_posix(), digest),)
+        return Ok(facts)
+    except (OSError, RuntimeError) as exc:
+        return Err(build.BuildError("Cannot inspect native artifacts: " + str(exc)))
+
+
+def selected_artifact_facts(
+    host: HostContext, project: Path
+) -> Result[tuple[tuple[str, str, str], ...], build.BuildError]:
+    """Resolve and inspect the application's prepared offline native selection."""
+    selected = binary.check_context(host, project)
+    if isinstance(selected, Err):
+        return selected
+    context = replace(selected.value, options=("--offline",), prepared_index_only=True)
+    indexed = build.verify_prepared_index(context)
+    return indexed if isinstance(indexed, Err) else native_artifact_facts(context)
+
+
 def run_suites(
     context: build.BuildContext, directory: Path, nonce: str
 ) -> Result[RunEvidence, build.BuildError]:
     """Run test all into a fresh owned XML file and publish only verified evidence."""
     targets = declared(context.project)
-    if isinstance(targets, Err):
-        return targets
+    artifacts = (
+        targets
+        if isinstance(targets, Err)
+        else native_artifact_facts(context)
+        if nonce
+        else Err(build.BuildError("Native artifact nonce is empty"))
+    )
+    if isinstance(artifacts, Err):
+        return artifacts
     listing = build.execute_binary(
         context, build.BinaryCall("test:agentctl-core-test", ("--list-tests",))
     )
@@ -338,7 +406,34 @@ def run_suites(
     except (OSError, UnicodeError) as exc:
         return Err(build.BuildError("Cannot record native case sources: " + str(exc)))
     path = directory / "tasty.xml"
-    return _test_and_record(context, path, expected.value, nonce)
+    outcome = _test_and_record(context, path, expected.value, nonce)
+    return _record_native_artifacts(context, directory, nonce, artifacts.value, outcome)
+
+
+def _record_native_artifacts(
+    context: build.BuildContext,
+    directory: Path,
+    nonce: str,
+    artifacts: tuple[tuple[str, str, str], ...],
+    outcome: Result[RunEvidence, build.BuildError],
+) -> Result[RunEvidence, build.BuildError]:
+    """Retain only unchanged pre/post native identities with the suite outcome."""
+    after = native_artifact_facts(context)
+    if isinstance(after, Err) or after.value != artifacts:
+        detail = after.error.message if isinstance(after, Err) else "identity changed"
+        primary = outcome.error.message + "; " if isinstance(outcome, Err) else ""
+        return Err(build.BuildError(primary + "native artifacts: " + detail))
+    try:
+        with (directory / "native-artifacts.json").open(
+            "x", encoding="utf-8"
+        ) as stream:
+            json.dump({"nonce": nonce, "artifacts": artifacts}, stream)
+    except (OSError, UnicodeError) as exc:
+        primary = outcome.error.message + "; " if isinstance(outcome, Err) else ""
+        return Err(
+            build.BuildError(primary + "cannot retain native artifacts: " + str(exc))
+        )
+    return outcome
 
 
 def _test_and_record(
@@ -365,17 +460,6 @@ def _test_and_record(
                 else ""
             )
             return Err(build.BuildError(tested.error.message + detail))
-        if tested.value.code != 0:
-            detail = (
-                ("; report: " + recorded.error.message)
-                if isinstance(recorded, Err)
-                else ""
-            )
-            return Err(
-                build.BuildError(
-                    f"Tasty command failed with status {tested.value.code}" + detail
-                )
-            )
     except OSError as exc:
         return Err(build.BuildError(f"Cannot run fresh Tasty execution: {exc}"))
     else:

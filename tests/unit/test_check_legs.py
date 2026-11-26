@@ -54,7 +54,9 @@ def test_python_leg_table_matches_oracle(root: Path) -> None:
     amended = {row.get("amends") for row in oracle["case"]}
     expected = [
         row["expected"]
-        for row in oracle["case"]
+        for row in sorted(
+            oracle["case"], key=lambda item: item["input"].get("order", 0)
+        )
         if row["input"].get("scope") in {"python", "python-covered"}
         and row["id"] not in amended
     ]

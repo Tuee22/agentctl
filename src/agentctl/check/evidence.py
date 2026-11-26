@@ -71,7 +71,7 @@ def read_tool_substeps(
             return Err(EvidenceError("tool substeps are a symlink"))
         decoder = json.JSONDecoder(object_pairs_hook=_unique_fields)
         value: object = decoder.decode(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, ValueError) as exc:
+    except (OSError, UnicodeError, ValueError, RecursionError) as exc:
         return Err(EvidenceError(str(exc)))
     match value:
         case {"nonce": str() as observed, "outcomes": list() as rows, **extra} if (
@@ -115,7 +115,7 @@ def read_oracle_details(path: Path, nonce: str) -> Result[OracleDetails, Evidenc
             return Err(EvidenceError("oracle details are a symlink"))
         decoder = json.JSONDecoder(object_pairs_hook=_unique_fields)
         value: object = decoder.decode(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, ValueError) as exc:
+    except (OSError, UnicodeError, ValueError, RecursionError) as exc:
         return Err(EvidenceError(str(exc)))
     return _parse_oracle_details(value, nonce)
 
@@ -159,8 +159,27 @@ def read_legs(
     try:
         decoder = json.JSONDecoder(object_pairs_hook=_unique_fields)
         value: object = decoder.decode(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, ValueError) as exc:
+    except (OSError, UnicodeError, ValueError, RecursionError) as exc:
         return Err(EvidenceError(str(exc)))
+    return _legs_from_value(value, nonce, expected)
+
+
+def parse_legs_bytes(
+    data: bytes, nonce: str, expected: tuple[str, ...]
+) -> Result[LegEvidence, EvidenceError]:
+    """Decode already captured bytes with the same closed tool-record schema."""
+    try:
+        decoder = json.JSONDecoder(object_pairs_hook=_unique_fields)
+        value: object = decoder.decode(data.decode("utf-8"))
+    except (UnicodeError, ValueError, RecursionError) as exc:
+        return Err(EvidenceError(str(exc)))
+    return _legs_from_value(value, nonce, expected)
+
+
+def _legs_from_value(
+    value: object, nonce: str, expected: tuple[str, ...]
+) -> Result[LegEvidence, EvidenceError]:
+    """Validate an ordered result independently of how its bytes were read."""
     match value:
         case {"nonce": str() as observed, "outcomes": list() as rows, **extra}:
             if extra or not nonce or observed != nonce:
@@ -271,7 +290,7 @@ def read_manifest(path: Path) -> Result[RunEvidence, EvidenceError]:
         value: object = json.loads(
             path.read_text(encoding="utf-8"), object_pairs_hook=_unique_fields
         )
-    except (OSError, UnicodeError, ValueError) as exc:
+    except (OSError, UnicodeError, ValueError, RecursionError) as exc:
         return Err(EvidenceError(str(exc)))
     return parse_manifest(value)
 

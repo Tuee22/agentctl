@@ -1,0 +1,80 @@
+[[case]]
+id = "host-lanes.debian"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { lane = "linux", family = "Linux", architecture = "x86_64", checkout = true, git = true, debian = true, mux = false, agents = false, authenticated = false, clean = false }
+expected = true
+
+[[case]]
+id = "host-lanes.foreign-linux"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { lane = "linux", family = "Windows", architecture = "x86_64", checkout = true, git = true, debian = false, mux = false, agents = false, authenticated = false, clean = false }
+expected = false
+
+[[case]]
+id = "host-lanes.not-debian"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { lane = "linux", family = "Linux", architecture = "x86_64", checkout = true, git = true, debian = false, mux = false, agents = false, authenticated = false, clean = false }
+expected = false
+
+[[case]]
+id = "host-lanes.no-checkout"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { lane = "linux", family = "Linux", architecture = "x86_64", checkout = false, git = true, debian = true, mux = false, agents = false, authenticated = false, clean = false }
+expected = false
+
+[[case]]
+id = "host-lanes.no-git"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { lane = "linux", family = "Linux", architecture = "x86_64", checkout = true, git = false, debian = true, mux = false, agents = false, authenticated = false, clean = false }
+expected = false
+
+[[case]]
+id = "host-lanes.unsupported-architecture"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { lane = "linux", family = "Linux", architecture = "unknown", checkout = true, git = true, debian = true, mux = false, agents = false, authenticated = false, clean = false }
+expected = false
+
+[[case]]
+id = "host-lanes.windows-native"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { lane = "linux-windows", family = "Windows", architecture = "x86_64", checkout = true, git = true, debian = false, mux = false, agents = false, authenticated = false, clean = false }
+expected = true
+
+[[case]]
+id = "host-lanes.macos-native"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { lane = "linux-macos", family = "Darwin", architecture = "arm64", checkout = true, git = true, debian = false, mux = false, agents = false, authenticated = false, clean = false }
+expected = true
+
+[[case]]
+id = "host-lanes.live-incomplete"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { lane = "linux-live-clean", family = "Linux", architecture = "x86_64", checkout = true, git = true, debian = true, mux = true, agents = true, authenticated = true, clean = false }
+expected = false
+
+[[case]]
+id = "host-lanes.live-complete"
+requirement = "R26"
+quote = "incomplete later phases should not prevent earlier phases from being validated"
+provenance = "request:R26"
+input = { lane = "linux-live-clean", family = "Linux", architecture = "x86_64", checkout = true, git = true, debian = true, mux = true, agents = true, authenticated = true, clean = true }
+expected = true
+

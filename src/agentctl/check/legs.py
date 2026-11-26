@@ -7,6 +7,8 @@ from pathlib import Path, PurePath, PurePosixPath
 from agentctl.foundation import Err, Ok, Result
 from agentctl.foundation_style_values import StyleTools
 
+FORMAT_JSON = "--output-format=json"
+
 
 @dataclass(frozen=True, slots=True)
 class Leg:
@@ -83,6 +85,7 @@ def python_legs(
                 config,
                 "--no-cache",
                 "--no-fix",
+                "--output-format=json",
                 *files,
             ),
         ),
@@ -97,6 +100,7 @@ def python_legs(
                 "--config",
                 config,
                 "--no-cache",
+                FORMAT_JSON,
                 *files,
             ),
         ),
@@ -110,6 +114,7 @@ def python_legs(
                 "--python",
                 python,
                 "--error-on-warning",
+                "--output-format=gitlab",
                 *files,
             ),
         ),

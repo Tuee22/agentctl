@@ -147,3 +147,30 @@ quote = "the check command should run ruff, ty (strict) and the entire test suit
 provenance = "decision:D-109"
 input = { "subject" = "check-leg", "scope" = "python-covered", "order" = 3 }
 expected = { "name" = "pytest", "arguments" = ["<py>", "-m", "coverage", "run", "--rcfile=<root>/pyproject.toml", "--data-file=<run>/coverage", "--branch", "--source=agentctl", "-m", "pytest", "-c", "<root>/pyproject.toml", "--rootdir=<root>", "-p", "no:cacheprovider", "-p", "pytester", "-p", "agentctl.check.gate_plugin", "--continue-on-collection-errors", "tests"], "report_arguments" = ["<py>", "-m", "coverage", "report", "--rcfile=<root>/pyproject.toml", "--data-file=<run>/coverage", "--include=<root>/src/agentctl/*", "--fail-under=100", "--show-missing"] }
+
+[[case]]
+id = "legs.python.ruff-check.json"
+amends = "legs.python.ruff-check"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-111"
+input = { "subject" = "check-leg", "scope" = "python", "order" = 0 }
+expected = { "name" = "ruff-check", "arguments" = ["<py>", "-m", "ruff", "check", "--config", "<root>/pyproject.toml", "--no-cache", "--no-fix", "--output-format=json", "<files>"] }
+
+[[case]]
+id = "legs.python.ruff-format.json"
+amends = "legs.python.ruff-format"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-114"
+input = { "subject" = "check-leg", "scope" = "python", "order" = 1 }
+expected = { "name" = "ruff-format", "arguments" = ["<py>", "-m", "ruff", "format", "--check", "--config", "<root>/pyproject.toml", "--no-cache", "--output-format=json", "<files>"] }
+
+[[case]]
+id = "legs.python.ty.gitlab"
+amends = "legs.python.ty"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "decision:D-116"
+input = { "subject" = "check-leg", "scope" = "python", "order" = 2 }
+expected = { "name" = "ty", "arguments" = ["<py>", "-m", "ty", "check", "--python", "<py>", "--error-on-warning", "--output-format=gitlab", "<files>"] }

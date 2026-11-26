@@ -54,42 +54,41 @@ KILLER_EXECUTION = pytest.StashKey[KillerExecution]()
 
 def _status(value: Result[None, MutationError], success: str) -> str:
     """Record only the typed outcome, without reproducing test output."""
-    match value:
-        case Ok():
-            return success
-        case Err(error):
-            return "failed:" + error.stage
+    if isinstance(value, Err):
+        return "failed:" + value.error.stage
+    return success
 
 
 def _mutant_record(execution: KillerExecution) -> MutantRecord | None:
     """Refuse incomplete or inconsistent per-killer execution values."""
-    match execution.outcomes:
-        case Err(error):
-            return MutantRecord(execution.record.identifier, error.stage, ())
-        case Ok(outcomes):
-            if (
-                not execution.record.killers
-                or tuple(item.node for item in outcomes) != execution.record.killers
-                or any(
-                    (item.baseline == Ok(None)) != (item.mutation is not None)
-                    for item in outcomes
-                )
-            ):
-                return None
-            return MutantRecord(
-                execution.record.identifier,
-                "",
-                tuple(
-                    KillerRecord(
-                        item.node,
-                        _status(item.baseline, "passed"),
-                        "not-run"
-                        if item.mutation is None
-                        else _status(item.mutation, "killed"),
-                    )
-                    for item in outcomes
-                ),
+    if isinstance(execution.outcomes, Err):
+        return MutantRecord(
+            execution.record.identifier, execution.outcomes.error.stage, ()
+        )
+    outcomes = execution.outcomes.value
+    if (
+        not execution.record.killers
+        or tuple(item.node for item in outcomes) != execution.record.killers
+        or any(
+            (item.baseline == Ok(None)) != (item.mutation is not None)
+            for item in outcomes
+        )
+    ):
+        return None
+    return MutantRecord(
+        execution.record.identifier,
+        "",
+        tuple(
+            KillerRecord(
+                item.node,
+                _status(item.baseline, "passed"),
+                "not-run"
+                if item.mutation is None
+                else _status(item.mutation, "killed"),
             )
+            for item in outcomes
+        ),
+    )
 
 
 def _capture_killer(item: pytest.Item) -> None:

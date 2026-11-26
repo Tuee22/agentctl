@@ -2,6 +2,11 @@
 version = 1
 
 [[claims]]
+identifier = "M-build-native-artifact-change-ignored"
+owner = 2
+killer_sources = [{ node = "tests/integration/test_build_boundaries.py::test_native_artifact_change_preserves_suite_failure", path = "tests/integration/test_build_boundaries.py" }]
+
+[[claims]]
 identifier = "M-boot-early-child-exit-zero"
 owner = 2
 killer_sources = [{ node = "tests/integration/test_bootstrap_caller.py::test_child_transfer_preserves_exit_without_launch", path = "tests/integration/test_bootstrap_caller.py" }]

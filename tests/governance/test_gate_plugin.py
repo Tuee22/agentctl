@@ -4,20 +4,24 @@
 import json
 import os
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
-from agentctl.check.evidence import parse_manifest
+from agentctl.check import coverage_hosts, steps
+from agentctl.check.evidence import Entry, ToolSubsteps, parse_manifest, source_census
 from agentctl.check.gate_plugin import orphan_modules
-from agentctl.check.legs import coverage_commands
+from agentctl.check.legs import Leg, coverage_commands
 from agentctl.check.phase_reports import (
     CollectionScope,
+    PhaseInputs,
     collection_failures,
     observe_collection,
 )
+from agentctl.check.steps import CheckRun, capture_coverage, coverage_snapshot_unchanged
 from agentctl.process import run
-from agentctl.result import Ok
+from agentctl.result import Err, Ok, Result
 
 pytestmark = pytest.mark.evidence("real")
 SAMPLE = (
@@ -422,6 +426,38 @@ def test_collection_error_preserves_other_execution(
     assert "collection failed: tests/test_broken.py" in result.value[1][1]
 
 
+def test_parametrized_phase_citation_uses_real_execution(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Use the real plugin's case IDs and outcomes for a phase test citation."""
+    source = (
+        'import pytest\npytestmark = pytest.mark.evidence("value")\n'
+        '@pytest.mark.parametrize("case", ["first", "second"])\n'
+        "def test_cases(case):\n    assert case != 'FAIL'\n"
+    )
+    manifest = _suite(pytester, monkeypatch, source)
+    citation = "test_parametrized_phase_citation_uses_real_execution.py::test_cases"
+    phases = (
+        PhaseInputs(0, frozenset({"source"}), frozenset({citation}), frozenset()),
+    )
+    passed_checks = steps.__dict__["_passed_phase_checks"]
+    assert _run(pytester).ret == 0
+    complete = parse_manifest(json.loads(manifest.read_text(encoding="utf-8")))
+    assert isinstance(complete, Ok)
+    assert passed_checks(phases, complete.value, "nested-nonce") == frozenset(
+        {citation}
+    ), "passing parameter cases were lost"
+    (
+        pytester.path / "test_parametrized_phase_citation_uses_real_execution.py"
+    ).write_text(source.replace("'FAIL'", "'second'"), encoding="utf-8")
+    assert _run(pytester).ret != 0
+    failed = parse_manifest(json.loads(manifest.read_text(encoding="utf-8")))
+    assert isinstance(failed, Ok)
+    assert citation not in passed_checks(phases, failed.value, "nested-nonce"), (
+        "incomplete parameter cases passed"
+    )
+
+
 def test_fixture_failures_remain_shared(
     pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -463,12 +499,14 @@ def test_coverage_gap_fails(tmp_path: Path) -> None:
         "[tool.coverage.report]\nfail_under = 100\n",
         encoding="utf-8",
     )
-    (tmp_path / "subject.py").write_text(
+    source = tmp_path / "src" / "agentctl"
+    source.mkdir(parents=True)
+    (source / "subject.py").write_text(
         "def choose(value: bool) -> int:\n"
         "    if value:\n        return 1\n    return 2\n",
         encoding="utf-8",
     )
-    program = tmp_path / "exercise.py"
+    program = source / "exercise.py"
     env = {
         key: value
         for key, value in os.environ.items()
@@ -500,6 +538,424 @@ def test_coverage_gap_fails(tmp_path: Path) -> None:
         )
         assert isinstance(report, Ok)
         assert report.value.code == expected, "coverage gap was accepted"
+
+
+def test_coverage_json_reports_native_branches(tmp_path: Path) -> None:
+    """The real coverage tool reports a missing branch, then complete coverage."""
+    source = tmp_path / "src" / "agentctl"
+    source.mkdir(parents=True)
+    subject = source / "subject.py"
+    subject.write_text(
+        "import sys\nif sys.argv[1] == 'yes':\n    print('yes')\n"
+        "else:\n    print('no')\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "pyproject.toml").write_text(
+        '[project.optional-dependencies]\ndev = ["coverage==7.17.0"]\n'
+        '[tool.coverage.run]\nbranch = true\nsource = ["src/agentctl"]\n',
+        encoding="utf-8",
+    )
+    manifest = source / "check" / "coverage_hosts.toml"
+    manifest.parent.mkdir()
+    manifest.write_text(
+        "version = 1\n[[source]]\npath = 'src/agentctl/subject.py'\n"
+        "hosts = ['Linux', 'Darwin', 'Windows']\n",
+        encoding="utf-8",
+    )
+    (manifest.parent / "source_ownership.toml").write_text(
+        "version = 1\n"
+        "[[phases]]\nnumber = 0\nprerequisites = []\n"
+        "[[phases]]\nnumber = 1\nprerequisites = [0]\n"
+        "[[artifacts]]\npath = 'src/agentctl/subject.py'\n"
+        "capability = 'subject'\nowner = 0\nconsumers = [0, 1]\nrequired = true\n",
+        encoding="utf-8",
+    )
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if not key.startswith("COVERAGE_")
+    }
+    for argument, append, expected in (
+        ("yes", (), (1, 1)),
+        ("no", ("--append",), (0, 0)),
+    ):
+        recorded = run(
+            [
+                sys.executable,
+                "-m",
+                "coverage",
+                "run",
+                "--rcfile=pyproject.toml",
+                "--data-file=coverage",
+                *append,
+                str(subject),
+                argument,
+            ],
+            cwd=tmp_path,
+            env=env,
+        )
+        assert isinstance(recorded, Ok)
+        assert recorded.value.code == 0
+        rendered = run(
+            [
+                sys.executable,
+                "-m",
+                "coverage",
+                "json",
+                "--rcfile=pyproject.toml",
+                "--data-file=coverage",
+                "-o",
+                "real-report.json",
+            ],
+            cwd=tmp_path,
+            env=env,
+        )
+        assert isinstance(rendered, Ok)
+        assert rendered.value.code == 0
+        observed = coverage_hosts.parse_report(
+            (tmp_path / "real-report.json").read_text(encoding="utf-8"), "7.17.0"
+        )
+        assert isinstance(observed, Ok)
+        assert observed == Ok(
+            (coverage_hosts.CoverageFact("src/agentctl/subject.py", *expected),)
+        )
+        transcript = run(
+            [
+                sys.executable,
+                "-m",
+                "coverage",
+                "report",
+                "--rcfile=pyproject.toml",
+                "--data-file=coverage",
+                "--fail-under=100",
+            ],
+            cwd=tmp_path,
+            env=env,
+        )
+        assert isinstance(transcript, Ok)
+        assert steps.coverage_text_floor(transcript.value) == Ok(
+            "floor" if argument == "yes" else "complete"
+        )
+        if argument == "yes":
+            _check_incomplete_coverage_capture(tmp_path, observed.value)
+        else:
+            _check_complete_coverage_capture(tmp_path, observed.value)
+
+
+def _finalizer_marker(directory: Path, nonce: str) -> str:
+    """Read the real finalizer record used by a coverage handoff control."""
+    final = steps.finalizer_observation(directory, nonce)
+    assert isinstance(final, Ok)
+    return steps.finalizer_seal(final.value)
+
+
+def _check_incomplete_coverage_capture(
+    tmp_path: Path, facts: tuple[coverage_hosts.CoverageFact, ...]
+) -> None:
+    """Refuse changed, replayed or inconsistent incomplete reports."""
+    report_file = tmp_path / "real-report.json"
+    report_bytes = report_file.read_bytes()
+    render = steps.__dict__["_coverage_rendered"]
+    for json_status, report_status in ((0, 2), (2, 0)):
+        assert isinstance(
+            render(
+                report_bytes,
+                report_bytes.decode("utf-8"),
+                steps.CoverageRequest("7.17.0", (), report_status),
+                json_status,
+                report_file.stat(),
+            ),
+            Err,
+        ), "coverage status mismatch was accepted"
+    entries = source_census(tmp_path)
+    assert isinstance(entries, Ok)
+    nonce = "a" * 32
+    leg = Leg("pytest", (), coverage_commands(sys.executable, tmp_path, tmp_path))
+    substeps = Ok(ToolSubsteps(nonce, (("pytest", (0, 0, 2)),)))
+    context = CheckRun(tmp_path, tmp_path, nonce, "Linux")
+    assert isinstance(
+        capture_coverage(
+            replace(context, nonce="bad"),
+            entries.value,
+            leg,
+            Ok(ToolSubsteps("bad", (("pytest", (0, 0, 2)),))),
+        ),
+        Err,
+    ), "invalid coverage nonce was accepted"
+    assert isinstance(capture_coverage(context, (), leg, substeps), Err)
+    assert isinstance(
+        capture_coverage(context, entries.value, replace(leg, after=()), substeps),
+        Err,
+    )
+    assert isinstance(
+        capture_coverage(
+            context,
+            entries.value,
+            leg,
+            Ok(ToolSubsteps(nonce, (("pytest", (0, 0)),))),
+        ),
+        Err,
+    )
+    captured = capture_coverage(context, entries.value, leg, substeps)
+    assert isinstance(captured, Ok), captured
+    assert captured.value.facts == facts
+    _check_coverage_phase_observation(entries.value, captured.value, has_gap=True)
+    assert coverage_snapshot_unchanged(tmp_path, nonce, captured) == 0
+    _check_coverage_parent_retention(tmp_path, captured.value)
+    seal = steps.coverage_seal(nonce, captured.value.record, captured.value.report)
+    output = f"{seal}\nkiller\nprovisional\n{_finalizer_marker(tmp_path, nonce)}\n"
+    assert steps.verify_coverage_handoff(tmp_path, nonce, output) == Ok(None)
+    assert isinstance(
+        steps.verify_coverage_handoff(tmp_path, nonce, seal + "\n" + output), Err
+    ), "ambiguous coverage handoff was accepted"
+    revised_raw = json.dumps(json.loads(captured.value.report), sort_keys=True).encode()
+    assert revised_raw != captured.value.report
+    revised_record = json.loads(captured.value.record)
+    revised_record["report"] = revised_raw.decode("utf-8")
+    (tmp_path / "coverage-raw.json").write_bytes(revised_raw)
+    (tmp_path / "coverage-report.json").write_text(
+        json.dumps(revised_record, sort_keys=True), encoding="utf-8"
+    )
+    assert steps.verify_coverage_handoff(tmp_path, nonce, output) == Err(
+        "coverage handoff digest mismatch"
+    ), "coverage handoff digest mismatch was ignored"
+    (tmp_path / "coverage-raw.json").write_bytes(captured.value.report)
+    (tmp_path / "coverage-report.json").write_bytes(captured.value.record)
+    assert coverage_snapshot_unchanged(tmp_path, nonce, captured) == 0
+    assert isinstance(capture_coverage(context, entries.value, leg, substeps), Err), (
+        "coverage capture overwrote an existing report"
+    )
+    assert coverage_snapshot_unchanged(tmp_path, nonce, captured) == 0, (
+        "coverage raw report was overwritten"
+    )
+    (tmp_path / "coverage-report.json").write_bytes(captured.value.record + b" ")
+    assert coverage_snapshot_unchanged(tmp_path, nonce, captured) == 1, (
+        "changed coverage record was accepted"
+    )
+    (tmp_path / "coverage-report.json").write_bytes(captured.value.record)
+    assert coverage_snapshot_unchanged(tmp_path, "b" * 32, captured) == 1, (
+        "foreign coverage nonce was accepted"
+    )
+    raw = tmp_path / "coverage-raw.json"
+    raw.write_bytes(captured.value.report + b" ")
+    assert coverage_snapshot_unchanged(tmp_path, nonce, captured) == 1, (
+        "changed raw coverage was accepted"
+    )
+    raw.write_bytes(captured.value.report)
+    assert coverage_snapshot_unchanged(tmp_path, nonce, captured) == 0
+    replacement = tmp_path / "replacement.json"
+    replacement.write_bytes(captured.value.record)
+    replacement.replace(tmp_path / "coverage-report.json")
+    assert coverage_snapshot_unchanged(tmp_path, nonce, captured) == 1, (
+        "replaced coverage record was accepted"
+    )
+
+
+def _check_coverage_parent_retention(
+    run_dir: Path, captured: steps.CoverageSnapshot
+) -> None:
+    """Change only the parent's copied coverage report with a real audit hook."""
+    script = (
+        "import sys\nfrom pathlib import Path\n"
+        "from agentctl.check import mutant_report, steps\n"
+        "from agentctl.foundation import Err, Ok\n"
+        "from agentctl.foundation_process_values import Output\n"
+        "run_dir, root, state = map(Path, sys.argv[1:4]); nonce = sys.argv[4]\n"
+        "root.mkdir()\n"
+        "killer_path = run_dir / 'mutant-killers.json'\n"
+        'killer_path.write_text(\'{"nonce":"\' + nonce + \'","records":[]}\', '
+        "encoding='utf-8')\n"
+        "killer = mutant_report.read(killer_path, nonce)\n"
+        "ruff = steps.record_ruff_snapshot(run_dir, "
+        "steps.RuffSnapshot(nonce, root, Output(0, '[]', ''), ()))\n"
+        "final = steps.record_finalizers(run_dir, nonce, "
+        "tuple((name, int(name in {'python-commands', 'ruff-format-observation', "
+        "'tool-outcomes', 'pytest-manifest', 'oracle-outcomes', 'host-observation', "
+        "'native-observation', 'ty-observation', "
+        "'coverage-text-observation'})) "
+        "for name in steps.FINALIZER_NAMES[:-1]))\n"
+        "phase = steps.record_provisional_phases(run_dir, nonce, Err('unavailable'))\n"
+        "assert isinstance(ruff, Ok) and isinstance(killer, Ok) "
+        "and isinstance(final, Ok) "
+        "and isinstance(phase, Ok)\n"
+        "record = (run_dir / 'coverage-report.json').read_bytes()\n"
+        "raw = (run_dir / 'coverage-raw.json').read_bytes()\n"
+        "output = '\\n'.join((steps.ruff_seal(nonce, ruff.value.record), "
+        "steps.coverage_seal(nonce, record, raw), "
+        "steps.killer_seal(nonce, killer.value), "
+        "steps.provisional_seal(nonce, phase.value), "
+        "steps.finalizer_seal(final.value), ''))\n"
+        "assert steps.verify_coverage_handoff(run_dir, nonce, output) == Ok(None)\n"
+        "ok_state = state.with_name(state.name + '-ok')\n"
+        "context = steps.CheckRun(root, run_dir, nonce, sys.argv[5])\n"
+        "valid = steps.retain_verified_gate_output("
+        "context, ok_state, (output, 'primary\\n'), verify_handoff=True)\n"
+        "assert isinstance(valid, Ok), valid\n"
+        "assert (valid.value / 'coverage-raw.json').read_bytes() == raw\n"
+        "assert (valid.value / 'coverage-report.json').read_bytes() == record\n"
+        "target = state / 'check-reports' / nonce / 'coverage-raw.json'\n"
+        "seen = [False]\n"
+        "def audit(event, args):\n"
+        "    if (not seen[0] and event == 'open' and str(args[0]) == str(target) "
+        "and 'r' in str(args[1]) and target.exists()):\n"
+        "        seen[0] = True\n"
+        "        with target.open('ab') as stream: stream.write(b' ')\n"
+        "sys.addaudithook(audit)\n"
+        "result = steps.retain_verified_gate_output("
+        "context, state, (output, 'primary\\n'), verify_handoff=True)\n"
+        "assert isinstance(result, Err), 'post-copy coverage tampering was accepted'\n"
+        "assert seen[0], 'coverage tamper hook did not run'\n"
+        "retained = state / 'check-reports' / nonce\n"
+        "assert 'coverage handoff' in "
+        "(retained / 'finalizer-handoff.txt').read_text()\n"
+        "assert (retained / 'stderr.txt').read_text() == 'primary\\n'\n"
+    )
+    family = sys.platform
+    native = (
+        "Windows" if family == "win32" else "Darwin" if family == "darwin" else "Linux"
+    )
+    root = run_dir / "checkout"
+    state = run_dir.parent / (run_dir.name + "-coverage-state")
+    child = run(
+        [
+            sys.executable,
+            "-c",
+            script,
+            str(run_dir),
+            str(root),
+            str(state),
+            captured.nonce,
+            native,
+        ],
+        cwd=run_dir,
+        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+    )
+    assert isinstance(child, Ok)
+    assert child.value.code == 0, child.value.stderr
+
+
+def _check_coverage_phase_observation(
+    entries: tuple[Entry, ...], captured: steps.CoverageSnapshot, *, has_gap: bool
+) -> None:
+    """Join the real report to the exact captured census and host family."""
+    phases = (
+        steps.phase_reports.PhaseInputs(
+            0, frozenset({"early"}), frozenset({"a"}), frozenset()
+        ),
+        steps.phase_reports.PhaseInputs(
+            1, frozenset({"late"}), frozenset({"b"}), frozenset({0})
+        ),
+    )
+    host = Ok(
+        steps.lanes.HostFacts(
+            family="Linux", architecture="x86_64", checkout=True, git=True
+        )
+    )
+    substeps = Ok(
+        ToolSubsteps(captured.nonce, (("pytest", (0, 0, 2 if has_gap else 0)),))
+    )
+    inputs = steps.CoverageAttributionInputs(
+        entries, phases, captured.nonce, "Linux", host, Ok(captured), substeps
+    )
+    gap = (
+        frozenset({"coverage incomplete: src/agentctl/subject.py"})
+        if has_gap
+        else frozenset()
+    )
+    assert steps.coverage_phase_observations(inputs) == Ok(((0, gap), (1, gap))), (
+        "captured coverage did not reach every source consumer"
+    )
+    tools = steps.ToolOutcome(1, Err("unused"), substeps, host=host)
+    provisional = steps.ProvisionalCapture(
+        Ok(entries),
+        Err("unused"),
+        tools,
+        None,
+        Err("unused"),
+        captured.nonce,
+        (),
+        (),
+        coverage=Ok(captured),
+        family="Linux",
+    )
+    initial = steps.ToolFailureAttribution(
+        frozenset({"coverage report failed"}), ((0, frozenset()), (1, frozenset()))
+    )
+    join = steps.__dict__["_coverage_provisional_attribution"]
+    assert join(provisional, entries, phases, initial) == Ok(
+        steps.ToolFailureAttribution(initial.shared, ((0, gap), (1, gap)))
+    ), "provisional coverage scope was lost"
+    assert isinstance(
+        join(replace(provisional, coverage=None), entries, phases, initial), Err
+    ), "missing captured coverage was accepted"
+    duplicate = replace(
+        initial, scoped=((0, frozenset()), (0, frozenset()), (1, frozenset()))
+    )
+    assert isinstance(join(provisional, entries, phases, duplicate), Err), (
+        "duplicate coverage phase scope was accepted"
+    )
+    for invalid in (
+        replace(inputs, nonce="stale"),
+        replace(
+            inputs,
+            host=Ok(
+                steps.lanes.HostFacts(
+                    family="Windows", architecture="x86_64", checkout=True, git=True
+                )
+            ),
+        ),
+        replace(inputs, coverage=Ok(replace(captured, entries=()))),
+        replace(inputs, coverage=Ok(replace(captured, nonce="b" * 32))),
+        replace(inputs, coverage=Ok(replace(captured, facts=()))),
+        replace(inputs, coverage=Ok(replace(captured, record=b"{}"))),
+        replace(inputs, coverage=Ok(replace(captured, report=captured.report + b" "))),
+        replace(inputs, coverage=None),
+        replace(inputs, host=None),
+        replace(inputs, substeps=Err("unavailable")),
+        replace(inputs, substeps=Ok(ToolSubsteps("stale", substeps.value.outcomes))),
+        replace(
+            inputs, substeps=Ok(ToolSubsteps(captured.nonce, (("pytest", (0, 0, 1)),)))
+        ),
+    ):
+        assert isinstance(steps.coverage_phase_observations(invalid), Err), (
+            "foreign or inconsistent coverage observation was accepted"
+        )
+    unowned = (*entries, Entry("src/agentctl/unowned.py", "file", (b"pass\n",)))
+    invalid = replace(
+        inputs, entries=unowned, coverage=Ok(replace(captured, entries=unowned))
+    )
+    assert isinstance(steps.coverage_phase_observations(invalid), Err), (
+        "unowned coverage source was accepted"
+    )
+
+
+def _check_complete_coverage_capture(
+    tmp_path: Path, facts: tuple[coverage_hosts.CoverageFact, ...]
+) -> None:
+    """Capture complete coverage and reject raw-file replacement."""
+    complete_run = tmp_path / "complete-run"
+    complete_run.mkdir()
+    (complete_run / "coverage").write_bytes((tmp_path / "coverage").read_bytes())
+    entries = source_census(tmp_path)
+    assert isinstance(entries, Ok)
+    nonce = "c" * 32
+    leg = Leg("pytest", (), coverage_commands(sys.executable, tmp_path, complete_run))
+    captured = capture_coverage(
+        CheckRun(tmp_path, complete_run, nonce, "Linux"),
+        entries.value,
+        leg,
+        Ok(ToolSubsteps(nonce, (("pytest", (0, 0, 0)),))),
+    )
+    assert isinstance(captured, Ok), captured
+    assert captured.value.facts == facts
+    _check_coverage_phase_observation(entries.value, captured.value, has_gap=False)
+    assert coverage_snapshot_unchanged(complete_run, nonce, captured) == 0
+    replacement = complete_run / "replacement-raw.json"
+    replacement.write_bytes(captured.value.report)
+    replacement.replace(complete_run / "coverage-raw.json")
+    assert coverage_snapshot_unchanged(complete_run, nonce, captured) == 1, (
+        "replaced raw coverage was accepted"
+    )
 
 
 def test_plugin_collection_boundaries(
@@ -541,3 +997,481 @@ def test_plugin_collection_boundaries(
     monkeypatch.delenv("AGENTCTL_CHECK_MANIFEST")
     monkeypatch.delenv("AGENTCTL_CHECK_NONCE")
     assert _run(pytester).ret == 0
+
+
+def test_coverage_text_parent_joins_real_report_and_retained_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Join a real coverage report to its retained facts and subprocess statuses."""
+    project, directory = tmp_path / "project", tmp_path / "run"
+    source = project / "src/agentctl"
+    source.mkdir(parents=True)
+    directory.mkdir()
+    subject = source / "subject.py"
+    subject.write_text(
+        "if __name__ == '__main__':\n    print('run')\n", encoding="utf-8"
+    )
+    (project / "pyproject.toml").write_text(
+        '[project.optional-dependencies]\ndev = ["coverage==7.17.0"]\n'
+        '[tool.coverage.run]\nbranch = true\nsource = ["src/agentctl"]\n',
+        encoding="utf-8",
+    )
+    manifest = source / "check/coverage_hosts.toml"
+    manifest.parent.mkdir()
+    manifest.write_text(
+        "version = 1\n[[source]]\npath = 'src/agentctl/subject.py'\n"
+        "hosts = ['Linux', 'Darwin', 'Windows']\n",
+        encoding="utf-8",
+    )
+    (manifest.parent / "source_ownership.toml").write_text(
+        "version = 1\n"
+        "[[phases]]\nnumber = 0\nprerequisites = []\n"
+        "[[phases]]\nnumber = 1\nprerequisites = [0]\n"
+        "[[artifacts]]\npath = 'src/agentctl/subject.py'\n"
+        "capability = 'later'\nowner = 1\nconsumers = [1]\nrequired = true\n",
+        encoding="utf-8",
+    )
+    nonce = "a" * 32
+    context = CheckRun(project, directory, nonce, "Linux")
+    commands = coverage_commands(sys.executable, project, directory)
+    leg = Leg(
+        "pytest",
+        (
+            sys.executable,
+            "-m",
+            "coverage",
+            "run",
+            "--branch",
+            "--parallel-mode",
+            f"--rcfile={project / 'pyproject.toml'}",
+            f"--data-file={directory / 'coverage'}",
+            str(subject),
+        ),
+        commands,
+        after_failure=True,
+    )
+    observed = steps.__dict__["_run_leg_observed"](project, directory, nonce, leg)
+    assert observed.substeps == (0, 0, steps.COVERAGE_REPORT_FAILURE)
+    text = observed.coverage_text
+    assert isinstance(text, Ok), "real report transcript was not captured"
+    entries = source_census(project)
+    assert isinstance(entries, Ok)
+    substeps = Ok(ToolSubsteps(nonce, (("pytest", observed.substeps),)))
+    coverage = capture_coverage(context, entries.value, leg, substeps)
+    assert isinstance(coverage, Ok), coverage
+    inputs = steps.CoverageTextInputs(
+        context, entries.value, leg, substeps, text, coverage
+    )
+    assert steps.coverage_text_agreement(inputs) == Ok(None)
+    _check_coverage_text_json_integrity(inputs, coverage.value)
+    for name, outcomes in (
+        ("tool-outcomes.json", [["pytest", 2]]),
+        ("tool-substeps.json", [["pytest", [0, 0, 2]]]),
+    ):
+        (directory / name).write_text(
+            json.dumps({"nonce": nonce, "outcomes": outcomes}), encoding="utf-8"
+        )
+    _check_coverage_text_localization(inputs, monkeypatch)
+    tools = steps.__dict__["_read_sealed_tool_results"](directory, nonce)
+    assert isinstance(tools, Ok)
+    passed = {
+        "coverage-text-observation",
+        "coverage-observation",
+        "tool-outcomes",
+        "tool-substeps",
+    }
+    final = steps.record_finalizers(
+        directory,
+        nonce,
+        tuple((name, int(name not in passed)) for name in steps.FINALIZER_NAMES[:-1]),
+    )
+    phase = steps.record_provisional_phases(directory, nonce, Err("unavailable"))
+    assert isinstance(final, Ok)
+    assert isinstance(phase, Ok)
+    output = "\n".join(
+        (
+            steps.coverage_text_seal(nonce, text.value.record),
+            steps.tool_results_seal(nonce, *tools.value),
+            steps.coverage_seal(nonce, coverage.value.record, coverage.value.report),
+            steps.provisional_seal(nonce, phase.value),
+            steps.finalizer_seal(final.value),
+            "",
+        )
+    )
+    monkeypatch.setattr(
+        steps.ownership, "guarded_census", lambda _root: source_census(project)
+    )
+    assert steps.verify_coverage_text_handoff(context, directory, output) == Ok(None)
+    retained = steps.retain_verified_gate_output(
+        context, tmp_path / "state", (output, ""), verify_handoff=True
+    )
+    assert isinstance(retained, Ok), retained
+    _check_coverage_text_copy(context, tmp_path, output, monkeypatch)
+    _check_coverage_text_forgery(context, output, text.value.record)
+
+
+def _check_coverage_text_localization(
+    inputs: steps.CoverageTextInputs, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Keep earlier phases clear only for an intact later-owned floor failure."""
+    phases = (
+        steps.phase_reports.PhaseInputs(0, frozenset(), frozenset(), frozenset()),
+        steps.phase_reports.PhaseInputs(1, frozenset(), frozenset(), frozenset({0})),
+    )
+    host = Ok(
+        steps.lanes.HostFacts(
+            family="Linux", architecture="x86_64", checkout=True, git=True
+        )
+    )
+    tools = steps.ToolOutcome(
+        1, Err("unused"), inputs.substeps, host=host, coverage_text=inputs.text
+    )
+    capture = steps.ProvisionalCapture(
+        Ok(inputs.entries),
+        Err("unused"),
+        tools,
+        None,
+        Err("unused"),
+        inputs.context.nonce,
+        (),
+        (),
+        coverage=inputs.coverage,
+        family="Linux",
+        coverage_context=inputs.context,
+        coverage_leg=inputs.leg,
+    )
+    initial = steps.ToolFailureAttribution(
+        frozenset({"coverage report failed", "independent failure"}),
+        ((0, frozenset()), (1, frozenset())),
+    )
+    join = steps.__dict__["_coverage_provisional_attribution"]
+    result = join(capture, inputs.entries, phases, initial)
+    assert result == Ok(
+        steps.ToolFailureAttribution(
+            frozenset({"independent failure"}),
+            (
+                (0, frozenset()),
+                (1, frozenset({"coverage incomplete: src/agentctl/subject.py"})),
+            ),
+        )
+    ), "later coverage floor failure was not localized"
+    _check_parent_coverage_scopes(inputs, phases, host, monkeypatch)
+    missing = replace(capture, tools=replace(tools, coverage_text=None))
+    refused = join(missing, inputs.entries, phases, initial)
+    assert isinstance(refused, Ok)
+    assert refused.value.shared == initial.shared, (
+        "unverified coverage failure was localized"
+    )
+    assert isinstance(inputs.text, Ok)
+    stale = replace(
+        capture,
+        tools=replace(
+            tools, coverage_text=Ok(replace(inputs.text.value, nonce="b" * 32))
+        ),
+    )
+    refused = join(stale, inputs.entries, phases, initial)
+    assert isinstance(refused, Ok)
+    assert refused.value.shared == initial.shared, (
+        "foreign coverage transcript was localized"
+    )
+    record = inputs.context.directory / "coverage-text.json"
+    record.write_bytes(inputs.text.value.record + b" ")
+    damaged = join(capture, inputs.entries, phases, initial)
+    record.write_bytes(inputs.text.value.record)
+    assert isinstance(damaged, Ok)
+    assert damaged.value.shared == initial.shared, (
+        "changed coverage transcript was localized"
+    )
+    assert isinstance(inputs.coverage, Ok)
+    json_record = inputs.context.directory / "coverage-report.json"
+    json_record.write_bytes(inputs.coverage.value.record + b" ")
+    damaged_json = join(capture, inputs.entries, phases, initial)
+    json_record.write_bytes(inputs.coverage.value.record)
+    assert isinstance(damaged_json, Ok)
+    assert damaged_json.value.shared == initial.shared, (
+        "changed coverage JSON was localized"
+    )
+
+
+def _check_parent_coverage_scopes(
+    inputs: steps.CoverageTextInputs,
+    phases: tuple[steps.phase_reports.PhaseInputs, ...],
+    host: Result[steps.lanes.HostFacts, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Check retained real coverage gaps against phase ownership and both routes."""
+    observed = (
+        steps.phase_reports.PhaseResult(0, "a" * 64, frozenset({"unverified-run"})),
+        steps.phase_reports.PhaseResult(
+            1,
+            "b" * 64,
+            frozenset(
+                {"unverified-run", "coverage incomplete: src/agentctl/subject.py"}
+            ),
+        ),
+    )
+    forged = (observed[0], replace(observed[1], failures=frozenset({"unverified-run"})))
+    scope = steps.CoverageAttributionInputs(
+        inputs.entries,
+        phases,
+        inputs.context.nonce,
+        inputs.context.family,
+        host,
+        inputs.coverage,
+        inputs.substeps,
+    )
+    assert steps.verify_phase_coverage_failures(scope, observed) == Ok(None)
+    assert isinstance(steps.verify_phase_coverage_failures(scope, forged), Err), (
+        "parent accepted hidden coverage gap"
+    )
+    with monkeypatch.context() as patch:
+        patch.setattr(steps, "_parent_bound_census", lambda *_args: Ok(inputs.entries))
+        patch.setattr(steps, "census_phases", lambda *_args: Ok(()))
+        work = steps.ownership.ScopedPhaseWork(
+            steps.ownership.PhaseWork(phases, ()), ()
+        )
+        patch.setattr(steps, "scoped_source_inputs", lambda *_args: Ok(work))
+        patch.setattr(steps, "host_observation", lambda *_args: host)
+        rebuilt = steps.__dict__["_parent_coverage_inputs"](
+            inputs.context, inputs.context.directory, ""
+        )
+        assert isinstance(rebuilt, Ok), rebuilt
+        assert steps.verify_phase_coverage_failures(rebuilt.value, observed) == Ok(None)
+        patch.setattr(
+            steps.ownership, "guarded_census", lambda *_args: Ok(inputs.entries)
+        )
+        patch.setattr(steps, "_parent_bound_census", lambda *_args: Err("changed"))
+        assert isinstance(
+            steps.__dict__["_parent_coverage_inputs"](
+                inputs.context, inputs.context.directory, ""
+            ),
+            Err,
+        ), "unbound parent coverage census was accepted"
+        patch.setattr(steps, "_parent_bound_census", lambda *_args: Ok(inputs.entries))
+        _check_parent_coverage_routes(
+            inputs.context, rebuilt.value, observed, forged, patch
+        )
+
+
+def _check_parent_coverage_routes(
+    context: CheckRun,
+    inputs: steps.CoverageAttributionInputs,
+    observed: tuple[steps.phase_reports.PhaseResult, ...],
+    forged: tuple[steps.phase_reports.PhaseResult, ...],
+    patch: pytest.MonkeyPatch,
+) -> None:
+    """Run the parent coverage recheck on both live and retained paths."""
+    final = steps.evidence.LegEvidence(
+        context.nonce, tuple((name, 0) for name in steps.FINALIZER_NAMES[:-1])
+    )
+    assert isinstance(inputs.coverage, Ok)
+    assert isinstance(inputs.host, Ok)
+    assert isinstance(inputs.outcomes, Ok)
+    assert isinstance(inputs.substeps, Ok)
+    coverage, host, outcomes, substeps = (
+        inputs.coverage.value,
+        inputs.host.value,
+        inputs.outcomes.value,
+        inputs.substeps.value,
+    )
+    output = "\n".join(
+        (
+            steps.coverage_seal(context.nonce, coverage.record, coverage.report),
+            steps.host_observation_seal(context.nonce, host),
+            steps.tool_results_seal(context.nonce, outcomes, substeps),
+        )
+    )
+    output += "\n" + steps.finalizer_seal(final)
+    assert steps.coverage_inputs_sealed(inputs, output)
+    patch.setattr(steps, "finalizer_observation", lambda *_args: Ok(final))
+    patch.setattr(
+        steps, "_provisional_values_for_identity", lambda *_args: Ok(observed)
+    )
+    for name in (
+        "verify_python_commands_handoff",
+        "verify_coverage_handoff",
+        "verify_coverage_text_handoff",
+        "verify_host_handoff",
+        "verify_tool_results_handoff",
+        "_verify_provisional_census",
+        "verify_python_plan_handoff",
+        "verify_provisional_input_identities",
+        "verify_pytest_handoff",
+        "verify_oracle_handoff",
+        "verify_native_handoff",
+        "verify_ty_handoff",
+        "verify_provisional_collection",
+        "verify_provisional_oracle",
+        "verify_provisional_host",
+        "verify_provisional_static",
+        "verify_provisional_tools",
+        "verify_provisional_validation",
+        "verify_provisional_prerequisites",
+        "verify_provisional_source",
+        "verify_finalizer_handoff",
+        "verify_provisional_handoff",
+        "verify_provisional_finalizers",
+        "verify_killer_handoff",
+        "verify_ruff_handoff",
+        "verify_ruff_format_handoff",
+        "retain_handoff_failure",
+    ):
+        patch.setattr(steps, name, lambda *_args, **_kwargs: Ok(None))
+    assert steps.verify_provisional_coverage(context, context.directory, output) == Ok(
+        None
+    )
+    patch.setattr(steps, "_provisional_values_for_identity", lambda *_args: Ok(forged))
+    assert isinstance(
+        steps.verify_provisional_coverage(context, context.directory, output), Err
+    ), "parent accepted hidden coverage gap"
+    assert isinstance(steps.verify_python_handoffs(context, output), Err), (
+        "live parent accepted hidden coverage gap"
+    )
+    patch.setattr(
+        steps, "retain_gate_output", lambda *_args, **_kwargs: Ok(context.directory)
+    )
+    patch.setattr(
+        steps,
+        "verify_retained_streams",
+        lambda _directory, _streams, _observed, prior: prior,
+    )
+    patch.setattr(
+        steps,
+        "verify_retained_artifacts",
+        lambda _directory, _observed, prior: prior,
+    )
+    retained = steps.retain_verified_gate_output(
+        context, Path("/state"), (output, ""), verify_handoff=True
+    )
+    assert isinstance(retained, Err), "retained parent accepted hidden coverage gap"
+    changed_report = coverage.report + b" "
+    changed_wrapper = json.loads(coverage.record)
+    changed_wrapper["report"] = changed_report.decode("utf-8")
+    changed_record = json.dumps(changed_wrapper, sort_keys=True).encode()
+    changes = (
+        (
+            replace(inputs, coverage=Ok(replace(coverage, facts=()))),
+            "changed coverage facts were accepted",
+        ),
+        (
+            replace(
+                inputs,
+                coverage=Ok(
+                    replace(coverage, record=changed_record, report=changed_report)
+                ),
+            ),
+            "changed coverage bytes after seal were accepted",
+        ),
+        (
+            replace(
+                inputs, coverage=Ok(replace(coverage, record=coverage.record + b" "))
+            ),
+            "changed coverage report was accepted",
+        ),
+        (
+            replace(inputs, host=Ok(replace(host, checkout=not host.checkout))),
+            "changed coverage host was accepted",
+        ),
+        (
+            replace(inputs, outcomes=Ok(replace(outcomes, outcomes=()))),
+            "changed coverage outcomes were accepted",
+        ),
+        (
+            replace(inputs, substeps=Ok(replace(substeps, outcomes=()))),
+            "changed coverage substeps were accepted",
+        ),
+        (
+            replace(inputs, outcomes=Ok(replace(outcomes, nonce="stale"))),
+            "stale coverage outcome nonce was accepted",
+        ),
+        (
+            replace(inputs, substeps=Ok(replace(substeps, nonce="stale"))),
+            "stale coverage substep nonce was accepted",
+        ),
+        (
+            replace(inputs, coverage=Ok(replace(coverage, nonce="stale"))),
+            "stale coverage nonce was accepted",
+        ),
+    )
+    patch.setattr(steps, "verify_phase_coverage_failures", lambda *_args: Ok(None))
+    for changed, reason in changes:
+        assert not steps.coverage_inputs_sealed(changed, output), reason
+        patch.setattr(
+            steps,
+            "_parent_coverage_inputs",
+            lambda *_args, changed=changed: Ok(changed),
+        )
+        assert isinstance(
+            steps.verify_provisional_coverage(context, context.directory, output), Err
+        ), "parent accepted changed coverage inputs after seal"
+        assert isinstance(steps.verify_python_handoffs(context, output), Err)
+        assert isinstance(
+            steps.retain_verified_gate_output(
+                context, Path("/state"), (output, ""), verify_handoff=True
+            ),
+            Err,
+        )
+
+
+def _check_coverage_text_forgery(context: CheckRun, output: str, record: bytes) -> None:
+    """Refuse a freshly sealed transcript that contradicts retained observations."""
+    altered = json.loads(record)
+    altered["code"] = 0
+    altered["stdout"] = "TOTAL 1 0 100%\n"
+    changed = json.dumps(altered, sort_keys=True).encode()
+    (context.directory / "coverage-text.json").write_bytes(changed)
+    forged = output.replace(
+        steps.coverage_text_seal(context.nonce, record),
+        steps.coverage_text_seal(context.nonce, changed),
+    )
+    assert isinstance(
+        steps.verify_coverage_text_handoff(context, context.directory, forged), Err
+    ), "a sealed transcript inconsistent with the real coverage facts was accepted"
+
+
+def _check_coverage_text_json_integrity(
+    inputs: steps.CoverageTextInputs, coverage: steps.CoverageSnapshot
+) -> None:
+    """Reject cached facts or raw JSON that differ from the original capture."""
+    for invalid in (
+        replace(coverage, facts=()),
+        replace(
+            coverage,
+            facts=(
+                replace(
+                    coverage.facts[0],
+                    missing_statements=coverage.facts[0].missing_statements + 1,
+                ),
+            ),
+        ),
+        replace(coverage, report=coverage.report + b" "),
+        replace(coverage, record=b"{}"),
+    ):
+        assert isinstance(
+            steps.coverage_text_agreement(replace(inputs, coverage=Ok(invalid))), Err
+        ), "changed coverage facts or JSON were accepted"
+
+
+def _check_coverage_text_copy(
+    context: CheckRun, tmp_path: Path, output: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Refuse a transcript changed after the parent has retained the report."""
+    original_retain = steps.retain_gate_output
+
+    def corrupt_copy(
+        root: Path, state: Path, run_dir: Path, run_nonce: str, streams: tuple[str, str]
+    ) -> Result[Path, str]:
+        result = original_retain(root, state, run_dir, run_nonce, streams)
+        if isinstance(result, Ok):
+            target = result.value / "coverage-text.json"
+            target.write_bytes(target.read_bytes() + b" ")
+        return result
+
+    monkeypatch.setattr(steps, "retain_gate_output", corrupt_copy)
+    altered_copy = steps.retain_verified_gate_output(
+        context, tmp_path / "tampered-state", (output, "primary\n"), verify_handoff=True
+    )
+    assert isinstance(altered_copy, Err), "a changed retained transcript was accepted"
+    assert (
+        tmp_path / "tampered-state/check-reports" / context.nonce / "stderr.txt"
+    ).read_text() == "primary\n"

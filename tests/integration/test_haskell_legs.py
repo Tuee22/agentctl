@@ -1,6 +1,7 @@
 # Copyright (c) 2026 agentctl contributors.
 """Native warning, suite routing, private configuration and package-data controls."""
 
+import hashlib
 import json
 import os
 import shutil
@@ -15,7 +16,7 @@ import pytest
 from hatchling.build import build_sdist, build_wheel
 
 from agentctl.bootstrap import build
-from agentctl.check import haskell
+from agentctl.check import haskell, ownership, steps
 from agentctl.check.evidence import Entry, source_census
 from agentctl.check.steps import (
     _run_tools_observed,
@@ -23,7 +24,7 @@ from agentctl.check.steps import (
     run_tools,
 )
 from agentctl.process import Output, run
-from agentctl.result import Err, Ok
+from agentctl.result import Err, Ok, Result
 from tests.harness.haskell import copy_project
 from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
 
@@ -31,6 +32,66 @@ haskell_build = _haskell_build_fixture
 PROTOCOL_VERSION = 2
 
 pytestmark = pytest.mark.evidence("real")
+
+
+def test_native_handoff_binds_real_execution(
+    haskell_build: build.BuildContext,
+    root: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The handoff accepts the application's real native execution and sources."""
+    directory = tmp_path / "native"
+    assert isinstance(haskell.run_suites(haskell_build, directory, "real-native"), Ok)
+    artifacts: object = json.loads((directory / "native-artifacts.json").read_text())
+    assert isinstance(artifacts, dict)
+    assert artifacts["nonce"] == "real-native"
+    rows = artifacts["artifacts"]
+    assert isinstance(rows, list)
+    assert [row[0] for row in rows] == ["ghc", "cabal", "native-test"]
+    assert all(
+        len(row[2]) == steps.SHA256_HEX_LENGTH and Path(row[1]).is_file()
+        for row in rows
+    )
+    for _role, path, digest in rows:
+        with Path(path).open("rb") as stream:
+            assert hashlib.file_digest(stream, "sha256").hexdigest() == digest
+    census = ownership.guarded_census(root)
+    assert isinstance(census, Ok)
+    captured = steps.native_snapshot(directory, "real-native", census.value)
+    assert isinstance(captured, Ok), captured
+
+    def selected(
+        _context: steps.CheckRun,
+    ) -> Result[tuple[tuple[str, str, str], ...], str]:
+        facts = haskell.native_artifact_facts(haskell_build)
+        return Err(facts.error.message) if isinstance(facts, Err) else facts
+
+    monkeypatch.setattr(steps, "_selected_native_artifacts", selected)
+    marker = steps.native_observation_seal("real-native", captured.value)
+    assert isinstance(marker, Ok)
+    failed = {
+        "python-commands",
+        "tool-outcomes",
+        "pytest-manifest",
+        "oracle-outcomes",
+        "host-observation",
+        "ruff-observation",
+        "ruff-format-observation",
+        "coverage-observation",
+        "mutant-killers",
+        "ty-observation",
+        "coverage-text-observation",
+    }
+    outcomes = tuple((name, int(name in failed)) for name in steps.FINALIZER_NAMES[:-1])
+    final = steps.record_finalizers(directory, "real-native", outcomes)
+    assert isinstance(final, Ok)
+    context = steps.CheckRun(root, directory, "real-native", "Linux")
+    assert steps.verify_native_handoff(
+        context,
+        directory,
+        marker.value + "\nphase\n" + steps.finalizer_seal(final.value) + "\n",
+    ) == Ok(None)
 
 
 def _warning(context: build.BuildContext) -> None:

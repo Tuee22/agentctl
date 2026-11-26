@@ -1516,6 +1516,206 @@ owner = 0
 killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_pytest_leg_reports_shared_coverage_damage", path = "tests/governance/test_run_evidence.py" }]
 
 [[claims]]
+identifier = "M-phase-vbox-process-read-failure-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_guest_process_absence_refuses_unreadable_entries", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-guest-facts-exit-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_host_binding_values", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-handoff-seal-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_coverage_handoff_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-handoff-finalizer-veto-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_coverage_handoff_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-handoff-digest-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-handoff-duplicate-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-handoff-postcopy-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-handoff-missing-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_failed_coverage_finalizer_retains_partial_handoff", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-capture-raw-identity-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-capture-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-capture-report-status-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-capture-json-status-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-capture-record-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-capture-raw-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-capture-record-identity-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-capture-replay-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-capture-reservation-overwritten"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-capture-pin-ambiguity-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_capture_requires_one_exact_pin", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-record-not-retained"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-raw-not-retained"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-format-type-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-duplicate-fields-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-branch-mode-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-version-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-source-path-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-branch-count-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-total-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-duplicate-lines-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-branch-gap-hidden"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_gaps_follow_source_consumers", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-shared-consumer-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_gaps_follow_source_consumers", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-census-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_attribution_refuses_incomplete_census", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-foreign-source-demanded"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_gaps_follow_source_consumers", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-amendment-chain-binding-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_mutants.py::test_mutant_amendment_chain_requires_exact_predecessor", path = "tests/governance/test_mutants.py" }]
+
+[[claims]]
+identifier = "M-phase-amendment-chain-noop-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_mutants.py::test_mutant_amendment_chain_requires_exact_predecessor", path = "tests/governance/test_mutants.py" }]
+
+[[claims]]
+identifier = "M-phase-amendment-revision-identity-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ratchet.py::test_mutant_amendment_chain_is_append_only", path = "tests/governance/test_ratchet.py" }]
+
+[[claims]]
+identifier = "M-phase-amendment-revision-location-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ratchet.py::test_mutant_amendment_chain_is_append_only", path = "tests/governance/test_ratchet.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-after-failure-policy-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_provisional_tools_preserve_shared_failures", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-failed-followup-continued"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_provisional_tools_preserve_shared_failures", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-followup-interruption-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_provisional_tools_preserve_shared_failures", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-successful-tool-substeps-incomplete"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_provisional_tools_preserve_shared_failures", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
 identifier = "M-phase-tool-substep-boolean-accepted"
 owner = 0
 killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_tool_substep_record_boundaries", path = "tests/governance/test_run_evidence.py" }]
@@ -1904,3 +2104,3168 @@ killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_foreign_sour
 identifier = "M-phase-coverage-include-dropped"
 owner = 0
 killer_sources = [{ node = "tests/unit/test_check_legs.py::test_python_leg_table_matches_oracle", path = "tests/unit/test_check_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-join-source-census-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-join-host-family-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-join-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-join-handoff-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-join-facts-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-join-substeps-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-join-status-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-join-missing-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-join-scope-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_json_reports_native_branches", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-join-shared-veto-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-join-phase-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-summary-bool-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-summary-lines-unbalanced"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-summary-branches-unbalanced"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-total-statements-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-total-covered-lines-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-total-branches-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-total-covered-branches-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-json-summary-reconciliation-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_coverage_json_refuses_inconsistent_observations", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-peer-argument-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_guest_peer_nonce_is_visible_until_exit", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-peer-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_guest_peer_nonce_is_visible_until_exit", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-peer-argument-not-used"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_guest_peer_nonce_is_visible_until_exit", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-citation-case-resolution-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_provisional_parametrized_citation_requires_every_case", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-citation-case-all-changed-to-any"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_provisional_parametrized_citation_requires_every_case", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-citation-case-teardown-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_provisional_parametrized_citation_requires_every_case", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-citation-case-presence-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_provisional_parametrized_citation_requires_every_case", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-citation-case-prefix-unbounded"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_provisional_parametrized_citation_requires_every_case", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-validation-problems-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-validation-completed-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-validation-failed-status-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-validation-successful-status-counted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-validation-damage-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-validation-empty-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-validation-live-messages-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_reports_independent_failures", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-validation-live-integrity-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_reports_independent_failures", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-source-validation-observed-path-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_source_guards.py::test_source_observations_retain_inspected_path", path = "tests/governance/test_source_guards.py" }]
+
+[[claims]]
+identifier = "M-phase-source-validation-live-capture-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_captures_source_issue_path", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-source-validation-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-source-validation-scoped-damage-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-source-validation-shared-damage-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-source-validation-consumer-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-source-validation-missing-source-localized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-source-validation-unowned-source-localized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-source-validation-duplicate-census-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-source-validation-foreign-phases-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-source-validation-empty-message-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-source-census-duplicate-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_source_guards.py::test_source_guards_bind_census_to_live_walk", path = "tests/governance/test_source_guards.py" }]
+
+[[claims]]
+identifier = "M-phase-source-census-traversal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_source_guards.py::test_source_guards_bind_census_to_live_walk", path = "tests/governance/test_source_guards.py" }]
+
+[[claims]]
+identifier = "M-phase-source-census-link-shape-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_source_guards.py::test_source_guards_bind_census_to_live_walk", path = "tests/governance/test_source_guards.py" }]
+
+[[claims]]
+identifier = "M-phase-source-census-link-target-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_source_guards.py::test_source_guards_bind_census_to_live_walk", path = "tests/governance/test_source_guards.py" }]
+
+[[claims]]
+identifier = "M-phase-source-census-native-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_source_guards.py::test_captured_source_walk_matches_native_and_invalid_text", path = "tests/governance/test_source_guards.py" }]
+
+[[claims]]
+identifier = "M-phase-source-census-live-mismatch-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_source_guards.py::test_source_guards_bind_census_to_live_walk", path = "tests/governance/test_source_guards.py" }]
+
+[[claims]]
+identifier = "M-phase-source-census-gate-census-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_refuses_changed_source_walk", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-json-flag-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_check_legs.py::test_python_leg_table_matches_oracle", path = "tests/unit/test_check_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-capture-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-tool-handoff-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-duplicate-json-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-row-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-outside-path-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-boolean-status-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-stderr-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-status-json-disagreement"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-missing-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-status-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-substeps-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-facts-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-phase-scope-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-shared-veto-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-overwrite-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-bytes-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-identity-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-finalizer-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_ruff_observation_survives_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-finalizer-status-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_ruff_observation_survives_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-emit-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_ruff_observation_survives_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-seal-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_ruff_handoff_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-failed-seal-emitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_ruff_handoff_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-missing-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_failed_ruff_finalizer_retains_partial_handoff", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-duplicate-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-record-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-digest-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-retention-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-postcopy-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-handoff-root-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_json_is_captured_from_the_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-python-targets-missing-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_tool_targets_match_guarded_census", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-targets-duplicate-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_tool_targets_match_guarded_census", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-targets-empty-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_tool_targets_match_guarded_census", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-targets-duplicate-census-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_tool_targets_match_guarded_census", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-targets-root-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_tool_targets_match_guarded_census", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-targets-traversal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_tool_targets_match_guarded_census", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-targets-live-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_captures_target_census_mismatch", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-python-targets-live-diagnostic-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_captures_target_census_mismatch", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-python-invocations-attempts-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_tool_substeps_preserve_primary_and_followup", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-python-invocations-handoff-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_tool_substeps_preserve_primary_and_followup", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-python-invocations-plan-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_invocations_join_census_and_attempted_commands", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-invocations-actual-command-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_invocations_join_census_and_attempted_commands", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-invocations-command-count-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_invocations_join_census_and_attempted_commands", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-invocations-substep-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_invocations_join_census_and_attempted_commands", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-invocations-outcome-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_invocations_join_census_and_attempted_commands", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-invocations-outcome-status-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_invocations_join_census_and_attempted_commands", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-invocations-truncated-followup-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_invocations_join_census_and_attempted_commands", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-invocations-live-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_reports_independent_failures", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-python-invocations-later-leg-poisons"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_python_invocations_join_census_and_attempted_commands", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-python-commands-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_python_command_record_refuses_replacement", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-python-commands-root-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_python_command_record_refuses_replacement", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-python-commands-bytes-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_python_command_record_refuses_replacement", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-python-commands-identity-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_python_command_record_refuses_replacement", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-python-commands-seal-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_python_command_seal_follows_finalizer", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-python-commands-failed-seal-emitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_python_command_seal_follows_finalizer", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-python-commands-finalizer-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_python_commands_survive_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-python-commands-postcopy-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_python_commands_real_handoff_and_retention", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-receipt-duplicate-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_binding_json_refuses_ambiguous_values", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-guest-facts-duplicate-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_binding_json_refuses_ambiguous_values", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-receipt-boolean-version-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_binding_json_refuses_ambiguous_values", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-receipt-root-traversal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_binding_json_refuses_ambiguous_values", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-receipt-root-noncanonical-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_binding_json_refuses_ambiguous_values", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-vbox-receipt-root-double-slash-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_binding_json_refuses_ambiguous_values", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-json-flag-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_check_legs.py::test_python_leg_table_matches_oracle", path = "tests/unit/test_check_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-capture-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_format_json_is_captured_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_format_json_is_captured_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-status-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_format_json_is_captured_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-substeps-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_format_json_is_captured_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-facts-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_format_json_is_captured_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-finalizer-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_ruff_format_survives_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-finalizer-status-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_ruff_format_survives_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-seal-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_ruff_format_survives_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-failed-seal-emitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_ruff_format_survives_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-duplicate-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_format_json_is_captured_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-digest-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_format_json_is_captured_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ruff-format-postcopy-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ruff_format_json_is_captured_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-python-parent-plan-parent-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_rechecks_actual_python_plan", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-python-parent-plan-seal-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_rechecks_actual_python_plan", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-python-parent-plan-source-digest-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_rechecks_actual_python_plan", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-python-parent-plan-attempts-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_rechecks_actual_python_plan", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-python-parent-plan-write-guard-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_python_plan_requires_shared_finalizers", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-python-parent-plan-containment-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_python_plan_requires_shared_finalizers", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-python-parent-plan-capture-source-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_command_capture_uses_guarded_source_census", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-results-handoff-seal-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_tool_results_seal_follows_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-results-handoff-failed-seal-emitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_tool_results_seal_follows_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-results-handoff-failed-outcomes-needs-seal"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_failed_tool_finalizer_retains_partial_handoff", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-results-handoff-failed-substeps-needs-seal"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_failed_tool_finalizer_retains_partial_handoff", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-results-handoff-missing-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_tool_results_handoff_preserves_real_subprocess_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-results-handoff-duplicate-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_tool_results_handoff_preserves_real_subprocess_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-results-handoff-digest-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_tool_results_handoff_preserves_real_subprocess_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-results-handoff-outcomes-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_tool_results_handoff_preserves_real_subprocess_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-results-handoff-substeps-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_tool_results_handoff_preserves_real_subprocess_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-results-handoff-postcopy-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_tool_results_handoff_preserves_real_subprocess_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-tool-results-handoff-live-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_rejects_changed_live_tool_results", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-seal-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_pytest_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-failed-seal-emitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_pytest_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-failed-finalizer-needs-seal"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_failed_pytest_finalizer_retains_partial_handoff", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-missing-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_pytest_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-duplicate-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_pytest_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-digest-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_pytest_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-live-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_pytest_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-postcopy-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_pytest_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-field-nonce-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_pytest_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-field-collected-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_pytest_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-field-executed-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_pytest_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-field-passed-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_pytest_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-field-forbidden-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_pytest_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-pytest-handoff-field-classes-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_pytest_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-seal-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_oracle_seal_follows_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-failed-seal-emitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_oracle_seal_follows_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-failed-outcomes-needs-seal"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_failed_oracle_finalizer_retains_partial_handoff", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-failed-details-needs-seal"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_failed_oracle_finalizer_retains_partial_handoff", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-missing-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_oracle_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-duplicate-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_oracle_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-digest-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_oracle_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-live-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_oracle_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-postcopy-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_oracle_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-field-outcomes-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_oracle_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-field-outcomes-nonce-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_oracle_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-field-details-nonce-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_oracle_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-field-sources-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_oracle_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-oracle-handoff-field-issues-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_oracle_handoff_preserves_real_execution", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-seal-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_host_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-failed-seal-emitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_host_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-failed-finalizer-needs-seal"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_failed_host_finalizer_retains_partial_handoff", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-missing-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-duplicate-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-digest-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-live-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-postcopy-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-field-family-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-field-architecture-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-field-checkout-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-field-git-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-field-mux-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-field-agents-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-field-authenticated-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-field-clean-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-host-handoff-field-xcode-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-field-collected-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_seal_binds_each_observation", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-field-executed-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_seal_binds_each_observation", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-field-passed-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_seal_binds_each_observation", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-field-forbidden-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_seal_binds_each_observation", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-field-classes-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_seal_binds_each_observation", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-field-case-sources-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_seal_binds_each_observation", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-field-native-source-digest-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_seal_binds_each_observation", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-seal-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-failed-seal-emitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-failed-finalizer-needs-seal"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_failed_native_finalizer_retains_partial_handoff", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-missing-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_handoff_binds_case_sources_and_checkout", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-duplicate-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_handoff_binds_case_sources_and_checkout", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-digest-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_handoff_checks_live_and_retained_reports", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-live-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_handoff_checks_live_and_retained_reports", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-postcopy-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_handoff_checks_live_and_retained_reports", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-write-guard-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_failed_native_finalizer_retains_partial_handoff", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-native-handoff-containment-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_failed_native_finalizer_retains_partial_handoff", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-publication-cleanup-not-checked"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_parent_evidence_requires_verified_retention_and_cleanup", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-publication-retention-not-checked"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_parent_evidence_requires_verified_retention_and_cleanup", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-publication-handoff-not-checked"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_parent_evidence_requires_verified_retention_and_cleanup", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-publication-exit-not-checked"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_parent_evidence_requires_verified_retention_and_cleanup", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-publication-phase-not-authenticated"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_parent_evidence_requires_verified_retention_and_cleanup", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-publication-successful-child-finalizers-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_successful_child_cannot_hide_failed_finalizers", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-publication-published-before-cleanup"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_gate_publishes_evidence_only_after_cleanup", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-binding-receipt-public-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_private_binding_receipt_refuses_links_and_public_files", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-binding-source-census-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_shared_binding_rechecks_actual_checkout_bytes", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-binding-mount-share-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_shared_binding_rechecks_actual_checkout_bytes", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-binding-guest-cpu-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_virtualbox_binding.py::test_guest_binding_rechecks_actual_allocation", path = "tests/integration/test_virtualbox_binding.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-binding-preflight-refusal-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_context_keeps_binding_refusal", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-native-lane-debian-release-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_lane.py::test_debian_release_requires_exact_unambiguous_identity", path = "tests/unit/test_lane.py" }]
+
+[[claims]]
+identifier = "M-phase-native-lane-debian-identity-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_lane.py::test_phase_lane_qualifies_native_family_without_later_capabilities", path = "tests/unit/test_lane.py" }]
+
+[[claims]]
+identifier = "M-phase-native-lane-foreign-family-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_lane.py::test_phase_lane_qualifies_native_family_without_later_capabilities", path = "tests/unit/test_lane.py" }]
+
+[[claims]]
+identifier = "M-phase-native-lane-host-scopes-not-joined"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-lane-host-family-mismatch-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-lane-debian-seal-field-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_host_handoff_preserves_real_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-native-lane-live-mux-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_lane.py::test_phase_lane_qualifies_native_family_without_later_capabilities", path = "tests/unit/test_lane.py" }]
+
+[[claims]]
+identifier = "M-phase-native-lane-live-agents-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_lane.py::test_phase_lane_qualifies_native_family_without_later_capabilities", path = "tests/unit/test_lane.py" }]
+
+[[claims]]
+identifier = "M-phase-native-lane-live-authenticated-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_lane.py::test_phase_lane_qualifies_native_family_without_later_capabilities", path = "tests/unit/test_lane.py" }]
+
+[[claims]]
+identifier = "M-phase-native-lane-live-clean-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_lane.py::test_phase_lane_qualifies_native_family_without_later_capabilities", path = "tests/unit/test_lane.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-observation-capture-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-observation-missing-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-observation-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-observation-status-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-observation-facts-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-observation-scope-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-observation-format-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_check_legs.py::test_python_leg_table_matches_oracle", path = "tests/unit/test_check_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-observation-status-shape-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_ty_diagnostics_refuse_incomplete_or_foreign_values", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-seal-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_ty_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-failed-seal-emitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_ty_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-failed-finalizer-needs-seal"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_failed_ty_finalizer_retains_partial_handoff", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-missing-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-duplicate-seal-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-digest-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-live-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-postcopy-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-record-not-retained"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-record-overwritten"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_ty_record_refuses_replacement_and_stale_identity", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_ty_record_refuses_replacement_and_stale_identity", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-bytes-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_ty_record_refuses_replacement_and_stale_identity", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-ty-handoff-finalizer-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_ty_seal_follows_finalizer", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-identity-scope-remains-shared"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_binary_identity_failure_uses_captured_owner", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-identity-scope-globalized"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_real_binary_identity_refusal_stays_with_bootstrap", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-identity-scope-owner-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_binary_identity_failure_uses_captured_owner", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-identity-scope-owner-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_binary_identity_failure_uses_captured_owner", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-identity-scope-source-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_binary_identity_failure_uses_captured_owner", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-identity-scope-scope-incomplete-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_binary_identity_failure_uses_captured_owner", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-identity-scope-work-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_binary_identity_failure_reaches_provisional_work", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-identity-scope-foreign-debian-id-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_lane.py::test_debian_release_requires_exact_unambiguous_identity", path = "tests/unit/test_lane.py" }]
+
+[[claims]]
+identifier = "M-phase-unverified-marker-poisons-prerequisites"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_unverified_marker_does_not_invent_prerequisite_failures", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-text-retained-agreement-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-text-postcopy-check-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-text-json-facts-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-text-json-wrapper-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-floor-scope-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-floor-text-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-floor-json-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-text-leg-capture-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-input-identities-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-input-census-digest-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_parent_verifies_provisional_phase_input_identities", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-input-identities-live-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_parent_verifies_provisional_phase_input_identities", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-input-identities-retained-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_parent_verifies_provisional_phase_input_identities", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-collection-failures-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-collection-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-collection-live-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-collection-retained-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-collection-native-ownership-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-native-failures-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_native_failure_joins_captured_owners_and_mutants", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-native-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-native-snapshot-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-oracle-failures-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_oracle_failures_follow_source_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-oracle-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_oracle_failures_follow_source_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-oracle-live-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_oracle_failures_follow_source_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-oracle-retained-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_oracle_failures_follow_source_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-failures-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-live-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-retained-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-collection-unbound-census"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-oracle-unbound-census"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_oracle_failures_follow_source_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-unbound-census"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-static-failures-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-static-tool-failure-hidden"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-static-status-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-static-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-static-live-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-static-retained-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-static-unbound-census"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-host-failures-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-host-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-host-live-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-host-retained-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-host-unbound-census"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-owned-tool-failure-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-shared-tool-failure-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-tool-schedule-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-tool-coverage-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-tool-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-tool-live-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-tool-retained-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-finalizer-failures-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_refuses_omitted_finalizer_failure", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-finalizer-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_refuses_omitted_finalizer_failure", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-finalizer-live-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_refuses_omitted_finalizer_failure", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-finalizer-retained-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_refuses_omitted_finalizer_failure", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-source-owned-failure-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_parent_rechecks_source_and_missing_input_failures", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-source-missing-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_parent_rechecks_source_and_missing_input_failures", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-source-shared-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_parent_rechecks_source_and_missing_input_failures", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-source-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_parent_rechecks_source_and_missing_input_failures", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-source-live-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_parent_rechecks_source_and_missing_input_failures", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-source-retained-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_parent_rechecks_source_and_missing_input_failures", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-source-unbound-census"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_parent_rechecks_source_and_missing_input_failures", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-prerequisite-failures-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_unverified_marker_does_not_invent_prerequisite_failures", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-prerequisite-unverified-propagated"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_unverified_marker_does_not_invent_prerequisite_failures", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-prerequisite-finalizer-propagated"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_unverified_marker_does_not_invent_prerequisite_failures", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-prerequisite-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_parent_rechecks_prerequisite_failures", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-prerequisite-live-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_parent_rechecks_prerequisite_failures", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-prerequisite-retained-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_parent_rechecks_prerequisite_failures", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-prerequisite-unbound-census"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_parent_rechecks_prerequisite_failures", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-validation-dropped"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_parent_rechecks_shared_validation_failures", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-validation-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_parent_rechecks_shared_validation_failures", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-validation-live-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_parent_rechecks_shared_validation_failures", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-validation-retained-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_parent_rechecks_shared_validation_failures", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-validation-docs-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_parent_rechecks_shared_validation_failures", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-validation-census-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_census.py::test_parent_rechecks_shared_validation_failures", path = "tests/unit/test_steps_census.py" }]
+
+[[claims]]
+identifier = "M-phase-initial-oracle-status-lost"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_retains_initial_oracle_integrity", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-initial-oracle-gate-veto-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_initial_oracle_details_failure_survives_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-initial-oracle-finalizer-status-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_initial_oracle_details_failure_survives_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-validation-integrity-capture-lost"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_retains_transient_integrity", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-validation-integrity-gate-veto-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_validation_integrity_failure_survives_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-validation-integrity-finalizer-status-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_validation_integrity_failure_survives_finalizers", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-row-classes-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_execution_scopes", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-row-unavailable-applied"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_execution_scopes", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-row-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_execution_scopes", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-row-native-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_execution_scopes", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-row-overlap-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_execution_scopes", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-row-child-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-row-parent-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-ownership-missing-globalized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_missing_owned_source_validation_is_scoped", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-ownership-unknown-localized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_missing_owned_source_validation_is_scoped", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-ownership-ambiguous-localized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_missing_owned_source_validation_is_scoped", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-ownership-child-scope-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_missing_owned_source_validation_is_scoped", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-ownership-parent-scope-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_missing_owned_source_validation_is_scoped", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-mutant-census-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_mutant_ownership_with_later_missing_source", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-mutant-bytes-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_mutant_ownership_with_later_missing_source", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-mutant-native-identity-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_mutant_ownership_with_later_missing_source", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-mutant-declared-fallback-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_mutant_ownership_with_later_missing_source", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-mutant-observed-fallback-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_mutant_ownership_with_later_missing_source", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-mutant-python-fallback-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_mutant_ownership_with_later_missing_source", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-mutant-failures-erased"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-mutant-census-refusal-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-mutant-native-shape-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-mutant-child-selection-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-mutant-parent-selection-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-mutant-parent-marker-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-mutant-gate-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-mutant-collection-failures-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-mutant-owner-disagreement-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-mutant-observed-native-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-mutant-child-marker-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_carries_scoped_mutant_marker", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-consumer-scope-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_missing_test_consumers_remain_on_their_phases", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-consumer-scope-ambiguous"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_missing_test_consumers_remain_on_their_phases", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-consumer-collection-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_missing_test_consumers_remain_on_their_phases", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-mutant-undeclared-scope-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_undeclared_mutants_remain_on_their_owners", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-mutant-undeclared-foreign-owner-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_undeclared_mutants_remain_on_their_owners", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-mutant-undeclared-collection-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-undeclared-integrity-hidden-row-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_plan_validator.py::test_undeclared_integrity_has_no_hidden_causes", path = "tests/governance/test_plan_validator.py" }]
+
+[[claims]]
+identifier = "M-phase-undeclared-integrity-output-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_plan_validator.py::test_undeclared_integrity_has_no_hidden_causes", path = "tests/governance/test_plan_validator.py" }]
+
+[[claims]]
+identifier = "M-phase-undeclared-integrity-scope-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_plan_validator.py::test_undeclared_integrity_has_no_hidden_causes", path = "tests/governance/test_plan_validator.py" }]
+
+[[claims]]
+identifier = "M-phase-undeclared-integrity-ambiguous-localized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_plan_validator.py::test_undeclared_integrity_has_no_hidden_causes", path = "tests/governance/test_plan_validator.py" }]
+
+[[claims]]
+identifier = "M-phase-undeclared-integrity-child-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_plan_validator.py::test_undeclared_integrity_has_no_hidden_causes", path = "tests/governance/test_plan_validator.py" }]
+
+[[claims]]
+identifier = "M-phase-undeclared-integrity-parent-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_plan_validator.py::test_undeclared_integrity_has_no_hidden_causes", path = "tests/governance/test_plan_validator.py" }]
+
+[[claims]]
+identifier = "M-phase-undeclared-integrity-two-phase-route-bypassed"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_later_undeclared_mutant_does_not_globalize_integrity", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-host-version-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_invalid_manifests_are_refused", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-host-version-float-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_invalid_manifests_are_refused", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-provisional-deep-json-escapes"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_deep_provisional_handoff_is_refused", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-handoff-deep-json-escapes"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_deep_coverage_handoff_is_refused", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-report-deep-json-escapes"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_coverage_hosts.py::test_deep_coverage_json_is_refused", path = "tests/unit/test_coverage_hosts.py" }]
+
+[[claims]]
+identifier = "M-phase-provisional-handoff-hardlink-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_provisional_handoff_rejects_hardlinks", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-provisional-handoff-file-replacement-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_provisional_handoff_rejects_equal_byte_replacement", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-handoff-hardlink-accepted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_finalizer_handoff_rejects_hardlinks", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-handoff-file-replacement-ignored"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_handoff_rejects_equal_byte_replacement", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-special-file-read"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_finalizer_observation_rejects_special_files", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-deep-manifest-evidence-escapes"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_deep_evidence_records_fail_closed", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-deep-legs-evidence-escapes"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_deep_evidence_records_fail_closed", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-deep-oracle-evidence-escapes"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_deep_evidence_records_fail_closed", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-deep-substeps-evidence-escapes"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_deep_evidence_records_fail_closed", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-provisional-open-nonblocking-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_provisional_handoff_opens_nonblocking", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-provisional-open-nofollow-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_provisional_handoff_opens_nonblocking", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-open-safe-flags-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_finalizer_handoff_opens_nonblocking", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-deep-finalizer-bytes-escapes"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_deep_evidence_records_fail_closed", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-truthy-pass-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_receipt_pass_is_a_boolean", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-requirement-type-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_receipt_requirement_rejects_malformed_identifiers", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-requirement-pairs-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_receipt_requirement_rejects_malformed_pairs", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-evidence-type-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_receipt_rejects_malformed_evidence", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-native-identity-type-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_receipt_rejects_malformed_identity", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-family-type-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_receipt_rejects_malformed_identity", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-cleanup-junction-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_cleanup_refuses_linked_run_root", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-cleanup-run-identity-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_cleanup_refuses_replaced_run_root", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-cleanup-post-containment-identity-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_cleanup_refuses_replaced_run_root", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-check-run-identity-not-captured"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_gate_publishes_evidence_only_after_cleanup", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-ownership-boolean-number-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_ownership_rejects_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-ownership-boolean-dependency-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_ownership_rejects_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-ownership-boolean-owner-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_ownership_rejects_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-ownership-boolean-consumer-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_ownership_rejects_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-calculation-boolean-number-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_phase_calculation_rejects_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-calculation-boolean-dependency-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_phase_calculation_rejects_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-native-number-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_native_attribution_rejects_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-native-consumer-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_native_attribution_rejects_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-native-citation-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_native_attribution_rejects_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-collection-scope-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_collection_rejects_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-collection-consumer-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_collection_rejects_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-collection-mutant-owner-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_collection_rejects_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-failure-owner-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_additional_failures_reject_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-additional-phase-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_additional_failures_reject_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-additional-result-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_additional_failures_reject_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-additional-dependency-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_additional_failures_reject_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-additional-owner-boolean-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_additional_failures_reject_boolean_indices", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-integrity-row-requirement-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_integrity_row_variants_remain_scoped", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-integrity-row-owner-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_later_integrity_row_damage_is_attributed", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-integrity-row-oracle-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_integrity_row_variants_remain_scoped", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-integrity-row-mutant-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_later_integrity_row_damage_is_attributed", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-integrity-row-killer-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_integrity_row_variants_remain_scoped", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-integrity-sprint-mutant-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_integrity_row_variants_remain_scoped", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-integrity-audit-output-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_integrity_row_variants_remain_scoped", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-integrity-globalized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_later_integrity_row_damage_is_attributed", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-integrity-unmatched-localized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_later_integrity_row_damage_is_attributed", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-scoped-integrity-collection-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_later_integrity_row_damage_is_attributed", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-mutant-misplaced-declaration-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_undeclared_mutants_remain_on_their_owners", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-aggregate-validation-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_aggregate_receipts_respects_lower_host_acceptance", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-aggregate-identity-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_aggregate_receipts_respects_lower_host_acceptance", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-aggregate-failure-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_aggregate_receipts_respects_lower_host_acceptance", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-aggregate-order-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_aggregate_receipts_respects_lower_host_acceptance", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-aggregate-duplicate-capability-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_aggregate_receipts_respects_lower_host_acceptance", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-aggregate-boolean-phase-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_aggregate_receipts_respects_lower_host_acceptance", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-host-lane-families-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_receipt_requires_qualified_host_and_retained_diagnostics", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-host-native-family-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_receipt_requires_qualified_host_and_retained_diagnostics", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-host-boolean-facts-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_receipt_requires_qualified_host_and_retained_diagnostics", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-host-eligibility-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_requirement_receipt_oracle", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-diagnostics-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_receipt_requires_qualified_host_and_retained_diagnostics", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-host-value-after-seal-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-collection-pytest-value-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-collection-native-value-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-collection-killer-value-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-collection-value-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_captures_provisional_phase_observations", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-oracle-value-after-seal-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_oracle_failures_follow_source_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-tool-values-after-seal-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-tool-outcome-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-tool-substep-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-tool-collection-value-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-tool-value-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-static-record-value-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-static-outcome-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-static-substep-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-static-tool-values-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-static-tool-value-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_static_legs.py::test_ty_json_is_captured_and_scoped_from_real_leg", path = "tests/integration/test_static_legs.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-snapshot-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-outcome-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-substep-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-facts-value-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-bytes-value-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-host-value-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-tool-values-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-coverage-value-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_gate_plugin.py::test_coverage_text_parent_joins_real_report_and_retained_evidence", path = "tests/governance/test_gate_plugin.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-finalizer-value-after-seal-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_refuses_omitted_finalizer_failure", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-provisional-values-for-identity-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-provisional-collection-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-provisional-oracle-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-provisional-host-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-provisional-tools-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-provisional-coverage-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-provisional-static-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-provisional-source-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-provisional-prerequisites-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-provisional-validation-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-killer-handoff-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-coverage-handoff-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-ruff-handoff-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-ruff-format-handoff-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-coverage-text-retained-agreement-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-coverage-text-handoff-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-ty-handoff-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-native-handoff-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-host-handoff-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-oracle-handoff-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-pytest-handoff-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-tool-results-handoff-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-verify-python-commands-handoff-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-consumer-seal-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_finalizer_consumers_reject_changed_statuses", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-python-plan-finalizer-value-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_python_plan_requires_shared_finalizers", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-publication-finalizer-value-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_successful_child_cannot_hide_failed_finalizers", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-python-plan-command-value-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_rechecks_actual_python_plan", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-census-command-value-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_rechecks_actual_python_plan", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-workspace-cleanup-long-path-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_native_workspace_cleanup_handles_long_paths_and_boundaries", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-workspace-cleanup-unc-path-omitted"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_native_workspace_cleanup_handles_long_paths_and_boundaries", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-workspace-cleanup-identity-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_native_workspace_cleanup_handles_long_paths_and_boundaries", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-workspace-cleanup-parent-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_native_workspace_cleanup_handles_long_paths_and_boundaries", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-workspace-cleanup-name-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_native_workspace_cleanup_handles_long_paths_and_boundaries", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-handoff-unsafe-read"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_coverage_handoff_refuses_special_and_replaced_files", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-coverage-handoff-final-identity-ignored"
+owner = 0
+killer_sources = [{ node = "tests/unit/test_steps_records.py::test_coverage_handoff_refuses_special_and_replaced_files", path = "tests/unit/test_steps_records.py" }]
+
+[[claims]]
+identifier = "M-phase-readiness-observation-not-emitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_readiness_reaches_validation", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-readiness-observation-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_parent_recovers_exact_readiness_observation", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-readiness-duplicate-observation-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_parent_recovers_exact_readiness_observation", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-retained-readiness-stream-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_retained_output_refuses_changed_readiness_stream", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-readiness-failure-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-retained-stderr-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_retained_output_refuses_changed_readiness_stream", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-command-failure-globalized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_unexplained_native_failure_follows_all_consumers", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-native-command-source-consumers-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_unexplained_native_failure_follows_all_consumers", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-native-command-cited-consumers-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_unexplained_native_failure_follows_all_consumers", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-globalized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_unavailable_native_scope_follows_declared_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-source-consumers-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_unavailable_native_scope_follows_declared_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-citations-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_unavailable_native_scope_follows_declared_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-mutant-owners-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_unavailable_native_scope_follows_declared_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-owner-mismatch-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_unavailable_native_scope_follows_declared_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-not-reported"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_unavailable_native_scope_follows_declared_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-primary-detail-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_unavailable_native_scope_follows_declared_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-unowned-source-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_unavailable_native_scope_follows_declared_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-boolean-owner-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_unavailable_native_scope_follows_declared_consumers", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-native-suppresses-earlier"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-native-scope-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-native-tool-success-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-native-collection-success-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-native-mutant-source-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-native-mutant-owner-globalized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-missing-native-mutant-success-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-missing-native-reconstruction-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-missing-native-finalizer-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-missing-native-tool-seal-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-missing-native-success-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-missing-native-seal-ambiguity-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-missing-native-collection-skipped"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-missing-native-tool-skipped"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-missing-native-scope-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-finalizer-provisional-reread-unsafe"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_refuses_replaced_provisional_record[finalizers]", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-identity-provisional-reread-unsafe"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_parent_refuses_replaced_provisional_record[identity]", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-cited-check-failure-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_parent_rechecks_cited_test_outcomes", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-cited-check-nonce-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_phase_reports.py::test_parent_rechecks_cited_test_outcomes", path = "tests/governance/test_phase_reports.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-cited-check-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-source-missing-input-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_parent_rechecks_source_and_missing_input_failures", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-artifact-seal-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_handoff_binds_case_sources_and_checkout", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-artifact-finalizer-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_handoff_binds_case_sources_and_checkout", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-selection-compare-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_handoff_binds_case_sources_and_checkout", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-native-selection-resolution-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_native_handoff_binds_case_sources_and_checkout", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-process-run-invalid-escapes"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_invalid_process_arguments_return_typed_failures", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-process-bytes-invalid-escapes"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_invalid_process_arguments_return_typed_failures", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-process-start-invalid-escapes"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_invalid_process_arguments_return_typed_failures", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-process-protocol-invalid-escapes"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_invalid_process_arguments_return_typed_failures", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-process-replace-invalid-escapes"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_invalid_process_arguments_return_typed_failures", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-process-foreground-invalid-escapes"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_invalid_process_arguments_return_typed_failures", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-emission-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_failed_native_step_emits_absence_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-partial-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_failed_native_step_emits_absence_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-marker-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_missing_native_parent_checks_real_failed_tool_handoff", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_missing_native_parent_checks_real_failed_tool_handoff", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-success-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_missing_native_parent_checks_real_failed_tool_handoff", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-native-absence-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_missing_native_parent_checks_real_failed_tool_handoff", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-native-integrity-absence-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_failed_native_step_emits_absence_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-native-finalizer-guard-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_failed_native_step_emits_absence_observation", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-native-finalizer-globalized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-finalizer-local-scope-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-native-finalizer-scope-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-native-finalizer-evidence-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-native-finalizer-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_gate_scopes_captured_toolchain_failure", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-parent-missing-native-validation-skipped"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_ownership_manifest.py::test_scoped_mutant_mapping_retains_owned_damage", path = "tests/governance/test_ownership_manifest.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-validation-marker-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_carries_original_native_absence", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-validation-globalized"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_carries_original_native_absence", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-native-absence-integrity-globalized"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_guard.py::test_validation_carries_original_native_absence", path = "tests/integration/test_guard.py" }]
+
+[[claims]]
+identifier = "M-phase-native-finalizer-execute-globalized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_execute_localizes_proven_native_absence", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-retained-artifact-snapshot-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_retained_output_refuses_changed_readiness_stream", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-report-change-evidence-published"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_gate_publishes_evidence_only_after_cleanup", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-report-change-success-returned"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_gate_publishes_evidence_only_after_cleanup", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-verified-report-snapshot-recaptured"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_parent_keeps_verified_report_snapshot", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-interpreter-change-ignored"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_interpreter_real_and_changed", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-interpreter-failure-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_interpreter_failure_preserves_primary", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-interpreter-retained-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_parent_rejects_changed_retained_interpreter", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-interpreter-record-not-retained"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_parent_keeps_verified_report_snapshot", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-interpreter-change-published"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_interpreter_real_and_changed", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-interpreter-change-success"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_interpreter_real_and_changed", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-observer-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_gate_child_process_observed_before_release", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-released-before-observation"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_gate_child_process_observed_before_release", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-observation-discarded"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_gate_child_process_observed_before_release", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-handshake-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_parent_observes_real_child", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-family-changed"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_parent_observes_real_child", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-nonce-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_parent_observes_real_child", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-parent-pid-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_child_record_refuses_foreign_observations", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-foreign-image-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_child_record_refuses_foreign_observations", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-birth-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_child_record_refuses_foreign_observations", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-failure-hidden"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_child_observer_failure_preserves_primary", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-retained-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_parent_rejects_changed_retained_child", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-record-not-retained"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_parent_observes_real_child", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-observed-child-timeout-accepted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_observed_child_timeout_preserves_output_and_reaps", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-process-image-foreign-mapping-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_process_image.py::test_process_image_file_rejects_foreign_and_replaced_mapping", path = "tests/governance/test_process_image.py" }]
+
+[[claims]]
+identifier = "M-phase-process-image-replacement-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_process_image.py::test_process_image_file_rejects_foreign_and_replaced_mapping", path = "tests/governance/test_process_image.py" }]
+
+[[claims]]
+identifier = "M-phase-gate-child-live-file-join-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_child_record_refuses_foreign_observations", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-process-image-live-hash-omitted"
+owner = 0
+killer_sources = [{ node = "tests/integration/test_runtime_boundaries.py::test_gate_child_process_observed_before_release", path = "tests/integration/test_runtime_boundaries.py" }]
+
+[[claims]]
+identifier = "M-phase-process-image-inconsistent-reads-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_process_image.py::test_process_image_file_rejects_inconsistent_reads", path = "tests/governance/test_process_image.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-noncanonical-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_receipt_record_refuses_ambiguous_or_noncanonical_values", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-invalid-record-prerequisite-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_release_receipts.py::test_receipt_record_aggregation_preserves_scoped_failures", path = "tests/governance/test_release_receipts.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-input-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_retained_receipt_inputs_join_sealed_observations", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-input-census-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_retained_receipt_inputs_join_sealed_observations", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-input-coverage-seal-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_retained_receipt_inputs_join_sealed_observations", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-retained-receipt-inputs-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_parent_observes_real_child", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-input-finalizer-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_retained_receipt_inputs_join_sealed_observations", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-evidence-marker-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_phase_receipt_evidence_scopes_actual_results", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-evidence-python-nonce-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_phase_receipt_evidence_scopes_actual_results", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-evidence-coverage-census-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_phase_receipt_evidence_scopes_actual_results", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-evidence-mutants-globalized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_phase_receipt_evidence_scopes_actual_results", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-candidate-failure-lost"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_parent_observes_real_child", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-evidence-boolean-owner-accepted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_phase_receipt_evidence_scopes_actual_results", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-native-plan-citations-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_receipt_native_citations_include_plan_and_mutant_requirements", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-native-mutant-citations-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_receipt_native_citations_include_plan_and_mutant_requirements", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-native-citations-not-captured"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_retained_receipt_inputs_join_sealed_observations", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-missing-native-citation-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_phase_receipt_evidence_scopes_actual_results", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-native-citation-globalized"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_phase_receipt_evidence_scopes_actual_results", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-native-absence-proof-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_retained_receipt_inputs_join_sealed_observations", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-native-absence-attribution-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_retained_receipt_inputs_join_sealed_observations", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-receipt-native-source-absence-unscoped"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_phase_receipt_evidence_scopes_actual_results", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-candidate-handoff-omitted"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_gate_parent_observes_real_child", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-candidate-source-census-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_parent_retains_unverified_phase_candidates", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-candidate-input-snapshot-unchecked"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_parent_retains_unverified_phase_candidates", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-candidate-record-not-retained"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_parent_retains_unverified_phase_candidates", path = "tests/governance/test_run_evidence.py" }]
+
+[[claims]]
+identifier = "M-phase-candidate-marked-verified"
+owner = 0
+killer_sources = [{ node = "tests/governance/test_run_evidence.py::test_parent_retains_unverified_phase_candidates", path = "tests/governance/test_run_evidence.py" }]

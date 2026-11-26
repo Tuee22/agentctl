@@ -8,7 +8,10 @@ import tokenize
 import tomllib
 from dataclasses import dataclass
 from io import StringIO
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+
+from agentctl.check.evidence import SYMLINK_PAYLOADS, Entry
+from agentctl.foundation import Err, Ok, Result
 
 FORBIDDEN_NAMES = frozenset(
     {
@@ -34,6 +37,14 @@ class CoverageException:
     reason: str
 
 
+@dataclass(frozen=True, slots=True)
+class SourceIssue:
+    """A source guard failure and the directly inspected path, when known."""
+
+    path: str | None
+    message: str
+
+
 COVERAGE_EXCEPTIONS = (
     CoverageException(
         "src/agentctl/check/preconditions.py",
@@ -43,13 +54,13 @@ COVERAGE_EXCEPTIONS = (
     ),
     CoverageException(
         "src/agentctl/foundation_process_identity.py",
-        44,
+        50,
         "def _posix_alive(pid: int) -> Result[bool, SpawnError]:  # pragma: no cover",
         "Signal zero needs POSIX; real owned-process controls cover this API.",
     ),
     CoverageException(
         "src/agentctl/foundation_process_identity.py",
-        55,
+        61,
         "def _windows_alive(pid: int) -> Result[bool, SpawnError]:  # pragma: no cover",
         "Query handles need Win32; real owned-process controls run on Windows.",
     ),
@@ -338,22 +349,26 @@ def haskell_source(text: str, relative: str) -> tuple[str, ...]:
     return problems
 
 
-def sources(root: Path) -> tuple[str, ...]:
-    """Walk the complete package and tests; only product code owns process choices."""
+def source_observations(root: Path) -> tuple[SourceIssue, ...]:
+    """Retain each source guard failure with the path actually inspected."""
     paths = tuple(sorted((root / "src").rglob("*.py")))
     tests = tuple(sorted((root / "tests").rglob("*.py")))
     if not paths or not tests:
-        return ("validator.non-vacuous: Python source and tests are required",)
-    problems: tuple[str, ...] = ()
+        return (
+            SourceIssue(
+                None, "validator.non-vacuous: Python source and tests are required"
+            ),
+        )
+    problems: tuple[SourceIssue, ...] = ()
     for path in (*paths, *tests):
         relative = path.relative_to(root).as_posix()
         try:
             found = python_source(path.read_text(encoding="utf-8"), relative)
         except (OSError, UnicodeError):
-            problems += ("src.parse: " + relative,)
+            problems += (SourceIssue(relative, "src.parse: " + relative),)
             continue
         problems += tuple(
-            problem
+            SourceIssue(relative, problem)
             for problem in found
             if relative.startswith("src/") or problem.startswith("src.suppression-ban:")
         )
@@ -366,13 +381,97 @@ def sources(root: Path) -> tuple[str, ...]:
         try:
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeError):
-            problems += ("src.parse: " + relative,)
+            problems += (SourceIssue(relative, "src.parse: " + relative),)
             continue
         if path.suffix in {".c", ".h"}:
-            problems += native_source(text, relative)
+            problems += tuple(
+                SourceIssue(relative, item) for item in native_source(text, relative)
+            )
             continue
-        problems += haskell_source(text, relative)
+        problems += tuple(
+            SourceIssue(relative, item) for item in haskell_source(text, relative)
+        )
     return problems
+
+
+def sources(root: Path) -> tuple[str, ...]:
+    """Walk the complete package and tests; only product code owns process choices."""
+    return tuple(issue.message for issue in source_observations(root))
+
+
+def census_source_observations(
+    entries: tuple[Entry, ...],
+) -> Result[tuple[SourceIssue, ...], str]:
+    """Run source guards against the immutable bytes of one captured census."""
+    names = tuple(entry.path for entry in entries)
+    if len(names) != len(set(names)) or any(
+        not name
+        or PurePosixPath(name).as_posix() != name
+        or PurePosixPath(name).is_absolute()
+        or ".." in PurePosixPath(name).parts
+        or "\\" in name
+        for name in names
+    ):
+        return Err("invalid or duplicate source census paths")
+    selected = tuple(
+        entry
+        for entry in entries
+        if (entry.path.startswith(("src/", "tests/")) and entry.path.endswith(".py"))
+        or (
+            entry.path.endswith((".hs", ".c", ".h"))
+            and not entry.path.startswith("tests/fixtures/")
+        )
+    )
+    if any(
+        entry.kind not in {"file", "symlink", "directory"}
+        or (entry.kind == "file" and len(entry.payloads) != 1)
+        or (entry.kind == "symlink" and len(entry.payloads) != SYMLINK_PAYLOADS)
+        for entry in selected
+    ):
+        return Err("invalid source census entry")
+    files = tuple(entry for entry in selected if entry.kind != "directory")
+    python = tuple(
+        entry
+        for entry in files
+        if entry.path.startswith(("src/", "tests/")) and entry.path.endswith(".py")
+    )
+    if not any(entry.path.startswith("src/") for entry in python) or not any(
+        entry.path.startswith("tests/") for entry in python
+    ):
+        return Ok(
+            (
+                SourceIssue(
+                    None, "validator.non-vacuous: Python source and tests are required"
+                ),
+            )
+        )
+    ordered = (
+        *sorted(entry for entry in python if entry.path.startswith("src/")),
+        *sorted(entry for entry in python if entry.path.startswith("tests/")),
+        *sorted(entry for entry in files if entry.path.endswith((".hs", ".c", ".h"))),
+    )
+    return Ok(
+        tuple(issue for entry in ordered for issue in _census_source_issues(entry))
+    )
+
+
+def _census_source_issues(entry: Entry) -> tuple[SourceIssue, ...]:
+    """Classify a captured file without reopening its live checkout path."""
+    try:
+        text = entry.payloads[-1].decode("utf-8")
+    except UnicodeError:
+        return (SourceIssue(entry.path, "src.parse: " + entry.path),)
+    if entry.path.endswith(".py"):
+        messages = tuple(
+            item
+            for item in python_source(text, entry.path)
+            if entry.path.startswith("src/") or item.startswith("src.suppression-ban:")
+        )
+    elif entry.path.endswith((".c", ".h")):
+        messages = native_source(text, entry.path)
+    else:
+        messages = haskell_source(text, entry.path)
+    return tuple(SourceIssue(entry.path, item) for item in messages)
 
 
 def configuration(root: Path) -> tuple[str, ...]:

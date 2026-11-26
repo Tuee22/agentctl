@@ -2,6 +2,7 @@
 """Closed host-lane predicates and full-pass-only evidence formatting."""
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -27,7 +28,16 @@ LANES: tuple[Lane, ...] = (
     "macos",
     "windows-psmux",
 )
-QUALIFICATIONS = ("checkout", "git", "mux", "agents", "authenticated", "clean", "xcode")
+QUALIFICATIONS = (
+    "checkout",
+    "git",
+    "mux",
+    "agents",
+    "authenticated",
+    "clean",
+    "xcode",
+    "debian",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,6 +60,7 @@ class HostFacts:
     authenticated: bool = False
     clean: bool = False
     xcode: bool = False
+    debian: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,6 +115,7 @@ def parse_host(value: object, nonce: str) -> Result[HostFacts, LaneError]:
             authenticated=bool(facts["authenticated"]),
             clean=bool(facts["clean"]),
             xcode=bool(facts["xcode"]),
+            debian=bool(facts["debian"]),
         )
     )
 
@@ -158,6 +170,39 @@ def architecture(family: str, observed: str) -> str:
         observed.lower(), observed.lower()
     )
     return "arm64" if family == "Darwin" and name == "aarch64" else name
+
+
+def debian_release(text: str) -> bool:
+    """Accept exactly one Debian ID from the native operating-system release."""
+    candidates = tuple(
+        line for line in text.splitlines() if re.match(r"^\s*ID\s*=", line)
+    )
+    if len(candidates) != 1:
+        return False
+    ids = re.findall(r'(?m)^ID=(?:"([^"\n]+)"|([^\s"\n]+))$', text)
+    return tuple(quoted or plain for quoted, plain in ids) == ("debian",)
+
+
+def phase_lane_host(lane: PhaseLane, facts: HostFacts) -> bool:
+    """Check the native family and base capabilities for one phase lane."""
+    arch = architecture(facts.family, facts.architecture)
+    base = facts.checkout and facts.git
+    linux = facts.family == "Linux" and arch in {"x86_64", "aarch64"} and facts.debian
+    windows = facts.family == "Windows" and arch == "x86_64"
+    macos = facts.family == "Darwin" and arch in {"x86_64", "arm64"}
+    return base and (
+        (linux and lane in {"linux", "linux-windows", "linux-macos"})
+        or (
+            linux
+            and lane == "linux-live-clean"
+            and facts.mux
+            and facts.agents
+            and facts.authenticated
+            and facts.clean
+        )
+        or (windows and lane == "linux-windows")
+        or (macos and lane == "linux-macos")
+    )
 
 
 def evaluate(facts: HostFacts) -> tuple[LaneState, ...]:

@@ -5,15 +5,106 @@ from pathlib import Path
 
 import pytest
 
+from agentctl.check.evidence import Entry, source_census
+from agentctl.check.steps import _source_guard_observations
 from agentctl.check.validator.source import (
+    SourceIssue,
+    census_source_observations,
     configuration,
     native_source,
     python_source,
+    source_observations,
     sources,
 )
+from agentctl.foundation import Err, Ok
 
 pytestmark = pytest.mark.evidence("value")
 SUBJECT = "src/agentctl/subject.py"
+
+
+def test_source_observations_retain_inspected_path(tmp_path: Path) -> None:
+    """Source failures retain the file inspected, including unowned files."""
+    package = tmp_path / "src"
+    tests = tmp_path / "tests"
+    package.mkdir()
+    tests.mkdir()
+    (tests / "test_example.py").write_text("value = 1\n", encoding="utf-8")
+    (package / "later.py").write_text("import subprocess\n", encoding="utf-8")
+    expected = SourceIssue("src/later.py", "src.one-process-module: src/later.py")
+    assert source_observations(tmp_path) == (expected,), "source path was not captured"
+    assert sources(tmp_path) == (expected.message,)
+
+
+def test_source_guards_bind_census_to_live_walk(tmp_path: Path) -> None:
+    """Source findings use guarded bytes and refuse a changed live walk."""
+    package, tests = tmp_path / "src", tmp_path / "tests"
+    package.mkdir()
+    tests.mkdir()
+    subject = package / "later.py"
+    subject.write_text("import subprocess\n", encoding="utf-8")
+    (tests / "test_example.py").write_text("value = 1\n", encoding="utf-8")
+    captured = source_census(tmp_path)
+    assert isinstance(captured, Ok)
+    original = source_observations(tmp_path)
+    assert census_source_observations(captured.value) == Ok(original), (
+        "captured source walk differs from live source walk"
+    )
+    assert _source_guard_observations(captured, original) == original
+    subject.write_text("value = 2\n", encoding="utf-8")
+    live = source_observations(tmp_path)
+    assert not live
+    assert census_source_observations(captured.value) == Ok(original), (
+        "captured source bytes were replaced by live bytes"
+    )
+    assert _source_guard_observations(captured, live) == (
+        SourceIssue(None, "validator source census differs from live source walk"),
+    ), "changed source validation was accepted"
+    assert isinstance(
+        census_source_observations((*captured.value, captured.value[0])), Err
+    ), "duplicate source census was accepted"
+    invalid = (*captured.value, Entry("src/invalid.py", "symlink", (b"target",)))
+    assert isinstance(census_source_observations(invalid), Err), (
+        "invalid captured source was accepted"
+    )
+    escaped = (*captured.value, Entry("src/../other.py", "file", (b"pass",)))
+    assert isinstance(census_source_observations(escaped), Err), (
+        "noncanonical captured source was accepted"
+    )
+    assert _source_guard_observations(Err("no census"), live) == live
+    linked = (
+        *captured.value,
+        Entry("src/link.py", "symlink", (b"target", b"import subprocess\n")),
+    )
+    linked_result = census_source_observations(linked)
+    assert isinstance(linked_result, Ok)
+    assert (
+        SourceIssue("src/link.py", "src.one-process-module: src/link.py")
+        in linked_result.value
+    ), "captured link target was not inspected"
+
+
+def test_captured_source_walk_matches_native_and_invalid_text(tmp_path: Path) -> None:
+    """The census and live walks agree on native files and unreadable source bytes."""
+    package, tests = tmp_path / "src", tmp_path / "tests"
+    package.mkdir()
+    tests.mkdir()
+    (package / "invalid.py").write_bytes(b"\xff")
+    (package / "native.c").write_text(
+        '#pragma GCC diagnostic ignored "-Wunused"\n', encoding="utf-8"
+    )
+    (tests / "test_example.py").write_text("pass\n", encoding="utf-8")
+    fixtures = tests / "fixtures"
+    fixtures.mkdir()
+    (fixtures / "ignored.c").write_text(
+        '#pragma GCC diagnostic ignored "-Wunused"\n', encoding="utf-8"
+    )
+    captured = source_census(tmp_path)
+    assert isinstance(captured, Ok)
+    expected = source_observations(tmp_path)
+    assert tuple(issue.path for issue in expected) == ("src/invalid.py", "src/native.c")
+    assert census_source_observations(captured.value) == Ok(expected), (
+        "captured source walk differs from live source walk"
+    )
 
 
 def _reject(rule: str, source: str) -> None:
@@ -297,12 +388,12 @@ def test_coverage_exception_scope() -> None:
         ),
         (
             "src/agentctl/foundation_process_identity.py",
-            44,
+            50,
             "def _posix_alive(pid: int) -> Result[bool, SpawnError]:",
         ),
         (
             "src/agentctl/foundation_process_identity.py",
-            55,
+            61,
             "def _windows_alive(pid: int) -> Result[bool, SpawnError]:",
         ),
     ):

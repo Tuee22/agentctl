@@ -8,12 +8,14 @@ from pathlib import Path
 
 import pytest
 
+from agentctl.check import steps
 from agentctl.check.evidence import Entry, RunEvidence
 from agentctl.check.lanes import HostFacts, evaluate
 from agentctl.check.mutants import Mutant, Operator
 from agentctl.check.ownership import MutantOwnership, OwnershipManifest, bind_mutants
 from agentctl.check.phase_reports import ArtifactOwnership, OwnershipPhase
 from agentctl.check.plan_data import Phase, Sprint
+from agentctl.check.steps import _parent_validation_problems
 from agentctl.check.validator import closure
 from agentctl.check.validator.plan import (
     _invalid_dependency_direction,
@@ -279,6 +281,155 @@ def _execution() -> RunEvidence:
         (),
         ((CASE_ID, "value"),),
     )
+
+
+def test_undeclared_integrity_has_no_hidden_causes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An aggregate is attributable only when every other integrity check passes."""
+    _policy(tmp_path)
+    phase = _declaration(tmp_path)
+    record = Mutant(
+        "M-legs-control",
+        Operator.REPLACE_LITERAL,
+        "src/subject.py",
+        "x",
+        "y",
+        (CASE_ID,),
+        "control",
+    )
+    missing = replace(record, identifier="M-legs-undeclared")
+    captured = closure.CapturedPolicy(
+        ((record.identifier, 0), (missing.identifier, 0)),
+        (tmp_path / "DEVELOPMENT_PLAN/development_plan_standards.md").read_text(
+            encoding="utf-8"
+        ),
+        (tmp_path / "DEVELOPMENT_PLAN/00-overview.md").read_text(encoding="utf-8"),
+        frozenset({"tests/oracles/example.toml"}),
+    )
+    expected = (
+        "plan.gate-integrity: undeclared corpus mutant M-legs-undeclared",
+        "plan.gate-integrity: declaration or execution join",
+    )
+    assert closure.undeclared_only_integrity(
+        (phase,), (record, missing), captured
+    ) == Ok(expected), "undeclared-only integrity failure was not identified"
+    hidden_killer = replace(record, killers=("tests/unit/test_other.py::test_case",))
+    assert isinstance(
+        closure.undeclared_only_integrity((phase,), (hidden_killer, missing), captured),
+        Err,
+    ), "hidden killer mismatch was localized"
+    assert isinstance(
+        closure.undeclared_only_integrity(
+            (phase,), (record, missing), replace(captured, regular_files=frozenset())
+        ),
+        Err,
+    ), "hidden oracle absence was localized"
+    assert isinstance(
+        closure.undeclared_only_integrity(
+            (phase,), (record, missing), replace(captured, owners=None)
+        ),
+        Err,
+    ), "unverified mutant owners were accepted"
+    malformed = replace(phase, text=phase.text.replace("| R20", "| malformed R20"))
+    assert isinstance(
+        closure.undeclared_only_integrity((malformed,), (record, missing), captured),
+        Err,
+    ), "malformed integrity row was localized"
+    with monkeypatch.context() as patch:
+        patch.setattr(
+            closure, "gate_integrity", lambda *_args, **_kwargs: (*expected, "other")
+        )
+        assert isinstance(
+            closure.undeclared_only_integrity((phase,), (record, missing), captured),
+            Err,
+        ), "inconsistent integrity diagnostics were localized"
+    entries = (
+        Entry(
+            "DEVELOPMENT_PLAN/development_plan_standards.md",
+            "file",
+            (captured.standards.encode(),),
+        ),
+        Entry("DEVELOPMENT_PLAN/00-overview.md", "file", (captured.overview.encode(),)),
+        Entry("tests/oracles/example.toml", "file", (b"oracle",)),
+    )
+    owners = captured.owners
+    assert owners is not None
+    claims = ((record, missing), owners)
+    problems = (*expected, "independent validator failure")
+    assert steps.scoped_mutant_declaration_validation(
+        problems, Ok(entries), Ok((phase,)), claims
+    ) == ("independent validator failure",), "undeclared aggregate was globalized"
+    for invalid in (
+        (*problems, expected[0]),
+        (*problems, "plan.gate-integrity: unexpected issue"),
+        (expected[0], "independent validator failure"),
+    ):
+        assert (
+            steps.scoped_mutant_declaration_validation(
+                invalid, Ok(entries), Ok((phase,)), claims
+            )
+            == invalid
+        ), "ambiguous integrity aggregate was localized"
+    captured_run = steps.ProvisionalCapture(
+        Ok(entries),
+        Ok((phase,)),
+        steps.ToolOutcome(0, Err("unused"), Err("unused")),
+        claims,
+        Err("unused"),
+        "fresh",
+        (),
+        (),
+        validation=problems,
+    )
+    _assert_undeclared_integrity_routes(captured_run, expected, tmp_path, monkeypatch)
+
+
+def _assert_undeclared_integrity_routes(
+    captured: steps.ProvisionalCapture,
+    expected: tuple[str, ...],
+    root: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Both parent and child scope the same independently checked aggregate."""
+    assert isinstance(captured.census, Ok)
+    assert isinstance(captured.phases, Ok)
+    assert captured.claims is not None
+    entries = captured.census.value
+    declarations = captured.phases.value
+    owners = captured.claims[1]
+    monkeypatch.setattr(
+        steps, "_captured_phase_observations", lambda value: Ok(value.validation)
+    )
+    assert steps.captured_phase_observations(captured) == Ok(
+        ("independent validator failure",)
+    ), "child globalized undeclared integrity failure"
+    monkeypatch.setattr(
+        steps, "_parent_collection_capture", lambda *_args: Ok((declarations, captured))
+    )
+    monkeypatch.setattr(steps, "targets", lambda *_args: Ok(("src",)))
+    monkeypatch.setattr(steps, "complete_mutant_owners", lambda *_args: Ok(owners))
+    monkeypatch.setattr(steps, "python_target_census", lambda *_args: Ok(None))
+    monkeypatch.setattr(
+        steps, "docs", lambda *_args: ("independent validator failure",)
+    )
+    for name in (
+        "plan",
+        "source_ownership_problems",
+        "test_consumer_problems",
+        "coverage_host_problems",
+        "forbidden_surfaces",
+        "configuration",
+        "phase0_claim_problems",
+        "fragment_claim_problems",
+    ):
+        monkeypatch.setattr(steps, name, lambda *_args: ())
+    monkeypatch.setattr(steps.closure, "static", lambda *_args, **_kwargs: expected)
+    monkeypatch.setattr(steps, "_parent_bound_census", lambda *_args: Ok(entries))
+    context = steps.CheckRun(root, root / "run", "fresh", "Linux")
+    assert _parent_validation_problems(context, context.directory, "") == Ok(
+        ("independent validator failure",)
+    ), "parent globalized undeclared integrity failure"
 
 
 def test_explicit_mutant_owner_refusal(tmp_path: Path) -> None:

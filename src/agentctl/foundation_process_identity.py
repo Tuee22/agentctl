@@ -2,14 +2,20 @@
 """Native process identity observations shared by governance and runtime."""
 
 import ctypes
+import hashlib
 import os
+import stat
 import sys
 from pathlib import Path
 from typing import NamedTuple, Protocol, runtime_checkable
 
 from agentctl.check.process_identity import linux_birth_stat
 from agentctl.foundation import Err, Family, Ok, Result
-from agentctl.foundation_process_values import SpawnError
+from agentctl.foundation_process_values import (
+    ProcessImageFile,
+    ProcessObservation,
+    SpawnError,
+)
 
 PROCESS_QUERY = 0x1000
 INVALID_PID = 87
@@ -244,7 +250,7 @@ def linux_birth(pid: int) -> Result[int | None, SpawnError]:
         return Err(SpawnError("Linux process identity requires a positive Linux PID"))
     try:
         data = (Path("/proc") / str(pid) / "stat").read_bytes()
-    except FileNotFoundError:
+    except (FileNotFoundError, ProcessLookupError):
         state = alive("Linux", pid)
         if isinstance(state, Err):
             return state
@@ -268,6 +274,103 @@ def process_birth(family: Family, pid: int) -> Result[int | None, SpawnError]:
     if family == "Linux":
         return linux_birth(pid)
     return Err(SpawnError("process creation identity unavailable on this host"))
+
+
+def native_process_image(
+    family: Family, pid: int
+) -> Result[ProcessObservation, SpawnError]:
+    """Observe one live process image and retain its native creation identity."""
+    if isinstance(pid, bool) or pid <= 0:
+        return Err(SpawnError("process image requires a positive PID"))
+    if family == "Linux" and sys.platform == "linux":
+        return _linux_process_image(pid)
+    if family == "Windows" and sys.platform == "win32":
+        return _windows_process_image(pid)
+    return Err(SpawnError("native process image unavailable on this host"))
+
+
+def _linux_process_image(pid: int) -> Result[ProcessObservation, SpawnError]:
+    before = linux_birth(pid)
+    if isinstance(before, Err):
+        return before
+    if before.value is None:
+        return Err(SpawnError("process image is no longer live"))
+    try:
+        executable = Path("/proc") / str(pid) / "exe"
+        image = executable.resolve(strict=True)
+    except (OSError, RuntimeError) as exc:
+        return Err(SpawnError("cannot observe Linux process image: " + str(exc)))
+    observed = _process_image_file(image, executable)
+    if isinstance(observed, Err):
+        return observed
+    after = linux_birth(pid)
+    if isinstance(after, Err):
+        return after
+    return (
+        Ok(ProcessObservation("Linux", pid, before.value, image, observed.value))
+        if after == before
+        else Err(SpawnError("Linux process changed during image observation"))
+    )
+
+
+def _windows_process_image(pid: int) -> Result[ProcessObservation, SpawnError]:
+    before = windows_process_image(pid)
+    if isinstance(before, Err):
+        return before
+    try:
+        image = before.value.image.resolve(strict=True)
+    except (OSError, RuntimeError) as exc:
+        return Err(SpawnError("cannot resolve Windows process image: " + str(exc)))
+    observed = _process_image_file(image, image)
+    if isinstance(observed, Err):
+        return observed
+    after = windows_process_image(pid)
+    if isinstance(after, Err):
+        return after
+    return (
+        Ok(
+            ProcessObservation(
+                "Windows", pid, before.value.birth, image, observed.value
+            )
+        )
+        if after == before
+        else Err(SpawnError("Windows process changed during image observation"))
+    )
+
+
+def _process_file_facts(info: os.stat_result) -> tuple[int, int, int, int]:
+    return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns)
+
+
+def _process_image_file(
+    image: Path, executable: Path
+) -> Result[ProcessImageFile, SpawnError]:
+    """Bind stable file bytes to the live image path while the child is held."""
+    try:
+        before = image.stat()
+        if not stat.S_ISREG(before.st_mode) or not image.samefile(executable):
+            return Err(SpawnError("process image file does not match live image"))
+        with image.open("rb") as stream:
+            opened = os.fstat(stream.fileno())
+            digest = hashlib.file_digest(stream, "sha256").hexdigest()
+            stream.seek(0)
+            repeated = hashlib.file_digest(stream, "sha256").hexdigest()
+            closed = os.fstat(stream.fileno())
+        after = image.stat()
+        if (
+            digest != repeated
+            or before.st_ctime_ns != after.st_ctime_ns
+            or opened.st_ctime_ns != closed.st_ctime_ns
+            or any(
+                _process_file_facts(item) != _process_file_facts(before)
+                for item in (opened, closed, after)
+            )
+            or not image.samefile(executable)
+        ):
+            return Err(SpawnError("process image file changed during observation"))
+    except (OSError, RuntimeError, ValueError) as exc:
+        return Err(SpawnError("cannot observe process image file: " + str(exc)))
+    return Ok(ProcessImageFile(*_process_file_facts(before), digest))
 
 
 def registered_alive(

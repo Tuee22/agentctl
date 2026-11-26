@@ -292,3 +292,19 @@ revised_sha256 = "93c297650270739b8cc4ae3ce8f9650409366eede289857efa2749335df262
 search = "def orphan_modules(\n    root: Path,\n    collected: frozenset[str],\n    cited: frozenset[str],\n    support: frozenset[str],\n    failed_modules: frozenset[str] = frozenset(),\n) -> tuple[str, ...]:\n    \"\"\"Join filesystem modules to collection, failed collectors and support.\"\"\"\n    modules = frozenset(node.split(\"::\", 1)[0] for node in collected)\n    files = frozenset(\n        path.relative_to(root).as_posix() for path in (root / \"tests\").rglob(\"*.py\")\n    )\n    hidden_tests = frozenset(\n        path\n        for path in files\n        if (Path(path).name.startswith(\"test_\") or Path(path).name.endswith(\"_test.py\"))\n        and path in support\n    )\n    test_modules = modules | failed_modules\n    return tuple(\n        sorted(\n            (files - test_modules - support)\n            | (test_modules - cited)\n            | (failed_modules - files)\n            | hidden_tests\n        )\n    )"
 replace = "def orphan_modules(\n    root: Path,\n    collected: frozenset[str],\n    cited: frozenset[str],\n    support: frozenset[str],\n    failed_modules: frozenset[str] = frozenset(),\n) -> tuple[str, ...]:\n    \"\"\"Deliberate short circuit.\"\"\"\n    return ()"
 provenance = "decision:D-90"
+
+[[amendment]]
+id = "M-legs-drop-pytest"
+prior_sha256 = "2a0ffbc6d012a89df38a134f658532781011ade9d5ea3e7b82dc17804796efd7"
+revised_sha256 = "cf7dae7c9ad760c867aef574f8eb405f44ba66ff74020a86e1743d9ac30142a1"
+search = "Leg(\n            \"pytest\",\n            (\n                python,\n                \"-m\",\n                \"coverage\",\n                \"run\",\n                f\"--rcfile={config}\",\n                f\"--data-file={run_dir / 'coverage'}\",\n                \"--branch\",\n                \"--source=agentctl\",\n                \"-m\",\n                \"pytest\",\n                \"-c\",\n                config,\n                f\"--rootdir={root}\",\n                \"-p\",\n                \"no:cacheprovider\",\n                \"-p\",\n                \"pytester\",\n                \"-p\",\n                \"agentctl.check.gate_plugin\",\n                \"--continue-on-collection-errors\",\n                \"tests\",\n            ),\n            coverage_commands(python, root, run_dir, foreign),\n            after_failure=True,\n        ),"
+replace = ""
+provenance = "decision:D-110"
+
+[[amendment]]
+id = "M-legs-drop-ty"
+prior_sha256 = "16acfc8838e62ad116e08f4b36d9ce6fc7be3a0ee0b6c52853ed98fa2fd92b82"
+revised_sha256 = "accee377976a6715633dcae3ea0ab569c13355419df3e900c67e9d2113eccba7"
+search = "Leg(\n            \"ty\",\n            (\n                python,\n                \"-m\",\n                \"ty\",\n                \"check\",\n                \"--python\",\n                python,\n                \"--error-on-warning\",\n                \"--output-format=gitlab\",\n                *files,\n            ),\n        ),"
+replace = ""
+provenance = "decision:D-117"

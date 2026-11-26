@@ -8,10 +8,11 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 
-from agentctl.foundation import Err, Ok, Result
+from agentctl.foundation import Err, Family, Ok, Result
 from agentctl.foundation_process_identity import (
     alive,
     linux_birth,
+    native_process_image,
     process_birth,
     registered_alive,
     windows_birth,
@@ -21,6 +22,7 @@ from agentctl.foundation_process_values import ByteOutput, Output, SpawnError
 __all__ = [
     "ByteOutput",
     "Child",
+    "ObservationRequest",
     "Output",
     "SpawnError",
     "alive",
@@ -32,6 +34,7 @@ __all__ = [
     "replace",
     "run",
     "run_bytes",
+    "run_observed",
     "start",
     "start_protocol",
     "stop",
@@ -49,6 +52,15 @@ class Child:
     def pid(self) -> int:
         """Expose the operating-system pid observed after process creation."""
         return self.handle.pid
+
+
+@dataclass(frozen=True, slots=True)
+class ObservationRequest:
+    """Native family and release input for one observed process."""
+
+    family: Family
+    input_text: str
+    timeout: float = 600
 
 
 def run(
@@ -72,7 +84,7 @@ def run(
             input=None if input_text is None else input_text.encode("utf-8"),
         )
         return Ok(_decoded(child.returncode, child.stdout, child.stderr))
-    except (OSError, subprocess.TimeoutExpired, UnicodeError) as exc:
+    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
         return Err(SpawnError(str(exc)))
 
 
@@ -85,7 +97,7 @@ def run_bytes(
             argv, cwd=cwd, env=env, timeout=timeout, check=False, capture_output=True
         )
         return Ok(ByteOutput(child.returncode, child.stdout, child.stderr))
-    except (OSError, subprocess.TimeoutExpired) as exc:
+    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
         return Err(SpawnError(str(exc)))
 
 
@@ -102,7 +114,7 @@ def start(
             stderr=subprocess.PIPE,
             text=False,
         )
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         return Err(SpawnError(str(exc)))
     return Ok(Child(handle))
 
@@ -121,7 +133,7 @@ def start_protocol(
             stderr=subprocess.PIPE,
             text=False,
         )
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         return Err(SpawnError(str(exc)))
     return Ok(Child(handle))
 
@@ -146,7 +158,7 @@ def replace(argv: list[str], *, env: Mapping[str, str]) -> Result[int, SpawnErro
     """Replace this process with inherited terminal handles and literal arguments."""
     try:
         os.execve(argv[0], argv, dict(env))
-    except OSError as exc:
+    except (OSError, ValueError, IndexError) as exc:
         return Err(SpawnError(str(exc)))
 
 
@@ -165,7 +177,7 @@ def foreground(
                     return Ok(status.result())
                 except KeyboardInterrupt:
                     continue
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         return Err(SpawnError(str(exc)))
 
 
@@ -186,6 +198,49 @@ def finish(
         return Ok(_decoded(code, stdout, stderr))
     except (OSError, subprocess.TimeoutExpired, UnicodeError, ValueError) as exc:
         return Err(SpawnError(str(exc)))
+
+
+def run_observed(
+    argv: list[str],
+    *,
+    cwd: Path,
+    env: Mapping[str, str],
+    request: ObservationRequest,
+) -> Result[Output, SpawnError]:
+    """Observe an owned child before releasing its explicit input protocol."""
+    if not request.input_text:
+        return Err(SpawnError("observed child requires explicit input"))
+    started = start_protocol(argv, cwd=cwd, env=env)
+    if isinstance(started, Err):
+        return started
+    child = started.value
+    observed = native_process_image(request.family, child.pid)
+    completed = finish(child, timeout=request.timeout, input_text=request.input_text)
+    if isinstance(completed, Ok):
+        return Ok(
+            Output(
+                completed.value.code,
+                completed.value.stdout,
+                completed.value.stderr,
+                observed,
+            )
+        )
+    cleaned = stop(child)
+    if isinstance(cleaned, Err):
+        return Err(
+            SpawnError(completed.error.message + "; cleanup: " + cleaned.error.message)
+        )
+    return Ok(
+        Output(
+            1,
+            cleaned.value.stdout,
+            cleaned.value.stderr
+            + "\nprocess failure: "
+            + completed.error.message
+            + "\n",
+            observed,
+        )
+    )
 
 
 def _decoded(code: int, stdout: bytes, stderr: bytes) -> Output:

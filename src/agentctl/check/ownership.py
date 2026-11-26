@@ -88,6 +88,14 @@ class MutantScope:
 
 
 @dataclass(frozen=True, slots=True)
+class ScopedMutantMapping:
+    """Declared owners and mandatory phase-local ownership failures."""
+
+    owners: tuple[tuple[str, int], ...]
+    scopes: tuple[MutantScope, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class OracleScope:
     """Oracle diagnostics for one consumer, not a phase verdict."""
 
@@ -448,6 +456,42 @@ def bind_mutants_observed(
     )
 
 
+def bind_mutants_with_missing_inputs(
+    manifest: OwnershipManifest,
+    entries: tuple[Entry, ...],
+    records: tuple[Mutant, ...],
+    claims: tuple[MutantOwnership, ...],
+    native_sources: tuple[tuple[str, str], ...] | None,
+) -> Result[tuple[tuple[str, int], ...], str]:
+    """Bind present mutant inputs while keeping other declared absences explicit.
+
+    Missing source bytes are never synthesized. Callers must independently
+    attribute every absent required artifact to its consumers before a verdict.
+    """
+    paths = tuple(entry.path for entry in entries)
+    missing = tuple(
+        artifact.path
+        for artifact in manifest.artifacts
+        if artifact.required and artifact.path not in paths
+    )
+    if not missing:
+        return Err("no missing required inputs to scope")
+    checked = ownership_inputs(manifest.phases, manifest.artifacts, (*paths, *missing))
+    if isinstance(checked, Err):
+        return checked
+    for entry in entries:
+        encoded = _entry_bytes(entry)
+        if isinstance(encoded, Err):
+            return encoded
+    return (
+        _bind_mutants_after_census(manifest, entries, records, claims)
+        if native_sources is None
+        else _bind_observed_after_census(
+            manifest, entries, records, claims, native_sources
+        )
+    )
+
+
 def _bind_observed_after_census(
     manifest: OwnershipManifest,
     entries: tuple[Entry, ...],
@@ -656,6 +700,47 @@ def attribute_mutant_claims(
     )
 
 
+def scoped_mutant_mapping(
+    manifest: OwnershipManifest,
+    entries: tuple[Entry, ...],
+    records: tuple[Mutant, ...],
+    claims: tuple[MutantOwnership, ...],
+    native_sources: tuple[tuple[str, str], ...] | None = None,
+) -> Result[ScopedMutantMapping, str]:
+    """Derive declared owners together with all mandatory unresolved failures.
+
+    This mapping is provisional; every returned failure must be joined to its
+    phase before the mapping can contribute to any authenticated result.
+    """
+    scoped = attribute_mutant_claims(manifest, entries, records, claims, native_sources)
+    if isinstance(scoped, Err):
+        return scoped
+    artifacts = {artifact.path: artifact for artifact in manifest.artifacts}
+    files = frozenset(entry.path for entry in entries if entry.kind == "file")
+    if native_sources is not None and any(
+        path not in files
+        or path not in artifacts
+        or re.fullmatch(r"src/agentctl/haskell/test/[A-Za-z0-9_-]+\.hs", path) is None
+        or re.fullmatch(
+            r"haskell:agentctl-core-test/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+", node
+        )
+        is None
+        for node, path in native_sources
+    ):
+        return Err("native source ownership is invalid")
+    return Ok(
+        ScopedMutantMapping(
+            tuple(
+                sorted(
+                    (record.identifier, artifacts[record.target].owner)
+                    for record in records
+                )
+            ),
+            scoped.value,
+        )
+    )
+
+
 def census_matches_guard(
     entries: tuple[Entry, ...], facts: tuple[FileFact, ...]
 ) -> Result[None, str]:
@@ -768,11 +853,10 @@ def guarded_census(
                 return Err("source census differs from original write guard")
             if first != last:
                 return Err("checkout changed during source census")
-            match census_matches_guard(entries, first):
-                case Err(error):
-                    return Err(error)
-                case Ok():
-                    return _guard_links(root, entries, first)
+            matched = census_matches_guard(entries, first)
+            if isinstance(matched, Err):
+                return matched
+            return _guard_links(root, entries, first)
         case _:
             return Err("unable to read source census and guard snapshots")
 
@@ -799,18 +883,15 @@ def bind_census(
     inputs = ownership_inputs(
         manifest.phases, manifest.artifacts, tuple(entry.path for entry in entries)
     )
-    match inputs:
-        case Err(error):
-            return Err(error)
-        case Ok(phase_inputs):
-            sources: tuple[tuple[str, bytes], ...] = ()
-            for entry in sorted(entries):
-                match _entry_bytes(entry):
-                    case Err(error):
-                        return Err(error)
-                    case Ok(payload):
-                        sources += ((entry.path, payload),)
-            return Ok(OwnershipSnapshot(phase_inputs, sources))
+    if isinstance(inputs, Err):
+        return inputs
+    sources: tuple[tuple[str, bytes], ...] = ()
+    for entry in sorted(entries):
+        payload = _entry_bytes(entry)
+        if isinstance(payload, Err):
+            return payload
+        sources += ((entry.path, payload.value),)
+    return Ok(OwnershipSnapshot(inputs.value, sources))
 
 
 def phase_work(
@@ -829,26 +910,25 @@ def phase_work(
         or any(not assigned or "" in assigned for _number, assigned in checks)
     ):
         return Err("invalid phase check assignments")
-    match bind_census(manifest, entries):
-        case Err(error):
-            return Err(error)
-        case Ok(snapshot):
-            input_map = dict(snapshot.phase_inputs)
-            check_map = dict(checks)
-            return Ok(
-                PhaseWork(
-                    tuple(
-                        PhaseInputs(
-                            phase.number,
-                            input_map[phase.number],
-                            check_map[phase.number],
-                            phase.prerequisites,
-                        )
-                        for phase in manifest.phases
-                    ),
-                    snapshot.sources,
+    bound = bind_census(manifest, entries)
+    if isinstance(bound, Err):
+        return bound
+    input_map = dict(bound.value.phase_inputs)
+    check_map = dict(checks)
+    return Ok(
+        PhaseWork(
+            tuple(
+                PhaseInputs(
+                    phase.number,
+                    input_map[phase.number],
+                    check_map[phase.number],
+                    phase.prerequisites,
                 )
-            )
+                for phase in manifest.phases
+            ),
+            bound.value.sources,
+        )
+    )
 
 
 def scoped_phase_work(
@@ -965,11 +1045,7 @@ def _mutant_claim(value: TomlValue) -> Result[MutantOwnership, str]:
 def _killer_source_item(
     result: Result[tuple[str, str], str],
 ) -> tuple[tuple[str, str], ...]:
-    match result:
-        case Ok(value):
-            return (value,)
-        case Err():
-            return ()
+    return (result.value,) if isinstance(result, Ok) else ()
 
 
 def parse_mutant_claims(text: str) -> Result[tuple[MutantOwnership, ...], str]:
@@ -997,11 +1073,7 @@ def parse_mutant_claims(text: str) -> Result[tuple[MutantOwnership, ...], str]:
 def _mutant_claim_item(
     result: Result[MutantOwnership, str],
 ) -> tuple[MutantOwnership, ...]:
-    match result:
-        case Ok(value):
-            return (value,)
-        case Err():
-            return ()
+    return (result.value,) if isinstance(result, Ok) else ()
 
 
 def _numbers(value: TomlValue) -> Result[frozenset[int], str]:
@@ -1022,11 +1094,7 @@ def _numbers(value: TomlValue) -> Result[frozenset[int], str]:
 
 
 def _number_item(value: Result[int, str]) -> tuple[int, ...]:
-    match value:
-        case Ok(number):
-            return (number,)
-        case Err():
-            return ()
+    return (value.value,) if isinstance(value, Ok) else ()
 
 
 def _phase(value: TomlValue) -> Result[OwnershipPhase, str]:
@@ -1067,21 +1135,13 @@ def _artifact(value: TomlValue) -> Result[ArtifactOwnership, str]:
 
 
 def _phase_item(value: Result[OwnershipPhase, str]) -> tuple[OwnershipPhase, ...]:
-    match value:
-        case Ok(phase):
-            return (phase,)
-        case Err():
-            return ()
+    return (value.value,) if isinstance(value, Ok) else ()
 
 
 def _artifact_item(
     value: Result[ArtifactOwnership, str],
 ) -> tuple[ArtifactOwnership, ...]:
-    match value:
-        case Ok(artifact):
-            return (artifact,)
-        case Err():
-            return ()
+    return (value.value,) if isinstance(value, Ok) else ()
 
 
 def parse_manifest(text: str) -> Result[OwnershipManifest, str]:
@@ -1123,11 +1183,9 @@ def parse_manifest(text: str) -> Result[OwnershipManifest, str]:
             )
             required = tuple(item.path for item in result.artifacts if item.required)
             checked = ownership_inputs(result.phases, result.artifacts, required)
-            match checked:
-                case Err(error):
-                    return Err(error)
-                case Ok():
-                    return Ok(result)
+            if isinstance(checked, Err):
+                return checked
+            return Ok(result)
     return Err("invalid ownership manifest fields")
 
 

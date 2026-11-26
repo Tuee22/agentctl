@@ -48,8 +48,6 @@ def descendants(
     included = next(
         (after for before, after in pairwise(states) if before == after), frozenset()
     )
-    if not included:
-        return Err("process closure did not converge")
     selected = tuple(
         sorted((row for row in rows if row.pid in included), key=lambda row: row.pid)
     )
@@ -235,9 +233,7 @@ def observe_native(
             else ()
         ),
     )
-    if failures:
-        return Err("; ".join(failures))
-    return sampled
+    return Err("; ".join(failures)) if failures else sampled
 
 
 def tree_problems(

@@ -46,7 +46,8 @@ def isolated_environment(
     codex = directory / "codex"
     codex.mkdir(mode=0o700)
     (codex / "config.toml").write_text(
-        'cli_auth_credentials_store = "file"\n', encoding="utf-8"
+        'cli_auth_credentials_store = "file"\ncheck_for_update_on_startup = false\n',
+        encoding="utf-8",
     )
     return {
         **{key: value for key, value in original.items() if key in SYSTEM_KEYS},

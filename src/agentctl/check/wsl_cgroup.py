@@ -203,8 +203,6 @@ def _sample(
     boundary = boundary_path.resolve(strict=True)
     if leaf != leaf_path or boundary != boundary_path:
         return Err("cgroup path contains a filesystem alias")
-    if not leaf.is_relative_to(boundary) or not boundary.is_relative_to(root):
-        return Err("cgroup path escaped observation root")
     limits = tuple(
         (
             (directory / "cpu.max").read_text(encoding="ascii").strip(),

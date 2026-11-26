@@ -259,6 +259,60 @@ def test_mutant_amendments_are_append_only() -> None:
             assert isinstance(current, Err)
 
 
+@pytest.mark.evidence("value")
+def test_mutant_amendment_chain_is_append_only() -> None:
+    """Each later revision remains separately protected and beside its mutant."""
+    original = '[[mutant]]\nid = "M-example-one"\nsearch = "old"\n'
+    first = '[[amendment]]\nid = "M-example-one"\nsearch = "new"\n'
+    second = (
+        '[[amendment]]\nid = "M-example-one"\n'
+        f'prior_sha256 = "{"a" * 64}"\nsearch = "newer"\n'
+    )
+    baseline = rows(original + first, "mutant")
+    current = rows(original + first + second, "mutant")
+    assert isinstance(baseline, Ok)
+    assert isinstance(current, Ok), "valid amendment revision was rejected"
+    assert append_only(baseline.value, current.value) == ()
+    assert len(current.value) == len(baseline.value) + 1
+    third = second.replace('"' + "a" * 64 + '"', '"' + "b" * 64 + '"')
+    assert isinstance(rows(original + first + second + third, "mutant"), Ok), (
+        "distinct amendment revisions were conflated"
+    )
+    assert append_only(current.value, baseline.value)
+    changed_second = rows(
+        original + first + second.replace('"newer"', '"changed"'), "mutant"
+    )
+    assert isinstance(changed_second, Ok)
+    assert append_only(current.value, changed_second.value)
+    assert isinstance(rows(original + first + second + second, "mutant"), Err)
+    altered = rows(original + first.replace('"new"', '"other"') + second, "mutant")
+    assert isinstance(altered, Ok)
+    assert append_only(baseline.value, altered.value)
+    assert (
+        relocation_problems(
+            tuple(("tests/mutants/one.toml", row) for row in baseline.value),
+            tuple(("tests/mutants/one.toml", row) for row in current.value),
+            (),
+            "",
+        )
+        == ()
+    ), "valid amendment revision was rejected"
+    assert relocation_problems(
+        tuple(("tests/mutants/one.toml", row) for row in baseline.value),
+        tuple(
+            (
+                "tests/mutants/other.toml"
+                if row.identifier.startswith("amendment:M-example-one:")
+                else "tests/mutants/one.toml",
+                row,
+            )
+            for row in current.value
+        ),
+        (),
+        "",
+    ), "a separated amendment revision was accepted"
+
+
 @pytest.mark.evidence("real")
 def test_head_adapter_real(tmp_path: Path) -> None:
     """Read actual loose git objects, distinguishing absent and corrupt HEAD."""

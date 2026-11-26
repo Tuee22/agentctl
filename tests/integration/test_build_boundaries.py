@@ -1,13 +1,14 @@
 # Copyright (c) 2026 agentctl contributors.
 """Native Cabal and real filesystem failure boundaries without replacement tools."""
 
+import platform
 from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
 from agentctl.bootstrap import build
-from agentctl.check import haskell
+from agentctl.check import haskell, steps
 from agentctl.result import Err, Ok
 from tests.harness.bootstrap import context, native_tools
 from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
@@ -15,6 +16,45 @@ from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixtu
 haskell_build = _haskell_build_fixture
 
 pytestmark = pytest.mark.evidence("real")
+
+
+def test_native_artifact_change_preserves_suite_failure(
+    haskell_build: build.BuildContext, tmp_path: Path
+) -> None:
+    """An actual native artifact mismatch retains the earlier suite failure."""
+    facts = haskell.native_artifact_facts(haskell_build)
+    assert isinstance(facts, Ok), facts
+    name, path, digest = facts.value[0]
+    changed = ((name, path, "0" * len(digest)), *facts.value[1:])
+    result = haskell.__dict__["_record_native_artifacts"](
+        haskell_build, tmp_path, "fresh", changed, Err(build.BuildError("suite failed"))
+    )
+    assert isinstance(result, Err), "changed native artifacts were accepted"
+    assert "suite failed" in result.error.message
+    assert "identity changed" in result.error.message, (
+        "native artifact change was accepted"
+    )
+    assert not (tmp_path / "native-artifacts.json").exists()
+
+
+def test_parent_resolves_selected_native_artifacts(
+    haskell_build: build.BuildContext,
+    root: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The parent checks the actual files selected by the application build path."""
+    family = platform.system()
+    assert family in {"Linux", "Darwin", "Windows"}
+    monkeypatch.setattr(
+        haskell.binary, "check_context", lambda *_args: Ok(haskell_build)
+    )
+    actual = steps.__dict__["_selected_native_artifacts"](
+        steps.CheckRun(root, tmp_path, "fresh", family)
+    )
+    expected = haskell.native_artifact_facts(haskell_build)
+    assert isinstance(expected, Ok), expected
+    assert actual == Ok(expected.value), "selected native artifacts were not observed"
 
 
 def _owned(directory: Path) -> build.BuildContext:

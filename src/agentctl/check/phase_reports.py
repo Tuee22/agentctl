@@ -2,11 +2,13 @@
 """Pure phase-input and outcome calculations; no receipt is issued here."""
 
 import hashlib
+import json
 import re
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 from typing import Literal
 
+from agentctl.check import lanes
 from agentctl.check.evidence import LegEvidence, RunEvidence, ToolSubsteps
 from agentctl.foundation import Err, Ok, Result
 
@@ -16,6 +18,7 @@ ATTRIBUTED_COLLECTION_FIELDS = 3
 SCOPED_COLLECTION_FIELDS = 4
 PYTEST_COMBINE_STEPS = 2
 PYTEST_FULL_STEPS = 3
+RECEIPT_PAIR_FIELDS = 2
 
 
 @dataclass(frozen=True, slots=True)
@@ -304,17 +307,22 @@ def ownership_inputs(
         not phases
         or not artifacts
         or numbers != tuple(range(len(numbers)))
+        or any(isinstance(number, bool) for number in numbers)
         or any(number < 0 for number in numbers)
         or len(set(paths)) != len(paths)
         or len(set(observed_paths)) != len(observed_paths)
         or any(not _canonical_path(path) for path in (*paths, *observed_paths))
         or any(
-            dependency not in numbers or dependency >= phase.number
+            isinstance(dependency, bool)
+            or dependency not in numbers
+            or dependency >= phase.number
             for phase in phases
             for dependency in phase.prerequisites
         )
         or any(
-            artifact.owner not in numbers
+            isinstance(artifact.owner, bool)
+            or any(isinstance(consumer, bool) for consumer in artifact.consumers)
+            or artifact.owner not in numbers
             or artifact.owner not in artifact.consumers
             or not artifact.consumers <= frozenset(numbers)
             or not re.fullmatch(r"[a-z][a-z0-9-]*", artifact.capability)
@@ -418,7 +426,7 @@ def native_case_failures(
         or manifest.nonce != nonce
         or not numbers
         or len(valid_numbers) != len(numbers)
-        or any(number < 0 for number in numbers)
+        or any(isinstance(number, bool) or number < 0 for number in numbers)
         or not manifest.collected
         or manifest.collected != manifest.executed
         or not manifest.passed <= manifest.executed
@@ -426,11 +434,16 @@ def native_case_failures(
         or frozenset(by_case) != manifest.collected
         or len(by_source) != len(consumers)
         or any(
-            not owners or not owners <= valid_numbers for owners in by_source.values()
+            not owners
+            or any(isinstance(owner, bool) for owner in owners)
+            or not owners <= valid_numbers
+            for owners in by_source.values()
         )
         or any(path not in by_source for path in by_case.values())
         or any(
-            number not in valid_numbers or not node.startswith("haskell:")
+            isinstance(number, bool)
+            or number not in valid_numbers
+            or not node.startswith("haskell:")
             for number, node in citations
         )
         or any(
@@ -445,6 +458,9 @@ def native_case_failures(
         return Err("invalid native failure records")
     declared = frozenset(citations)
     unexplained = not failures and "native-command-failed" in manifest.forbidden
+    native_consumers = frozenset(
+        owner for source in by_case.values() for owner in by_source[source]
+    ) | frozenset(owner for owner, _node in citations)
     return Ok(
         tuple(
             (
@@ -465,7 +481,7 @@ def native_case_failures(
                 )
                 | (
                     frozenset({"unexplained native command failure"})
-                    if unexplained
+                    if unexplained and number in native_consumers
                     else frozenset[str]()
                 ),
             )
@@ -601,7 +617,10 @@ def collection_failures(
         not scopes
         or len(set(numbers)) != len(numbers)
         or any(
-            scope.number < 0 or not scope.required or not scope.modules
+            isinstance(scope.number, bool)
+            or scope.number < 0
+            or not scope.required
+            or not scope.modules
             for scope in scopes
         )
         or any(not name for scope in scopes for name in scope.required | scope.modules)
@@ -620,7 +639,8 @@ def collection_failures(
         or any(
             not consumers
             or any(
-                not any(
+                isinstance(owner, bool)
+                or not any(
                     scope.number == owner and node.split("::", 1)[0] in scope.modules
                     for scope in scopes
                 )
@@ -650,7 +670,10 @@ def collection_failures(
             re.fullmatch(r"M-[a-z0-9-]+", identifier) is None
             for identifier in identifiers
         )
-        or any(owner not in numbers for _identifier, owner in mappings)
+        or any(
+            isinstance(owner, bool) or owner not in numbers
+            for _identifier, owner in mappings
+        )
         or any(
             "tests/governance/test_mutants.py" not in scope.modules
             for _identifier, owner in mappings
@@ -738,6 +761,7 @@ class ReceiptRequirement:
     """Current expected logical identity and evidence for one capability."""
 
     capability: str
+    lane: lanes.PhaseLane
     identity: str
     families: frozenset[NativeFamily]
     native_identities: frozenset[tuple[NativeFamily, str]]
@@ -755,6 +779,7 @@ class Receipt:
     capability: str
     family: NativeFamily
     host_family: NativeFamily
+    host_facts: lanes.HostFacts
     identity: str
     native_identity: str
     nonce: str
@@ -763,6 +788,35 @@ class Receipt:
     mutants: frozenset[str]
     coverage: frozenset[str]
     prerequisites: frozenset[tuple[str, str]]
+    diagnostics: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ReceiptGroup:
+    """Expected capability and supplied native receipts for one numbered phase."""
+
+    number: int
+    requirement: ReceiptRequirement
+    receipts: tuple[Receipt, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ReceiptRecordGroup:
+    """Canonical receipt bytes supplied for one capability's native lanes."""
+
+    number: int
+    requirement: ReceiptRequirement
+    records: tuple[bytes, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ReceiptAggregate:
+    """Calculated receipt failures; this is not authenticated run evidence."""
+
+    number: int
+    capability: str
+    identity: str
+    failures: frozenset[str]
 
 
 def hardware_budget(families: frozenset[NativeFamily]) -> bool:
@@ -771,6 +825,225 @@ def hardware_budget(families: frozenset[NativeFamily]) -> bool:
         "linux" in families
         and families <= {"linux", "windows", "macos"}
         and not {"windows", "macos"} <= families
+    )
+
+
+def _receipt_text(value: object) -> bool:
+    """Require a nonempty string at a receipt identity boundary."""
+    return isinstance(value, str) and bool(value)
+
+
+def _receipt_phase_number(value: object) -> bool:
+    """Require an integer phase identifier without accepting Boolean aliases."""
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def _receipt_text_set(value: object) -> bool:
+    """Require immutable, nonempty-string evidence members; an empty set is valid."""
+    return isinstance(value, frozenset) and all(_receipt_text(item) for item in value)
+
+
+def _receipt_pairs(value: object) -> bool:
+    """Require immutable pairs of nonempty strings before destructuring them."""
+    return isinstance(value, frozenset) and all(
+        isinstance(item, tuple)
+        and len(item) == RECEIPT_PAIR_FIELDS
+        and all(_receipt_text(part) for part in item)
+        for item in value
+    )
+
+
+def _receipt_diagnostics(value: object) -> bool:
+    """Require an immutable sequence of nonempty retained messages."""
+    return isinstance(value, tuple) and all(_receipt_text(item) for item in value)
+
+
+def _receipt_host(value: object, family: str, lane: lanes.PhaseLane) -> bool:
+    """Require typed host facts without authenticating their origin."""
+    return (
+        isinstance(value, lanes.HostFacts)
+        and _receipt_text(value.architecture)
+        and value.family
+        == {"linux": "Linux", "windows": "Windows", "macos": "Darwin"}.get(family)
+        and all(isinstance(getattr(value, name), bool) for name in lanes.QUALIFICATIONS)
+        and lanes.phase_lane_host(lane, value)
+    )
+
+
+def _receipt_fields_valid(receipt: Receipt) -> bool:
+    """Check the complete value shape without claiming its origin is authentic."""
+    host = receipt.host_facts
+    return (
+        _receipt_text(receipt.capability)
+        and receipt.family in ("linux", "windows", "macos")
+        and receipt.host_family == receipt.family
+        and isinstance(host, lanes.HostFacts)
+        and host.family
+        == {"linux": "Linux", "windows": "Windows", "macos": "Darwin"}.get(
+            receipt.family
+        )
+        and _receipt_text(host.architecture)
+        and all(isinstance(getattr(host, name), bool) for name in lanes.QUALIFICATIONS)
+        and _receipt_text(receipt.identity)
+        and _receipt_text(receipt.native_identity)
+        and _receipt_text(receipt.nonce)
+        and isinstance(receipt.passed, bool)
+        and _receipt_text_set(receipt.tests)
+        and _receipt_text_set(receipt.mutants)
+        and _receipt_text_set(receipt.coverage)
+        and _receipt_pairs(receipt.prerequisites)
+        and _receipt_diagnostics(receipt.diagnostics)
+    )
+
+
+def receipt_bytes(receipt: Receipt) -> Result[bytes, str]:
+    """Encode a complete receipt value canonically; this does not authenticate it."""
+    if not _receipt_fields_valid(receipt):
+        return Err("invalid receipt value")
+    host = receipt.host_facts
+    return Ok(
+        json.dumps(
+            {
+                "version": 1,
+                "capability": receipt.capability,
+                "family": receipt.family,
+                "host_family": receipt.host_family,
+                "host_facts": {
+                    "family": host.family,
+                    "architecture": host.architecture,
+                    **{name: getattr(host, name) for name in lanes.QUALIFICATIONS},
+                },
+                "identity": receipt.identity,
+                "native_identity": receipt.native_identity,
+                "nonce": receipt.nonce,
+                "passed": receipt.passed,
+                "tests": sorted(receipt.tests),
+                "mutants": sorted(receipt.mutants),
+                "coverage": sorted(receipt.coverage),
+                "prerequisites": sorted(receipt.prerequisites),
+                "diagnostics": list(receipt.diagnostics),
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        ).encode("ascii")
+    )
+
+
+def _unique_receipt_fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    """Reject duplicate JSON object keys before constructing a receipt value."""
+    result = dict(pairs)
+    if len(result) != len(pairs):
+        message = "duplicate receipt field"
+        raise ValueError(message)
+    return result
+
+
+def _receipt_list(value: object) -> frozenset[str] | None:
+    """Decode a unique ordered list of nonempty evidence identifiers."""
+    if (
+        not isinstance(value, list)
+        or any(not _receipt_text(item) for item in value)
+        or len(value) != len(set(value))
+    ):
+        return None
+    return frozenset(str(item) for item in value)
+
+
+def _receipt_pair_list(value: object) -> frozenset[tuple[str, str]] | None:
+    """Decode unique prerequisite identity pairs."""
+    if not isinstance(value, list) or any(
+        not isinstance(item, list)
+        or len(item) != RECEIPT_PAIR_FIELDS
+        or any(not _receipt_text(part) for part in item)
+        for item in value
+    ):
+        return None
+    pairs = tuple((str(item[0]), str(item[1])) for item in value)
+    return frozenset(pairs) if len(pairs) == len(set(pairs)) else None
+
+
+def parse_receipt(contents: bytes) -> Result[Receipt, str]:
+    """Decode only complete canonical records; callers must authenticate the run."""
+    try:
+        value: object = json.loads(contents, object_pairs_hook=_unique_receipt_fields)
+    except (UnicodeError, ValueError, RecursionError):
+        return Err("invalid receipt JSON")
+    if not isinstance(value, dict) or set(value) != {
+        "version",
+        "capability",
+        "family",
+        "host_family",
+        "host_facts",
+        "identity",
+        "native_identity",
+        "nonce",
+        "passed",
+        "tests",
+        "mutants",
+        "coverage",
+        "prerequisites",
+        "diagnostics",
+    }:
+        return Err("invalid receipt fields")
+    family, nonce = value["family"], value["nonce"]
+    if (
+        type(value["version"]) is not int
+        or value["version"] != 1
+        or not _receipt_text(nonce)
+        or not isinstance(nonce, str)
+        or not isinstance(value["passed"], bool)
+        or not isinstance(value["diagnostics"], list)
+        or any(not _receipt_text(item) for item in value["diagnostics"])
+    ):
+        return Err("invalid receipt values")
+    native_family: NativeFamily
+    match family:
+        case "linux":
+            native_family = "linux"
+        case "windows":
+            native_family = "windows"
+        case "macos":
+            native_family = "macos"
+        case _:
+            return Err("invalid receipt values")
+    host = lanes.parse_host({"nonce": nonce, "facts": value["host_facts"]}, nonce)
+    tests = _receipt_list(value["tests"])
+    mutants = _receipt_list(value["mutants"])
+    coverage = _receipt_list(value["coverage"])
+    prerequisites = _receipt_pair_list(value["prerequisites"])
+    if (
+        isinstance(host, Err)
+        or value["host_family"] != native_family
+        or tests is None
+        or mutants is None
+        or coverage is None
+        or prerequisites is None
+        or not all(
+            isinstance(value[name], str)
+            for name in ("capability", "host_family", "identity", "native_identity")
+        )
+    ):
+        return Err("invalid receipt values")
+    receipt = Receipt(
+        capability=str(value["capability"]),
+        family=native_family,
+        host_family=native_family,
+        host_facts=host.value,
+        identity=str(value["identity"]),
+        native_identity=str(value["native_identity"]),
+        nonce=nonce,
+        passed=value["passed"],
+        tests=tests,
+        mutants=mutants,
+        coverage=coverage,
+        prerequisites=prerequisites,
+        diagnostics=tuple(value["diagnostics"]),
+    )
+    return (
+        Ok(receipt)
+        if receipt_bytes(receipt) == Ok(contents)
+        else Err("invalid or noncanonical receipt")
     )
 
 
@@ -784,10 +1057,27 @@ def validate_receipts(
     observations or establish historical authenticity.
     """
     if (
-        not requirement.capability
-        or not requirement.identity
+        not _receipt_text(requirement.capability)
+        or not _receipt_text(requirement.lane)
+        or requirement.lane
+        not in {"linux", "linux-windows", "linux-macos", "linux-live-clean"}
+        or not _receipt_text(requirement.identity)
         or not requirement.tests
+        or not _receipt_text_set(requirement.tests)
+        or not _receipt_text_set(requirement.mutants)
+        or not _receipt_text_set(requirement.coverage)
+        or not _receipt_text_set(requirement.families)
         or not hardware_budget(requirement.families)
+        or requirement.families
+        != {
+            "linux": frozenset({"linux"}),
+            "linux-windows": frozenset({"linux", "windows"}),
+            "linux-macos": frozenset({"linux", "macos"}),
+            "linux-live-clean": frozenset({"linux"}),
+        }[requirement.lane]
+        or not _receipt_pairs(requirement.native_identities)
+        or not _receipt_pairs(requirement.run_nonces)
+        or not _receipt_pairs(requirement.prerequisites)
         or frozenset(family for family, _identity in requirement.native_identities)
         != requirement.families
         or len(requirement.native_identities) != len(requirement.families)
@@ -803,7 +1093,8 @@ def validate_receipts(
         return ("invalid requirement",)
     families = tuple(receipt.family for receipt in receipts)
     if (
-        len(set(families)) != len(families)
+        any(not _receipt_text(family) for family in families)
+        or len(set(families)) != len(families)
         or frozenset(families) != requirement.families
     ):
         return ("missing, duplicate or unexpected family",)
@@ -811,17 +1102,112 @@ def validate_receipts(
         "invalid receipt: " + receipt.family
         for receipt in receipts
         if (
-            receipt.capability != requirement.capability
+            not _receipt_text(receipt.capability)
+            or not _receipt_text(receipt.host_family)
+            or not _receipt_text(receipt.identity)
+            or not _receipt_text(receipt.native_identity)
+            or not _receipt_text(receipt.nonce)
+            or receipt.capability != requirement.capability
             or receipt.family != receipt.host_family
+            or not _receipt_host(receipt.host_facts, receipt.family, requirement.lane)
             or receipt.identity != requirement.identity
             or (receipt.family, receipt.native_identity)
             not in requirement.native_identities
             or (receipt.family, receipt.nonce) not in requirement.run_nonces
-            or not receipt.passed
+            or receipt.passed is not True
+            or not _receipt_text_set(receipt.tests)
+            or not _receipt_text_set(receipt.mutants)
+            or not _receipt_text_set(receipt.coverage)
+            or not _receipt_pairs(receipt.prerequisites)
+            or not _receipt_diagnostics(receipt.diagnostics)
             or not requirement.tests <= receipt.tests
             or not requirement.mutants <= receipt.mutants
             or not requirement.coverage <= receipt.coverage
             or receipt.prerequisites != requirement.prerequisites
+        )
+    )
+
+
+def aggregate_receipts(
+    groups: tuple[ReceiptGroup, ...],
+) -> Result[tuple[ReceiptAggregate, ...], str]:
+    """Join current receipts to explicit lower capability prerequisites.
+
+    Requirements, identities and receipt records must be authenticated by the
+    caller. This calculation neither reads retained runs nor issues a verdict.
+    """
+    numbers = tuple(group.number for group in groups)
+    capabilities = tuple(group.requirement.capability for group in groups)
+    if (
+        not groups
+        or any(not _receipt_phase_number(number) for number in numbers)
+        or numbers != tuple(sorted(set(numbers)))
+        or any(not _receipt_text(capability) for capability in capabilities)
+        or len(set(capabilities)) != len(capabilities)
+    ):
+        return Err("invalid receipt group declarations")
+    declared = {group.requirement.capability: group for group in groups}
+    results: tuple[ReceiptAggregate, ...] = ()
+    for group in groups:
+        requirement = group.requirement
+        invalid = validate_receipts(requirement, group.receipts)
+        prerequisites = (
+            requirement.prerequisites
+            if _receipt_pairs(requirement.prerequisites)
+            else frozenset()
+        )
+        prior = {result.capability: result for result in results}
+        failures = frozenset(invalid) | frozenset(
+            "invalid prerequisite: " + name
+            for name, identity in prerequisites
+            if name not in declared
+            or declared[name].number >= group.number
+            or declared[name].requirement.identity != identity
+            or name not in prior
+            or bool(prior[name].failures)
+        )
+        results += (
+            ReceiptAggregate(
+                group.number, requirement.capability, requirement.identity, failures
+            ),
+        )
+    return Ok(results)
+
+
+def aggregate_receipt_records(
+    groups: tuple[ReceiptRecordGroup, ...],
+) -> Result[tuple[ReceiptAggregate, ...], str]:
+    """Join canonical records without treating their bytes as run authentication.
+
+    An invalid record fails its capability before prerequisite propagation, so
+    an unrelated earlier capability can retain its own independently valid result.
+    The caller must authenticate both records and current requirements.
+    """
+    parsed = tuple(
+        tuple(parse_receipt(record) for record in group.records) for group in groups
+    )
+    invalid = tuple(any(isinstance(item, Err) for item in items) for items in parsed)
+    decoded = tuple(
+        ReceiptGroup(
+            group.number,
+            group.requirement,
+            () if bad else tuple(item.value for item in items if isinstance(item, Ok)),
+        )
+        for group, items, bad in zip(groups, parsed, invalid, strict=True)
+    )
+    joined = aggregate_receipts(decoded)
+    if isinstance(joined, Err):
+        return joined
+    return Ok(
+        tuple(
+            ReceiptAggregate(
+                item.number,
+                item.capability,
+                item.identity,
+                item.failures
+                | (frozenset({"invalid receipt record"}) if bad else frozenset()),
+            )
+            for item, bad in zip(joined.value, invalid, strict=True)
         )
     )
 
@@ -845,7 +1231,8 @@ def calculate(
         or len(names) != len(set(names))
         or any(not name for name in names)
         or any(
-            phase.number < 0
+            isinstance(phase.number, bool)
+            or phase.number < 0
             or not phase.checks
             or not phase.inputs
             or "" in phase.checks
@@ -853,7 +1240,9 @@ def calculate(
             for phase in phases
         )
         or any(
-            dependency >= phase.number or dependency not in numbers
+            isinstance(dependency, bool)
+            or dependency >= phase.number
+            or dependency not in numbers
             for phase in phases
             for dependency in phase.prerequisites
         )
@@ -946,6 +1335,17 @@ def calculate_scoped_inputs(
     return Ok(merged)
 
 
+def join_results[A, B](
+    first: Result[A, str], second: Result[B, str]
+) -> Result[tuple[A, B], str]:
+    """Join two results, preserving the first error."""
+    if isinstance(first, Err):
+        return first
+    if isinstance(second, Err):
+        return second
+    return Ok((first.value, second.value))
+
+
 def calculate_observed(
     phases: tuple[PhaseInputs, ...],
     sources: tuple[tuple[str, bytes], ...],
@@ -982,6 +1382,7 @@ def calculate_observed(
     numbers = tuple(number for number, _failures in ownership_failures)
     if (
         len(numbers) != len(set(numbers))
+        or any(isinstance(number, bool) for number in numbers)
         or frozenset(numbers) != frozenset(phase.number for phase in phases)
         or any("" in failures for _number, failures in ownership_failures)
     ):
@@ -996,10 +1397,11 @@ def calculate_observed(
         collections = collection_failures(
             scopes, observation, mutation_owners=collection[2]
         )
-    match base, collections:
-        case (Err(error), _) | (_, Err(error)):
+    match join_results(base, collections):
+        case Err(error):
             return Err(error)
-        case Ok(results), Ok(failures):
+        case joined:
+            results, failures = joined.value
             collection_by_phase = dict(failures)
             ownership_by_phase = dict(ownership_failures)
             merged: tuple[PhaseResult, ...] = ()
@@ -1036,14 +1438,18 @@ def join_additional_failures(
     if (
         not phases
         or numbers != tuple(sorted(set(numbers)))
+        or any(isinstance(number, bool) for number in numbers)
         or tuple(result.number for result in results) != numbers
+        or any(isinstance(result.number, bool) for result in results)
         or any(
             re.fullmatch(r"[0-9a-f]{64}", result.identity) is None
             or "" in result.failures
             for result in results
         )
         or any(
-            dependency not in numbers or dependency >= phase.number
+            isinstance(dependency, bool)
+            or dependency not in numbers
+            or dependency >= phase.number
             for phase in phases
             for dependency in phase.prerequisites
         )
@@ -1053,6 +1459,7 @@ def join_additional_failures(
         owners = tuple(number for number, _failures in values)
         if (
             len(set(owners)) != len(owners)
+            or any(isinstance(owner, bool) for owner in owners)
             or frozenset(owners) != frozenset(numbers)
             or any("" in failures for _number, failures in values)
         ):

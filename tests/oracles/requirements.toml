@@ -1,0 +1,104 @@
+[[case]]
+id = "requirement.receipt.current"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "request:R20"
+input = { family = "linux", host_family = "linux", identity = "logical-input", native_identity = "linux-tools", nonce = "linux-nonce", passed = true, test = true, mutant = true, coverage = true, prerequisite = "bootstrap-input", debian = true, checkout = true }
+expected = true
+
+[[case]]
+id = "requirement.receipt.foreign-host"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "request:R20"
+input = { family = "linux", host_family = "windows", identity = "logical-input", native_identity = "linux-tools", nonce = "linux-nonce", passed = true, test = true, mutant = true, coverage = true, prerequisite = "bootstrap-input", debian = true, checkout = true }
+expected = false
+
+[[case]]
+id = "requirement.receipt.stale-input"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "request:R20"
+input = { family = "linux", host_family = "linux", identity = "stale", native_identity = "linux-tools", nonce = "linux-nonce", passed = true, test = true, mutant = true, coverage = true, prerequisite = "bootstrap-input", debian = true, checkout = true }
+expected = false
+
+[[case]]
+id = "requirement.receipt.wrong-native"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "request:R20"
+input = { family = "linux", host_family = "linux", identity = "logical-input", native_identity = "other-tools", nonce = "linux-nonce", passed = true, test = true, mutant = true, coverage = true, prerequisite = "bootstrap-input", debian = true, checkout = true }
+expected = false
+
+[[case]]
+id = "requirement.receipt.stale-nonce"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "request:R20"
+input = { family = "linux", host_family = "linux", identity = "logical-input", native_identity = "linux-tools", nonce = "old-nonce", passed = true, test = true, mutant = true, coverage = true, prerequisite = "bootstrap-input", debian = true, checkout = true }
+expected = false
+
+[[case]]
+id = "requirement.receipt.failed"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "request:R20"
+input = { family = "linux", host_family = "linux", identity = "logical-input", native_identity = "linux-tools", nonce = "linux-nonce", passed = false, test = true, mutant = true, coverage = true, prerequisite = "bootstrap-input", debian = true, checkout = true }
+expected = false
+
+[[case]]
+id = "requirement.receipt.test-missing"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "request:R20"
+input = { family = "linux", host_family = "linux", identity = "logical-input", native_identity = "linux-tools", nonce = "linux-nonce", passed = true, test = false, mutant = true, coverage = true, prerequisite = "bootstrap-input", debian = true, checkout = true }
+expected = false
+
+[[case]]
+id = "requirement.receipt.mutant-missing"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "request:R20"
+input = { family = "linux", host_family = "linux", identity = "logical-input", native_identity = "linux-tools", nonce = "linux-nonce", passed = true, test = true, mutant = false, coverage = true, prerequisite = "bootstrap-input", debian = true, checkout = true }
+expected = false
+
+[[case]]
+id = "requirement.receipt.coverage-missing"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "request:R20"
+input = { family = "linux", host_family = "linux", identity = "logical-input", native_identity = "linux-tools", nonce = "linux-nonce", passed = true, test = true, mutant = true, coverage = false, prerequisite = "bootstrap-input", debian = true, checkout = true }
+expected = false
+
+[[case]]
+id = "requirement.receipt.prerequisite-stale"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "request:R20"
+input = { family = "linux", host_family = "linux", identity = "logical-input", native_identity = "linux-tools", nonce = "linux-nonce", passed = true, test = true, mutant = true, coverage = true, prerequisite = "stale", debian = true, checkout = true }
+expected = false
+
+[[case]]
+id = "requirement.gate.receipt-current"
+requirement = "R14.1"
+quote = "the check command should run ruff, ty (strict) and the entire test suite"
+provenance = "request:R14.1"
+input = { family = "linux", host_family = "linux", identity = "logical-input", native_identity = "linux-tools", nonce = "linux-nonce", passed = true, test = true, mutant = true, coverage = true, prerequisite = "bootstrap-input", debian = true, checkout = true }
+expected = true
+
+[[case]]
+id = "requirement.receipt.not-debian"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "request:R20"
+input = { family = "linux", host_family = "linux", identity = "logical-input", native_identity = "linux-tools", nonce = "linux-nonce", passed = true, test = true, mutant = true, coverage = true, prerequisite = "bootstrap-input", debian = false, checkout = true }
+expected = false
+
+[[case]]
+id = "requirement.receipt.no-checkout"
+requirement = "R20"
+quote = "phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input"
+provenance = "request:R20"
+input = { family = "linux", host_family = "linux", identity = "logical-input", native_identity = "linux-tools", nonce = "linux-nonce", passed = true, test = true, mutant = true, coverage = true, prerequisite = "bootstrap-input", debian = true, checkout = false }
+expected = false
+

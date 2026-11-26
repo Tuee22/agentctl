@@ -46,8 +46,11 @@ guest user's Linux home, and gate state, reports and toolchains live on the gues
 After the last source edit and before each guest `agentctl check`, run the pre-gate binding from Windows:
 `python -I -m agentctl.check.virtualbox_bind ROOT VM SHARE GUEST_ROOT KEY KNOWN_HOSTS PORT USER`. It reads the VM UUID,
 creates a fresh nonce challenge in the live checkout, has the guest answer it with the application's own
-`binding_challenge.answer` over strict-host-key batch SSH, confirms no guest process still carries the nonce, removes
-the owned sentinels, then compares the host and guest source census digests. On agreement it writes
+`binding_challenge.answer` over strict-host-key batch SSH, scans guest process command lines for the nonce and refuses
+an unreadable process entry (`tests/integration/test_virtualbox_binding.py::test_guest_process_absence_refuses_unreadable_entries`).
+This scan does not independently prove peer or descendant termination. It removes
+the owned sentinels, then compares the host and guest source census digests. Guest facts from an unsuccessful
+command are refused even when its output is valid JSON (`tests/integration/test_virtualbox_binding.py::test_host_binding_values`). On agreement it writes
 `virtualbox-binding.json` into the guest user's private agentctl state directory. Inside the gate,
 `tests/integration/test_virtualbox_binding.py::test_shared_checkout_identity` recomputes the live census and the
 `vboxsf` bind-mount entry and requires both to equal the receipt;

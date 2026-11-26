@@ -16,7 +16,7 @@ from tempfile import TemporaryDirectory
 import pytest
 
 import agentctl
-from agentctl.check.lanes import HostFacts, read_host
+from agentctl.check.lanes import HostFacts, debian_release, read_host
 from agentctl.paths import directories
 from agentctl.process import run
 from agentctl.result import Ok
@@ -232,6 +232,14 @@ def observe(root: Path, nonce: str, destination: Path) -> HostFacts:
         .resolve()
         .is_relative_to(root.resolve() / "src/agentctl")
     )
+    try:
+        release = (
+            Path("/etc/os-release").read_text(encoding="utf-8")
+            if platform.system() == "Linux"
+            else ""
+        )
+    except (OSError, UnicodeError):
+        release = ""
     facts = HostFacts(
         family=platform.system(),
         architecture=platform.machine(),
@@ -248,6 +256,7 @@ def observe(root: Path, nonce: str, destination: Path) -> HostFacts:
         ),
         clean=clean_recipe(),
         xcode=observe_xcode(platform.system(), destination.parent, os.environ),
+        debian=debian_release(release),
     )
     destination.write_text(
         json.dumps({"nonce": nonce, "facts": asdict(facts)}), encoding="utf-8"

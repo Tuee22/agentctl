@@ -12,6 +12,7 @@ from agentctl.bootstrap import build
 from agentctl.result import Ok
 from tests.harness.agents import AuthProbe, isolated_environment, native_agent, probe
 from tests.harness.haskell_fixtures import haskell_build as _haskell_build_fixture
+from tests.harness.host import live_folder
 from tests.harness.launch import PaneProgram, native_pane
 from tests.harness.tmux import PrivateMux
 from tests.harness.tmux_fixtures import mux_server as _mux_server_fixture
@@ -56,8 +57,7 @@ def _program(
 ) -> PaneProgram:
     """Give each parser case its own logged-out configuration and runtime state."""
     environment = isolated_environment(scope, os.environ)
-    folder = scope / "project"
-    folder.mkdir()
+    folder = live_folder(mux.family, os.environ)
     executable = native_agent(agent, mux.family, environment)
     auth = probe(mux.context, AuthProbe(agent, executable, folder), environment)
     assert auth["state"] == "LoggedOut", "isolated agent used credentials"
@@ -76,10 +76,19 @@ def test_final_argv_accepted_logged_out(root: Path, mux_server: PrivateMux) -> N
         ("codex", ("exec",)),
     ):
         scope = mux_server.scope / ("installed-" + agent)
+        accepted = _program(mux_server, agent, scope / "accepted", ())
+        assert accepted.environment["DISABLE_AUTOUPDATER"] == "1"
+        config = Path(accepted.environment["CODEX_HOME"]) / "config.toml"
+        assert (
+            tomllib.loads(config.read_text(encoding="utf-8"))[
+                "check_for_update_on_startup"
+            ]
+            is False
+        )
         positive = native_pane(
             mux_server,
             agent + "-accepted",
-            _program(mux_server, agent, scope / "accepted", ()),
+            accepted,
         )
         dead = positive.observe_startup()
         assert not dead, ARGV_REASON + ": " + positive.capture()
@@ -89,6 +98,9 @@ def test_final_argv_accepted_logged_out(root: Path, mux_server: PrivateMux) -> N
             if row["id"] == "agents." + agent
         )
         if mux_server.family == "Linux":
+            assert (Path("/proc") / str(positive.pid) / "cwd").samefile(
+                live_folder(mux_server.family, os.environ),
+            ), "real agent launched outside the live-acceptance folder"
             actual = (Path("/proc") / str(positive.pid) / "cmdline").read_bytes()
             assert actual.split(b"\0")[-len(flags) - 1 : -1] == [
                 flag.encode() for flag in flags

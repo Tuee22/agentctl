@@ -19,8 +19,8 @@ This phase needs Linux only. The declared tests are executable contracts; an abs
 
 | Requirement | Oracle | Observer | Mutants | Tests |
 |---|---|---|---|---|
-| R22 — Native effects and runtime host facts | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | `M-host-accepts-id-like`, `M-process-second-spawner` | `haskell:agentctl-core-test/Host/debian-exact-id`, `haskell:agentctl-core-test/Host/unsupported-linux-no-effects`, `haskell:agentctl-core-test/ProcessReal/timeout-cleans-up` |
-| R15 — Provisioning plans, consent and owned publication | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | `M-provision-privilege-implies-consent`, `M-provision-partial-publish` | `haskell:agentctl-core-test/Provision/idempotent-plan`, `haskell:agentctl-core-test/Provision/noninteractive-no-consent`, `haskell:agentctl-core-test/Provision/atomic-publish-and-lock` |
+| R22 — Native effects and runtime host facts | `tests/oracles/requirements.toml` | value: independent expected values for the owned pure contract; observer: independent inputs and nonce-bound native observations | `M-host-accepts-id-like`, `M-process-second-spawner` | `haskell:agentctl-core-test/Host/debian-exact-id`, `haskell:agentctl-core-test/Host/unsupported-linux-no-effects`, `haskell:agentctl-core-test/ProcessReal/timeout-cleans-up` |
+| R15 — Provisioning plans, consent and owned publication | `tests/oracles/requirements.toml` | value: independent expected values for the owned pure contract; observer: independent inputs and nonce-bound native observations | `M-provision-privilege-implies-consent`, `M-provision-partial-publish` | `haskell:agentctl-core-test/Provision/idempotent-plan`, `haskell:agentctl-core-test/Provision/noninteractive-no-consent`, `haskell:agentctl-core-test/Provision/atomic-publish-and-lock` |
 
 ## Not Proven By This Gate
 
@@ -35,7 +35,7 @@ This phase needs Linux only. The declared tests are executable contracts; an abs
 **Status**: Planned
 **Implementation**: `src/agentctl/haskell/src/AgentCtl/Process.hs`, `src/agentctl/haskell/src/AgentCtl/Native.hs`, `src/agentctl/haskell/src/AgentCtl/Host.hs`, `src/agentctl/haskell/src/AgentCtl/Paths.hs`
 **Validation tests**: `haskell:agentctl-core-test/Host/debian-exact-id`, `haskell:agentctl-core-test/Host/unsupported-linux-no-effects`, `haskell:agentctl-core-test/ProcessReal/timeout-cleans-up`, `tests/unit/test_mux_values.py::test_version_floor_oracle`, `tests/unit/test_mux_values.py::test_resolution_candidates_oracle`, `tests/unit/test_mux_values.py::test_remedy_oracle`, `tests/unit/test_mux_values.py::test_session_name_oracle`, `tests/unit/test_mux_values.py::test_render_oracle`, `tests/unit/test_mux_values.py::test_process_tree_policy_oracle`, `tests/unit/test_mux_values.py::test_pane_target_oracle`, `tests/unit/test_mux_values.py::test_dead_status_rule_oracle`, `tests/unit/test_mux_values.py::test_spec_acceptance_oracle`, `tests/unit/test_mux_values.py::test_reap_policy_oracle`, `tests/unit/test_mux_values.py::test_invocation_cwd_stays_off_argv`
-**Mutants**: `M-host-accepts-id-like`, `M-process-second-spawner`
+**Mutants**: `M-host-accepts-id-like`, `M-process-second-spawner`, `M-launch-cwd-on-mux-line`
 **Closes**: R22
 **Docs to update**: `documents/architecture/python_haskell_boundary.md`, `documents/engineering/toolchain_bootstrap.md`, `documents/engineering/code_standards.md`
 

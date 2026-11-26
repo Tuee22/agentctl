@@ -13,11 +13,15 @@ import os
 import platform
 import re
 import shutil
+import stat
 import sys
 from dataclasses import asdict, dataclass
-from pathlib import Path
+from dataclasses import replace as dataclass_replace
+from pathlib import Path, PurePosixPath
 
 from agentctl.check.evidence import Entry, source_census
+from agentctl.check.lanes import debian_release
+from agentctl.check.phase_reports import containing_mount, parse_mountinfo
 from agentctl.check.wsl_guest_sample import affinity
 from agentctl.foundation import Err, Family, Ok, Result
 from agentctl.foundation_process import run
@@ -38,6 +42,7 @@ MOUNT_FIELDS = 10
 MOUNT_TAIL = 2
 MEMINFO_FIELDS = 3
 MAX_TEXT = 4096
+MAX_RECEIPT_BYTES = 65536
 VIRTUALBOX_PRODUCT = "VirtualBox"
 NEWLINE = "\n"
 
@@ -132,6 +137,25 @@ def _count(value: int, *, minimum: int) -> bool:
     return not isinstance(value, bool) and value >= minimum
 
 
+def _unique_fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    """Reject ambiguous fields at every level of a transported observation."""
+    values: dict[str, object] = {}
+    for key, value in pairs:
+        if key in values:
+            raise ValueError
+        values[key] = value
+    return values
+
+
+def decode_facts_json(text: str) -> Result[GuestFacts, str]:
+    """Decode one unambiguous guest-facts message before checking its schema."""
+    try:
+        value: object = json.loads(text, object_pairs_hook=_unique_fields)
+    except (ValueError, RecursionError):
+        return Err("guest binding facts are not unambiguous JSON")
+    return decode_facts(value)
+
+
 def decode_facts(value: object) -> Result[GuestFacts, str]:
     """Parse guest facts, refusing missing, extra or ill-typed fields."""
     match value:
@@ -176,12 +200,12 @@ def decode_facts(value: object) -> Result[GuestFacts, str]:
 def decode(text: str) -> Result[Receipt, str]:
     """Parse a closed version-1 receipt."""
     try:
-        value = json.loads(text)
-    except json.JSONDecodeError:
+        value = json.loads(text, object_pairs_hook=_unique_fields)
+    except (ValueError, RecursionError):
         return Err("binding receipt is not JSON")
     match value:
         case {
-            "version": 1,
+            "version": int() as version,
             "nonce": str() as nonce,
             "vm": str() as vm,
             "share": str() as share,
@@ -191,11 +215,16 @@ def decode(text: str) -> Result[Receipt, str]:
             **extra,
         } if (
             not extra
+            and not isinstance(version, bool)
+            and version == 1
             and HEX32.fullmatch(nonce) is not None
             and UUID.fullmatch(vm) is not None
             and SHARE.fullmatch(share) is not None
             and _text(source)
-            and guest_root.startswith("/")
+            and PurePosixPath(guest_root).is_absolute()
+            and not guest_root.startswith("//")
+            and str(PurePosixPath(guest_root)) == guest_root
+            and ".." not in PurePosixPath(guest_root).parts
             and _text(guest_root)
         ):
             parsed = decode_facts(facts)
@@ -262,6 +291,141 @@ def _version(argv: tuple[str, ...], cwd: Path) -> Result[str, str]:
 def virtualbox_guest(product: str) -> bool:
     """Recognize the DMI product name VirtualBox reports to its guests."""
     return product.strip() == VIRTUALBOX_PRODUCT
+
+
+def _private_receipt(path: Path) -> Result[Receipt, str]:
+    """Read one unchanged private receipt without accepting links or replacement."""
+    try:
+        getuid = getattr(os, "getuid", None)
+        if getuid is None:
+            return Err("binding receipt owner identity unavailable")
+        before = path.lstat()
+        if (
+            path.is_symlink()
+            or not stat.S_ISREG(before.st_mode)
+            or before.st_nlink != 1
+            or before.st_uid != getuid()
+            or before.st_mode & 0o077
+            or before.st_size > MAX_RECEIPT_BYTES
+        ):
+            return Err("binding receipt is not a private regular file")
+        with path.open(encoding="utf-8") as stream:
+            text = stream.read(MAX_RECEIPT_BYTES + 1)
+        after = path.lstat()
+        if (
+            len(text) > MAX_RECEIPT_BYTES
+            or path.is_symlink()
+            or after.st_nlink != 1
+            or (
+                before.st_dev,
+                before.st_ino,
+                before.st_size,
+                before.st_mtime_ns,
+                before.st_ctime_ns,
+                before.st_mode,
+                before.st_uid,
+            )
+            != (
+                after.st_dev,
+                after.st_ino,
+                after.st_size,
+                after.st_mtime_ns,
+                after.st_ctime_ns,
+                after.st_mode,
+                after.st_uid,
+            )
+        ):
+            return Err("binding receipt changed during inspection")
+    except (OSError, UnicodeError) as exc:
+        return Err("cannot read private binding receipt: " + str(exc))
+    return decode(text)
+
+
+def _shared_guest_capacity(receipt: Receipt) -> Result[None, str]:
+    """Check the actual guest identity and current allocation without installers."""
+    try:
+        product = Path("/sys/class/dmi/id/product_name").read_text(encoding="utf-8")
+        release = Path("/etc/os-release").read_text(encoding="utf-8")
+        memory = Path("/proc/meminfo").read_text(encoding="utf-8")
+        status = Path("/proc/self/status").read_text(encoding="utf-8")
+        storage = shutil.disk_usage(Path.home()).free
+    except (OSError, UnicodeError) as exc:
+        return Err("cannot inspect VirtualBox guest identity: " + str(exc))
+    if not virtualbox_guest(product) or not debian_release(release):
+        return Err("shared checkout is not in a Debian VirtualBox guest")
+    total = meminfo(memory, "MemTotal")
+    swap = meminfo(memory, "SwapTotal")
+    cpus = affinity(status)
+    if (
+        isinstance(total, Err)
+        or isinstance(swap, Err)
+        or isinstance(cpus, Err)
+        or (len(cpus.value), total.value, swap.value)
+        != (
+            receipt.facts.cpus,
+            receipt.facts.memory_kib,
+            receipt.facts.swap_kib,
+        )
+        or storage <= 0
+    ):
+        return Err("guest capacity differs from binding receipt")
+    return Ok(None)
+
+
+def _shared_checkout_identity(
+    root: Path, mountinfo: str, receipt: Receipt
+) -> Result[None, str]:
+    """Compare the current checkout bytes and mount with the binding exchange."""
+    entries = source_census(root)
+    line = mount_line(mountinfo, root.as_posix(), receipt.share)
+    if isinstance(entries, Err):
+        return Err("cannot census shared checkout: " + entries.error.message)
+    if isinstance(line, Err):
+        return line
+    observed = dataclass_replace(
+        receipt.facts,
+        census=census_digest(entries.value),
+        entries=len(entries.value),
+        mount=line.value,
+    )
+    return verify_identity(receipt, root.as_posix(), observed)
+
+
+def _checkout_mountinfo(root: Path) -> Result[str | None, str]:
+    """Read the mount and identify VirtualBox shared-folder checkouts."""
+    try:
+        mountinfo = Path("/proc/self/mountinfo").read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        return Err("cannot inspect checkout mount: " + str(exc))
+    mounts = parse_mountinfo(mountinfo)
+    if isinstance(mounts, Err):
+        return mounts
+    selected = containing_mount(root.as_posix(), mounts.value)
+    if isinstance(selected, Err):
+        return selected
+    return Ok(mountinfo if selected.value.filesystem == "vboxsf" else None)
+
+
+def check_shared_checkout(
+    root: Path, family: Family, receipt_path: Path
+) -> Result[None, str]:
+    """Check a VirtualBox shared checkout against its stored pre-gate binding."""
+    if family != "Linux":
+        return Ok(None)
+    mounted = _checkout_mountinfo(root)
+    if isinstance(mounted, Err):
+        return mounted
+    if mounted.value is None:
+        return Ok(None)
+    receipt = _private_receipt(receipt_path)
+    if isinstance(receipt, Err):
+        return receipt
+    capacity = _shared_guest_capacity(receipt.value)
+    return (
+        capacity
+        if isinstance(capacity, Err)
+        else _shared_checkout_identity(root, mounted.value, receipt.value)
+    )
 
 
 def observe_guest(root: Path, share: str, family: Family) -> Result[GuestFacts, str]:

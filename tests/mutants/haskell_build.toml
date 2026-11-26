@@ -1,4 +1,13 @@
 [[mutant]]
+id = "M-build-native-artifact-change-ignored"
+operator = "replace-literal"
+target = "src/agentctl/check/haskell.py"
+search = "    if isinstance(after, Err) or after.value != artifacts:\n"
+replace = "    if isinstance(after, Err):\n"
+killers = ["tests/integration/test_build_boundaries.py::test_native_artifact_change_preserves_suite_failure"]
+reason = "native artifact change was accepted"
+
+[[mutant]]
 id = "M-build-native-source-census-omitted"
 operator = "replace-literal"
 target = "src/agentctl/check/haskell.py"

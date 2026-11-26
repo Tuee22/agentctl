@@ -24,6 +24,10 @@ GUEST_PYTHON = "~/.local/share/pipx/venvs/agentctl/bin/python"
 VBOXMANAGE = Path("C:/Program Files/Oracle/VirtualBox/VBoxManage.exe")
 NEWLINE = "\n"
 ARGUMENTS = 9
+MAX_VM_INFO = 1_048_576
+SHARE_FIELD = re.compile(
+    r"SharedFolder(Name|Path)(Transient|Machine)Mapping([1-9][0-9]*)"
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,11 +60,24 @@ def ssh_command(key: Path, known_hosts: Path, port: int, user: str) -> tuple[str
 
 
 def _guest(
-    target: Target, script: str, stdin: str | None = None
+    target: Target,
+    script: str,
+    stdin: str | None = None,
+    *,
+    peer_nonce: str | None = None,
 ) -> Result[Output, str]:
-    """Run one fixed guest Python program through the strict SSH prefix."""
+    """Run a guest program, exposing a peer nonce in the remote process argv."""
+    if peer_nonce is not None and re.fullmatch(r"[0-9a-f]{32}", peer_nonce) is None:
+        return Err("invalid guest peer nonce")
     result = run(
-        [*target.ssh, GUEST_PYTHON, "-I", "-c", _encoded(script)],
+        [
+            *target.ssh,
+            GUEST_PYTHON,
+            "-I",
+            "-c",
+            _encoded(script),
+            *((peer_nonce,) if peer_nonce is not None else ()),
+        ],
         cwd=target.root,
         env=os.environ,
         timeout=600,
@@ -75,27 +92,30 @@ def _encoded(script: str) -> str:
     return f"'import base64; exec(base64.b64decode(\"{payload}\"))'"
 
 
-def _answer_script(guest_root: str, nonce: str) -> str:
+def _answer_script(guest_root: str) -> str:
     """Answer the host's challenge with the application's own peer operation."""
     return (
         "from pathlib import Path; import sys; "
         "from agentctl.check.binding_challenge import answer; "
-        f"r = answer(Path({guest_root!r}), {nonce!r}); "
+        f"r = answer(Path({guest_root!r}), sys.argv[1]); "
         "print(getattr(r, 'error', 'ok')); "
         "sys.exit(0 if r.__class__.__name__ == 'Ok' else 1)"
     )
 
 
-def _absence_script(nonce: str) -> str:
+def _absence_script(nonce: str, proc_root: str = "/proc") -> str:
     """Report whether any guest process still names the challenge nonce."""
     return (
-        "import os; me = str(os.getpid()); hits = []\n"
-        "for pid in os.listdir('/proc'):\n"
+        "import os, sys; me = str(os.getpid()); hits = []; unknown = False\n"
+        f"root = {proc_root!r}\n"
+        "for pid in os.listdir(root):\n"
         "    if pid.isdigit() and pid != me:\n"
-        "        try: text = open('/proc/' + pid + '/cmdline', 'rb').read()\n"
-        "        except OSError: continue\n"
+        "        try: text = open(os.path.join(root, pid, 'cmdline'), 'rb').read()\n"
+        "        except FileNotFoundError: continue\n"
+        "        except OSError: unknown = True; continue\n"
         f"        if {nonce!r}.encode() in text: hits.append(pid)\n"
-        "print('active' if hits else 'stopped')"
+        "print('unknown' if unknown else 'active' if hits else 'stopped')\n"
+        "sys.exit(1 if unknown else 0)"
     )
 
 
@@ -108,9 +128,86 @@ def vm_uuid(text: str, name: str) -> Result[str, str]:
     return Ok(str(uuids[0]))
 
 
+def _shared_folder_path(text: str, share: str) -> Result[str, str]:
+    """Decode one named share from complete, paired machine-readable fields."""
+    if (
+        not text.endswith("\n")
+        or len(text) > MAX_VM_INFO
+        or re.fullmatch(r"[A-Za-z0-9_-]{1,64}", share) is None
+    ):
+        return Err("invalid VirtualBox shared-folder observation")
+    rows = tuple(line.partition("=") for line in text.splitlines())
+    selected = tuple(
+        (key, value)
+        for key, separator, value in rows
+        if separator and key.startswith(("SharedFolderName", "SharedFolderPath"))
+    )
+    try:
+        decoded = tuple(
+            (SHARE_FIELD.fullmatch(key), json.loads(value)) for key, value in selected
+        )
+        if any(match is None or not isinstance(value, str) for match, value in decoded):
+            return Err("invalid VirtualBox shared-folder field")
+        fields = tuple(
+            ((match.group(2), match.group(3), match.group(1)), value)
+            for match, value in decoded
+            if match is not None and isinstance(value, str)
+        )
+    except (ValueError, UnicodeError):
+        return Err("cannot decode VirtualBox shared-folder mapping")
+    return _paired_share(fields, share)
+
+
+def _paired_share(
+    fields: tuple[tuple[tuple[str, str, str], str], ...], share: str
+) -> Result[str, str]:
+    """Select the one complete name and path pair for the named share."""
+    keys = tuple(key for key, _value in fields)
+    if len(keys) != len(set(keys)):
+        return Err("duplicate VirtualBox shared-folder field")
+    mappings = dict(fields)
+    slots = frozenset((kind, index) for kind, index, _field in keys)
+    if any(
+        (kind, index, field) not in mappings
+        for kind, index in slots
+        for field in ("Name", "Path")
+    ):
+        return Err("incomplete VirtualBox shared-folder mapping")
+    matches = tuple(
+        mappings[kind, index, "Path"]
+        for kind, index in slots
+        if mappings[kind, index, "Name"] == share
+    )
+    if len(matches) != 1:
+        return Err("missing or ambiguous VirtualBox shared folder")
+    return Ok(matches[0])
+
+
+def shared_folder(text: str, share: str, root: Path) -> Result[None, str]:
+    """Require one unambiguous VM mapping to the observed local checkout."""
+    observed = _shared_folder_path(text, share)
+    if isinstance(observed, Err):
+        return observed
+    try:
+        mapped = Path(observed.value)
+        if (
+            not root.is_absolute()
+            or not mapped.is_absolute()
+            or ".." in mapped.parts
+            or root.is_symlink()
+            or root.is_junction()
+            or mapped.resolve(strict=True) != root.resolve(strict=True)
+            or not root.is_dir()
+        ):
+            return Err("VirtualBox shared folder does not name the checkout")
+        return Ok(None)
+    except (OSError, RuntimeError, ValueError):
+        return Err("cannot inspect VirtualBox shared-folder mapping")
+
+
 def _peer(target: Target, nonce: str) -> Result[None, str]:
     """Run the guest's answer operation for one challenge."""
-    answered = _guest(target, _answer_script(target.guest_root, nonce))
+    answered = _guest(target, _answer_script(target.guest_root), peer_nonce=nonce)
     if isinstance(answered, Err):
         return answered
     return (
@@ -137,10 +234,9 @@ def _guest_facts(target: Target) -> Result[virtualbox_binding.GuestFacts, str]:
     )
     if isinstance(observed, Err):
         return observed
-    try:
-        return virtualbox_binding.decode_facts(json.loads(observed.value.stdout))
-    except json.JSONDecodeError:
-        return Err("guest facts are not JSON: " + observed.value.stdout.strip())
+    if observed.value.code != 0:
+        return Err("guest facts command failed: " + observed.value.stderr.strip())
+    return virtualbox_binding.decode_facts_json(observed.value.stdout)
 
 
 def bind(target: Target) -> Result[virtualbox_binding.Receipt, str]:
@@ -191,21 +287,29 @@ def store(target: Target, receipt: virtualbox_binding.Receipt) -> Result[None, s
     return Ok(None) if stored.value.code == 0 else Err("cannot store binding receipt")
 
 
+def observe_vm(root: Path, vm: str, share: str) -> Result[str, str]:
+    """Join a named VM to its current shared-folder mapping."""
+    shown = run(
+        [str(VBOXMANAGE), "showvminfo", vm, "--machinereadable"],
+        cwd=root,
+        env=os.environ,
+    )
+    if isinstance(shown, Err) or shown.value.code:
+        return Err("cannot observe the VirtualBox VM")
+    uuid = vm_uuid(shown.value.stdout, vm)
+    if isinstance(uuid, Err):
+        return uuid
+    mapping = shared_folder(shown.value.stdout, share, root)
+    return mapping if isinstance(mapping, Err) else uuid
+
+
 def main(argv: tuple[str, ...]) -> int:
     """``ROOT VM SHARE GUEST_ROOT KEY KNOWN_HOSTS PORT USER``."""
     if len(argv) != ARGUMENTS - 1:
         sys.stdout.write((main.__doc__ or "") + NEWLINE)
         return 2
     root, vm, share, guest_root, key, known, port, user = argv
-    shown = run(
-        [str(VBOXMANAGE), "showvminfo", vm, "--machinereadable"],
-        cwd=Path(root),
-        env=os.environ,
-    )
-    if isinstance(shown, Err) or shown.value.code:
-        sys.stdout.write("cannot observe the VirtualBox VM" + NEWLINE)
-        return 1
-    uuid = vm_uuid(shown.value.stdout, vm)
+    uuid = observe_vm(Path(root), vm, share)
     if isinstance(uuid, Err):
         sys.stdout.write(uuid.error + NEWLINE)
         return 1
@@ -219,6 +323,10 @@ def main(argv: tuple[str, ...]) -> int:
     receipt = bind(target)
     if isinstance(receipt, Err):
         sys.stdout.write("binding failed: " + receipt.error + NEWLINE)
+        return 1
+    after = observe_vm(Path(root), vm, share)
+    if isinstance(after, Err) or after.value != uuid.value:
+        sys.stdout.write("binding failed: VirtualBox mapping changed" + NEWLINE)
         return 1
     stored = store(target, receipt.value)
     if isinstance(stored, Err):

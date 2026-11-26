@@ -79,6 +79,10 @@ A Planned test/resource is an implementation obligation, not a claim that a file
 | R25 | Windows-host Linux validation uses a dedicated right-sized Debian Hyper-V VM with all Linux dependencies and a verified bind mount of the same host checkout; no commit/copy bridge supplies evidence. | `a dedicated wsl2 instance for agentctl is used` | [Sprint 12.1](phase-12-linux-live-and-clean-acceptance.md) | value; real; observer | `documents/operations/validation_runbook.md` | `tests/oracles/host_lanes.toml` |
 | R26 | Every phase is additive, independently closable from its own prerequisites and requires Linux plus at most one native foreign hardware family. | `incomplete later phases should not prevent earlier phases from being validated` | [Sprint 0.1](phase-0-governance-and-phase-evidence.md) | value; real; observer | `documents/engineering/quality_gate.md` | `tests/oracles/phase_ownership.toml` |
 
+R25 preserves its protected historical wording. Its current Windows-hosted Linux route is the dedicated Debian
+VirtualBox VM specified by [D-107 and D-108](rationale.md#current-decision-precedence) and the
+[validation runbook](../documents/operations/validation_runbook.md); Hyper-V and WSL controls are migration inputs.
+
 ## Phase Responsibilities
 
 | Phase | Builds | Host lane | Gate kind |

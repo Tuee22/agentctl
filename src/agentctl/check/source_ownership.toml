@@ -979,6 +979,384 @@ consumers = [0]
 required = true
 
 [[artifacts]]
+path = "tests/governance/test_steps_diagnostics.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_binding_challenge.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_binding_inventory.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_binding_protocol.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_binding_transaction.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_binding_transport.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_binding_workflow.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_foundation_process_identity.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_hyperv_guest.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_hyperv_guest_protocol.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_hyperv_storage.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_virtualbox_binding.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_virtualbox_guest.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_virtualbox_guest_capacity.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_virtualbox_guest_protocol.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_virtualbox_sessions.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_virtualbox_ssh_key.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_virtualbox_storage.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_wsl_cgroup.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_wsl_guest_sample.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_wsl_monitor.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_wsl_mount.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_b_wsl_tree.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_audit.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_build.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_closure.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_coverage_hosts.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_evidence.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_foundation_process.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_gate_plugin.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_haskell.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_mutant_report.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_mutants.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_ownership.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_phase_reports.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_process_identity.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_ratchet.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_style.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_toolchain.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_g_writeguard.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_a_census.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_a_coverage.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_a_records.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_b_attribution.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_b_capture.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_b_handoff.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_b_validate.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_b_verify.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_c_handoff_readers.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_c_handoff_verifiers.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_c_native_joins.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_c_provisional_joins.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_steps_c_retention.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/governance/test_cover_h_remaining.py"
+capability = "governance-tests"
+owner = 0
+consumers = [0]
+required = true
+
+[[artifacts]]
 path = "tests/governance/test_gate_plugin.py"
 capability = "governance-tests"
 owner = 0
@@ -5004,4 +5382,18 @@ path = "tests/governance/test_wsl_capacity.py"
 capability = "wsl-binding-tests"
 owner = 0
 consumers = [0]
+required = true
+
+[[artifacts]]
+path = "tests/oracles/requirements.toml"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+required = true
+
+[[artifacts]]
+path = "tests/oracles/host_lanes.toml"
+capability = "gate-ownership"
+owner = 0
+consumers = [0, 12]
 required = true

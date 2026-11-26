@@ -19,8 +19,8 @@ This phase needs Linux and native macOS. Its receipts can come from separate run
 
 | Requirement | Oracle | Observer | Mutants | Tests |
 |---|---|---|---|---|
-| R20 — Darwin bootstrap and Haskell tmux readiness | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | `M-darwin-prompts-in-check` | `tests/integration/test_darwin_runtime.py::test_native_bootstrap_and_tmux_readiness`, `tests/integration/test_darwin_runtime.py::test_missing_clt_is_noninteractive_refusal` |
-| R20 — Native Darwin session and supervisor confirmation | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | none — native positive/refusing twins | `tests/integration/test_mux_real.py::test_private_server_roundtrip`, `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`, `tests/integration/test_guarded_submit.py::test_changed_input_or_output_refuses` |
+| R20 — Darwin bootstrap and Haskell tmux readiness | `tests/oracles/requirements.toml` | value: independent expected values for the owned pure contract; observer: independent inputs and nonce-bound native observations | `M-darwin-prompts-in-check` | `tests/integration/test_darwin_runtime.py::test_native_bootstrap_and_tmux_readiness`, `tests/integration/test_darwin_runtime.py::test_missing_clt_is_noninteractive_refusal` |
+| R20 — Native Darwin session and supervisor confirmation | `tests/oracles/requirements.toml` | value: independent expected supervisor and session values; observer: independent inputs and nonce-bound native observations | none — native positive/refusing twins | `tests/integration/test_mux_real.py::test_private_server_roundtrip`, `tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`, `tests/integration/test_guarded_submit.py::test_changed_input_or_output_refuses` |
 
 ## Not Proven By This Gate
 

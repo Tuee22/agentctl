@@ -19,9 +19,9 @@ This phase needs Linux and native Windows. Its receipts can come from separate r
 
 | Requirement | Oracle | Observer | Mutants | Tests |
 |---|---|---|---|---|
-| R24 — Attached-client memory and control ordering | `tests/oracles/backend_profiles.toml` | value; observer: independent inputs and nonce-bound native observations | `M-psmux-unbounded-frame-queue`, `M-psmux-reader-blocking`, `M-psmux-oneshot-dropped` | `tests/integration/test_psmux_backpressure.py::test_blocked_output_is_bounded`, `tests/integration/test_psmux_backpressure.py::test_real_session_survives_stall`, `tests/integration/test_psmux_backpressure.py::test_control_and_oneshot_order` |
-| R24 — Capture, exact-target and guarded-input qualification | `tests/oracles/backend_profiles.toml` | value; observer: independent inputs and nonce-bound native observations | `M-psmux-wide-wrap-lost`, `M-psmux-missing-pane-fallback`, `M-psmux-stale-input-accepted` | `tests/integration/test_psmux_capture.py::test_hard_soft_and_wide_wraps`, `tests/integration/test_guarded_submit.py::test_native_psmux_revision_guard`, `tests/integration/test_psmux_capture.py::test_missing_explicit_target_is_error` |
-| R24 — Private coexistence and capability identity | `tests/oracles/backend_profiles.toml` | value; observer: independent inputs and nonce-bound native observations | `M-psmux-system-path-fallback`, `M-psmux-registry-version-coupled` | `tests/integration/test_psmux_isolation.py::test_system_install_and_registry_untouched`, `tests/integration/test_psmux_isolation.py::test_mixed_server_is_not_qualified` |
+| R24 — Attached-client memory and control ordering | `tests/oracles/backend_profiles.toml` | value: independent expected values for the owned pure contract; observer: independent inputs and nonce-bound native observations | `M-psmux-unbounded-frame-queue`, `M-psmux-reader-blocking`, `M-psmux-oneshot-dropped` | `tests/integration/test_psmux_backpressure.py::test_blocked_output_is_bounded`, `tests/integration/test_psmux_backpressure.py::test_real_session_survives_stall`, `tests/integration/test_psmux_backpressure.py::test_control_and_oneshot_order` |
+| R24 — Capture, exact-target and guarded-input qualification | `tests/oracles/backend_profiles.toml` | value: independent expected values for the owned pure contract; observer: independent inputs and nonce-bound native observations | `M-psmux-wide-wrap-lost`, `M-psmux-missing-pane-fallback`, `M-psmux-stale-input-accepted` | `tests/integration/test_psmux_capture.py::test_hard_soft_and_wide_wraps`, `tests/integration/test_guarded_submit.py::test_native_psmux_revision_guard`, `tests/integration/test_psmux_capture.py::test_missing_explicit_target_is_error` |
+| R24 — Private coexistence and capability identity | `tests/oracles/backend_profiles.toml` | value: independent expected values for the owned pure contract; observer: independent inputs and nonce-bound native observations | `M-psmux-system-path-fallback`, `M-psmux-registry-version-coupled` | `tests/integration/test_psmux_isolation.py::test_system_install_and_registry_untouched`, `tests/integration/test_psmux_isolation.py::test_mixed_server_is_not_qualified` |
 
 ## Not Proven By This Gate
 
@@ -36,7 +36,7 @@ This phase needs Linux and native Windows. Its receipts can come from separate r
 **Status**: Planned
 **Implementation**: `src/agentctl/haskell/resources/psmux/patches/`, `tests/integration/test_psmux_backpressure.py`
 **Validation tests**: `tests/integration/test_psmux_backpressure.py::test_blocked_output_is_bounded`, `tests/integration/test_psmux_backpressure.py::test_real_session_survives_stall`, `tests/integration/test_psmux_backpressure.py::test_control_and_oneshot_order`
-**Mutants**: `M-psmux-unbounded-frame-queue`, `M-psmux-reader-blocking`, `M-psmux-oneshot-dropped`
+**Mutants**: `M-psmux-unbounded-frame-queue`, `M-psmux-reader-blocking`, `M-psmux-oneshot-dropped`, `M-mux-remain-session-unqualified`, `M-mux-render-psmux-alias`
 **Closes**: none
 **Docs to update**: `documents/architecture/multiplexer_adapter.md`, `documents/architecture/supervisor_contract.md`, `documents/engineering/testing.md`, `documents/reference/external_tool_facts.md`
 

@@ -19,8 +19,8 @@ This phase needs Linux only. The declared tests are executable contracts; an abs
 
 | Requirement | Oracle | Observer | Mutants | Tests |
 |---|---|---|---|---|
-| R16 — Managed session commands and durable identity | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | `M-session-stale-instance-accepted`, `M-session-stop-prefix` | `tests/e2e/test_sessions.py::test_list_shows_only_managed`, `tests/e2e/test_sessions.py::test_stop_never_prefix_matches`, `tests/e2e/test_sessions.py::test_status_defaults_to_current_folder` |
-| R17.1 — Explicit adoption and nonownership | `tests/oracles/requirements.toml` | value; observer: independent inputs and nonce-bound native observations | `M-adopt-stop-kills-target` | `tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership`, `tests/e2e/test_adopt.py::test_stale_entry_after_server_restart` |
+| R16 — Managed session commands and durable identity | `tests/oracles/requirements.toml` | value: independent expected values for the owned pure contract; observer: independent inputs and nonce-bound native observations | `M-session-stale-instance-accepted`, `M-session-stop-prefix` | `tests/e2e/test_sessions.py::test_list_shows_only_managed`, `tests/e2e/test_sessions.py::test_stop_never_prefix_matches`, `tests/e2e/test_sessions.py::test_status_defaults_to_current_folder` |
+| R17.1 — Explicit adoption and nonownership | `tests/oracles/requirements.toml` | value: independent expected values for the owned pure contract; observer: independent inputs and nonce-bound native observations | `M-adopt-stop-kills-target` | `tests/e2e/test_adopt.py::test_adopt_does_not_take_ownership`, `tests/e2e/test_adopt.py::test_stale_entry_after_server_restart` |
 
 ## Not Proven By This Gate
 
@@ -35,7 +35,7 @@ This phase needs Linux only. The declared tests are executable contracts; an abs
 **Status**: Planned
 **Implementation**: `src/agentctl/haskell/src/AgentCtl/Sessions.hs`, `src/agentctl/haskell/src/AgentCtl/Session/Identity.hs`, `tests/harness/sessions.py`, `tests/harness/screens.py`
 **Validation tests**: `tests/e2e/test_sessions.py::test_list_shows_only_managed`, `tests/e2e/test_sessions.py::test_stop_never_prefix_matches`, `tests/e2e/test_sessions.py::test_status_defaults_to_current_folder`, `tests/unit/test_sessions_values.py::test_list_rows_match_oracle`
-**Mutants**: `M-session-stale-instance-accepted`, `M-session-stop-prefix`
+**Mutants**: `M-session-stale-instance-accepted`, `M-session-stop-prefix`, `M-adopt-no-pid-revalidation`, `M-adopt-no-socket-revalidation`, `M-adopt-sets-session-options`, `M-adopt-stop-kills`, `M-classify-status-stale-capture`, `M-sessions-attach-wrong-target`, `M-sessions-dead-as-alive`, `M-sessions-list-includes-foreign`, `M-sessions-status-wrong-folder`, `M-sessions-stop-kills-foreign`
 **Closes**: R16
 **Docs to update**: `documents/architecture/sessions_and_ownership.md`, `documents/reference/files_and_state.md`, `documents/reference/cli_reference.md`
 

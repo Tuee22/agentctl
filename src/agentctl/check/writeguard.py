@@ -150,20 +150,17 @@ def _index(root: Path, git: str) -> Result[tuple[FileFact, ...], GuardError]:
     index_name = index_result.value.stdout.strip()
     if not index_name:
         return Err(GuardError("git returned an empty index path"))
-    try:
-        index_path = (root / index_name).resolve()
-        identity = str(index_path).encode("utf-8")
-        facts = (
-            FileFact(
-                "--index-path",
-                "git-index-path",
-                len(identity),
-                0,
-                hashlib.sha256(identity).hexdigest(),
-            ),
-        )
-    except (OSError, RuntimeError) as exc:
-        return Err(GuardError(str(exc)))
+    index_path = Path(os.path.realpath(root / index_name))
+    identity = str(index_path).encode("utf-8")
+    facts = (
+        FileFact(
+            "--index-path",
+            "git-index-path",
+            len(identity),
+            0,
+            hashlib.sha256(identity).hexdigest(),
+        ),
+    )
     contents = _index_entry(index_path)
     if isinstance(contents, Err):
         return contents

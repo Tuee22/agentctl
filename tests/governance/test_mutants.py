@@ -1,6 +1,7 @@
 # Copyright (c) 2026 agentctl contributors.
 """Real scratch mutation controls and every executable corpus record."""
 
+import hashlib
 import json
 import os
 import sys
@@ -87,6 +88,58 @@ def test_mutant_amendment_refusals(root: Path, tmp_path: Path) -> None:
         assert isinstance(amend_records(original, [changed], root), Err)
     assert isinstance(amend_records(original, [amendment, amendment], root), Err)
     assert isinstance(amend_records(original, [amendment], tmp_path), Err)
+
+
+def test_mutant_amendment_chain_requires_exact_predecessor(
+    root: Path, tmp_path: Path
+) -> None:
+    """A second revision binds the first and refuses replay, forks and no-ops."""
+    document = tomllib.loads(
+        (root / "tests/mutants/gate.toml").read_text(encoding="utf-8")
+    )
+    original = next(
+        row for row in document["mutant"] if row["id"] == "M-legs-drop-pytest"
+    )
+    first = next(row for row in document["amendment"] if row["id"] == original["id"])
+    plan = tmp_path / "DEVELOPMENT_PLAN"
+    plan.mkdir()
+    (plan / "rationale.md").write_text(
+        "| D-90 | `M-legs-drop-pytest` |\n| D-110 | `M-legs-drop-pytest` |\n",
+        encoding="utf-8",
+    )
+    observed = amend_records([original], [first], tmp_path)
+    assert isinstance(observed, Ok)
+    current = observed.value[0]
+    assert isinstance(current, dict)
+    revised = {**current, "search": str(current["search"]) + " revised"}
+
+    def digest(value: dict[str, object]) -> str:
+        canonical = json.dumps(
+            value, sort_keys=True, ensure_ascii=True, allow_nan=False
+        )
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    second = {
+        "id": original["id"],
+        "prior_sha256": digest(current),
+        "revised_sha256": digest(revised),
+        "search": revised["search"],
+        "replace": revised["replace"],
+        "provenance": "decision:D-110",
+    }
+    assert amend_records([original], [first, second], tmp_path) == Ok((revised,))
+    for chain in (
+        [second, first],
+        [first, second, second],
+        [first, {**second, "prior_sha256": first["prior_sha256"]}],
+        [
+            first,
+            {**second, "search": current["search"], "revised_sha256": digest(current)},
+        ],
+    ):
+        assert isinstance(amend_records([original], chain, tmp_path), Err), (
+            "invalid amendment chain was accepted"
+        )
 
 
 def _sample(root: Path) -> Path:

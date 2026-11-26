@@ -188,8 +188,8 @@ def advance(state: State, *, wait_seconds: float) -> Result[State, str]:
             )
         case Waiting(held, released):
             return _advance_waiting(held, released, wait_seconds)
-        case AwaitingAbsence(exchange, removed):
-            return _start_peer(exchange, "absence", removed)
+        case _:
+            return _start_peer(state.exchange, "absence", state.removed)
 
 
 def _advance_waiting(

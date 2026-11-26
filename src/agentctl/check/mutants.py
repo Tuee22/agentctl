@@ -280,8 +280,8 @@ def amend_records(
 def _amend_all(
     result: tuple[object, ...], amendments: list[object], rationale: str
 ) -> Result[tuple[object, ...], MutationError]:
-    """Require unique documented amendments and preserve every original row."""
-    used = frozenset[str]()
+    """Apply a documented, content-bound sequence without changing old rows."""
+    used = frozenset[tuple[str, str]]()
     for amendment in amendments:
         if (
             not isinstance(amendment, dict)
@@ -299,8 +299,9 @@ def _amend_all(
             return Err(MutationError("schema", "invalid mutant amendment fields"))
         identifier = str(amendment["id"])
         provenance = str(amendment["provenance"])
+        prior = str(amendment["prior_sha256"])
         if (
-            identifier in used
+            (identifier, prior) in used
             or not re.fullmatch(r"decision:D-\d+", provenance)
             or not re.search(
                 r"^\| "
@@ -346,12 +347,14 @@ def _amend_all(
         binding = MutantAmendment(
             identifier, amendment["prior_sha256"], amendment["revised_sha256"]
         )
-        if not mutant_amendment_matches(before, after, binding):
+        if before.contents == after.contents or not mutant_amendment_matches(
+            before, after, binding
+        ):
             return Err(
                 MutationError("schema", "mutant amendment content binding mismatch")
             )
         result = tuple(updated if value is original else value for value in result)
-        used = used | {identifier}
+        used = used | {(identifier, prior)}
     return Ok(result)
 
 

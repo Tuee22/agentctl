@@ -15,6 +15,7 @@ from tempfile import TemporaryDirectory, mkdtemp
 
 import pytest
 
+from agentctl import foundation_process_identity
 from agentctl.check.evidence import read_legs
 from agentctl.check.mutants import scratch
 from agentctl.check.process_identity import linux_birth_stat
@@ -63,6 +64,29 @@ def test_linux_birth_parses_kernel_stat() -> None:
         assert isinstance(linux_birth_stat(malformed, 123), Err), (
             "invalid Linux process identity was accepted"
         )
+
+
+@pytest.mark.evidence("value")
+def test_linux_birth_handles_process_exit_during_stat(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A vanished proc entry is absent only after a separate liveness check."""
+    monkeypatch.setattr(foundation_process_identity.sys, "platform", "linux")
+
+    def vanished(_path: Path) -> bytes:
+        raise ProcessLookupError
+
+    monkeypatch.setattr(Path, "read_bytes", vanished)
+    monkeypatch.setattr(
+        foundation_process_identity, "alive", lambda *_args: Ok(value=False)
+    )
+    assert foundation_process_identity.linux_birth(123) == Ok(None)
+    monkeypatch.setattr(
+        foundation_process_identity, "alive", lambda *_args: Ok(value=True)
+    )
+    assert isinstance(foundation_process_identity.linux_birth(123), Err), (
+        "live process without readable stat was accepted as absent"
+    )
 
 
 def _family() -> Family:
@@ -588,8 +612,20 @@ def test_later_readiness_does_not_prevent_validation(
 def _vetoed_validation(subject: Path, run_dir: Path) -> tuple[int, str, str]:
     """Observe attempted tool launches without recursively running this suite."""
     script = (
-        "import sys\nfrom pathlib import Path\n"
+        "import json, sys\nfrom pathlib import Path\n"
         "from agentctl.check.steps import validate_and_run\n"
+        "def profile(frame, event, arg):\n"
+        "    if event == 'return' and "
+        "frame.f_code.co_name == 'python_invocation_observation':\n"
+        "        print('captured-python-invocations: ' + arg.__class__.__name__)\n"
+        "    if event == 'call' and "
+        "frame.f_code.co_name == 'captured_phase_observations':\n"
+        "        items = frame.f_locals['captured'].validation\n"
+        "        print('captured-validation: ' + json.dumps(items))\n"
+        "        issues = frame.f_locals['captured'].source_issues\n"
+        "        print('captured-source: ' + json.dumps(\n"
+        "            [[item.path, item.message] for item in issues]))\n"
+        "sys.setprofile(profile)\n"
         "def audit(event, args):\n"
         "    if event == 'subprocess.Popen':\n"
         "        if 'tests.harness.oracle' in str(args[1]): return\n"
@@ -666,8 +702,139 @@ def test_validation_reports_independent_failures(root: Path, tmp_path: Path) -> 
     assert code == 1
     assert "docs.taxonomy: docs/" in error
     assert "undeclared requirement R999" in error
+    assert "captured-python-invocations: Ok" in output, (
+        "actual Python invocations were not joined"
+    )
+    captured = next(
+        line.removeprefix("captured-validation: ")
+        for line in output.splitlines()
+        if line.startswith("captured-validation: ")
+    )
+    observed = json.loads(captured)
+    assert any("docs.taxonomy: docs/" in item for item in observed), (
+        "actual validator damage did not reach the phase capture"
+    )
+    assert any("undeclared requirement R999" in item for item in observed), (
+        "actual validator damage did not reach the phase capture"
+    )
+    assert "coverage observation failed" in observed, (
+        "pre-finalizer integrity failure did not reach the phase capture"
+    )
     assert "ruff-check: FAIL" in output
     assert "pytest: FAIL" in output
+
+
+@pytest.mark.evidence("real")
+def test_validation_captures_source_issue_path(root: Path, tmp_path: Path) -> None:
+    """A real source guard carries its observed path into the phase handoff."""
+    subject = tmp_path / "subject"
+    assert scratch(root, subject) == Ok(subject)
+    relative = "src/agentctl/bootstrap/prereqs.py"
+    source = subject / relative
+    source.write_bytes(source.read_bytes() + b"\nimport subprocess\n")
+    code, output, _error = _vetoed_validation(subject, tmp_path)
+    assert code == 1
+    captured = next(
+        line.removeprefix("captured-source: ")
+        for line in output.splitlines()
+        if line.startswith("captured-source: ")
+    )
+    assert [relative, "src.one-process-module: " + relative] in json.loads(captured), (
+        "actual source issue did not reach phase capture"
+    )
+
+
+@pytest.mark.evidence("real")
+def test_validation_refuses_changed_source_walk(root: Path, tmp_path: Path) -> None:
+    """The real validator detects a source changed after its guarded census."""
+    subject = tmp_path / "subject"
+    assert scratch(root, subject) == Ok(subject)
+    script = (
+        "import json, sys\nfrom pathlib import Path\n"
+        "from agentctl.check.steps import validate_and_run\n"
+        "root, run_dir = map(Path, sys.argv[1:3])\n"
+        "def profile(frame, event, arg):\n"
+        "    if event == 'call' and frame.f_code.co_name == 'source_observations':\n"
+        "        path = root / 'src/agentctl/bootstrap/prereqs.py'\n"
+        "        path.write_bytes(path.read_bytes() + b'\\nimport subprocess\\n')\n"
+        "    if event == 'call' and "
+        "frame.f_code.co_name == 'captured_phase_observations':\n"
+        "        issues = frame.f_locals['captured'].source_issues\n"
+        "        print('captured-source: ' + json.dumps(\n"
+        "            [[item.path, item.message] for item in issues]))\n"
+        "sys.setprofile(profile)\n"
+        "def audit(event, args):\n"
+        "    if event == 'subprocess.Popen': raise OSError('owned tool veto')\n"
+        "sys.addaudithook(audit)\n"
+        "sys.exit(validate_and_run(root, run_dir, 'nonce', sys.argv[3]))\n"
+    )
+    result = run(
+        [sys.executable, "-c", script, str(subject), str(tmp_path), _family()],
+        cwd=subject,
+        env={
+            **os.environ,
+            "PYTHONPATH": str(subject / "src"),
+            "PYTHONDONTWRITEBYTECODE": "1",
+        },
+    )
+    assert isinstance(result, Ok)
+    assert result.value.code == 1
+    captured = next(
+        line.removeprefix("captured-source: ")
+        for line in result.value.stdout.splitlines()
+        if line.startswith("captured-source: ")
+    )
+    assert [
+        None,
+        "validator source census differs from live source walk",
+    ] in json.loads(captured), "changed source validation was accepted"
+
+
+@pytest.mark.evidence("real")
+def test_validation_captures_target_census_mismatch(root: Path, tmp_path: Path) -> None:
+    """A Python source added after target discovery is visible to validation."""
+    subject = tmp_path / "subject"
+    assert scratch(root, subject) == Ok(subject)
+    script = (
+        "import json, sys\nfrom pathlib import Path\n"
+        "from agentctl.check.steps import validate_and_run\n"
+        "root, run_dir = map(Path, sys.argv[1:3]); changed = [False]\n"
+        "def profile(frame, event, arg):\n"
+        "    if event == 'return' and frame.f_code.co_name == 'targets' "
+        "and not changed[0]:\n"
+        "        changed[0] = True\n"
+        "        (root / 'src/agentctl/new_target.py').write_text('pass\\n')\n"
+        "    if event == 'call' and "
+        "frame.f_code.co_name == 'captured_phase_observations':\n"
+        "        print('captured-validation: ' + "
+        "json.dumps(frame.f_locals['captured'].validation))\n"
+        "sys.setprofile(profile)\n"
+        "def audit(event, args):\n"
+        "    if event == 'subprocess.Popen': raise OSError('owned tool veto')\n"
+        "sys.addaudithook(audit)\n"
+        "sys.exit(validate_and_run(root, run_dir, 'nonce', sys.argv[3]))\n"
+    )
+    result = run(
+        [sys.executable, "-c", script, str(subject), str(tmp_path), _family()],
+        cwd=subject,
+        env={
+            **os.environ,
+            "PYTHONPATH": str(subject / "src"),
+            "PYTHONDONTWRITEBYTECODE": "1",
+        },
+    )
+    assert isinstance(result, Ok)
+    assert result.value.code == 1
+    captured = next(
+        line.removeprefix("captured-validation: ")
+        for line in result.value.stdout.splitlines()
+        if line.startswith("captured-validation: ")
+    )
+    assert any(
+        "validators: Python targets: Python tool targets differ from the source census"
+        in item
+        for item in json.loads(captured)
+    ), "live target mismatch was not captured"
 
 
 @pytest.mark.evidence("real")
@@ -1021,3 +1188,190 @@ def test_ref_and_liveness_read_errors(tmp_path: Path) -> None:
     )
     assert isinstance(result, Ok)
     assert result.value.stdout.strip() == "git is required for the ref snapshot"
+
+
+@pytest.mark.evidence("real")
+def test_validation_retains_initial_oracle_integrity(
+    root: Path, tmp_path: Path
+) -> None:
+    """A transient first integrity failure survives even if the later check passes."""
+    subject = tmp_path / "subject"
+    assert scratch(root, subject) == Ok(subject)
+    script = (
+        "import sys\nfrom pathlib import Path\n"
+        "from agentctl.check import steps\n"
+        "root, state = map(Path, sys.argv[1:3])\n"
+        "original = steps.oracle_details_unchanged\n"
+        "calls = []\n"
+        "def transient(*args):\n"
+        "    calls.append(True)\n"
+        "    return 1 if len(calls) == 1 else original(*args)\n"
+        "steps.oracle_details_unchanged = transient\n"
+        "def audit(event, args):\n"
+        "    if event == 'subprocess.Popen':\n"
+        "        if 'tests.harness.oracle' in str(args[1]): return\n"
+        "        raise OSError('owned tool veto')\n"
+        "sys.addaudithook(audit)\n"
+        "context = steps.CheckRun(root, state, 'nonce', sys.argv[3])\n"
+        "result = steps._validate_and_observe(context)\n"
+        "assert len(calls) >= 2\n"
+        "assert result.initial_oracle_details == 1, 'initial integrity failure lost'\n"
+    )
+    result = run(
+        [sys.executable, "-c", script, str(subject), str(tmp_path), _family()],
+        cwd=subject,
+        env={
+            **os.environ,
+            "PYTHONPATH": str(subject / "src"),
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf-8",
+        },
+    )
+    assert isinstance(result, Ok)
+    assert result.value.code == 0, "initial oracle integrity failure lost"
+
+
+@pytest.mark.evidence("real")
+def test_validation_retains_transient_integrity(root: Path, tmp_path: Path) -> None:
+    """A failed pre-finalizer record check is retained independently of later reads."""
+    subject = tmp_path / "subject"
+    assert scratch(root, subject) == Ok(subject)
+    script = (
+        "import sys\nfrom pathlib import Path\n"
+        "from agentctl.check import steps\n"
+        "from agentctl.foundation import Ok\n"
+        "root, state = map(Path, sys.argv[1:3])\n"
+        "checks = ('mutant_killers_match', 'mutant_killers_unchanged', "
+        "'oracle_outcomes_unchanged', 'oracle_details_unchanged', "
+        "'tool_outcomes_unchanged', 'tool_substeps_unchanged', "
+        "'pytest_manifest_unchanged', 'native_snapshot_unchanged', "
+        "'host_observation_unchanged', 'coverage_snapshot_unchanged', "
+        "'ruff_snapshot_unchanged', 'python_commands_unchanged', "
+        "'ty_snapshot_unchanged', 'coverage_text_integrity')\n"
+        "for name in checks: setattr(steps, name, lambda *args, **kwargs: 0)\n"
+        "steps.report_python_invocations = lambda *args: Ok(None)\n"
+        "steps.report_oracle_diagnostics = lambda *args: Ok(None)\n"
+        "steps.captured_phase_observations = lambda *args: None\n"
+        "def audit(event, args):\n"
+        "    if event == 'subprocess.Popen': raise OSError('owned tool veto')\n"
+        "sys.addaudithook(audit)\n"
+        "context = steps.CheckRun(root, state, 'nonce', sys.argv[3])\n"
+        "clean = steps._validate_and_observe(context)\n"
+        "assert clean.validation_integrity == 0, 'clean integrity was rejected'\n"
+        "steps.host_observation_unchanged = lambda *args: 1\n"
+        "damaged = steps._validate_and_observe(context)\n"
+        "assert damaged.validation_integrity == 1, "
+        "'validation integrity capture lost'\n"
+    )
+    result = run(
+        [sys.executable, "-c", script, str(subject), str(tmp_path), _family()],
+        cwd=subject,
+        env={
+            **os.environ,
+            "PYTHONPATH": str(subject / "src"),
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf-8",
+        },
+    )
+    assert isinstance(result, Ok)
+    assert result.value.code == 0, "validation integrity capture lost"
+
+
+@pytest.mark.evidence("real")
+def test_validation_carries_original_native_absence(root: Path, tmp_path: Path) -> None:
+    """Validation retains a captured absence without erasing the overall failure."""
+    subject = tmp_path / "subject"
+    assert scratch(root, subject) == Ok(subject)
+    script = (
+        "import sys\nfrom pathlib import Path\n"
+        "from agentctl.check import evidence, steps\n"
+        "from agentctl.foundation import Err, Ok\n"
+        "root, state = map(Path, sys.argv[1:3])\n"
+        "marker = steps.native_absence_observation(state, 'nonce', 1)\n"
+        "assert isinstance(marker, Ok)\n"
+        "tools = steps.ToolOutcome(1, Ok(evidence.LegEvidence('nonce', "
+        "(('cabal-test', 1),))), Ok(evidence.ToolSubsteps('nonce', ())), "
+        "native=Err('absent'), native_absence=marker.value)\n"
+        "steps._run_tools_observed = lambda *args, **kwargs: tools\n"
+        "checks = ('mutant_killers_match', 'mutant_killers_unchanged', "
+        "'oracle_outcomes_unchanged', 'oracle_details_unchanged', "
+        "'tool_outcomes_unchanged', 'tool_substeps_unchanged', "
+        "'pytest_manifest_unchanged', 'host_observation_unchanged', "
+        "'coverage_snapshot_unchanged', 'ruff_snapshot_unchanged', "
+        "'python_commands_unchanged', 'ty_snapshot_unchanged', "
+        "'coverage_text_integrity')\n"
+        "for name in checks: setattr(steps, name, lambda *args, **kwargs: 0)\n"
+        "steps.native_snapshot_unchanged = lambda *args: 1\n"
+        "steps.report_python_invocations = lambda *args: Ok(None)\n"
+        "steps.report_oracle_diagnostics = lambda *args: Ok(None)\n"
+        "def capture(value):\n"
+        "    assert 'native observation failed' not in value.validation, "
+        "'native absence was globalized'\n"
+        "    return Err('controlled observation')\n"
+        "steps.captured_phase_observations = capture\n"
+        "def audit(event, args):\n"
+        "    if event == 'subprocess.Popen': raise OSError('owned tool veto')\n"
+        "sys.addaudithook(audit)\n"
+        "context = steps.CheckRun(root, state, 'nonce', sys.argv[3])\n"
+        "result = steps._validate_and_observe(context)\n"
+        "assert result.code == 1, 'native failure lost from overall result'\n"
+        "assert result.validation_integrity == 0, 'native absence was globalized'\n"
+        "assert result.native_absence == marker.value, "
+        "'native absence was not carried'\n"
+    )
+    result = run(
+        [sys.executable, "-c", script, str(subject), str(tmp_path), _family()],
+        cwd=subject,
+        env={
+            **os.environ,
+            "PYTHONPATH": str(subject / "src"),
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf-8",
+        },
+    )
+    assert isinstance(result, Ok)
+    assert result.value.code == 0, result.value.stderr
+
+
+@pytest.mark.evidence("real")
+def test_validation_carries_scoped_mutant_marker(root: Path, tmp_path: Path) -> None:
+    """Carry a scoped ownership fallback into the actual provisional capture."""
+    subject = tmp_path / "subject"
+    assert scratch(root, subject) == Ok(subject)
+    script = (
+        "import sys\nfrom pathlib import Path\n"
+        "from agentctl.check import ownership, steps\n"
+        "from agentctl.foundation import Err, Ok\n"
+        "root, state = map(Path, sys.argv[1:3])\n"
+        "steps.complete_mutant_owners = lambda *args: Err('controlled')\n"
+        "steps.provisional_mutant_owners = lambda *args: Err('controlled')\n"
+        "def mapping(entries, records):\n"
+        "    owners = tuple((record.identifier, 0) for record in records)\n"
+        "    return Ok(ownership.ScopedMutantMapping(owners, ()))\n"
+        "steps.declared_scoped_mutant_mapping = mapping\n"
+        "def capture(value):\n"
+        "    assert value.scoped_mutants, 'validation omitted scoped mutant marker'\n"
+        "    return Err('controlled observation')\n"
+        "steps.captured_phase_observations = capture\n"
+        "def audit(event, args):\n"
+        "    if event == 'subprocess.Popen': raise OSError('owned tool veto')\n"
+        "sys.addaudithook(audit)\n"
+        "context = steps.CheckRun(root, state, 'nonce', sys.argv[3])\n"
+        "steps._validate_and_observe(context)\n"
+    )
+    result = run(
+        [sys.executable, "-c", script, str(subject), str(tmp_path), _family()],
+        cwd=subject,
+        env={
+            **os.environ,
+            "PYTHONPATH": str(subject / "src"),
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf-8",
+        },
+    )
+    assert isinstance(result, Ok)
+    assert result.value.code == 0, "validation omitted scoped mutant marker"

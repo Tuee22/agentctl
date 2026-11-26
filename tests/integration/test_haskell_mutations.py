@@ -56,7 +56,9 @@ def test_native_edge_vetoes(
         assert isinstance(events, list)
         assert events[0]["argv"] == [sys.executable, "-c", "print('observer control')"]
         assert not events[0]["blocked"]
-        assert events[-1]["blocked"]
+        blocked = [event for event in events if event["blocked"]]
+        assert len(blocked) == 1, "the native veto must occur exactly once"
+        assert events.index(blocked[0]) > 0
         assert all(event["nonce"] == nonce for event in events)
 
 

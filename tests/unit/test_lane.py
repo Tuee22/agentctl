@@ -12,11 +12,13 @@ from agentctl.check.lanes import (
     Declaration,
     HostFacts,
     architecture,
+    debian_release,
     evaluate,
     evidence_lines,
     parse_host,
     parse_lane,
     parse_phase_lane,
+    phase_lane_host,
     read_host,
     refusals,
 )
@@ -24,6 +26,97 @@ from agentctl.result import Err, Ok
 from tests.harness.oracle import Object, Store, load_scoped
 
 pytestmark = pytest.mark.evidence("value")
+
+
+def test_phase_lane_qualifies_native_family_without_later_capabilities() -> None:
+    """Require Debian or the specified foreign host and only the lane's base facts."""
+    linux = HostFacts("Linux", "x86_64", checkout=True, git=True, debian=True)
+    assert phase_lane_host("linux", linux), "Debian phase lane was rejected"
+    assert phase_lane_host("linux-windows", linux)
+    assert phase_lane_host("linux-macos", linux)
+    assert not phase_lane_host("linux", replace(linux, debian=False)), (
+        "non-Debian Linux qualified for a phase"
+    )
+    assert not phase_lane_host("linux", replace(linux, checkout=False))
+    assert not phase_lane_host("linux", replace(linux, git=False))
+    assert not phase_lane_host("linux", replace(linux, architecture="unknown"))
+    assert not phase_lane_host("linux-live-clean", linux)
+    live = replace(linux, mux=True, agents=True, authenticated=True, clean=True)
+    assert phase_lane_host("linux-live-clean", live)
+    for name in ("mux", "agents", "authenticated", "clean"):
+        assert not phase_lane_host(
+            "linux-live-clean", replace(live, **{name: False})
+        ), "live lane ignored " + name
+    windows = HostFacts("Windows", "AMD64", checkout=True, git=True)
+    assert phase_lane_host("linux-windows", windows), (
+        "foreign phase lane required later capabilities"
+    )
+    assert not phase_lane_host("linux", windows), "foreign family qualified Linux lane"
+    assert not phase_lane_host("linux-macos", windows)
+    assert not phase_lane_host("linux-windows", replace(windows, architecture="ARM64"))
+    mac = HostFacts("Darwin", "arm64", checkout=True, git=True)
+    assert phase_lane_host("linux-macos", mac)
+    assert not phase_lane_host("linux-windows", mac)
+
+
+def test_host_lane_oracle(root: Path) -> None:
+    """Use independent cases for native family and lane qualification."""
+    store = load_scoped(root / "tests/oracles/host_lanes.toml", root)
+    assert isinstance(store, Store)
+    assert store.effective
+    for row in store.effective:
+        assert isinstance(row.inputs, Object)
+        values = dict(row.inputs.items)
+        assert isinstance(row.expected, bool)
+        lane = values["lane"]
+        family = values["family"]
+        machine = values["architecture"]
+        assert isinstance(lane, str)
+        assert isinstance(family, str)
+        assert isinstance(machine, str)
+        parsed = parse_phase_lane(lane)
+        assert isinstance(parsed, Ok)
+        flags = tuple(
+            values[name]
+            for name in (
+                "checkout",
+                "git",
+                "debian",
+                "mux",
+                "agents",
+                "authenticated",
+                "clean",
+            )
+        )
+        assert all(isinstance(value, bool) for value in flags)
+        facts = HostFacts(
+            family,
+            machine,
+            checkout=flags[0] is True,
+            git=flags[1] is True,
+            debian=flags[2] is True,
+            mux=flags[3] is True,
+            agents=flags[4] is True,
+            authenticated=flags[5] is True,
+            clean=flags[6] is True,
+        )
+        assert phase_lane_host(parsed.value, facts) == row.expected, row.identifier
+
+
+def test_debian_release_requires_exact_unambiguous_identity() -> None:
+    """Reject derivatives, missing IDs and duplicate distribution identities."""
+    assert debian_release('NAME="Debian"\nID=debian\n')
+    assert debian_release('ID="debian"\n')
+    for invalid in (
+        "",
+        "ID=ubuntu\n",
+        "ID_LIKE=debian\n",
+        "ID=debian\nID=debian\n",
+        'ID=debian\nID="bad value"\n',
+        "ID=debian\nID=\n",
+        "ID=debian\n ID =other\n",
+    ):
+        assert not debian_release(invalid), "foreign Linux qualified as Debian"
 
 
 def test_lane_evidence_oracle(root: Path) -> None:
@@ -174,6 +267,7 @@ def test_host_observation_schema(
         "authenticated": False,
         "clean": False,
         "xcode": False,
+        "debian": False,
     }
     value = {"nonce": "current", "facts": facts}
     expected = HostFacts(family="Linux", architecture="x86_64", checkout=True, git=True)
@@ -184,6 +278,11 @@ def test_host_observation_schema(
         {**value, "nonce": "old"},
         {**value, "facts": []},
         {**value, "facts": {**facts, "mux": "false"}},
+        {**value, "facts": {**facts, "debian": "true"}},
+        {
+            **value,
+            "facts": {key: value for key, value in facts.items() if key != "debian"},
+        },
         {**value, "facts": {**facts, "family": 1}},
     ):
         assert isinstance(parse_host(invalid, "current"), Err)
