@@ -19,7 +19,7 @@ Haskell derives its runtime-owned subdirectories and never duplicates a per-user
 |---|---|---|---|---|
 | `cache` | Source, build trees, private dependency stores and style tools | `XDG_CACHE_HOME` | `~/.cache/agentctl` | `%LOCALAPPDATA%/agentctl/cache` |
 | `data` | Immutable application/backend publications and their receipts | `XDG_DATA_HOME` | `~/.local/share/agentctl` | `%LOCALAPPDATA%/agentctl/data` |
-| `state` | Backend registry, launch/adoption/watch state, logs, locks and validation reports | `XDG_STATE_HOME` | `~/.local/state/agentctl` | `%LOCALAPPDATA%/agentctl/state` |
+| `state` | Backend registry, launch/adoption/watch state, logs, locks, validation reports and stored phase receipts | `XDG_STATE_HOME` | `~/.local/state/agentctl` | `%LOCALAPPDATA%/agentctl/state` |
 
 An absolute override selects its `agentctl` child on every OS. Relative overrides are refused or handled by the
 explicit root policy rather than used as arbitrary deletion/build locations. Secrets remain in user agent
@@ -49,7 +49,9 @@ configuration or short-lived private launch specs, never executable arguments or
   supervisor.jsonl            append-only decisions and outcomes
   locks/                      check, supervisor, watch and runtime preparation locks
   live-acceptance/             fixed real-agent validation folder
-  validation/                 retained reports, phase receipts and resource manifests
+  validation/                 retained reports, original logs and resource manifests
+  validation/receipts/        stored phase receipts by phase, half and identity
+  virtualbox-binding.json     binding receipt, written only in the dedicated VirtualBox guest
 ```
 
 Backend registry identity is stable across executable upgrades; a build digest does not silently create a
@@ -128,8 +130,10 @@ normal, failed and interrupted owned execution without deleting another process'
 ## Live-Test Folder
 
 Real agents start only in `<state>/live-acceptance/` with updating disabled. Ordinary live checks send no input
-and answer no dialog. In a dedicated validation VM, authorized credential copies remain private there while
-the host originals remain intact. Only the dedicated environment's agent configuration can be prepared for
+and answer no dialog. In the dedicated validation VM, agent credentials are the host's files shared read-only, or
+private 0600 copies as the fallback, as the
+[validation runbook](../operations/validation_runbook.md#agent-credentials-in-the-vm) describes, and the host
+originals stay unchanged. Only the dedicated environment's agent configuration can be prepared for
 those tests; no user's existing Linux environment is modified.
 
 ## Check Run Directory
@@ -138,19 +142,25 @@ A check has a fresh nonce, main temporary root and complete registry of any shor
 Every root records canonical path, owner and intended lifetime. Bytecode, private tool homes, coverage data,
 pytest/native manifests, observer records and private backend endpoints remain outside the checkout.
 
-Retained phase/lane receipts and original logs are published to `<state>/validation/` before temporary cleanup.
-Their identities include source/prerequisite scope, tool/backend hashes, host observations and execution
-manifests. Reports never contain copied credentials or full terminal captures by default. A failed finalizer
-is appended to the original failure rather than erasing it.
+The parent retains its report and original logs in `<state>/validation/` before temporary cleanup. After
+verifying the run, it stores one phase receipt per phase for each half the run evaluated natively under
+`<state>/validation/receipts/`; the [quality gate](../engineering/quality_gate.md) defines what a receipt binds, the
+store layout and when a run reads a stored receipt. Limits:
+[T.C](../../DEVELOPMENT_PLAN/development_plan_standards.md#tc-ceiling) C3. Reports never contain copied credentials
+or full terminal captures by default. A failed finalizer is appended to the original failure rather than erasing it.
 
 Cleanup begins only after owned children and strict file handles have ended. It verifies every resolved target
 is inside the registered allowed roots, never kills by image name, and leaves an explicit retained failure if
 resources cannot be reaped. A stale directory alone does not prove a live process, and a missing build file
-alone does not prove a server leak. Future runs never reuse test verdicts or mutant kills from old roots.
+alone does not prove a server leak. A run never reuses a test verdict, baseline or mutant kill from another run
+([T.K](../../DEVELOPMENT_PLAN/development_plan_standards.md#tk-kill)); a foreign half enters only as a stored
+receipt.
 
-The dedicated Debian VM uses guest-owned build/dependency/state storage with a bind-mounted live Windows source checkout. Its
-binding/resource receipt is created before the write-guard and transient source sentinels are removed before
-validation. [Validation runbook](../operations/validation_runbook.md) owns the exact observed evidence.
+The dedicated Debian VM uses guest-owned build/dependency/state storage with a bind-mounted live Windows source
+checkout. Before the guest gate's write-guard snapshot, the binder removes its transient source sentinels and
+writes `<state>/virtualbox-binding.json` in the guest with mode 0600; the
+[validation runbook](../operations/validation_runbook.md) owns the binder contract and the exact observed
+evidence.
 
 ## Related
 
@@ -160,6 +170,6 @@ validation. [Validation runbook](../operations/validation_runbook.md) owns the e
 - [sessions_and_ownership.md](../architecture/sessions_and_ownership.md) — managed/adopted identities.
 - [supervisor_contract.md](../architecture/supervisor_contract.md) — intent and delivery semantics.
 - [binary_build.md](../engineering/binary_build.md) — immutable publications and source identities.
-- [quality_gate.md](../engineering/quality_gate.md) — phase receipts and integrity.
-- [validation_runbook.md](../operations/validation_runbook.md) — shared source and native lane preparation.
+- [quality_gate.md](../engineering/quality_gate.md) — the receipt store and what a phase receipt binds.
+- [validation_runbook.md](../operations/validation_runbook.md) — shared source, credentials, host preparation and the binding receipt.
 - [Session management and adoption](../../DEVELOPMENT_PLAN/phase-6-session-management-and-adoption.md) — state ownership.

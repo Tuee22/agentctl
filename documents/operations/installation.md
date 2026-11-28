@@ -6,8 +6,9 @@
 
 > **Purpose**: Describe pipx installation, automatic source builds, host-owned runtime preparation, external agent prerequisites and safe upgrades.
 
-This page states the required user-facing contract. The plan and gate receipts establish which implemented
-host paths satisfy it; a successful Python package installation is not proof of native backend qualification.
+This page states the required user-facing contract. The plan and the gate's phase verdicts, whose mechanics the
+[quality gate](../engineering/quality_gate.md) defines, establish which implemented host paths satisfy it; a
+successful Python package installation is not proof of native backend qualification.
 
 ## Requirements
 
@@ -23,9 +24,9 @@ Haskell owns runtime platform policy and multiplexer preparation.
 | Native macOS | Its own qualified native bootstrap/multiplexer path | Install agent CLIs and arrange authentication |
 
 Linux requires exact Debian identity. A Linux machine with APT but another distribution is unsupported rather
-than silently accepted. Windows backend preparation is native; a dedicated Debian VirtualBox VM can provide
-Linux validation but cannot replace native Windows execution. [Validation runbook](validation_runbook.md) defines
-that setup.
+than silently accepted. Windows backend preparation is native; a dedicated Debian VirtualBox VM supplies only the
+Linux halves of validation, never the `windows` half. The [validation runbook](validation_runbook.md) defines that
+setup.
 
 Agentctl never installs claude or codex. A new launch checks its requested executable early and reports the
 missing tool before an expensive backend build. Listing, logs and reattachment require only their actual
@@ -42,7 +43,8 @@ Agentctl does not edit shell startup files or global PATH.
 
 Install the checkout with pipx, or install a published source/wheel artifact carrying the same bundled sources.
 A Git URL needs Git for pipx's acquisition; installing a local checkout does not. Contributors use
-`pipx install --editable '.[dev]'` from the editable checkout, then run `agentctl check` there.
+`pipx install --editable '.[dev]'` from the editable checkout, then run `agentctl check` there on the triggers of
+the [testing-cost method](../../AGENTS.md#testing-cost-method).
 A commit, staged index or clean worktree is never required for editable development or validation.
 
 ## First Run
@@ -72,7 +74,9 @@ separate ownership/compatibility policy and never grants ownership of the extern
 Noninteractive preparation cannot prompt. Explicit installation consent and already available privilege are
 required for system changes. Global consent travels separately from raw agent arguments; a similarly spelled
 flag in the agent's tail remains the agent's argument. Authentication dialogs and login operations are never
-part of automatic preparation. `agentctl check` reports missing setup without opening installers.
+part of automatic preparation. `agentctl check` reports a missing setup capability as absent, leaving the phases
+that need it at best `awaiting:setup:<capability>`
+([T.V](../../DEVELOPMENT_PLAN/development_plan_standards.md#tv-verdict)), without opening installers.
 
 ## Logging In
 
@@ -101,7 +105,8 @@ normal lifecycle. No image-name kill or recursive removal of an inferred user di
 - [binary_build.md](../engineering/binary_build.md) — source builds and immutable caches.
 - [multiplexer_adapter.md](../architecture/multiplexer_adapter.md) — private Windows registry and compatibility.
 - [launch_contract.md](../architecture/launch_contract.md) — preflight, argv and reattachment.
-- [validation_runbook.md](validation_runbook.md) — native and WSL2 validation preparation.
+- [validation_runbook.md](validation_runbook.md) — VirtualBox and native validation preparation.
+- [quality_gate.md](../engineering/quality_gate.md) — phase verdicts and the halves they join.
 - [troubleshooting.md](troubleshooting.md) — actionable refusal and readiness outcomes.
 - [files_and_state.md](../reference/files_and_state.md) — owned directories and removal boundaries.
 - [Python bootstrap and handoff](../../DEVELOPMENT_PLAN/phase-2-python-bootstrap-and-handoff.md) — installation owner.

@@ -4,12 +4,15 @@
 **Supersedes**: N/A
 **Owning phase**: [Python discipline and gate integrity](../../DEVELOPMENT_PLAN/phase-1-python-discipline-and-gate-integrity.md)
 
-> **Purpose**: Define independent behavioral evidence, complete phase/lane attribution, strict source migration, isolated native resources and honest limits.
+> **Purpose**: Define how tests meet the plan standards' admissibility, kill and adequacy clauses: evidence classes, isolation, observers, oracles, mutants and native controls.
 
-This page states the required evidence contract. The [quality gate](quality_gate.md) executes it through one
-no-argument command; the plan owns closure and migration status. No commit, human attestation, answered dialog,
-manual fixture capture or clean worktree substitutes for execution. Preparation and optional fixture capture
-remain outside ordinary check execution.
+Whether a test is admissible closure evidence is
+[T.E](../../DEVELOPMENT_PLAN/development_plan_standards.md#te-unspoofable-test), what counts as a kill is
+[T.K](../../DEVELOPMENT_PLAN/development_plan_standards.md#tk-kill) and when a phase's tests and mutants are adequate
+is [T.M](../../DEVELOPMENT_PLAN/development_plan_standards.md#tm-adequacy); this page states how tests meet them. The
+[quality gate](quality_gate.md) executes them through one no-argument command, and the plan owns closure and
+migration status. No commit, human attestation, answered dialog, manual fixture capture or clean worktree
+substitutes for execution. Preparation and optional fixture capture remain outside ordinary check execution.
 
 ## Evidence Classes
 
@@ -18,24 +21,31 @@ remain outside ordinary check execution.
 | `value` | Independent expected values compared with a pure subject over declared finite inputs | Does not establish behavior outside its supported domain |
 | `real` | An actual native tool or public application in a verified owned scope, with observed executable identity | Does not establish another release, host or backend |
 | `observer` | An independent receiver/process/filesystem witness records actual operations and their absence beside a live positive control | Does not establish an unobserved native behavior |
-| `owed` | A declared native obligation assigned to its hardware acceptance owner | Is not a passing test or a replacement for native execution |
+| `owed` | Native confirmation that a lower phase cannot observe, assigned to a later phase whose lane includes that family or half ([T.X](../../DEVELOPMENT_PLAN/development_plan_standards.md#tx-terms)); a host-declared kill target records `owed:<family>` on another family's run ([T.K](../../DEVELOPMENT_PLAN/development_plan_standards.md#tk-kill) K6) | Is not a passing test or a replacement for native execution |
 
 Each collected case declares its evidence class. An available foreign-host detection branch can establish
-capability absence, but supplies no native behavior receipt. All present tests run; absent future cases remain
-visible obligations of their owner. The complete phase verdict joins its owned and prerequisite executions,
-coverage, mutant outcomes and common integrity receipt without requiring later-phase success.
+capability absence, but supplies no native behavior receipt. All present tests run; an absent planned case is a
+planned absence of the citing phase and never enters another phase
+([T.F](../../DEVELOPMENT_PLAN/development_plan_standards.md#tf-shared-and-owned-failures), V3). A phase's verdict is
+[T.V](../../DEVELOPMENT_PLAN/development_plan_standards.md#tv-verdict) over its own and prerequisite executions,
+coverage and mutant outcomes, and it never requires a later phase to pass.
 
-Skipped, deselected, expected-failure, zero-assert, stale or subject-generated expectations establish no claim.
+Skipped, deselected, expected-failure, zero-assert, stale or subject-generated expectations establish no claim
+(T.E E1 and E3; [T.S](../../DEVELOPMENT_PLAN/development_plan_standards.md#ts-defended-spoofs) S3 and S6).
 Documented-only screens are not live captures. Passing exit status alone is insufficient when a traceback or
-incomplete report could produce the same status convention. Finite observations cannot prove universal purity,
-termination, callback ownership or soundness of every native typing declaration.
+incomplete report could produce the same status convention. Limits:
+[T.C](../../DEVELOPMENT_PLAN/development_plan_standards.md#tc-ceiling) C5.
 
 ## Isolation
 
 Real tools receive private homes, XDG roots, registries, caches and unique run identities. The subject uses its
-production path; the harness controls only supported external inputs. There is no production test branch,
-mocked implementation or monkeypatched calculation. Environment construction, current-directory changes and
-owned fake agents are explicit boundary controls.
+production path, and there is no production test branch, mocked implementation or monkeypatched calculation. A
+test controls only environment variables, the working directory and values passed through the subject's declared
+parameters, and owned fake agents are explicit boundary controls
+([T.E](../../DEVELOPMENT_PLAN/development_plan_standards.md#te-unspoofable-test) E4). E4 is judged at stage 2
+([T.W](../../DEVELOPMENT_PLAN/development_plan_standards.md#tw-staged-enforcement)), and per-file caps freeze the
+known substitutions, each a shape of the
+[deletion ledger](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md).
 
 - tmux uses a short, private socket directory, an empty owned configuration and no inherited mux routing.
   A server is ended only after its endpoint is verified inside a registered owned root.
@@ -48,14 +58,22 @@ owned fake agents are explicit boundary controls.
   synchronization. A sleep or a lazy file handle cannot be the synchronization oracle. Sharing violations are
   diagnosed and fixed without suppressing the test or weakening the screen comparison.
 - Agent logged-out controls use empty private configuration and remove provider credentials. Live acceptance
-  launches only in the fixed state-owned folder with updating disabled, sends no input and answers no dialogs.
-- Test bodies run no package manager, sudo, login or real installer. Cold installation is a separately observed
-  preparation action in a disposable environment, followed by the same complete gate.
+  runs on the `linux-live` half with logged-in agents
+  ([T.X](../../DEVELOPMENT_PLAN/development_plan_standards.md#tx-terms)), launches only in the fixed state-owned
+  folder with updating disabled, sends no input and answers no dialogs.
+- Test bodies run no package manager, sudo, login or real installer. Cold, partial and failing installations are
+  proven against installer models, and agentctl's own Windows provisioning runs once per run in a gate leg of
+  its owner, never per mutation (D-180).
+- Code is never restructured only to change coverage measurement; a host-state guard stays only where real state
+  on its family reaches it ([T.S](../../DEVELOPMENT_PLAN/development_plan_standards.md#ts-defended-spoofs) S11).
 
-A Windows workstation may supply Linux runs only through the dedicated Debian VirtualBox procedure in the
+A Windows workstation supplies the Linux halves only through the dedicated Debian VirtualBox procedure in the
 [validation runbook](../operations/validation_runbook.md). The live source bind mount is shared; Linux dependency
 stores, sockets, homes and build output remain on dedicated guest storage. Windows and guest checks do not
-write the shared checkout concurrently. Guest evidence stays Linux evidence.
+write the shared checkout concurrently. Guest evidence stays Linux evidence
+([T.E](../../DEVELOPMENT_PLAN/development_plan_standards.md#te-unspoofable-test) E6), and agent credentials reach
+the guest only through the runbook's
+[read-only shares or their 0600 copy fallback](../operations/validation_runbook.md#agent-credentials-in-the-vm).
 
 ## Observers and Nonces
 
@@ -72,7 +90,9 @@ receiving a safe positive submission.
 ## Oracles
 
 Oracles are independently derived from the user requirements and verified external tool facts. Their exact
-inputs, expectations, provenance and amendment relationships remain explicit. Gate configuration, source
+inputs, expectations, provenance and amendment relationships remain explicit. An expectation is a literal in the
+test or a row of an oracle that the cited Gate Integrity row names and the test loads, judged at stage 2
+([T.E](../../DEVELOPMENT_PLAN/development_plan_standards.md#te-unspoofable-test) E3). Gate configuration, source
 rules and native boundaries have two-sided controls. A supported-input domain records its finite bounds,
 accepted/refused cases and assumptions rather than claiming all annotated Python values are total.
 
@@ -84,23 +104,29 @@ success/failure vocabulary. Tests and gate implementation are in the same migrat
 
 ## Mutants
 
-Every declared mutation has a source target, exact change, independent killer and named failure reason.
-Compilation refusal, timeout, failed baseline or an unrelated teardown error does not count as the intended
-runtime kill. Corpus cases retain complete result records and restore scratch targets. Named killer execution
-inside the mutation harness is part of the registered corpus, not an alternative phase-closing runner.
-The runner observes individual baseline and eligible mutation outcomes, including failures from later named
-killers. The pytest observer writes their statuses to a separate run artifact, which the parent retains with the
-report (`tests/governance/test_gate_plugin.py::test_killer_outcomes_are_retained_from_real_execution`,
-`tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout`). The parent joins that artifact to the captured corpus and pytest outcomes and checks its original bytes after
-follow-up commands and finalizers. The parent checks a child-issued digest against both the live report and its
-retained copy. Provisional phase observations retain individual failed killers under their
-declared mutant owner while preserving the aggregate failure. They are not authenticated phase receipts; a failed baseline remains a failure and cannot
-count as a kill.
+Every declared mutation has a source target, exact change, independent killer and named failure reason. What
+counts as a kill, and the stage at which each kill condition applies, is
+[T.K](../../DEVELOPMENT_PLAN/development_plan_standards.md#tk-kill); the ownership and adequacy of a phase's mutants
+are [T.M](../../DEVELOPMENT_PLAN/development_plan_standards.md#tm-adequacy). Corpus cases retain complete result
+records and restore scratch targets. Named killer execution inside the mutation harness is part of the registered
+corpus, not an alternative phase-closing runner. The runner observes individual baseline and eligible mutation
+outcomes, including failures from later named killers. The pytest observer writes their statuses to a separate run
+artifact, which the parent retains with the report
+(`tests/governance/test_gate_plugin.py::test_killer_outcomes_are_retained_from_real_execution`,
+`tests/integration/test_runtime_boundaries.py::test_gate_reports_are_retained_outside_checkout`). The parent joins
+that artifact to the captured corpus and pytest outcomes and checks its original bytes after follow-up commands and
+finalizers. The parent checks a child-issued digest against both the live report and its retained copy.
+Provisional phase observations retain individual failed killers under their declared mutant owner while
+preserving the aggregate failure. A kill failure is owned by the mutant's owner
+([T.F](../../DEVELOPMENT_PLAN/development_plan_standards.md#tf-shared-and-owned-failures)), and a failed baseline is
+never a kill (T.K K2).
 
 New discipline controls include accepting twins and mutations demonstrating that each banned spelling or
 escape path changes the expected verdict. Existing oracle rows and committed mutations remain ratcheted
-against unchanged HEAD; amendments do not erase the expectation they correct. Uncommitted data has current-run
-protection but no claimed historical independence.
+against unchanged HEAD: a protected row changes only through a
+[T.G](../../DEVELOPMENT_PLAN/development_plan_standards.md#tg-governed-changes) record, and an amendment does not
+erase the expectation it corrects. Rows added since the last user commit have current-run protection only
+([T.C](../../DEVELOPMENT_PLAN/development_plan_standards.md#tc-ceiling) C2).
 
 ## Gate Legs and What Each Proves
 
@@ -108,17 +134,27 @@ Static tools measure the complete current file census and attribute diagnostics 
 in a shared prerequisite invalidate its consumers. Native builds prove the actual compiled input identity;
 unit/value tests establish declared functions on independent examples; real backend tests establish only their
 observed artifact and host. Coverage and collection manifests are exact per declared subject, with no hidden
-legacy roots. Shared run-integrity failures invalidate every dependent phase receipt.
+legacy roots. Exactly the failures that
+[T.F](../../DEVELOPMENT_PLAN/development_plan_standards.md#tf-shared-and-owned-failures) lists are shared and fail
+every phase; every other failure is owned by its locus.
 
-A deliberately broken later capability must leave an unrelated earlier complete phase verdict intact, while
-a stale nonce, omitted execution or changed common prerequisite invalidates the corresponding consumer.
-These are required gate controls, not assumptions inferred from a readable report.
+Haskell and C sources close by named-reason kills plus native accepting and refusing twins on their own family
+([T.X](../../DEVELOPMENT_PLAN/development_plan_standards.md#tx-terms)), while the coverage floor applies to Python
+sources (R20.2).
+
+A deliberately broken later capability leaves an unrelated earlier phase verdict unchanged, while a stale nonce,
+omitted execution or changed common prerequisite invalidates the corresponding consumer. These are required gate
+controls, not assumptions inferred from a readable report; the spoof matrix and live-plan independence controls of
+`tests/governance/test_phase_verdicts.py` are deliverables of
+[Governance and phase evidence](../../DEVELOPMENT_PLAN/phase-0-governance-and-phase-evidence.md).
 
 ## Unsupported Paths
 
-An unavailable native lane is unmet work rather than an emulated pass. WSL cannot establish Win32 process,
-filesystem, console or psmux behavior; Linux cannot establish Darwin SDK/Keychain behavior. Documented screen
-classes cannot claim live confirmation, and tests do not spend provider quota to manufacture failures.
+A half that no verified run has supplied prints `absent`, so the phases that require it are at best
+`awaiting:<half>` ([T.V](../../DEVELOPMENT_PLAN/development_plan_standards.md#tv-verdict)), never an emulated pass.
+A Linux guest cannot establish Win32 process, filesystem, console or psmux behavior, and Linux cannot establish
+Darwin SDK or Keychain behavior (T.E E6). Documented screen classes cannot claim live confirmation, and tests do not spend
+provider quota to manufacture failures.
 A short native stress test supports its measured workload, not arbitrary messages or universal bug freedom.
 
 ## Native multiplexer ownership
@@ -132,15 +168,17 @@ back to an active pane. Adopted sessions never become owned because they appear 
 Windows memory qualification includes independently capped vulnerable controls, synthetic blocked-output
 clients, real-server stalls beyond the server timeout, repeated resume cycles, multiple clients, mixed
 frame/no-change/directive workloads, latest-screen delivery, control ordering and clipboard/bell preservation.
-It measures private committed memory rather than resident RAM. Tests using the real clipboard run in a
-separate disposable Windows user/session; ordinary checks use an independent native test sink.
+It measures private committed memory rather than resident RAM. Clipboard and bell one-shots are observed only
+through synthetic test clients; no test writes the OS clipboard (D-172).
 
 ## Auth probes and installed-agent controls
 
-Agent CLIs remain user-installed. Fresh launch checks only the requested agent and fails before costly backend
-preparation when that executable is absent. Session listing, logs and reattachment do not demand unrelated
-agent executables or fresh authentication. Authentication status is observed without a login or any response
-to a trust/approval dialog. Private logged-out controls prove credential isolation rather than guessing it.
+The application never installs an agent CLI or logs it in; a validation host receives the CLIs through
+agent-performed [one-time setup](../operations/validation_runbook.md#one-time-host-setup). Fresh launch checks only
+the requested agent and fails before costly backend preparation when that executable is absent. Session listing,
+logs and reattachment do not demand unrelated agent executables or fresh authentication. Authentication status is
+observed without a login or any response to a trust/approval dialog. Private logged-out controls prove credential
+isolation rather than guessing it.
 
 ## Terminal closure and exit status
 
@@ -159,9 +197,10 @@ failure is retained alongside the original failure and cannot turn an incomplete
 
 ## Related
 
-- [quality_gate.md](quality_gate.md) — complete execution and independent phase/lane verdicts.
+- [quality_gate.md](quality_gate.md) — gate mechanics and phase verdicts.
+- [development_plan_standards.md § T](../../DEVELOPMENT_PLAN/development_plan_standards.md#t-unspoofable-evidence-and-phase-verdicts) — admissible tests, kills, adequacy and their limits.
 - [code_standards.md](code_standards.md) — Python doctrine and native boundary rules.
-- [validation_runbook.md](../operations/validation_runbook.md) — prepared native and WSL2 lanes.
+- [validation_runbook.md](../operations/validation_runbook.md) — VirtualBox, native Windows and Darwin runs.
 - [toolchain_bootstrap.md](toolchain_bootstrap.md) — installation versus ordinary testing.
 - [multiplexer_adapter.md](../architecture/multiplexer_adapter.md) — backend identity and isolation.
 - [files_and_state.md](../reference/files_and_state.md) — owned roots and retained receipts.

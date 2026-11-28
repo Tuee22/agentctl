@@ -8,7 +8,8 @@
 
 The required diagnostic contract preserves the original typed cause, action and remedy. Installed package
 metadata or a version banner alone cannot substitute for a qualifying executable or live server identity.
-The [quality gate](../engineering/quality_gate.md) reports failures by phase, source owner and native lane.
+The [quality gate](../engineering/quality_gate.md) reports failures by phase (`phase-failure` lines), source owner
+and half ([T.O](../../DEVELOPMENT_PLAN/development_plan_standards.md#to-output)).
 
 ## Multiplexer Missing
 
@@ -58,7 +59,7 @@ spawn alone is not evidence that the agent reached a usable prompt.
 Supply explicit installation consent and available privilege through the supported public preparation path.
 A check run never opens a package manager, sudo prompt, UAC dialog or installer interaction. Windows restart-
 required and installer-busy outcomes are reported distinctly; agentctl never reboots or forces an application
-closed. Cold-install validation uses an owned disposable environment prepared before ordinary tests.
+closed. No setup needs a host restart; a setup that would leaves its capability absent.
 
 ## ghcup Below the Floor
 
@@ -73,9 +74,11 @@ cause. Never weaken a pin or accept an incomplete file because the expected dest
 
 ## Unsupported Platform
 
-Linux runtime policy requires exact Debian identity. WSL2 qualifies a Linux lane only when it uses the dedicated
-Debian environment, complete dependencies, measured resource budget and verified shared-checkout bind mount.
-A missing native Windows or macOS capability remains unmet rather than substituted by WSL output.
+Linux runtime policy requires exact Debian identity. A dedicated Debian VirtualBox guest supplies the Linux halves
+only with complete dependencies, a measured resource budget and a verified bind mount of the shared checkout
+([validation runbook](validation_runbook.md)). A missing native Windows or macOS half prints `absent`, so the phase
+is at best `awaiting:<half>` ([T.V](../../DEVELOPMENT_PLAN/development_plan_standards.md#tv-verdict)), and guest
+output never substitutes for it.
 
 ## Native Build, Cache or Binary Identity Failed
 
@@ -124,24 +127,37 @@ Malformed, foreign, linked, overpermissive or stale registry data produces a typ
 external multiplexer registries and unrelated sessions are untouched. Recover by correcting or deliberately
 forgetting the exact owned record through the supported command, not by broad state deletion.
 
-## Validation and WSL2 Failures
+## Validation Failures
 
-The retained phase report separates product failures, unmet native lanes, missing planned cases and common
-integrity failures. A later product defect need not erase an earlier complete verdict, but a missing shared
-execution or stale source/backend receipt invalidates its consumers. An overall failure is never presented
-as full product acceptance.
+Each `PHASE` line carries one verdict of
+[T.V](../../DEVELOPMENT_PLAN/development_plan_standards.md#tv-verdict), published by the verified parent as the
+[quality gate](../engineering/quality_gate.md) describes. Follow the remedy for what the run prints:
 
-For WSL2, inspect the dedicated distribution/version, cgroup and affinity limits, disk/free-space budget,
-actual Linux tool paths and bind-mount receipt. A copied checkout, one-way synchronization or imported stale
-commit is not the shared source bridge. Unsupported mount permissions or filesystem semantics fail honestly;
-they are not repaired by modifying another distribution or global WSL configuration.
+| Output | Meaning | Remedy |
+|---|---|---|
+| `fail` with its `phase-failure` lines | The phase has an owned failure, or the run has a shared failure | Fix each named failure and rerun only its own test first, as the [testing-cost method](../../AGENTS.md#testing-cost-method) describes |
+| `awaiting:<half>` | The phase's only gap is a required half with no current stored receipt | Run `agentctl check` on a host that supplies that half, as the [validation runbook](validation_runbook.md#select-the-halves) describes |
+| `awaiting:setup:<capability>` | The capability's probe reports it absent, and every failure of that half is attributable to it | Perform its [one-time host setup](validation_runbook.md#one-time-host-setup), then rerun |
+| `awaiting:prerequisite` | The only gap is a prerequisite phase that is itself awaiting a half or a capability | Resolve the prerequisite's awaiting verdict first |
+| `phase verdicts withheld: <reason>` | The parent cannot verify the run, so it publishes no phase verdict | Remove the named cause and rerun the [canonical run sequence](validation_runbook.md#canonical-run-sequence) |
+
+Exactly the shared failures of
+[T.F](../../DEVELOPMENT_PLAN/development_plan_standards.md#tf-shared-and-owned-failures) affect every phase; every
+other failure stays with its owner, so a later failure leaves an earlier `pass` unchanged. A nonzero exit can
+coexist with an earlier phase's `pass`, and only `EVIDENCE pass` is whole-product acceptance.
+
+For the VirtualBox guest, a binding receipt that no longer matches means the source changed after binding: rerun
+the binder, then the guest gate, with no edit between them. Also inspect the guest's cgroup and affinity limits,
+disk and free-space budget and actual Linux tool paths. A copied checkout, one-way synchronization or imported
+stale commit is not the shared source bridge. The mount's permission, lock, case and symlink behavior is a
+recorded mount fact, never repaired by changing another VM or its settings.
 
 ## Related
 
 - [installation.md](installation.md) — user preparation and first use.
 - [validation_runbook.md](validation_runbook.md) — dedicated VirtualBox and native procedures.
 - [toolchain_bootstrap.md](../engineering/toolchain_bootstrap.md) — consent and typed readiness.
-- [quality_gate.md](../engineering/quality_gate.md) — independent phase/lane verdicts.
+- [quality_gate.md](../engineering/quality_gate.md) — verdict mechanics, `phase-failure` lines and stored receipts.
 - [sessions_and_ownership.md](../architecture/sessions_and_ownership.md) — managed/adopted authority.
 - [supervisor_contract.md](../architecture/supervisor_contract.md) — no-send and recovery outcomes.
 - [Agent preflight and launch](../../DEVELOPMENT_PLAN/phase-5-agent-preflight-and-launch.md) — diagnostic owner.

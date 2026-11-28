@@ -29,16 +29,30 @@ using its supported primitives; failure to qualify means no automated input and 
 weaker successful mode. Windows implements the same pre-existing contract with reviewed source patches.
 Observable terminal ordering does not expose an agent's latent internal state.
 
-Every present source/test artifact remains censused. One `agentctl check` runs all introduced legs and present
-tests, preserves all failures and emits independent phase/lane reports. Closure follows owned inputs and actual
-prerequisites rather than every later source file or the overall result. Shared integrity failures invalidate
-their consumers. Final product acceptance binds the whole subject and current native receipts.
+Every present source and test artifact is censused. One no-argument `agentctl check` runs every introduced leg
+and present test and preserves every failure; only its verified parent publishes one verdict line per phase
+([T.O](development_plan_standards.md#to-output)). A phase identity covers only that phase's closure
+([T.I](development_plan_standards.md#ti-identity)). A failure fails every phase only when
+[T.F](development_plan_standards.md#tf-shared-and-owned-failures) lists it as shared; every other failure stays
+with its locus, so later-only work never changes an earlier verdict. Final product acceptance binds the whole
+subject and a current receipt for every half.
+
+Behavior is proven model-first: unchanged production code runs through declared effect interpreters against
+conformant environment models, and only the thin native layer, private multiplexer servers and the harness
+provisioning earn `real` evidence ([§ T](development_plan_standards.md#t-unspoofable-evidence-and-phase-verdicts)).
+Testing is non-disruptive: every test touches only the closed list of
+[§ Q](development_plan_standards.md#q-containment-and-user-state-protection), the same suite runs on every host
+while each host family supplies its own halves, and live acceptance with logged-in agents runs only on the bound
+dedicated guest.
 
 ## Requirements
 
-The table is the sole live requirement/closing-owner join. Original requirement IDs and request anchors are
-preserved; [rationale](rationale.md#current-decision-precedence) names the explicit user-authorized amendments.
-A Planned test/resource is an implementation obligation, not a claim that a file or observation already exists.
+The table is the sole live requirement/closing-owner join. Rows are append-only: a committed row, its quote and
+closing sprint included, never changes, and an obligation that moves to another owner is an appended row plus a
+decision row. Original requirement IDs and request anchors are preserved;
+[rationale](rationale.md#current-decision-precedence) names the explicit user-authorized amendments. A planned
+test or resource is an implementation obligation of the phase that cites it, not a claim that a file or
+observation already exists.
 
 | ID | Requirement | Quote | Closing sprint | Evidence classes | Prose home | Data home |
 |---|---|---|---|---|---|---|
@@ -72,36 +86,56 @@ A Planned test/resource is an implementation obligation, not a claim that a file
 | R18.6 | watch, unwatch, pause and resume-watch give manual pause and opt-out. | `Support manual pause and opt-out` | [Sprint 8.2](phase-8-recovery-and-supervisor.md) | value; real | [documents/architecture/supervisor_contract.md](../documents/architecture/supervisor_contract.md) | `tests/oracles/command_surface.toml` |
 | R19 | The supervisor never switches models, never restarts crashed processes and never sends login input. | `Never automatically switch models or restart arbitrary crashed processes` | [Sprint 8.1](phase-8-recovery-and-supervisor.md) | value; observer | [documents/architecture/supervisor_contract.md](../documents/architecture/supervisor_contract.md) | `tests/oracles/forbidden_actions.toml` |
 | R20 | Every closure uses current independent tests, mutants, coverage, native observations and input-bound phase receipts without human intervention or commits. | `phases should have strict validation criteria that cannot be spoofed and which an agent can validate automatically without human input` | [Sprint 1.3](phase-1-python-discipline-and-gate-integrity.md) | real; value; observer | [documents/engineering/testing.md](../documents/engineering/testing.md) | `tests/oracles/check_steps.toml` |
+| R20.1 | Only the verifying parent publishes phase verdicts; a phase passes only when V1–V10 hold over its closure at its stage, and child PHASE and EVIDENCE lines are relayed only as withheld. | `fix the doctrinal issues and blockers we've been discussing` | [Sprint 0.2](phase-0-governance-and-phase-evidence.md) | value; real; observer | `documents/engineering/quality_gate.md` | `tests/oracles/phase_verdicts.toml` |
+| R20.2 | Haskell and C closure evidence is named-reason mutation kills plus model twins on every run of each family a source executes on, and native positive and refusing twins on their own family for the thin native layer; the coverage floor applies to Python sources. | `clearly define what unspoofable tests mean (eg mutations)` | [Sprint 1.3](phase-1-python-discipline-and-gate-integrity.md) | value; real | `documents/engineering/testing.md` | `tests/oracles/python_discipline.toml` |
 | R21 | All first-party Python, checker, tests and native boundaries conform to project-owned strict functional doctrine with executable local enforcement and explicit migration. | `incorporate it's standards doctrinally` | [Sprint 1.1](phase-1-python-discipline-and-gate-integrity.md) | value; real; observer | `documents/engineering/code_standards.md` | `tests/oracles/python_discipline.toml` |
 | R22 | Haskell owns runtime dependency policy, source acquisition, toolchain/backend preparation, qualification, sessions and recovery; Python owns only the prerequisite bootstrap/transport and developer gate. | `as much logic as possible should be in haskell not python` | [Sprint 3.1](phase-3-haskell-runtime-and-platform-policy.md) | value; real; observer | `documents/architecture/python_haskell_boundary.md` | `tests/oracles/runtime_provisioning.toml` |
 | R23 | On native Windows Haskell idempotently provisions private Rust/Cargo and native linker/SDK requirements, fetches pinned source and patches, and builds/publishes its private psmux artifact. | `including idemmpotently installing any rust dependencies` | [Sprint 9.3](phase-9-windows-toolchain-and-psmux-build.md) | value; real; observer | `documents/engineering/toolchain_bootstrap.md` | `tests/oracles/backend_profiles.toml` |
+| R23.1 | The Windows harness runs agentctl's own provisioning once per run: a cold build on the first run, idempotent afterwards, never per mutation, using a private validation root and no restart. | `i think the test harness can do it once, without repeating it for each mutation` | [Sprint 9.3](phase-9-windows-toolchain-and-psmux-build.md) | value; real; observer | `documents/engineering/toolchain_bootstrap.md` | `tests/oracles/backend_profiles.toml` |
 | R24 | The exact psmux client/server artifacts meet memory/backpressure, control-event, coherent capture, exact-target and guarded-input contracts through independent native tests. | `consider both how agentctl will interact with psmux` | [Sprint 10.2](phase-10-windows-backend-qualification.md) | value; real; observer | `documents/architecture/multiplexer_adapter.md` | `tests/oracles/backend_profiles.toml` |
 | R25 | Windows-host Linux validation uses a dedicated right-sized Debian Hyper-V VM with all Linux dependencies and a verified bind mount of the same host checkout; no commit/copy bridge supplies evidence. | `a dedicated wsl2 instance for agentctl is used` | [Sprint 12.1](phase-12-linux-live-and-clean-acceptance.md) | value; real; observer | `documents/operations/validation_runbook.md` | `tests/oracles/host_lanes.toml` |
+| R25.1 | The Windows host binder attaches the live checkout to the dedicated Debian VirtualBox guest, verifies its nonce answer and census, writes the guest binding receipt and transports stored phase receipts. | `there must be a bind mount between the agentctl repo in wsl2 and the local host` | [Sprint 9.1](phase-9-windows-toolchain-and-psmux-build.md) | real; observer; value | `documents/operations/validation_runbook.md` | `tests/oracles/host_lanes.toml` |
 | R26 | Every phase is additive, independently closable from its own prerequisites and requires Linux plus at most one native foreign hardware family. | `incomplete later phases should not prevent earlier phases from being validated` | [Sprint 0.1](phase-0-governance-and-phase-evidence.md) | value; real; observer | `documents/engineering/quality_gate.md` | `tests/oracles/phase_ownership.toml` |
+| R26.1 | Later phases never contradict or undo an earlier phase; apart from shared failures, an earlier verdict and identity depend only on what is owned within its closure. | `later phases should not contradict/undo earlier phases` | [Sprint 0.3](phase-0-governance-and-phase-evidence.md) | value; real | `DEVELOPMENT_PLAN/development_plan_standards.md` | `tests/oracles/phase_ownership.toml` |
+| R27 | Agents select, activate and close phases only from verified verdicts and the computed selection line; regressed, awaiting and blocked are computed, never authored, and an absent half or capability blocks only the phases awaiting it. | `will allow agents to proceed from phase to phase without human involvement` | [Sprint 0.4](phase-0-governance-and-phase-evidence.md) | value; real | `documents/engineering/quality_gate.md` | `tests/oracles/phase_verdicts.toml` |
+| R28 | Tests touch only the closed list. Host facts are observed once. No agent CLI is probed or started outside the guest's live half. These mechanics are family-independent; the Darwin confirmation is owed to macOS acceptance. | `won't disrupt other tasks running on the windows machine` | [Sprint 0.5](phase-0-governance-and-phase-evidence.md) | value; observer; owed | `DEVELOPMENT_PLAN/development_plan_standards.md` | `tests/oracles/host_lanes.toml` |
+| R28.1 | Native Windows runs disturb nothing they did not create (job containment, consoles, psmux teardown, no registry or clipboard writes) and never need a host restart. | `(psmux sessions, claude/codex sessions, running VMs)` | [Sprint 9.1](phase-9-windows-toolchain-and-psmux-build.md) | value; real; observer | `documents/operations/validation_runbook.md` | `tests/oracles/host_lanes.toml` |
+| R29 | Effectful Haskell behaviour is validated against pure environment models through declared effect interpreters, with Haskell test tools, identically on every host. | `leverage pure functional logic using haskell's test tools to validate correct behaviour` | [Sprint 3.3](phase-3-haskell-runtime-and-platform-policy.md) | value; real | `documents/engineering/code_standards.md` | `tests/oracles/requirements.toml` |
+| R29.1 | Models are registered, independent, conformance-anchored to ratcheted rows and checked by model mutants. A model-backed kill counts only with a conformant model. | `you can use pure functional models as required to mock a rich, realistic envrionment` | [Sprint 1.3](phase-1-python-discipline-and-gate-integrity.md) | value; real | `documents/engineering/testing.md` | `tests/oracles/python_discipline.toml` |
 
-R25 preserves its protected historical wording. Its current Windows-hosted Linux route is the dedicated Debian
+R25 preserves its protected historical wording. Its Windows-hosted Linux route is the dedicated Debian
 VirtualBox VM specified by [D-107 and D-108](rationale.md#current-decision-precedence) and the
-[validation runbook](../documents/operations/validation_runbook.md); Hyper-V and WSL controls are migration inputs.
+[validation runbook](../documents/operations/validation_runbook.md), and R25.1 is the Windows binder that
+attaches the live checkout to that VM. [D-133 and D-134](rationale.md#current-decision-precedence) retire the
+superseded binding and Hyper-V route and the diagnostic VirtualBox and WSL observers.
+
+R1 closes in [Sprint 12.2](phase-12-linux-live-and-clean-acceptance.md) on the clean Debian path. Its clause on
+private source-built Windows psmux and toolchains is evidenced by R23, which closes in
+[Sprint 9.3](phase-9-windows-toolchain-and-psmux-build.md), so R1's closure never claims Windows provisioning.
+
+R14 preserves its protected wording. Its independent phase/lane verdicts are the per-phase `PHASE` lines of
+[T.O](development_plan_standards.md#to-output), whose `halves=` field reports each half of the phase's lane, and its
+overall result is the run's exit code ([D-135](rationale.md#current-decision-precedence)).
 
 ## Phase Responsibilities
 
 | Phase | Builds | Host lane | Gate kind |
 |---|---|---|---|
-| [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) | The governed target architecture, requirement ownership, legacy census and one gate with independent phase and lane verdicts | linux | self-verifying |
-| [Python discipline and gate integrity](phase-1-python-discipline-and-gate-integrity.md) | Project-owned strict Python doctrine, local executable enforcement, typed native boundaries and migration of existing package, gate and test code | linux | self-verifying |
-| [Python bootstrap and handoff](phase-2-python-bootstrap-and-handoff.md) | A portable pipx/Click entry point and only the Python work needed before Haskell exists: bootstrap directories, pinned ghcup/GHC/cabal, native source build and raw handoff | linux | self-verifying |
+| [Governance and phase evidence](phase-0-governance-and-phase-evidence.md) | Parent-published phase verdicts that satisfy [§ T](development_plan_standards.md#t-unspoofable-evidence-and-phase-verdicts) at stage 1, the governed plan and ownership census, and verdict-driven progression | linux | self-verifying |
+| [Python discipline and gate integrity](phase-1-python-discipline-and-gate-integrity.md) | Project-owned strict Python doctrine, local executable enforcement, typed native boundaries, the stage-2 evidence checkers and migration of existing Governance package, gate and test code | linux | self-verifying |
+| [Python bootstrap and handoff](phase-2-python-bootstrap-and-handoff.md) | Portable pipx installation, raw Click command transport and only the Python work needed before Haskell exists: bootstrap directories, pinned ghcup/GHC/cabal, native source build and raw handoff | linux | self-verifying |
 | [Haskell runtime and platform policy](phase-3-haskell-runtime-and-platform-policy.md) | Haskell owns runtime host policy, typed effect interpretation, consent and reusable artifact preparation | linux | self-verifying |
 | [Debian tmux and multiplexer](phase-4-debian-tmux-and-multiplexer.md) | The common checked-backend interface and Debian tmux implementation, including Haskell-owned APT provisioning and a private pane trampoline | linux | self-verifying |
 | [Agent preflight and launch](phase-5-agent-preflight-and-launch.md) | User-installed agent discovery, authentication refusal, immutable argv assembly and folder-derived launch/reattach | linux | self-verifying |
 | [Session management and adoption](phase-6-session-management-and-adoption.md) | Session management and adoption use checked instance identity and retain the distinction between access, ownership and supervision | linux | self-verifying |
 | [Pane observation and classification](phase-7-pane-observation-and-classification.md) | The generic observation and guarded-input contract precedes recovery and every foreign backend | linux | self-verifying |
 | [Recovery and supervisor](phase-8-recovery-and-supervisor.md) | The complete Linux recovery application consumes the already-qualified observation and conditional-submission capability | linux | self-verifying |
-| [Windows toolchain and psmux build](phase-9-windows-toolchain-and-psmux-build.md) | Haskell prepares native Windows build dependencies and compiles pinned psmux sources locally | linux-windows | self-verifying |
+| [Windows toolchain and psmux build](phase-9-windows-toolchain-and-psmux-build.md) | The Windows entry of binder, receipt transport and native gate precedes Haskell preparation of native Windows build dependencies and local compilation of pinned psmux sources | linux-windows | self-verifying |
 | [Windows backend qualification](phase-10-windows-backend-qualification.md) | Qualify the exact native candidate for attached-client memory behavior, capture correctness, exact identity and guarded input | linux-windows | self-verifying |
 | [Windows application acceptance](phase-11-windows-application-acceptance.md) | Native Windows acceptance of the shared application, private psmux artifact and registered resources | linux-windows | host-acceptance |
-| [Linux live and clean acceptance](phase-12-linux-live-and-clean-acceptance.md) | Debian clean-host and logged-in agent acceptance, with dedicated VirtualBox Linux validation on a Windows host | linux-live-clean | host-acceptance |
-| [macOS acceptance](phase-13-macos-acceptance.md) | The additive Darwin implementation and native acceptance of bootstrap, process/filesystem semantics and the common tmux backend contract | linux-macos | self-verifying |
-| [Release evidence and closure](phase-14-release-evidence-and-closure.md) | Whole-product closure joins current independent native receipts and requires an empty migration ledger | linux | host-acceptance |
+| [Linux live and clean acceptance](phase-12-linux-live-and-clean-acceptance.md) | Debian clean-host and logged-in agent acceptance, with a dedicated Debian VirtualBox VM for Linux evidence on a Windows host | linux-live-clean | host-acceptance |
+| [macOS acceptance](phase-13-macos-acceptance.md) | The native Darwin gate entry and observers, the additive Darwin implementation and native acceptance of bootstrap, process/filesystem semantics and the common tmux backend contract | linux-macos | self-verifying |
+| [Release evidence and closure](phase-14-release-evidence-and-closure.md) | Whole-product closure joins every phase's current verified halves and requires an empty migration ledger | linux | host-acceptance |
 
 ## Dependency Flow
 
@@ -109,27 +143,39 @@ The common Linux path is governance, strict Python migration, minimal bootstrap,
 Debian backend, agent launch, sessions, observation and guarded recovery. The Windows source-build/qualification
 branch consumes this common contract and requires Linux plus Windows only. Linux live/clean evidence and the
 Darwin extension consume the same common contract independently of Windows. Each phase has at most one foreign
-family. Release aggregation consumes already-earned native evidence on Linux; it does not add a joint
-Windows/macOS execution requirement.
+family. Release aggregation consumes already-earned native evidence on Linux, taking each foreign half from its
+current stored receipt; it does not add a joint Windows/macOS execution requirement.
+[macOS acceptance](phase-13-macos-acceptance.md) waits for the Mac hardware the user will provide: selection
+works it while its verdict is `fail`, it is blocked as `awaiting:macos` only once its `linux` half passes and
+`macos` is its only gap, and with no Mac the terminal state is `selection: stop` listing what each blocked phase
+awaits.
+[Release evidence and closure](phase-14-release-evidence-and-closure.md) keeps depending on it.
 
-A later phase cannot add a retroactive closure obligation. All cross-platform interfaces, provisioning value
-types and safety predicates are introduced before their platform implementations. Evidence input closures
-include shared contracts automatically; foreign implementation bytes do not enter an unrelated Linux phase.
+The plan is well-ordered ([§ A](development_plan_standards.md#a-well-ordered-constructive-narrative)). A later
+phase never contradicts or undoes an earlier one (A1): it adds no retroactive closure obligation and extends
+earlier contracts only through the interfaces they define. Incomplete later work never blocks validating an
+earlier phase (A2): apart from shared failures, an earlier verdict and identity depend only on what is owned
+within its closure, so foreign implementation bytes and later-only rows never enter an unrelated earlier phase.
+All cross-platform interfaces, provisioning value types and safety predicates are introduced before their
+platform implementations, and evidence input closures include shared contracts automatically.
 
 ## Hardware and VirtualBox
 
 Linux validation from Windows uses a dedicated Debian VirtualBox VM, observed capacity with host headroom and a
 verified bind mount of this live Windows checkout. Install all Linux dependencies, including pipx and the dev
 extra, and keep build/temp/toolchain state on private Linux storage. A copy, detached checkout or new commit is
-not synchronization. Bind-mount semantic controls, mount receipts and bidirectional pre-gate nonce markers
-prove the actual source identity. Native Windows and native Darwin evidence remain distinct requirements.
+not synchronization. Mount receipts, the census join and bidirectional pre-gate nonce markers prove the actual
+source identity; the mount's semantics are recorded facts. Native Windows and native Darwin evidence remain
+distinct requirements.
 
 ## Non-Goals
 
 No precompiled product/backend distribution, global psmux replacement, user-agent installation, login automation,
 silent session migration, global toolchain default changes or guessed wrap reconstruction. No model switching,
 arbitrary agent restart or claim that a provider overload is reproducible on demand. No alternate check runner,
-skip, source suppression, human closure checkpoint or required commit.
+skip, source suppression, human closure checkpoint or required commit. No local receipt authentication
+([T.C](development_plan_standards.md#tc-ceiling)) and no authored regressed, awaiting or blocked status. The
+focused stepwise sweep is a development tool, not a check runner, and never closes work.
 
 ## Related
 

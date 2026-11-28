@@ -69,7 +69,8 @@ configuration and executable hashes. A failed or interrupted build publishes not
 new directory and never overwrites an executable used by a running server.
 
 The separately declared macOS adapter uses native tmux and native host qualification. Windows psmux is never
-used by Linux or macOS, and WSL tmux evidence never supplies a Windows or macOS result.
+used by Linux or macOS, and Linux tmux evidence, a VirtualBox guest's included, never supplies a `windows` or
+`macos` half ([T.E](../../DEVELOPMENT_PLAN/development_plan_standards.md#te-unspoofable-test) E6).
 
 ## The Typed Vocabulary and the One Runner
 
@@ -188,8 +189,19 @@ resource cleanup errors preserve the original diagnostic and remain failures.
 The dependency's synthetic client regression and a real-server stall test measure private committed memory,
 not just resident memory. A capped vulnerable negative control proves the observer sees the defect without
 exhausting the workstation. Native Windows evidence, pane survival, output resumption, exact target controls,
-raw joined capture and conditional-input races form separate obligations. Linux validation may use the
-owned WSL2 environment described by [testing](../engineering/testing.md); it supplies Linux evidence only.
+raw joined capture and conditional-input races form separate obligations. On a Windows host, Linux validation
+uses the dedicated Debian VirtualBox VM of the [validation runbook](../operations/validation_runbook.md), and it
+supplies only Linux halves.
+
+Tests start only private servers under run-owned names, with a private home, an absolute `PSMUX_DATA_DIR`,
+`PSMUX_NO_WARM=1`, a private `TMUX_TMPDIR` and no inherited `TMUX`. tmux uses `kill-server` only on an owned `-S`
+socket after the scope check; psmux never uses `kill-server`, ends a session by its exact target after its registry
+PID and creation identity are verified, and a psmux whose teardown is not namespace-scoped is refused. A real
+client runs only in a terminal the test created and attaches only to run-owned servers whose panes emit no OSC 52
+or bell sequence; clipboard and bell one-shots are observed through synthetic test clients, never the OS clipboard
+(D-172). The tmux and psmux behaviour the effect models reproduce is anchored to transcript rows replayed against
+the real tool on private servers (D-177).
+
 
 ## Related
 
@@ -198,6 +210,7 @@ owned WSL2 environment described by [testing](../engineering/testing.md); it sup
 - [Sessions and ownership](sessions_and_ownership.md) — instance identity, adoption and allowed mutations.
 - [Supervisor contract](supervisor_contract.md) — snapshots, guarded delivery and safety limits.
 - [Testing](../engineering/testing.md) — isolated native observers and host evidence.
+- [Validation runbook](../operations/validation_runbook.md) — the dedicated VirtualBox VM that supplies Linux halves on Windows.
 - [External tool facts](../reference/external_tool_facts.md) — verified pins and native tool behavior.
 - [Debian tmux and multiplexer](../../DEVELOPMENT_PLAN/phase-4-debian-tmux-and-multiplexer.md) — the common backend contract.
 - [Windows toolchain and psmux build](../../DEVELOPMENT_PLAN/phase-9-windows-toolchain-and-psmux-build.md) — native source preparation.

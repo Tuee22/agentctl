@@ -63,7 +63,7 @@ Haskell reuses accepted runtime artifacts without package-manager, download or b
 prerequisite, denied consent, unavailable privilege, required reboot, failed verification or failed build has
 a named failure outcome. It does not prompt through an installer, answer a dialog, change global toolchain
 selection, or silently substitute a system psmux. [The multiplexer adapter](multiplexer_adapter.md) owns
-the backend contract and [the launch contract](launch_contract.md#preflight) its use by commands.
+the backend contract and [the launch contract](launch_contract.md) its use by commands.
 
 Haskell retains one native process runner, `AgentCtl.Process`, for runtime commands and installers. Its
 typed provisioning vocabulary is distinct from the session vocabulary, so permission to install tmux does
@@ -103,8 +103,8 @@ toolchain identity are checked by the binary-build owner rather than inferred fr
 
 Ordinary dispatch without a valid handoff refuses with a remedy naming `agentctl`. This prevents accidental
 direct use and is not a security boundary against the account owner. The pane trampoline is the explicit
-exception: its authority is the owned private spec described by
-[the pane trampoline](launch_contract.md#the-pane-trampoline), not inherited bootstrap variables.
+exception: its authority is the owned private spec that the pane trampoline section of
+[the launch contract](launch_contract.md) describes, not inherited bootstrap variables.
 
 ## The Python Spawn Set
 

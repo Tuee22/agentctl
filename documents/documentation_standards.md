@@ -17,30 +17,15 @@ that name no check; optional human review adds no gate-closure requirement.
 - `documents/` is the only documentation root, with four categories: `architecture/`, `engineering/`, `operations/` and
   `reference/`.
 - Each page owns one topic and names the one phase that builds its contract. It opens with the metadata block and ends
-  with `## Target Contracts and Migration Evidence
-
-Governed pages describe required target contracts; the plan alone records whether their implementation and
-evidence qualify. An existing command or a newly written rule supplies no conformance evidence by itself.
-Every standing incompatible shape has a concrete deletion owner in the plan ledger; all present source and
-tests remain in the gate census.
-
-A named enforcement claim identifies the actual test/control that establishes it. A required new mechanism
-is explicitly a deliverable of its owning contract, not a claim that the current validator already implements
-it. Accepting/refusing controls and applicable mutants accompany new enforcement. No skip, suppression,
-alternate runner or hidden legacy source bridges the migration.
-
-The single gate emits independently attributable phase/lane verdicts and a complete overall result. Prose
-must distinguish a phase-specific passing receipt from final whole-product acceptance. An unmet later native
-lane does not invalidate an earlier Linux contract, while shared integrity failures invalidate all consumers.
-Each phase needs Linux and at most one additional native family. WSL2 facts are Linux facts and use the
-dedicated-instance, resource/dependency and same-checkout bind-mount contract in the validation runbook.
-
-## Related`; an architecture page opens with `## TL;DR`.
+  with `## Related`; an architecture page opens with `## TL;DR`.
 - The plan owns status. A page states the contract its owning phase builds, in the present tense, and never says
   whether that phase is built.
 - Each fact has one home, a prose home that states it or a data home the tests read, and other pages link that home.
 - Outside `DEVELOPMENT_PLAN/` a phase is cited by its title, as a link, never by number, and no sprint is cited.
 - The pages a user reads never name the core binary.
+- Verdicts, admissible evidence and their limits are defined once in
+  [§ T](../DEVELOPMENT_PLAN/development_plan_standards.md#t-unspoofable-evidence-and-phase-verdicts); pages link its
+  clauses and never restate them.
 
 ## Metadata Block
 
@@ -77,17 +62,22 @@ Checked by `docs.metadata` (`tests/governance/test_doc_validator.py::test_docs_m
 The repository root holds three entry documents, all written by
 [Governance and phase evidence](../DEVELOPMENT_PLAN/phase-0-governance-and-phase-evidence.md):
 
-- **`README.md`** orients a new reader: what agentctl is, how to install it, and the commands whose owning phase the plan
-  records as built. It links both indexes, `DEVELOPMENT_PLAN/README.md` and `documents/README.md`, states no status and
-  never names the core binary.
+- **`README.md`** orients a new reader: what agentctl is, how to install it, and the target command surface, whose
+  commands and owners [cli_reference.md](reference/cli_reference.md) lists. It links both indexes,
+  `DEVELOPMENT_PLAN/README.md` and `documents/README.md`, states no status and never names the core binary.
 - **`AGENTS.md`** is the authoritative policy for agents working in the repository: they never run `git add`,
-  `git commit` or `git push`; they take up work in the order the plan's README gives; `agentctl check` is the only gate;
-  commits, human review and interactive actions never gate closure or phase advancement;
-  they never run a login command, call the core binary or `cabal` directly, weaken an oracle or a mutant, or add a skip
-  or a suppression. It also states the isolation and live-folder rules and the optional capture of screen fixtures
-  outside gate closure.
-- **`CLAUDE.md`** is a pointer: its metadata block, one sentence sending the reader to `AGENTS.md`, and the import line
-  `@AGENTS.md`. It states no rule of its own, so the two files cannot disagree.
+  `git commit` or `git push`; they take the action that the latest verified run's `selection:` line names
+  ([T.D](../DEVELOPMENT_PLAN/development_plan_standards.md#td-status-and-progression)) or, until the gate prints one,
+  take up work in the order the plan's README gives; `agentctl check` is the only gate, and its testing-cost method
+  governs every test run; commits, human review and human actions inside a run never gate closure or phase
+  advancement, no run, check or agent answers a dialog, and host provision changes only selection; they never run
+  a login command, call the core binary or `cabal` directly, weaken an oracle or a mutant, add a skip
+  or a suppression, or restructure code only to change coverage. It also states the VirtualBox, credential-share and
+  host-setup authority, the isolation and live-folder rules and the optional capture of screen fixtures outside gate
+  closure.
+- **`CLAUDE.md`** is a pointer: its metadata block, one line sending the reader to `AGENTS.md` and its testing-cost
+  method, and the import line `@AGENTS.md`. It states no rule of its own, so the two files cannot disagree, and the
+  import brings `AGENTS.md` into every Claude session.
 
 Each opens with `# <Title>`, `**Status**`, `**Supersedes**` and `> **Purpose**`, with no `**Owning phase**` line, since
 the governance phase owns all three. `AGENTS.md` is `Authoritative source`, and `README.md` and `CLAUDE.md` are
@@ -124,11 +114,12 @@ Each fact has one home, and every other page links it.
 
 | Fact | Its one home |
 |---|---|
-| Phase order, status, closure criteria and evidence rows | `DEVELOPMENT_PLAN/`; status in its [status table](../DEVELOPMENT_PLAN/README.md#current-phase-status) alone |
+| Phase order, status, closure criteria and evidence rows | `DEVELOPMENT_PLAN/`; status in its [status table](../DEVELOPMENT_PLAN/README.md#current-phase-status) alone, and available halves and setup capabilities in its [Validation Hosts](../DEVELOPMENT_PLAN/README.md#validation-hosts) table |
 | Requirements, with each one's prose home and data home | the [requirements table](../DEVELOPMENT_PLAN/00-overview.md#requirements) |
 | Decisions the request leaves open | the [decision rows](../DEVELOPMENT_PLAN/rationale.md#decisions) |
-| Lanes | [§ N](../DEVELOPMENT_PLAN/development_plan_standards.md#n-the-single-gate-gate-kinds-and-host-lanes) |
-| What counts as evidence | [§ L](../DEVELOPMENT_PLAN/development_plan_standards.md#l-evidence-classes-and-what-cannot-count), with the mechanics in [testing.md](engineering/testing.md#evidence-classes) |
+| Unspoofable evidence, phase verdicts, the `PHASE` line, progression and evidence limits | [§ T](../DEVELOPMENT_PLAN/development_plan_standards.md#t-unspoofable-evidence-and-phase-verdicts), with the gate mechanics in [quality_gate.md](engineering/quality_gate.md) |
+| Lanes and their halves | [§ N](../DEVELOPMENT_PLAN/development_plan_standards.md#n-the-single-gate-gate-kinds-and-host-lanes) |
+| What counts as evidence | [§ L](../DEVELOPMENT_PLAN/development_plan_standards.md#l-evidence-classes-and-what-cannot-count) for classes and [T.E](../DEVELOPMENT_PLAN/development_plan_standards.md#te-unspoofable-test) for admissibility, with the mechanics in [testing.md](engineering/testing.md) |
 | A product or engineering contract | its page under `architecture/` or `engineering/` |
 | Commands, files agentctl writes, warnings | [cli_reference.md](reference/cli_reference.md), [files_and_state.md](reference/files_and_state.md), [troubleshooting.md](operations/troubleshooting.md) |
 | Facts about external tools | [external_tool_facts.md](reference/external_tool_facts.md) |
@@ -138,14 +129,38 @@ Each fact has one home, and every other page links it.
   Neither restates the other: the page states the rule and names the file, and the file holds the cases. A page quotes
   a value from a data home only as an example, and a user-facing page quotes a command where the reader needs it, such
   as an install command or a remedy, and links where it comes from.
-- **The plan owns status.** No page states a phase's or sprint's status, so a page reads the same before and after its
-  phase is built; `documents/README.md` says this once for every page.
+- **The plan owns status.** No page states a phase's or sprint's status or verdict, so a page reads the same before and
+  after its phase is built; the plan owns status, a verified run computes verdicts
+  ([T.V](../DEVELOPMENT_PLAN/development_plan_standards.md#tv-verdict)), and `documents/README.md` says this once for
+  every page.
 - **Disagreements.** A page that disagrees with the plan about what a phase builds is reconciled to the plan in the same
   change. A page that disagrees with its data home means the change that introduced the disagreement is wrong: the fix
   corrects the page or appends an oracle row naming the row it amends, and never edits a committed row
   ([§ P](../DEVELOPMENT_PLAN/development_plan_standards.md#p-the-ratchet-and-automatic-closure)).
 
 Checked by `docs.no-status` (`tests/governance/test_doc_validator.py::test_docs_no_status`).
+
+## Target Contracts and Migration Evidence
+
+Governed pages describe required target contracts; the plan alone records whether their implementation and
+evidence qualify. An existing command or a newly written rule supplies no conformance evidence by itself.
+Every standing incompatible shape, and every documented target that present code does not meet, has a concrete
+deletion owner in the plan ledger; all present source and tests remain in the gate census.
+
+A named enforcement claim identifies the actual test/control that establishes it. A required new mechanism
+is explicitly a deliverable of its owning contract, not a claim that the current validator already implements
+it. Accepting/refusing controls and applicable mutants accompany new enforcement. No skip, suppression,
+alternate runner or hidden legacy source bridges the migration.
+
+Verdicts, admissible evidence and their limits are defined once in
+[§ T](../DEVELOPMENT_PLAN/development_plan_standards.md#t-unspoofable-evidence-and-phase-verdicts); pages link its
+clauses and never restate them. Prose distinguishes a phase's `pass` from whole-product acceptance,
+`EVIDENCE pass`. A half that no verified run has supplied prints `absent`, so only the phases that require it wait
+on it, each at best `awaiting:<half>` as [T.V](../DEVELOPMENT_PLAN/development_plan_standards.md#tv-verdict)
+decides, while the shared failures of
+[T.F](../DEVELOPMENT_PLAN/development_plan_standards.md#tf-shared-and-owned-failures) fail every phase. Each phase
+needs Linux and at most one additional native family; a dedicated Debian VirtualBox guest supplies only the Linux
+halves, under the [validation runbook](operations/validation_runbook.md).
 
 ## Naming and Linking
 
@@ -154,6 +169,9 @@ Checked by `docs.no-status` (`tests/governance/test_doc_validator.py::test_docs_
 - **Links are relative and resolve.** An anchor is the slug of a heading the target has: lower-case, every character
   other than letters, digits, spaces, `-` and `_` removed, and spaces written as `-`. A heading other pages link to
   keeps its text; renaming it updates every link to it in the same change.
+- **Anchor links stay inside the owner's closure.** A page links a heading anchor only in a page owned within its
+  owning phase's closure or in a plan companion; a link into a later-owned page targets the file
+  ([§ A](../DEVELOPMENT_PLAN/development_plan_standards.md#a-well-ordered-constructive-narrative) A3).
 - **External sources** are backticked URLs, never links, so validating links never needs the network;
   [external_tool_facts.md](reference/external_tool_facts.md) holds them.
 - **Phases are cited by title**, as the title linked to the phase file. No sprint is cited: a page names the phase.
@@ -161,7 +179,7 @@ Checked by `docs.no-status` (`tests/governance/test_doc_validator.py::test_docs_
 
 ```text
 WRONG: The supervisor arrives in Phase 10, Sprint 10.2.
-WHY:   inserting a phase renumbers every later one and sprints move between phases;
+WHY:   a number says nothing about a phase's contract and sprints move between phases;
        a title stays right, and a link fails loudly when its file goes away.
 RIGHT: [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) builds `supervisor run`.
 ```
@@ -187,8 +205,22 @@ Checked by `docs.links` (`tests/governance/test_doc_validator.py::test_docs_link
   contract stated as what the owning phase builds needs no inline id, because that phase's Gate Integrity table names
   its tests.
 - **Automatic validation.** Every validation criterion names an executable test and its observable outcome. Human
-  review, a git commit, a clean worktree, a manual attestation, answered dialog or authorized capture is never a
-  closure criterion. Optional human activities and claims no automated gate proves stay outside validation.
+  review, a git commit, a clean worktree, a manual attestation, an authorized capture or any other human action
+  inside a run is never a closure criterion, and neither is receipt authentication or historical attestation; no
+  run, check or agent answers a dialog. Host provision that the plan's
+  [Validation Hosts](../DEVELOPMENT_PLAN/README.md#validation-hosts) table records, the hardware and the setup the
+  user supplies with it, changes only selection; the limits of local evidence are stated only in
+  [T.C](../DEVELOPMENT_PLAN/development_plan_standards.md#tc-ceiling). Optional human activities and claims no
+  automated gate proves stay outside validation.
+- **Verdict vocabulary.** A phase result uses the terms of
+  [T.V](../DEVELOPMENT_PLAN/development_plan_standards.md#tv-verdict) and
+  [T.D](../DEVELOPMENT_PLAN/development_plan_standards.md#td-status-and-progression) (`pass`, `awaiting:<half>`,
+  `awaiting:setup:<capability>`, `awaiting:prerequisite`, `fail`, regressed and blocked) and those of
+  [T.X](../DEVELOPMENT_PLAN/development_plan_standards.md#tx-terms) (owed and logged-in), and links the clause. A
+  page never calls a receipt authenticated, never puts a word of trust in place of a § T term and never says that a
+  verdict waits for a later feature; "authenticated" describes only agent logins. An example `PHASE` line with a
+  real phase number goes in a `text` fence, since outside a fence `docs.phase-citation` reports it
+  (`tests/governance/test_doc_validator.py::test_docs_phase_citation`).
 
 ```text
 WRONG: The core binary will resolve the agent to an absolute path.
@@ -217,9 +249,10 @@ The root `README.md`, `operations/` and `reference/` are the pages a user reads.
 - They never name the core binary: the string `agentctl-core` occurs nowhere in them, fenced blocks included. They say
   "the core binary".
 - Every action they describe is an `agentctl <command>` the user types, or a command of another tool the user types:
-  `pipx`, `claude auth login`, `codex login`, a package manager.
+  `pipx`, `claude auth login`, `codex login`, a package manager. An `operations/` page may also give the exact
+  preparation commands a validation agent types, such as `VBoxManage`, the binder and the focused pytest sweep.
 - They describe behaviour, messages and files; module names and source paths belong in `architecture/` and
-  `engineering/`.
+  `engineering/`, apart from the module a preparation command runs.
 
 ```text
 WRONG: $ <data>/bin/<digest>/agentctl-core list
@@ -259,6 +292,8 @@ Every update happens in the same change as the thing it describes:
 - A new page updates the index in [README.md](README.md), a new shared term its glossary, and a renamed heading every
   link to it.
 - A change to the repository's working rules reviews the root `README.md`, `AGENTS.md` and `CLAUDE.md`.
+- A change to [§ T](../DEVELOPMENT_PLAN/development_plan_standards.md#t-unspoofable-evidence-and-phase-verdicts)
+  reviews every page that links it, the glossary and `AGENTS.md`.
 
 ## Validation
 
@@ -268,14 +303,13 @@ blocks are examples, so only `docs.binary-unnamed` reads inside them.
 
 Each check has one test in `tests/governance/test_doc_validator.py`, named `test_` and the check name with `.` and `-`
 written as `_`, and one negative fixture directory under `tests/fixtures/docs_negative/`, named the same way without
-`test_`. The test runs its check over the fixture, a minimal tree that must yield exactly the named violation and no
-other, and over the live tree, which must yield none; the fixture is the positive control that keeps the live tree's
-clean result from passing vacuously.
+`test_`. The test runs its check over a copy of the live governed tree with the fixture's single `case.toml` edit
+applied, which must yield exactly the named violation and no other, and over the live tree, which must yield none;
+the fixture is the positive control that keeps the live tree's clean result from passing vacuously.
 
-Root-page presence is required when the root-entry sprint begins; before that point its absence is the declared
-construction boundary, not a missing-link exemption. Existing root pages always receive metadata and content checks,
-and negative fixture trees always provide their own root pages. The document set under `documents/` and all plan links
-remain required throughout (`tests/governance/test_doc_validator.py::test_docs_root_entry`).
+Root-page presence is always required. Root pages always receive metadata and content checks, negative fixture trees
+always provide their own root pages, and the document set under `documents/` and all plan links are always required
+(`tests/governance/test_doc_validator.py::test_docs_root_entry`).
 
 | Check | Enforces | Test | Negative fixture |
 |---|---|---|---|
@@ -284,30 +318,39 @@ remain required throughout (`tests/governance/test_doc_validator.py::test_docs_r
 | `docs.taxonomy` | Every page sits at the root of `documents/` or in one of the four categories, with a lower-case `snake_case` `.md` name, and no `docs/` directory exists | `tests/governance/test_doc_validator.py::test_docs_taxonomy` | `tests/fixtures/docs_negative/docs_taxonomy/`: a page at `documents/guides/setup.md` |
 | `docs.links` | Every relative link outside a fenced block in `documents/`, the root documents and `DEVELOPMENT_PLAN/` resolves to an existing file, and its anchor, if any, to a heading of that file | `tests/governance/test_doc_validator.py::test_docs_links` | `tests/fixtures/docs_negative/docs_links/`: a link to `#install` in a page with no such heading |
 | `docs.owning-phase` | A page's `**Owning phase**` links an existing phase file, with that phase's title as the link text | `tests/governance/test_doc_validator.py::test_docs_owning_phase` | `tests/fixtures/docs_negative/docs_owning_phase/`: an `**Owning phase**` link to a phase file that does not exist |
-| `docs.no-status` | No page and no root document puts `Planned`, `Active` or `Done` on a line with a phase title or a link to a phase file | `tests/governance/test_doc_validator.py::test_docs_no_status` | `tests/fixtures/docs_negative/docs_no_status/`: a line calling a linked phase `Done` |
+| `docs.no-status` | No page and no root document puts `Planned`, `Active` or `Done` on a line with a link to a phase file; keeping a status word off a line that names a phase by its plain title is an authoring rule | `tests/governance/test_doc_validator.py::test_docs_no_status` | `tests/fixtures/docs_negative/docs_no_status/`: a line calling a linked phase `Done` |
 | `docs.phase-citation` | Outside `DEVELOPMENT_PLAN/`, no line outside a fenced block, link text and code spans included, holds `Phase` or `Sprint`, in any case, followed by a space and a digit | `tests/governance/test_doc_validator.py::test_docs_phase_citation` | `tests/fixtures/docs_negative/docs_phase_citation/`: prose citing a phase by its number |
 | `docs.binary-unnamed` | `agentctl-core` occurs nowhere in `documents/operations/`, `documents/reference/` or the root `README.md`, fenced blocks included | `tests/governance/test_doc_validator.py::test_docs_binary_unnamed` | `tests/fixtures/docs_negative/docs_binary_unnamed/`: an operations page whose `console` example runs the core binary by name |
 | `docs.enforcement-cited` | A paragraph, list item or table row that says a check, test, validator or `agentctl check` enforces, rejects, refuses or fails on something also holds a test node id | `tests/governance/test_doc_validator.py::test_docs_enforcement_cited` | `tests/fixtures/docs_negative/docs_enforcement_cited/`: a paragraph saying `agentctl check` fails on a skipped test, with no node id |
-| `docs.root-entry` | The root `README.md` links `DEVELOPMENT_PLAN/README.md` and `documents/README.md`, and `CLAUDE.md` holds only its metadata block, one sentence pointing to `AGENTS.md` and the line `@AGENTS.md` | `tests/governance/test_doc_validator.py::test_docs_root_entry` | `tests/fixtures/docs_negative/docs_root_entry/`: a `CLAUDE.md` with a rule of its own beside `@AGENTS.md` |
+| `docs.root-entry` | The root `README.md` links `DEVELOPMENT_PLAN/README.md` and `documents/README.md`, and `CLAUDE.md` holds only its metadata block, one line linking `AGENTS.md`, which may also link an `AGENTS.md` heading, and the line `@AGENTS.md` | `tests/governance/test_doc_validator.py::test_docs_root_entry` | `tests/fixtures/docs_negative/docs_root_entry/`: a `CLAUDE.md` with a rule of its own beside `@AGENTS.md` |
 
 Mutants with the `M-docval-` prefix, recorded under `tests/mutants/`, each weaken one of these checks and name its test
-as their killer ([testing.md](engineering/testing.md#mutants)). The `plan.*` checks that validate `DEVELOPMENT_PLAN/` are
-listed, with the sprints that land them, in [development_plan_standards.md](../DEVELOPMENT_PLAN/development_plan_standards.md).
+as their killer ([testing.md](engineering/testing.md)). The `plan.*` checks that validate `DEVELOPMENT_PLAN/` are
+listed with their tests in
+[§ U](../DEVELOPMENT_PLAN/development_plan_standards.md#u-plan-and-closure-checks) of the plan standards.
 
 Completion citations join the current gate's observations. A Done sprint's implementation paths must exist,
 and each cited test must have passed in this run; parametrized citations expand to the collected cases
 (`tests/governance/test_plan_validator.py::test_plan_cited_paths`,
-`tests/governance/test_plan_validator.py::test_plan_cited_ids`). Acceptance rows retain their lane and the current
-covered-tree digest, with the encoding and limits defined by the
-[quality gate](engineering/quality_gate.md#lane-summary-and-evidence-line)
-(`tests/governance/test_plan_validator.py::test_plan_evidence_rows`).
+`tests/governance/test_plan_validator.py::test_plan_cited_ids`). A sprint is Done when a verified run shows its
+paths present, its cited tests passed and its cited mutants killed
+([T.D](../DEVELOPMENT_PLAN/development_plan_standards.md#td-status-and-progression)). A host-acceptance phase's
+`**Gate evidence**` target is `none recorded` or `current verdict`
+([§ G](../DEVELOPMENT_PLAN/development_plan_standards.md#g-phase-and-sprint-document-requirements)), because the
+verdict itself is the published `PHASE` line whose mechanics the
+[quality gate](engineering/quality_gate.md#phase-verdicts-and-evidence-line) defines. The current
+`plan.evidence-rows` check enforces the form that § U states
+(`tests/governance/test_plan_validator.py::test_plan_evidence_rows`); the target accepts `current verdict`, as the
+Gate evidence row of [§ A](../DEVELOPMENT_PLAN/development_plan_standards.md#a-well-ordered-constructive-narrative)
+records.
 
 ## Related
 
 - [README.md](README.md) — the index of pages and the glossary of shared terms.
 - [development_plan_standards.md § J](../DEVELOPMENT_PLAN/development_plan_standards.md#j-readme-and-documents-harmony) — the plan's side of status, citation and naming harmony.
 - [development_plan_standards.md § S](../DEVELOPMENT_PLAN/development_plan_standards.md#s-contract-homes) — the page that is the home of each product contract.
+- [development_plan_standards.md § T](../DEVELOPMENT_PLAN/development_plan_standards.md#t-unspoofable-evidence-and-phase-verdicts) — verdicts, admissible evidence and their limits, which pages link and never restate.
 - [00-overview.md](../DEVELOPMENT_PLAN/00-overview.md#requirements) — each requirement's prose home and data home.
-- [testing.md](engineering/testing.md#oracles) — the data homes the tests read, and their provenance.
+- [testing.md](engineering/testing.md) — the data homes the tests read, and their provenance.
 - [quality_gate.md](engineering/quality_gate.md#check-steps) — the `validators` step that runs these checks.
 - [external_tool_facts.md](reference/external_tool_facts.md) — the one home of external facts and their sources.

@@ -16,7 +16,22 @@ compilation during wheel installation. First use obtains the pinned toolchain an
 sources. Editable installs read the live checkout, including uncommitted files; builds require no commit or
 clean worktree. Output and dependency stores remain outside package sources.
 
-The inventory includes the Cabal manifest/project and every declared application, library and test source. Actual foundation/protocol and transport-test components have only introduced prerequisite imports; later product libraries and the final command executable extend that component graph. No early component advertises a future stub. The complete gate attempts every present component, while early build-mechanism evidence uses its actual independent native component and failure controls.
+The inventory includes the Cabal manifest/project and every declared application, library and test source. Actual foundation/protocol and transport-test components have only introduced prerequisite imports; later product libraries and each host family's product executable extend that component graph. No early component advertises a future stub. The complete gate attempts every present component, while early build-mechanism evidence uses its actual independent native component and failure controls.
+
+Each phase's Haskell modules, evaluator entries and native tests form a package that the phase owns, and
+`cabal.project` discovers every package through one package glob, so a later phase adds its own package without
+editing an earlier package, the evaluator entry of another owner or the shared test entry. A later package's build
+failure belongs to that package's owner and the verdicts whose closure contains it, and never blocks an earlier
+component: for each verdict the gate builds the product executable, the evaluator, the native test suite and the
+build fixture that its evidence uses only from packages owned within that verdict's closure (D-163). The change
+that lands the glob re-homes each later owner's present modules into that owner's package. No phase owns a single
+complete product executable; each host family's installed executable is the product component of the earliest
+self-verifying owner whose closure contains every package that family links,
+[Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) for Linux,
+[Windows backend qualification](../../DEVELOPMENT_PLAN/phase-10-windows-backend-qualification.md) for Windows and
+[macOS acceptance](../../DEVELOPMENT_PLAN/phase-13-macos-acceptance.md) for Darwin, and the bootstrap handoff
+selects it by its declared host family. The present single `-Werror` unit in `agentctl-core.cabal` is a row of the
+[deletion ledger](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md).
 The Python package ships no developer-built application binary. After bootstrap, Haskell owns the native
 Windows psmux source-build workflow and its independent source/patch/toolchain identity.
 
@@ -72,6 +87,12 @@ Changed accepted inputs select a new immutable directory. Upgrades replace no ex
 agent, silently migrate no server and erase no known-good entry. Failed qualification leaves the prior
 artifact available. Explicit migration reports affected sessions and their capabilities; ordinary session
 commands do not turn an upgrade into an implicit restart.
+
+The native test suites use QuickCheck through a first-party `TestSource` property wrapper. Because installs build
+with tests, QuickCheck is part of the product's dependency closure at the pinned index-state (D-176). Gate builds
+use a private dedicated cabal store and a prepared offline index, never update shared stores or the index, and
+bound their parallelism so running VMs keep headroom (D-172).
+
 
 ## Related
 

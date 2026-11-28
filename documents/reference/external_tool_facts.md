@@ -20,8 +20,9 @@ old one, so a citation never changes meaning.
 **Verification host.** Ubuntu 24.04.5 LTS on Linux x86_64, with claude 2.1.316 (native install), codex-cli 0.166.0 (npm
 install), tmux 3.4, ghcup 0.1.50.2, GHC 9.12.4, cabal 3.16.1.0 and Python 3.12.3. pipx and psmux were not installed
 there, so their rows cite documentation and source code at the version given. Native tmux controls use private
-test servers; "local" in a source means a command run on this host. Each row distinguishes source inspection from
-native observations.
+test servers; "local" in a source means a command run on this host. A source that names the dedicated Debian guest
+or the native Windows host records a command run or an installed file read there instead. Each row distinguishes
+source inspection from native observations.
 
 ## claude CLI
 
@@ -47,6 +48,7 @@ native observations.
 | A native install keeps a launcher at `~/.local/bin/claude`, a symlink into `~/.local/share/claude/versions/`, and updates itself in the background; Homebrew, WinGet, apt, dnf and apk installs do not. `claude --version` prints `<version> (Claude Code)`, and `claude doctor` prints read-only diagnostics without starting a session. | 2.1.316 | 2026-10-31 | `https://code.claude.com/docs/en/setup` (Auto-updates; Verify your installation); local `claude --version` |
 | claude's own commands include `claude update` and `claude install [stable\|latest\|<version>]`. | 2.1.316 | 2026-10-31 | local `claude --help` |
 | Isolated `claude --version` reports 2.1.316, and `claude --help` lists `--dangerously-skip-permissions`, with test-owned home/config/XDG directories and `DISABLE_AUTOUPDATER=1`. | 2.1.316 | 2026-11-03 | local version and help through `agentctl.process.run`; `https://code.claude.com/docs/en/cli-reference` |
+| A permission rule is `Tool` or `Tool(specifier)` in the `allow`, `ask` or `deny` list of a settings file's `permissions` object, and user settings at `~/.claude/settings.json` apply in every project. Rules are evaluated deny, then ask, then allow, the first match deciding, and a deny at any settings level cannot be overridden. In a Bash rule `*` matches any text and a rule without `*` matches one exact command; a compound command joined by `&&`, `\|\|`, `;`, `\|`, `\|&`, `&` or a newline runs without a prompt only when every subcommand is allowed. | 2.1.332 | 2026-11-26 | `https://code.claude.com/docs/en/permissions` (Permission rule syntax; Wildcard patterns; Compound commands; Settings precedence); native Windows `claude --version` |
 
 ## codex CLI
 
@@ -182,6 +184,11 @@ These rows distinguish versioned documentation and source from native Windows ob
 | Python and Haskell disagree on per-user directories. platformdirs 4.14.2 uses XDG on Linux, `~/Library/Application Support/<app>` and `~/Library/Caches/<app>` on macOS, and `AppData\Local\<Author>\<App>` on Windows. The Haskell `directory` package's `getXdgDirectory` maps to `~/.local/share`, `~/.config`, `~/.cache` and `~/.local/state` on every non-Windows system, macOS included, and to `%APPDATA%` or `%LOCALAPPDATA%` on Windows. | platformdirs 4.14.2; directory 1.3.11.0 | 2026-10-31 | `https://pypi.org/pypi/platformdirs/json`; `https://platformdirs.readthedocs.io/en/latest/platforms.html`; `https://hackage-content.haskell.org/package/directory-1.3.11.0/docs/System-Directory.html` |
 | On Unix, `os.exec*` loads the new executable into the current process, which keeps its process id, and buffered output is not flushed first. | Python 3 | 2026-10-31 | `https://docs.python.org/3/library/os.html` (Process Management) |
 | The verification host's `/usr/bin/python3` is Python 3.12.3. | 3.12.3 | 2026-10-31 | local `/usr/bin/python3` |
+| pytest's `--sw`/`--stepwise` stops the session at the first failing test, and the next run deselects the tests that passed before it and resumes there; `--sw-skip`/`--stepwise-skip` and `--sw-reset`/`--stepwise-reset` imply it. Its state lives in the cache provider's store under `cache/stepwise`, so `-p no:cacheprovider` also blocks the stepwise plugin and `--sw` then exits 4 with `error: unrecognized arguments: --sw`. The `cache_dir` ini option, default `.pytest_cache` under the rootdir, sets that store's directory, so `-o cache_dir=<dir>` moves it. | 9.2.0 | 2026-11-26 | installed `_pytest/stepwise.py` (`pytest_addoption`, `pytest_configure`, `STEPWISE_CACHE_DIR`), `_pytest/config/__init__.py` (blocking `cacheprovider` blocks `stepwise`) and `_pytest/cacheprovider.py` (`cache_dir`) in the dedicated Debian guest; owned guest probes with `-o cache_dir` and with `-p no:cacheprovider` |
+| With `PYTEST_ADDOPTS=-p no:cacheprovider`, `pytest --stepwise -o cache_dir=<dir>` is accepted but inactive: the session runs past the first failing test, writes no stepwise state and exits 1. Without that variable the same command stops at the first failure and writes `v/cache/stepwise` under `<dir>`. | 9.2.0 | 2026-11-27 | owned probe in the dedicated Debian guest, run with and without that `PYTEST_ADDOPTS` |
+| coverage's `DEFAULT_EXCLUDE` excludes a line with a `# pragma: no cover` comment in either case, a body that is only `...`, alone or after a one-line signature, and `if TYPE_CHECKING:` or `if typing.TYPE_CHECKING:`. It is the default of `[report] exclude_lines`, which replaces it, while `exclude_also` appends to it. `COVERAGE_FILE` names the data file, default `.coverage`. | 7.17.0 | 2026-11-26 | installed `coverage/config.py` (`DEFAULT_EXCLUDE`, `exclude_list`, `exclude_also`, `COVERAGE_FILE`) and `coverage/cmdline.py` (data-file help) in the dedicated Debian guest |
+| ruff's `--cache-dir` sets the cache directory and reads `RUFF_CACHE_DIR`; with neither, an observed run created `.ruff_cache` in its working directory. `--no-cache` disables cache reads and reads `RUFF_NO_CACHE`. | 0.17.3 | 2026-11-26 | `ruff check --help` in the dedicated Debian guest; owned guest probe with and without `RUFF_CACHE_DIR` |
+| `PYTHONPYCACHEPREFIX`, like `-X pycache_prefix=PATH`, makes Python write `.pyc` files in a mirror tree under that path instead of `__pycache__` directories in the source tree; `PYTHONDONTWRITEBYTECODE`, like `-B`, stops `.pyc` writing. `-I` implies `-E`, which ignores every `PYTHON*` variable, so in isolated mode only `-B` or `-X pycache_prefix` keeps bytecode out of the source tree. | Python 3.13.5 | 2026-11-26 | `https://docs.python.org/3.13/using/cmdline.html` (`-I`, `-E`, `-B`, `-X pycache_prefix`, `PYTHONPYCACHEPREFIX`, `PYTHONDONTWRITEBYTECODE`); owned guest probe of `sys.pycache_prefix` and a module's `__cached__`, with no `__pycache__` beside its source |
 
 Coverage 7.17.0 is the exact dev-extra pin, verified with `python -m coverage --version` and the PyPI release metadata at `https://pypi.org/pypi/coverage/7.17.0/json` (2026-11-02). It runs on the supported Python floor and accepts branch collection and a fail-under of 100.
 
@@ -229,7 +236,7 @@ records; their behaviour is exercised by the application-owned native suite.
 ## Win32 State Directory Permissions
 
 These signatures and permission semantics were checked in Microsoft's primary documentation. Native execution
-belongs to the Windows acceptance lane; Linux compilation does not prove a Win32 call.
+belongs to the `windows` half; Linux compilation does not prove a Win32 call.
 
 | Fact | Version | Verified | Source |
 |---|---|---|---|
@@ -274,7 +281,7 @@ belongs to the Windows acceptance lane; Linux compilation does not prove a Win32
 | Fact | Version | Verified | Source |
 |---|---|---|---|
 | `resize-window -t TARGET -x WIDTH -y HEIGHT` selects an absolute window size. The capture control resizes only its private test window and checks `pane_width` before playback. | tmux 3.5a manual; local tmux 3.4 | 2026-11-04 | `https://raw.githubusercontent.com/tmux/tmux/3.5a/tmux.1` (`resize-window`); `tests/integration/test_capture_real.py::test_capture_roundtrip_on_private_server` |
-| The pinned argument reference lists `resize-window` with `-t`, `-x` and `-y`, and manual sizing; the scripting reference lists `pane_width` and `pane_height` as cell dimensions. Linux checks source facts only; actual psmux capture and sizing require the native Windows lane. | psmux 3.4.0 | 2026-11-04 | `https://raw.githubusercontent.com/psmux/psmux/v3.4.0/docs/tmux_args_reference.md`; `https://raw.githubusercontent.com/psmux/psmux/v3.4.0/docs/scripting.md` |
+| The pinned argument reference lists `resize-window` with `-t`, `-x` and `-y`, and manual sizing; the scripting reference lists `pane_width` and `pane_height` as cell dimensions. Linux checks source facts only; actual psmux capture and sizing require the native `windows` half. | psmux 3.4.0 | 2026-11-04 | `https://raw.githubusercontent.com/psmux/psmux/v3.4.0/docs/tmux_args_reference.md`; `https://raw.githubusercontent.com/psmux/psmux/v3.4.0/docs/scripting.md` |
 | `capture-pane -e` includes escape sequences for terminal attributes, while `-S 0` begins at the visible pane's first line. `cursor_x` and `cursor_y` report the cursor position, and `pane_width` and `pane_height` report cell dimensions. Native faint/plain twins retain different styled text with identical plain text and cursor position. | tmux 3.5a manual; local tmux 3.4 | 2026-11-04 | `https://raw.githubusercontent.com/tmux/tmux/3.5a/tmux.1` (`capture-pane`, `FORMATS`); `tests/integration/test_capture_real.py::test_capture_keeps_prompt_visuals` |
 | The scripting reference defines `cursor_x` and `cursor_y` as zero-based positions and `pane_width` and `pane_height` as dimensions; the argument reference lists `capture-pane -e`. These source facts do not establish native Windows rendering. | psmux 3.4.0 | 2026-11-04 | `https://raw.githubusercontent.com/psmux/psmux/v3.4.0/docs/scripting.md`; `https://raw.githubusercontent.com/psmux/psmux/v3.4.0/docs/tmux_args_reference.md` |
 | Prompt suggestions appear as grayed-out text. Tab or Right accepts them; typing dismisses them. The private live terminal exposes a faint suggestion at the starting input cursor when NO_COLOR is absent from that invocation. | Claude documentation; local 2.1.316 | 2026-11-04 | `https://code.claude.com/docs/en/interactive-mode` (Prompt suggestions); `tests/live/test_live_classification.py::test_live_screen_classes` |
@@ -339,21 +346,23 @@ is a candidate; artifact/source/patch identities and actual behavioral receipts 
 | Cargo `--bins` selects binary targets; `--locked` preserves lockfile resolution, `--offline` disallows network, and `--frozen` combines those requirements. | Cargo documented build interface | 2026-11-12 | `https://doc.rust-lang.org/cargo/commands/cargo-build.html` |
 | Visual Studio setup supports explicit component plans, quiet operation, waiting and no-restart behavior. Installation privilege and restart-required outcomes are distinct readiness conditions. | Visual Studio 2022 installer interface | 2026-11-12 | `https://learn.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio?view=vs-2022`; `https://learn.microsoft.com/en-us/visualstudio/install/create-a-network-installation-of-visual-studio#error-codes` |
 
-## WSL2 Validation and Resource Controls
+## Linux Guest Mount and Resource Interfaces
 
-These are documented interfaces and explicitly identified local observations, not proof of a current
-workstation's effective resource limits. The runbook requires actual capability observations before using them.
+These are documented Linux interfaces, not proof of a host's effective resource limits; the runbook records the
+observed values as host facts.
 
 | Fact | Version | Verified | Source |
 |---|---|---|---|
-| `wsl.conf` controls a distribution's settings; `.wslconfig` controls the shared WSL2 VM, including global RAM/processor settings. A dedicated distro name alone does not establish independent VM resource limits. | WSL2 documented configuration interface | 2026-11-12 | `https://learn.microsoft.com/en-us/windows/wsl/wsl-config` |
-| WSL exposes distribution/version listing and import/version selection. The default install can select Ubuntu, so Debian and version 2 must be selected/observed explicitly. | WSL documented command interface | 2026-11-12 | `https://learn.microsoft.com/en-us/windows/wsl/basic-commands` |
-| `WSL_UTF8=1` requests UTF-8 output; on the Windows validation host the verbose listing then had no UTF-16 NUL padding. | WSL 3.0.5.0 | 2026-11-15 | `https://github.com/microsoft/WSL/blob/master/diagnostics/collect-wsl-logs.ps1` (`WSL_UTF8`); local `wsl.exe --list --verbose` with and without the variable |
-| Each WSL2 distribution has an ext4 VHD; its configured maximum, allocated host bytes and filesystem available space are different observations. | WSL2 documented VHD storage interface | 2026-11-12 | `https://learn.microsoft.com/en-us/windows/wsl/disk-space` |
-| Windows files can be accessed through mounted drive paths such as `/mnt/c`; cross-filesystem performance and case/permission behavior differ from a Linux-native filesystem. | WSL documented filesystem interface | 2026-11-12 | `https://learn.microsoft.com/en-us/windows/wsl/filesystems` |
 | `mount --bind olddir newdir` exposes an existing tree at another path; mount inspection and bidirectional source observations are needed to establish the intended checkout binding. | Linux mount interface, source documentation | 2026-11-12 | `https://man7.org/linux/man-pages/man8/mount.8.html` |
 | cgroup v2 controllers apply hierarchical resource limits to processes and descendants. Available/effective controllers must be observed; declarations alone do not prove enforcement. | Linux cgroup v2 documented interface | 2026-11-12 | `https://docs.kernel.org/admin-guide/cgroup-v2.html` |
 | Systemd scopes/slices support resource-control settings backed by cgroups, including CPU and memory controls; installed version and effective controller support determine availability. | systemd resource-control documentation | 2026-11-12 | `https://www.freedesktop.org/software/systemd/man/devel/systemd.resource-control.html` |
+
+## Container Runtime
+
+| Fact | Version | Verified | Source |
+|---|---|---|---|
+| The dedicated guest's configured Debian 13 archives offer the container runtimes `podman` 5.4.2+ds1-2+b2 and `docker.io` 26.1.5+dfsg1-9+deb13u1. | podman 5.4.2+ds1-2+b2; docker.io 26.1.5+dfsg1-9+deb13u1 | 2026-11-26 | `apt-cache policy podman docker.io` in the dedicated Debian guest |
+| `podman build` builds a container image from a Containerfile, which is a file named `Containerfile` or `Dockerfile` or the file `-f` names; podman does not communicate with a daemon, and rootless isolation is the default for unprivileged users. | 5.4.2 | 2026-11-26 | `https://docs.podman.io/en/v5.4.2/markdown/podman-build.1.html` (DESCRIPTION; `--file`; `--isolation`; `--compress`) |
 
 ## SSH public-key values
 
@@ -384,6 +393,7 @@ workstation's effective resource limits. The runbook requires actual capability 
 |---|---|---|---|
 | Guest symbolic-link creation is disabled by default and has a per-share `SharedFoldersEnableSymlinksCreate` setting. | Oracle VirtualBox User Guide 7.1.12 | 2026-11-17 | `https://download.virtualbox.org/virtualbox/7.1.12/UserManual.pdf`, shared-folder symbolic links |
 | On an isolated Windows-hosted probe, enabling that setting allowed a guest-created relative link to be read on both hosts. A requested guest mode 0640 remained 0666, and a guest exclusive byte-range lock succeeded while a Windows lock covered the same byte. | VirtualBox 7.2.22 r175245 | 2026-11-17 | Dedicated VirtualBox VM and owned probe directory, with the per-share setting enabled; no checkout exported |
+| `VBoxManage sharedfolder add <vm> --name=<share> --hostpath=<path>` takes `--readonly`, which gives the share only read-only access to the files at the host path, and `--transient`, which adds the share to a running VM without persisting it after the VM stops; `sharedfolder remove --transient` removes such a share. | VirtualBox 7.2.22 r175245 | 2026-11-26 | native Windows `VBoxManage --version` and `VBoxManage help sharedfolder` |
 
 ## Related
 
@@ -391,6 +401,6 @@ workstation's effective resource limits. The runbook requires actual capability 
 - [testing.md](../engineering/testing.md#oracles) — how an oracle row carries its `tool:` provenance.
 - [toolchain_bootstrap.md](../engineering/toolchain_bootstrap.md) — the pins and floors built on the ghcup, GHC and cabal rows.
 - [multiplexer_adapter.md](../architecture/multiplexer_adapter.md) — the tmux and psmux behaviour the adapter relies on.
-- [launch_contract.md](../architecture/launch_contract.md#argument-assembly) — argument assembly and login checks built on the claude and codex rows.
-- [validation_runbook.md](../operations/validation_runbook.md) — native and WSL2 preparation requirements.
+- [launch_contract.md](../architecture/launch_contract.md) — argument assembly and login checks built on the claude and codex rows.
+- [validation_runbook.md](../operations/validation_runbook.md) — VirtualBox, native Windows and Darwin preparation requirements.
 - [quality_gate.md](../engineering/quality_gate.md#tool-configuration) — the tool configuration built on the Python tooling rows.

@@ -46,8 +46,10 @@ remedy rather than repeated installation, added repositories or a silently subst
 Windows qualification probes actual compile/link/resource capability, not only PATH or installer metadata.
 Existing qualified MSVC/SDK components can be reused without changing defaults. Missing components use the
 declared official installer and exact plan. Missing elevation, installer contention and restart-required
-outcomes remain unmet prerequisites. Automation opens no approval dialog, forces no application closed and
-never restarts the host.
+outcomes remain unmet prerequisites. On a validation host, missing MSVC build tools and Windows SDK are the setup
+capability `setup:msvc-build-tools`, which a validation agent provides as
+[one-time host setup](../operations/validation_runbook.md#one-time-host-setup) outside any gate run. Automation
+opens no approval dialog, forces no application closed and never restarts the host.
 
 ## Consent
 
@@ -56,10 +58,12 @@ mutation requires the repository's explicit consent policy and the concrete acti
 commands require supplied consent and already available privilege; privilege alone grants no consent.
 Consent never authorizes changes to profiles, user toolchain defaults, credentials or unrelated installations.
 
-`agentctl check` never prompts. Its prerequisite observations report missing preparation with a remedy.
-Tests run no actual package managers, sudo or Microsoft installers. Cold-provisioning acceptance prepares an
-owned disposable host through the public application outside the test subprocess tree, then runs the gate
-against that host and its independently observed preparation receipt. Constructed controls separately prove
+`agentctl check` never prompts. Its prerequisite observations report missing preparation with a remedy, and a
+missing setup capability leaves the phases that need it at best `awaiting:setup:<capability>`
+([T.V](../../DEVELOPMENT_PLAN/development_plan_standards.md#tv-verdict)).
+Tests run no actual package managers, sudo or Microsoft installers. Cold, partial and failing provisioning is
+proven against installer and toolchain models, and on Windows a gate leg runs agentctl's own provisioning once per
+run against a validation-only private root, never per mutation (D-180). Constructed controls separately prove
 planner refusals and interpreter action order.
 
 ## ghcup
@@ -94,16 +98,21 @@ cache check let concurrent callers reuse the winner. Failed acquisition, build o
 a good artifact or changes a running server. The [multiplexer adapter](../architecture/multiplexer_adapter.md)
 owns runtime backend selection, registry isolation and server compatibility.
 
-## The Clean-Lane Recipe
+## The Clean and Live Halves
 
-Linux clean acceptance begins from pipx/Python in dedicated Debian, observes initial dependency absence,
-prepares through the public application and runs `agentctl check`. Windows cold acceptance uses an owned native
+The `linux-clean` half begins from pipx/Python in a clean Debian container built from the clean-host recipe of
+[Debian tmux and multiplexer](../../DEVELOPMENT_PLAN/phase-4-debian-tmux-and-multiplexer.md), observes initial
+dependency absence under the run nonce rather than a hand-written clean fact, prepares through the public
+application and runs `agentctl check`. The `linux-live` half separately needs logged-in agents
+([T.X](../../DEVELOPMENT_PLAN/development_plan_standards.md#tx-terms)). Windows cold acceptance uses an owned native
 Windows environment with declared installer privilege. Receipts identify actual actions, before/after facts,
 versions and executable hashes; they are not manually asserted pristine-host certificates.
 
-A Windows workstation can supply Linux evidence through a dedicated, resource-budgeted Debian VirtualBox VM
-and a verified bind mount of the same checkout. The [validation runbook](../operations/validation_runbook.md)
-owns that procedure. The VM cannot supply native Windows or macOS evidence.
+A Windows workstation supplies the Linux halves through a dedicated, resource-budgeted Debian VirtualBox VM and a
+verified bind mount of the same checkout, and the clean container runs on the container runtime that one-time
+setup installs in that guest (`setup:container-runtime`). The
+[validation runbook](../operations/validation_runbook.md) owns that procedure. The VM cannot supply the `windows`
+or `macos` half.
 
 ## What Each Step Proves
 
@@ -121,7 +130,7 @@ owns that procedure. The VM cannot supply native Windows or macOS evidence.
 - [binary_build.md](binary_build.md) — application build and immutable publication.
 - [multiplexer_adapter.md](../architecture/multiplexer_adapter.md) — backend identity and isolation.
 - [quality_gate.md](quality_gate.md) — prerequisite observations and phase verdicts.
-- [validation_runbook.md](../operations/validation_runbook.md) — native and WSL2 preparation.
+- [validation_runbook.md](../operations/validation_runbook.md) — VirtualBox and native preparation.
 - [external_tool_facts.md](../reference/external_tool_facts.md) — upstream tool facts.
 - [Python bootstrap and handoff](../../DEVELOPMENT_PLAN/phase-2-python-bootstrap-and-handoff.md) — bootstrap owner.
 - [Windows toolchain and psmux build](../../DEVELOPMENT_PLAN/phase-9-windows-toolchain-and-psmux-build.md) — native Windows preparation.

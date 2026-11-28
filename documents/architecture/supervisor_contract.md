@@ -337,9 +337,17 @@ a crashed agent keeps its single launch and nothing receives `/model` or login b
 (`tests/e2e/test_supervisor_scenarios.py::test_forbidden_actions_never_taken`); and SIGTERM or SIGINT leaves every
 managed and adopted pane alive with its pid unchanged (`tests/e2e/test_supervisor_scenarios.py::test_stop_supervisor_keeps_sessions`).
 Every "receives nothing" runs beside a control pane per agent, scripted to the recovery sequence, whose received
-text shows the byte record was live. On a host with logged-in agents the live run sends nothing
-(`tests/live/test_live_supervision.py::test_live_watch_sends_nothing`), confirmed by
-[Linux live and clean acceptance](../../DEVELOPMENT_PLAN/phase-12-linux-live-and-clean-acceptance.md).
+text shows the byte record was live. On the `linux-live` half, with logged-in agents
+([T.X](../../DEVELOPMENT_PLAN/development_plan_standards.md#tx-terms)), the live run sends nothing
+(`tests/live/test_live_supervision.py::test_live_watch_sends_nothing`). That confirmation is owed to
+[Linux live and clean acceptance](../../DEVELOPMENT_PLAN/phase-12-linux-live-and-clean-acceptance.md), which cites
+the acceptance node `tests/live/test_live_supervisor.py::test_live_supervisor_never_sends` that
+[Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) builds.
+
+The supervisor-scenario rows are evaluated through a model interpreter of the supervisor's effect records, and a
+test sends console control events only to a console the run created whose attached processes are all run-owned
+(D-172, D-173).
+
 
 ## The Recovery Text
 
@@ -351,10 +359,11 @@ It begins with no `/` and holds no remedy command
 configurable, because a configurable text is the channel through which `/model` or `/login` would reach
 `send-keys`, and no single text is assumed right for both agents.
 
-Its efficacy cannot be proven. No lane can produce a genuine provider overload on demand, so the scenario
-matrix's fake agent recovers by script, which proves only that the supervisor sent the right bytes at the right
-moment. Whether a real agent resumes its task after a real overload is proven by no phase, and rule 9 is the
-honest limit: a conversation can resume, but an interrupted internal tool call is not restored.
+Its efficacy cannot be proven. No validation run, the `linux-live` half included, can produce a genuine provider
+overload on demand, so the scenario matrix's fake agent recovers by script, which proves only that the supervisor
+sent the right bytes at the right moment. Whether a real agent resumes its task after a real overload is proven by
+no phase, and rule 9 is the honest limit: a conversation can resume, but an interrupted internal tool call is not
+restored.
 
 ## Related
 

@@ -7,7 +7,8 @@
 > **Purpose**: Define public commands, raw transport, runtime preparation, capability reporting and exit outcomes.
 
 `agentctl` is the permanent pipx/Click entry point. Python obtains the source-built Haskell application and
-forwards product commands. The developer-only `check` command reports complete phase/lane evidence.
+forwards product commands. The developer-only `check` command publishes one verified verdict per phase and the next
+`selection:` action, as the [quality gate](../engineering/quality_gate.md) defines.
 The [plan](../../DEVELOPMENT_PLAN/README.md) owns completion status; a command is exposed only when its real
 owning contract is introduced, with no future placeholder in the handshake.
 
@@ -50,7 +51,7 @@ is permitted; compatibility grants no ownership.
 | `agentctl resume-watch NAME` | Exact target | Take a fresh baseline and resume supervision, not the agent's internal goal. | [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) |
 | `agentctl logs NAME` | Exact target | Print complete decision, observation, attempt, delivery and notification records without secrets or captured private screen content. | [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) |
 | `agentctl supervisor run [OPTIONS]` | Timing policy | Run the explicit foreground loop with one owner lock and qualified conditional submission. Unknown delivery halts/escalates rather than replaying input. Stop releases its lock without ending targets. | [Recovery and supervisor](../../DEVELOPMENT_PLAN/phase-8-recovery-and-supervisor.md) |
-| `agentctl check` | none | Run all introduced legs and present tests, retain all failures and emit complete per-phase/lane and overall reports. | [Governance and phase evidence](../../DEVELOPMENT_PLAN/phase-0-governance-and-phase-evidence.md) |
+| `agentctl check` | none | Run every introduced leg and present test and retain every failure; its output follows the [quality gate](../engineering/quality_gate.md#phase-verdicts-and-evidence-line). | [Governance and phase evidence](../../DEVELOPMENT_PLAN/phase-0-governance-and-phase-evidence.md) |
 
 The [launch contract](../architecture/launch_contract.md) owns exact flags, login refusal and startup behavior.
 The [supervisor contract](../architecture/supervisor_contract.md) owns state progression, fingerprints,
@@ -72,9 +73,8 @@ A failed source build, missing consent/elevation, pending reboot, unsupported Li
 artifact, missing requested agent or unqualified backend creates no new agent session. Bootstrap failure
 precedes product dispatch and preserves its complete diagnostic.
 
-The gate's overall exit reports complete checkout health. Phase closure instead consumes the canonical
-complete passing phase/lane report over current owned and prerequisite inputs; a later-only failure remains
-visible without erasing earlier trustworthy evidence. Final product closure requires aggregate success.
+The exit status of `agentctl check` follows
+[T.O](../../DEVELOPMENT_PLAN/development_plan_standards.md#to-output).
 
 ## Related
 
@@ -84,4 +84,4 @@ visible without erasing earlier trustworthy evidence. Final product closure requ
 - [launch](../architecture/launch_contract.md) — exact argv and startup.
 - [sessions](../architecture/sessions_and_ownership.md) — ownership and adoption.
 - [supervisor](../architecture/supervisor_contract.md) — guarded recovery.
-- [gate](../engineering/quality_gate.md) — phase evidence and overall result.
+- [gate](../engineering/quality_gate.md) — phase verdicts, the `selection:` line and the exit contract.

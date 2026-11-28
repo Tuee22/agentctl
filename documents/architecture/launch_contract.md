@@ -121,6 +121,11 @@ credentials on the user's behalf, and keystrokes into the REPL are the path it r
 both agents, a preflight records one auth-status probe and no login
 (`tests/integration/test_agent_auth_probe.py::test_preflight_never_runs_login`).
 
+Outside the `linux-live` half on the bound dedicated guest, no test runs an installed agent CLI: argv grammar,
+status, version and startup screens come from the agent-CLI model, anchored to transcript rows that the live half
+replays against the installed agents (D-172, D-179).
+
+
 ## Preflight
 
 `AgentCtl.Preflight` interprets a pure closed program over native host facts, agent discovery, authentication

@@ -26,7 +26,10 @@ A named check establishes only the rule and cases its cited tests exercise. The 
 mandatory authoring doctrine, not claims that the current source guards mechanically establish purity,
 immutability or totality. Adding a mechanical rule requires accepting and refusing controls and an applicable
 mutant in the existing gate. An implementation needing migration gains no exemption from a passing subset of
-checks, and a documentation change supplies no source-conformance evidence.
+checks, and a documentation change supplies no source-conformance evidence. The stage-2 clauses of
+[§ T](../../DEVELOPMENT_PLAN/development_plan_standards.md#t-unspoofable-evidence-and-phase-verdicts) are authoring
+doctrine in the same sense until they are enforced
+([T.C](../../DEVELOPMENT_PLAN/development_plan_standards.md#tc-ceiling) C6).
 
 **Pure core and effectful edge.**
 
@@ -72,12 +75,18 @@ checks, and a documentation change supplies no source-conformance evidence.
 - No `isinstance`, `issubclass`, comparison of `type(...)`, or reflective narrowing through `getattr`,
   `hasattr`, `callable` or computed method lookup. Parse structural input with `match` at its declared boundary,
   then carry the validated type. Order overlapping patterns most-specific first: `bool` precedes `int`.
+  Existing isinstance-on-Result conversions are runtime-type-test shapes of the
+  [deletion ledger](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md), frozen by per-file caps until the
+  closed `Result` match below replaces them.
 - Native API evidence names its actual kernel and complete owned subprocess/ABI subject. Linux controls do
-  not establish Windows or Darwin syscalls. Native receipts are independent requirements of their own lanes,
-  while portable planning and refusal controls execute on Linux.
-- No source-level ignore, noqa, formatter-disable, type-ignore or coverage pragma supplies acceptance.
-  Existing native exceptions are migration inputs in the deletion ledger, not doctrine exemptions. Native
-  per-subject coverage and receipts preserve the required evidence without adding an unreachable-arm exclusion.
+  not establish Windows or Darwin syscalls. Native receipts are independent requirements of their own halves
+  ([T.V](../../DEVELOPMENT_PLAN/development_plan_standards.md#tv-verdict) V8), while portable planning and refusal
+  controls execute on Linux.
+- No source-level ignore, noqa, formatter-disable, type-ignore or coverage pragma supplies acceptance. A
+  `COVERAGE_EXCEPTIONS` row of `src/agentctl/check/validator/source.py` is anchored by path, qualified function
+  name and exact `def` text, never by a line number. Each present row is a migration input of the deletion ledger,
+  not a doctrine exemption, and its foreign-family arm moves to a host-declared module. Native per-subject coverage
+  and receipts preserve the required evidence without adding an unreachable-arm exclusion.
 - Closed vocabularies are enum members, `Literal` unions or unions of records. Domain records are final,
   frozen, slotted, keyword-only dataclasses with recursively immutable fields. Behavior lives in module-level
   functions; ordinary mutable classes and concrete domain inheritance are excluded. Protocols describe
@@ -89,17 +98,20 @@ checks, and a documentation change supplies no source-conformance evidence.
   types for its supported boundary. It describes actual runtime names, signatures, borrowing and return shapes,
   including native mutable parser trees. Its version and native conformance are tested. It never invents an
   immutable result or a nonexistent export to satisfy a type checker.
-- No `from __future__ import annotations` and no `if TYPE_CHECKING:` block. The body of such a block never runs,
-  so full branch coverage would need the exclusion that `pragma: no cover` bans; an import used only in
-  annotations is an ordinary import.
+- No `from __future__ import annotations` and no `if TYPE_CHECKING:` block. The pinned coverage excludes an
+  `if TYPE_CHECKING:` block by default through its `DEFAULT_EXCLUDE`, which `pyproject.toml` leaves in force
+  ([external tool facts](../reference/external_tool_facts.md#python-tooling)), so such a block silently leaves the
+  complete-coverage floor while its imports exist for ty but not at run time. `src.suppression-ban` therefore
+  rejects `typing.TYPE_CHECKING` (`tests/governance/test_source_guards.py::test_suppression_ban_fixtures`). An
+  import used only in annotations is an ordinary import.
 - click's `Context.obj` is typed `Any`, so values travel as explicit parameters; `CliRunner.isolated_filesystem`
   is deprecated in click 8.5, and `filterwarnings = ["error"]` turns its warning into an error, so tests use
   `tmp_path`.
 
 **Results, not expected exceptions.**
 
-- `src/agentctl/result.py` defines `Ok` and `Err` as frozen, slotted generic dataclasses in Python 3.12
-  type-parameter syntax, and `Result` as their union. Each module declares its own union of error records, and a
+- `src/agentctl/foundation.py` defines `Ok` and `Err` as frozen, slotted generic dataclasses in Python 3.12
+  type-parameter syntax, and `Result` as their union; `src/agentctl/result.py` re-exports them. Each module declares its own union of error records, and a
   function whose failure is anticipated (a missing tool, a declined consent, a digest mismatch, a build error)
   returns `Err` of one of them.
 - `None` represents genuine optional absence, never a failed parse, failed lookup or validation error whose
@@ -113,8 +125,11 @@ checks, and a documentation change supplies no source-conformance evidence.
 - A `match` over a closed union names every member without a success catch-all. A new variant must produce a
   diagnostic from the pinned type/source controls in every relevant return shape, rather than silently falling
   through. No type-checker capability is assumed without its accepting and refusing control.
-  Open boundary parsers may use a rejecting wildcard, and a generic success-payload extractor may handle its
-  declared open payload domain. Neither permits a success catch-all over a closed domain. Exhaustiveness
+  A closed `Result` match is `case Ok(value):` followed by `case other:` whose first statement is
+  `assert_type(other, Err[E])`, so ty proves the arm is exactly the error and coverage sees no fall-through arc;
+  like every type-checker capability, the idiom applies only with its pinned ty accepting and refusing controls
+  (D-138). Open boundary parsers may use a rejecting wildcard, and a generic success-payload extractor may handle
+  its declared open payload domain. Neither permits a success catch-all over a closed domain. Exhaustiveness
   evidence covers functions returning `None` as well as value-returning functions; an unreachable assertion
   does not authorize a coverage exclusion or other suppression.
 
@@ -137,13 +152,21 @@ checks, and a documentation change supplies no source-conformance evidence.
   discard only when no later read resolves to that binding.
 - Prefer small named functions, expressions, comprehensions and structural matches. Data records carry no
   behavioral methods. Ordinary values are assembled completely at construction and replaced by new values.
-- Decisions are pure: the provisioning plan, the leg table and verdict, the digest rule, the lane predicates and
-  `paths.py` over OS family, environment and home take values and return values, so their tests are `value`
-  evidence on every host.
-- Platform choices are functions of the OS value `hostfacts.py` gathers once. No other module branches on
-  `sys.platform` or `os.name`, so all pure platform-policy values can be exercised and type-checked on Linux. Native adapters execute only on their actual kernel lane and require its separate receipt; pure policy tests cannot stand in for those syscalls.
+- Decisions are pure: the provisioning plan, the leg table, the phase verdict and selection calculation, the
+  digest rule, the half predicates and `paths.py` over OS family, environment and home take values and return
+  values, so their tests are `value` evidence on every host.
+- Platform choices are functions of the OS family that `foundation_host.py` captures once and `hostfacts.py`
+  re-exports. No other module reads `sys.platform`, `os.name` or `platform.system()`; other modules use the
+  `foundation_host` dispatcher, so all pure platform-policy values can be exercised and type-checked on Linux.
+  Foreign-family adapters live in host-declared modules owned by the earliest phase whose lane includes that
+  family and whose closure contains every module and native package they need, reached lazily through that
+  dispatcher. Native adapters execute only on their own family's half and
+  require its separate receipt; pure policy tests cannot stand in for those syscalls. A foreign-family branch of a
+  shared Haskell or C source that no later phase edits stays with its owner as a host-declared region
+  ([T.X](../../DEVELOPMENT_PLAN/development_plan_standards.md#tx-terms)), whose kills are obligations only on its
+  own family's runs.
 
-**Spawns only in `process.py`, and other effects at the edge.**
+**Spawns only in `foundation_process.py`, and other effects at the edge.**
 
 - Every spawn and exec goes through `src/agentctl/foundation_process.py`, the only module that imports `subprocess` or calls
   an `os.exec*`, `os.spawn*`, `os.posix_spawn` or `os.system` function (`src.one-process-module`), and the only one
@@ -172,15 +195,20 @@ handling, so an invalid byte becomes a typed error rather than an exception in a
 TOML and JSON use only the standard library's `tomllib` and `json`; host discovery uses the standard
 library's `shlex` for the shell-quoted `ID` and `VERSION_ID` fields of `os-release`.
 
-**Tests.** `unittest.mock` is banned, and `monkeypatch` serves only `setenv`, `delenv` and `chdir`; effects are
-observed through the spawn audit and the fake agent ([testing](testing.md#observers-and-nonces)).
+**Tests.** `unittest.mock` is banned. The target is that `monkeypatch` serves only `setenv`, `delenv` and `chdir`,
+with effects observed through the spawn audit and the fake agent ([testing](testing.md#observers-and-nonces)): any
+other substitution of a first-party attribute, host identity, native library or handle is inadmissible from stage 2
+([T.E](../../DEVELOPMENT_PLAN/development_plan_standards.md#te-unspoofable-test) E4), and per-file caps freeze the
+existing ones as substituting-test shapes of the deletion ledger. Code is never restructured only to change
+coverage; a host-state guard stays only where real state on its family reaches it
+([T.S](../../DEVELOPMENT_PLAN/development_plan_standards.md#ts-defended-spoofs) S11).
 
 Each pure contract has executable accepting, hostile-input, failure, composition and collection cases where
 applicable, with explicit finite bounds. Repeated evaluations preserve inputs and results. Relevant ambient
 perturbations exercise independence from locale, timezone, working directory, hash order and external state.
 An edge refusal checks the typed reason and observable behavior, not merely a nonzero exit that could hide a
-traceback. Source-rule controls and mutants establish their named obligations; finite examples do not prove
-universal termination, arbitrary callback purity or the soundness of every native dependency.
+traceback. Source-rule controls and mutants establish their named obligations. Limits:
+[T.C](../../DEVELOPMENT_PLAN/development_plan_standards.md#tc-ceiling) C5.
 
 The check lock loads the standard-library OS extension through a runtime-checked protocol. This keeps the Windows and POSIX interfaces typed without importing an unavailable extension on the other OS; the adapter holds the operating-system lock until its scope exits.
 
@@ -188,9 +216,10 @@ The run-integrity adapter reads raw symlink text, and its PTH115 exception is sc
 
 ## Haskell
 
-**The warnings stanza.** Every component of `agentctl-core.cabal` (the library, the three executables and the
-test suite) imports one common stanza, so the application's build refuses exactly what the gate's `cabal-build` leg
-refuses (`tests/integration/test_haskell_legs.py::test_werror_fires`):
+**The warnings stanza.** Every component of every package in the `cabal.project` package glob imports one common
+stanza, so the application's build refuses exactly what the gate's `cabal-build` leg refuses
+(`tests/integration/test_haskell_legs.py::test_werror_fires`); the present single-unit `agentctl-core.cabal` shape
+is a row of the [deletion ledger](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md):
 
 ```text
 common warnings
@@ -229,7 +258,7 @@ constructor, so holding a value proves the check ran.
   path that skips preflight does not compile. A compile-fail fixture matched by its GHC diagnostic code, beside a
   twin that compiles, keeps the constructor private
   (`tests/integration/test_ready_opaque.py::test_ready_constructor_is_not_exported`;
-  [launch contract](../architecture/launch_contract.md#preflight)).
+  [launch contract](../architecture/launch_contract.md)).
 - `SessionName` comes only from the smart constructor in `AgentCtl.Session.Name`, so an unvalidated name cannot
   reach a multiplexer command. A compiling checked-name caller and an external constructor caller rejected with
   the pinned compiler's `GHC-01928` diagnostic protect the private export
@@ -253,7 +282,10 @@ exit code.
 - The kernels (argv assembly, session names, auth classification, the preflight decision, screen classification,
   fingerprints, the recovery transitions and backoff) take values and return values. They are what
   `agentctl-core-eval` exposes as `value` evidence. Mutation checks also exercise bounded effects against private
-  native backends and controlled observers; no mutant uses a live-agent test as its killer.
+  native backends and controlled observers; no mutant uses a live-agent test as its killer unless every killer
+  it names is declared to the `linux-live` half, so it is a kill obligation only there, and such a killer launches agents
+  without input only in `<state>/live-acceptance/`
+  ([T.K](../../DEVELOPMENT_PLAN/development_plan_standards.md#tk-kill) K6).
 - Process output is decoded as UTF-8 explicitly, and no module computes a per-user directory: `AgentCtl.Paths`
   receives them from the handoff.
 
@@ -350,20 +382,30 @@ path requires a matching unhandled overload and a reached deadline; effects rema
 Generated sequences cover unsafe screens and require successful safe sends as their positive control
 (`haskell:agentctl-core-test/Machine/never-send-unsafe`).
 
+Effectful Haskell code reaches the OS only through records of operations at the raw OS boundary, `Effects m` for
+processes, files, the clock and the console, passed as a declared parameter through the `ExceptT failure m` shells;
+each subsystem has one native and one pure model interpreter, and `System.Info.os` appears only in native
+interpreters while the host family is otherwise a declared value (D-173). External tools are program models in the
+modeled process table that parse argv with their own code and never import a renderer, parser or codec of the
+subject (D-174). A test never sets, deletes or wraps a first-party attribute and never uses a mock framework; the
+environment is replaced only by a registered model bound to a declared effect interpreter (D-170).
+
+
 ## WRONG and RIGHT
 
 | WRONG | RIGHT | Why the WRONG one is wrong |
 |---|---|---|
 | `except Exception: return None` around the ghcup download | catch `urllib.error.URLError` and `OSError` in `ghcup.py` and return `Err` of a download error | the broad catch turns a programming defect into "no ghcup", and `None` tells the caller nothing it can print |
-| `subprocess.run(argv)` in `bootstrap/build.py` | `build.py` passes the argv to `process.py` | a second spawner is a path the spawn audit's single module does not cover, and `src.one-process-module` rejects it (`tests/governance/test_source_guards.py::test_subprocess_import_outside_process_module`) |
-| `if sys.platform == "win32":` inside the handoff | the handoff branches on the OS value from `hostfacts.py` | the Windows branch never runs on Linux, so coverage cannot reach it and ty narrows it away |
+| `subprocess.run(argv)` in `bootstrap/build.py` | `build.py` passes the argv to the foundation process adapter | a second spawner is a path the spawn audit's single module does not cover, and `src.one-process-module` rejects it (`tests/governance/test_source_guards.py::test_subprocess_import_outside_process_module`) |
+| `if sys.platform == "win32":` inside the handoff | the handoff branches on the OS family from `foundation_host.py` | the Windows branch never runs on Linux, so coverage cannot reach it and ty narrows it away |
 | `module AgentCtl.Preflight (Ready (..), preflight) where` | `module AgentCtl.Preflight (Ready, preflight) where` | exporting the constructor lets any module build a `Ready` and launch without preflight |
 | `{-# OPTIONS_GHC -Wno-incomplete-patterns #-}` above a classifier | a match that handles every constructor | the pragma silences the gate for one module, so an unhandled screen class becomes a runtime crash |
 
 ## Related
 
 - [quality_gate.md](quality_gate.md#tool-configuration) — the pinned ruff, ty, pytest and coverage configuration behind these rules.
-- [testing.md](testing.md) — why mocks and test-only branches never count as evidence.
+- [testing.md](testing.md) — why substituting tests are inadmissible from stage 2 (T.E E4) and capped until then.
+- [development_plan_standards.md T.E](../../DEVELOPMENT_PLAN/development_plan_standards.md#te-unspoofable-test) — E4, the substitution clause behind the mocking ban.
 - [binary_build.md](binary_build.md) — the Cabal project that carries the warnings stanza and style files.
 - [python_haskell_boundary.md](../architecture/python_haskell_boundary.md) — the single owners these rules protect.
 - [system-components.md](../../DEVELOPMENT_PLAN/system-components.md#haskell-package) — every module these rules apply to.
